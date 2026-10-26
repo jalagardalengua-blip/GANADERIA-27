@@ -60,7 +60,7 @@ const AU={ctx:null,on:true,crowd:null,music:false,amb:null};
 function auInit(){if(!AU.on)return;try{if(!AU.ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return;AU.ctx=new C();AU.master=AU.ctx.createGain();AU.master.gain.value=.7;AU.master.connect(AU.ctx.destination);
   const n=AU.ctx.createBuffer(1,AU.ctx.sampleRate*2,AU.ctx.sampleRate);const d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;AU.noise=n}
   if(AU.ctx.state==='suspended')AU.ctx.resume()}catch(e){AU.ctx=null}}
-function auToggle(){AU.on=!AU.on;if(AU.on)auInit();if(AU.master)AU.master.gain.value=AU.on?.7:0;const b=$('#h3snd');if(b)b.textContent=AU.on?'Sonido: sí':'Sonido: no'}
+function auToggle(){AU.on=!AU.on;if(AU.on)auInit();if(AU.master)AU.master.gain.value=AU.on?.7:0;const b=$('#h3snd');if(b){b.style.opacity=AU.on?1:.45}}
 function nz(){const s=AU.ctx.createBufferSource();s.buffer=AU.noise;s.loop=true;return s}
 function env(g,t0,a,peak,dec){g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(Math.max(.0002,peak),t0+a);g.gain.exponentialRampToValueAtTime(.0001,t0+a+dec)}
 const mf=n=>440*Math.pow(2,(n-69)/12);
@@ -219,7 +219,7 @@ function dustTick(D,dt){if(!D)return;for(const p of D.arr){if(p.l<=0)continue;p.
 function init3D(){
  const d=document.createElement('div');d.id='w3d';d.hidden=true;
  d.innerHTML=`<canvas id="c3d"></canvas>
- <div class="h3top"><div class="h3info" id="h3info"></div><span class="sp"></span><button class="btn sm" id="h3fs" aria-label="Pantalla completa">⛶</button><button class="btn sm" id="h3snd">Sonido: sí</button><button class="btn sm" id="h3adv">Avanzar mes</button><button class="btn sm" id="h3exit">Salir</button></div>
+ <div class="h3top"><div class="h3info" id="h3info"></div><span class="sp"></span><button class="btn sm" id="h3fs" aria-label="Pantalla completa">⛶</button><button class="btn sm" id="h3snd" aria-label="Sonido">♪</button><button class="btn sm" id="h3adv">Avanzar mes</button><button class="btn sm" id="h3exit">Salir</button></div>
  <div id="h3tasks" class="h3tasks" hidden></div>
  <div id="h3toro" class="h3pill" hidden></div><div id="h3carry" class="h3pill" hidden></div><div id="h3ban" class="h3ban" hidden></div>
  <div id="joy" aria-hidden="true"><div id="knob"></div></div>
@@ -311,7 +311,7 @@ function gH(x,z){const d=Math.hypot(x,z),f=clamp((d-55)/40,0,1);return(1.3*Math.
 function enterFinca(){W3.mode='finca';hudMode('finca');
  if(!W3.F||W3.F.key!==S.g.name){W3.F={key:S.g.name,p:V3(0,0,16),yaw:0,carry:null,toss:0,hits:0,uses:0};W3.truck={x:11,z:12,yaw:-.4,v:0};W3.horse={x:-12,z:13.4,yaw:0,v:0}}
  W3.drive=false;W3.ride=false;W3.tasksKey='';rebuildFinca();W3.yaw=Math.PI*.15;
- $('#h3help').textContent='Joystick para andar · arrastra para mirar · el botón dorado actúa (algunos hay que mantenerlos pulsados)';setTimeout(()=>{const h=$('#h3help');if(h)h.textContent=''},7000)}
+ $('#h3help').textContent='Joystick: moverte · arrastra: mirar · dorado: actuar';setTimeout(()=>{const h=$('#h3help');if(h)h.textContent=''},7000)}
 function rebuildFinca(){
  if(W3.mode!=='finca')return;
  const sc=new THREE.Scene();const m=S.month;
@@ -497,7 +497,9 @@ function fincaTick(dt){
  else if(W3.ride){
   const tv=L>.08?(W3.run?9.5:3.4)*L:0;if(L>.08)Hh.yaw+=clamp(angD(Hh.yaw,Math.atan2(mx,mz)),-2.4*dt,2.4*dt);Hh.v+=(tv-Hh.v)*Math.min(1,dt*1.8);
   const np={x:Hh.x+Math.sin(Hh.yaw)*Hh.v*dt,z:Hh.z+Math.cos(Hh.yaw)*Hh.v*dt,hit:0};collide(np,1.0);if(np.hit)Hh.v*=.6;Hh.x=np.x;Hh.z=np.z;
-  F.p.set(Hh.x,gH(Hh.x,Hh.z),Hh.z);F.yaw=Hh.yaw;if(Hh.v>7&&Math.random()<dt*6)dust(W3.D,Hh.x,F.p.y,Hh.z,.4)}
+  F.p.set(Hh.x,gH(Hh.x,Hh.z),Hh.z);F.yaw=Hh.yaw;if(Hh.v>7&&Math.random()<dt*6)dust(W3.D,Hh.x,F.p.y,Hh.z,.4);
+  W3.dAcc=(W3.dAcc||0)+Math.abs(Hh.v)*dt;if(W3.dAcc>=25){W3.dAcc-=25;mesInc('dist',25)}
+  if(W3.acoso){W3.acoso.t+=dt;if(W3.acoso.t>18)finAcoso(false)}}
  else if(F.toss>0){F.toss-=dt;const ph=2.2-F.toss;
   if(ph<.7){const v=ph/.7;F.p.x+=F.tv.x*dt;F.p.z+=F.tv.z*dt;collide(F.p);pl.root.position.y=gH(F.p.x,F.p.z)+Math.sin(v*Math.PI)*2.3;pl.root.rotation.x=-v*Math.PI*1.5}
   else if(ph<1.7){pl.root.rotation.x=-Math.PI/2;pl.root.position.y=gH(F.p.x,F.p.z)+.15}
@@ -518,7 +520,10 @@ function fincaTick(dt){
  const apartarOpt=h=>{const of=S.offers.filter(o=>o.st==='nueva'&&eligible(h.a,o));if(!of.length)return null;const o=h.a.mark?S.offers.find(x=>x.id===h.a.mark)||of[0]:of[0];const n=campo().filter(a=>a.mark===o.id).length;
   return {l:h.a.mark?`Quitar de la reseña (${n}/${o.n})`:`Apartar para ${o.feria} (${n}/${o.n})`,fn:()=>apartar(h,o)}};
  if(W3.drive){best={l:'Bajar de la camioneta',fn:bajar};if(Math.hypot(px-W3.porteria.x,pz-W3.porteria.z)<10)sec={l:'Salir hacia la plaza',fn:irPlaza}}
- else if(W3.ride){best={l:'Desmontar',fn:desmontar};const n=nearAnimal(5.5);if(n){sec=apartarOpt(n.h)||{l:`Ver a ${n.h.a.name}`,fn:()=>openFicha(n.h.a.id)}}}
+ else if(W3.ride){const A=W3.acoso;
+  if(A){const h=A.h,dx=h.x-Hh.x,dz=h.z-Hh.z,d=Math.hypot(dx,dz),ahead=(dx*Math.sin(Hh.yaw)+dz*Math.cos(Hh.yaw))>0;A.ok=d<3.6&&d>.9&&ahead&&Hh.v>6;
+   best=A.ok?{l:'¡Derribar!',fn:derribar}:{l:`Acoso · ${Math.max(0,Math.ceil(18-A.t))} s`,fn:()=>{}};sec={l:'Dejar el acoso',fn:()=>finAcoso(false)}}
+  else{best={l:'Desmontar',fn:desmontar};const n=nearAnimal(5.5);if(n)sec=apartarOpt(n.h);if(!sec){const n2=nearAnimal(10);if(n2&&acosable(n2.h))sec={l:`Acosar a ${n2.h.a.name}`,fn:()=>iniAcoso(n2.h)};else if(n)sec={l:`Ver a ${n.h.a.name}`,fn:()=>openFicha(n.h.a.id)}}}}
  else if(!(F.toss>0)){
   for(const a of W3.acts){if(a.cond&&!a.cond())continue;const d=Math.hypot(a.x-px,a.z-pz);if(d<a.r&&d<bd){bd=d;best=a}}
   if(best&&best.plac&&campo().some(a=>a.sex==='H'&&!a.tentado&&!a.role&&ageY(a)>=2))sec={l:'Tentar un macho',fn:machoModal};
@@ -541,26 +546,31 @@ function fincaTick(dt){
  cp.x+=(tx-cp.x)*Math.min(1,dt*8);cp.z+=(tz-cp.z)*Math.min(1,dt*8);cp.y+=(Math.max(ty,gH(cp.x,cp.z)+.6)-cp.y)*Math.min(1,dt*8);
  W3.cam.lookAt(F.p.x,F.p.y+(W3.drive?2:W3.ride?2.4:1.5),F.p.z);
  W3.hud=(W3.hud||0)+dt;if(W3.hud>.6){W3.hud=0;hudInfo();drawTasks()}}
-function subir(){W3.drive=true;W3.F.carry=null;setCarry();toast('Joystick: acelerar, frenar y girar. En la portería puedes salir hacia la plaza.')}
+function acosable(h){const a=h.a,y=ageY(a);return !h.free&&h.rk!=='pen'&&h.rk!=='emb'&&!a.role&&y>=1&&y<=2&&a.campo==null&&a.salud>=55&&!['derribado','acoso'].includes(h.mode)}
+function iniAcoso(h){W3.acoso={h,t:0,ok:false};h.mode='acoso';h.acz=Math.random()*6;W3.run=true;$('#h3run').classList.add('oro');toast('¡Arranca! Galopa a su altura y derríbala')}
+function finAcoso(ok){const A=W3.acoso;if(!A)return;A.h.mode='idle';A.h.t=2;W3.acoso=null;if(!ok)toast('Se te escapa')}
+function derribar(){const A=W3.acoso;if(!A||!A.ok)return;const h=A.h,a=h.a;h.mode='derribado';h.dT=2.2;h.fallSide=Math.random()<.5?1:-1;W3.acoso=null;mugido(.6);for(let i=0;i<5;i++)dust(W3.D,h.x,gH(h.x,h.z),h.z,.5);
+ a.campo=Math.round(clamp(a.g.bra+gauss()*5,1,99));mesInc('der');save();try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}toast(`¡Derribo! ${a.name} · campo ~${a.campo}`)}
+function subir(){W3.drive=true;W3.F.carry=null;setCarry();toast('En la portería sales hacia la plaza')}
 function bajar(){const T=W3.truck;W3.drive=false;T.v=0;const F=W3.F;F.p.set(T.x+Math.cos(T.yaw)*2.8,0,T.z-Math.sin(T.yaw)*2.8);collide(F.p,.42,true);W3.pl.root.visible=true}
-function montar(){W3.ride=true;W3.horse.v=0;W3.F.carry=null;seat(W3.pl);setCarry();toast('A caballo, con la garrocha. El ganado se aparta: colócate detrás para arrearlo. «Galope» para ir rápido.')}
+function montar(){W3.ride=true;W3.horse.v=0;W3.F.carry=null;seat(W3.pl);setCarry();toast('A caballo: arrea por detrás o acosa erales y becerras')}
 function desmontar(){const Hh=W3.horse;W3.ride=false;Hh.v=0;const P=W3.pl;P.seated=false;P.legs.forEach(l=>{l.hip.rotation.set(0,0,0);l.kn.rotation.x=0});const F=W3.F;F.p.set(Hh.x+Math.cos(Hh.yaw)*1.6,0,Hh.z-Math.sin(Hh.yaw)*1.6);collide(F.p);setCarry()}
 function echarPienso(i){const f=W3.feeds[i];if(f.lvl>=1)return;f.lvl=Math.min(1,f.lvl+.34);S.feedSpots=S.feedSpots||[0,0,0];S.feedSpots[i]=f.lvl;S.fedM=(S.fedM||0)+1;
  f.fill.visible=true;f.fill.scale.y=Math.max(.001,f.lvl*.3);W3.F.carry=null;setCarry();for(let j=0;j<4;j++)dust(W3.D,f.x,f.g.position.y+.5,f.z,.35);save();
- toast(S.fedM>=4?'Pienso echado. La camada comerá a gusto este mes.':`Pienso echado (${S.fedM} de 4 sacos este mes para notar el ahorro).`)}
-function herrarUno(h){const a=h.a;if(a.herrado)return;a.herrado=true;a.num=nextNum(a.born);S.money-=35;
+ toast(`Pienso echado · ${Math.min(4,S.fedM)}/4`);retosCheck()}
+function herrarUno(h){const a=h.a;if(a.herrado)return;a.herrado=true;a.num=nextNum(a.born);S.money-=35;mesInc('herr');
  h.mode='flee';h.t=2.5;const dx=h.x-W3.F.p.x,dz=h.z-W3.F.p.z,d=Math.hypot(dx,dz)||1;h.tx=h.x+dx/d*5;h.tz=h.z+dz/d*5;h.jump=.6;mugido(.5);
  for(let j=0;j<5;j++)dust(W3.D,h.x,gH(h.x,h.z)+.8,h.z,.25);save();
  const left=campo().filter(x=>!x.herrado).length;toast(`${a.name} lleva ya tu hierro y el número ${a.num}. ${left?`Quedan ${left}.`:'Herradero terminado.'}`);if(!left){W3.F.carry=null;setCarry()}}
-function curar(h){const a=h.a;a.salud=Math.min(100,a.salud+30);a.lesion=0;S.money-=120;W3.F.uses--;save();h.mode='flee';h.t=1.5;const dx=h.x-W3.F.p.x,dz=h.z-W3.F.p.z,d=Math.hypot(dx,dz)||1;h.tx=h.x+dx/d*4;h.tz=h.z+dz/d*4;
+function curar(h){const a=h.a;a.salud=Math.min(100,a.salud+30);a.lesion=0;S.money-=120;W3.F.uses--;mesInc('cur');save();h.mode='flee';h.t=1.5;const dx=h.x-W3.F.p.x,dz=h.z-W3.F.p.z,d=Math.hypot(dx,dz)||1;h.tx=h.x+dx/d*4;h.tz=h.z+dz/d*4;
  toast(`${a.name} curado (salud ${Math.round(a.salud)}). −120 € de veterinaria.`);if(W3.F.uses<=0){W3.F.carry=null;toast('El botiquín se ha quedado vacío.')}setCarry()}
-function repararCerca(){if(!S.roto)return;S.roto=null;W3.F.carry=null;S.money-=150;save();log('Cerca reparada.');rebuildFinca();toast('Cerca reparada (−150 € de material).')}
+function repararCerca(){if(!S.roto)return;S.roto=null;mesInc('cerca');W3.F.carry=null;S.money-=150;save();log('Cerca reparada.');rebuildFinca();toast('Cerca reparada (−150 € de material).')}
 function apartar(h,o){const a=h.a;if(a.mark){a.mark=null;a.encd=false;markBull(h,false);save();toast(`${a.name} vuelve al lote`);return}
  const n=campo().filter(x=>x.mark===o.id).length;if(n>=o.n){toast(`Ya tienes ${o.n} apartados para ${o.feria}`);return}
  a.mark=o.id;markBull(h,true);save();toast(n+1===o.n?`Reseña completa. Ahora, a caballo, arréalos hasta los corrales.`:`${a.name} apartado (${n+1}/${o.n}). Llevan una marca blanca en el anca.`)}
 function capturar(h){const a=h.a;h.free=false;h.target=null;h.mode='idle';h.t=2;
  if(h.escaped){h.escaped=false;h.R=RECTS[h.tk];S.escapado=null;save();toast(`${a.name} vuelve a su cercado. ${S.roto&&S.roto.rk===h.tk?'Repara la cerca o se volverá a escapar.':''}`);mugido(.5)}
- else{a.encd=true;h.R=RECTS.emb;h.rk='emb';save();const o=S.offers.find(x=>x.id===a.mark);const n=o?campo().filter(x=>x.mark===o.id&&x.encd).length:0;toast(o?`${a.name} encerrado en los corrales (${n}/${o.n}).`:`${a.name} encerrado.`)}
+ else{a.encd=true;h.R=RECTS.emb;h.rk='emb';mesInc('enc');save();const o=S.offers.find(x=>x.id===a.mark);const n=o?campo().filter(x=>x.mark===o.id&&x.encd).length:0;toast(o?`${a.name} encerrado en los corrales (${n}/${o.n}).`:`${a.name} encerrado.`)}
  W3.tasksKey=''}
 function herdTick(dt){
  const F=W3.F,px=F.p.x,pz=F.p.z,H=W3.herd,T=W3.truck,now=performance.now(),Hh=W3.horse;
@@ -571,8 +581,8 @@ function herdTick(dt){
   if(W3.ride&&h.a.mark&&!h.a.encd&&!h.free&&dH<12&&h.rk==='toros'){h.free=true;h.target=RECTS.emb;h.tk='emb'}
   if(W3.drive&&Math.hypot(T.x-h.x,T.z-h.z)<9&&!['spar','flee'].includes(h.mode)){h.mode='flee';h.t=2;const ex=h.x-T.x,ez=h.z-T.z,el=Math.hypot(ex,ez)||1;h.tx=h.x+ex/el*8;h.tz=h.z+ez/el*8}
   const herdR=W3.ride?12:(h.kind==='toro'?0:4.5);
-  if(dH<herdR&&!['spar','charge','arreo','flee'].includes(h.mode)){h.mode='arreo';h.arT=1.5}
-  if(h.bravo&&pin&&dP<10&&!['charge','calm','spar','flee','arreo'].includes(h.mode))h.mode='watch';
+  if(dH<herdR&&!['spar','charge','arreo','flee','acoso','derribado'].includes(h.mode)){h.mode='arreo';h.arT=1.5}
+  if(h.bravo&&pin&&dP<10&&!['charge','calm','spar','flee','arreo','acoso','derribado'].includes(h.mode))h.mode='watch';
   if(h.kind==='vaca'&&pin&&dP<6&&!['charge','calm'].includes(h.mode)&&H.some(c=>c.mother===h&&Math.hypot(c.x-px,c.z-pz)<5)&&Math.random()<dt*.6){h.mode='charge';h.t=1.4;toast(`¡${h.a.name} defiende a su becerro!`)}
   switch(h.mode){
    case 'watch':{head=.1;h.tyaw=Math.atan2(dx,dz);if(Math.random()<dt*.5)h.paw=.8;if(h.paw>0){h.paw-=dt;paw=true;if(Math.random()<dt*4)dust(W3.D,h.x+Math.sin(h.yaw),gH(h.x,h.z),h.z+Math.cos(h.yaw),.3)}
@@ -581,6 +591,10 @@ function herdTick(dt){
     if(dP<1.5&&!(F.toss>0)&&!W3.ride){tossPlayer(dx/dP,dz/dP,h.a.name);toss=1;h.mode='calm';h.t=6}
     if(h.t<=0||W3.ride){h.mode='calm';h.t=5}break}
    case 'calm':{h.t-=dt;head=.6;if(h.t<=0)h.mode='idle';break}
+   case 'acoso':{const ex=h.x-Hh.x,ez=h.z-Hh.z,d=Math.hypot(ex,ez)||1;let vx=ex/d,vz=ez/d;const zz=Math.sin(now/650+h.acz)*.7;vx+=-vz*zz;vz+=vx*zz;
+    const cx=(Rc.x0+Rc.x1)/2,cz=(Rc.z0+Rc.z1)/2,edge=Math.min(h.x-Rc.x0,Rc.x1-h.x,h.z-Rc.z0,Rc.z1-h.z);if(edge<9){vx+=(cx-h.x)/30*(9-edge)/3;vz+=(cz-h.z)/30*(9-edge)/3}
+    const vl=Math.hypot(vx,vz)||1,v=6.3*clamp((h.a.g.fue+20)/95,.8,1.1)*(d>20?.55:1);h.x+=vx/vl*v*dt;h.z+=vz/vl*v*dt;h.tyaw=Math.atan2(vx,vz);spd=1.3;head=.3;if(Math.random()<dt*7)dust(W3.D,h.x,gH(h.x,h.z),h.z,.35);break}
+   case 'derribado':{h.dT-=dt;spd=0;head=.1;if(h.dT<=0){const brv=h.a.g.bra>74;h.mode=brv?'paw':'flee';h.t=2.4;if(!brv){h.tx=h.x+(h.x-Hh.x)*2;h.tz=h.z+(h.z-Hh.z)*2}h.tyaw=Math.atan2(Hh.x-h.x,Hh.z-h.z);toast(brv?'Se levanta y se arranca: bravo':'Se levanta y huye: manso')}break}
    case 'flee':{h.t-=dt;const ex=h.tx-h.x,ez=h.tz-h.z,d=Math.hypot(ex,ez);if(d>.3&&h.t>0){const v=4;h.x+=ex/d*v*dt;h.z+=ez/d*v*dt;h.tyaw=Math.atan2(ex,ez);spd=1.1;head=.2}else{h.mode='idle';h.t=R(2,5)}break}
    case 'arreo':{const ex=h.x-hx,ez=h.z-hz,d=Math.max(.1,dH);let vx=ex/d,vz=ez/d;
     if(h.free&&h.tk){let best=null,bd=1e9;const ok=h.tk==='emb'&&inR(RECTS.toros,h.x,h.z)?'toros':h.tk;for(const op of openings(ok)){const dd=Math.hypot(op.x-h.x,op.z-h.z);if(dd<bd){bd=dd;best=op}}
@@ -620,7 +634,7 @@ function herdTick(dt){
   h.anim={speed:spd,head,paw,push,toss,look,limp:h.a.salud<55}}
  for(let i=0;i<H.length;i++)for(let j=i+1;j<H.length;j++){const a=H[i],b=H[j];if(a.rk!==b.rk&&!a.free&&!b.free)continue;const dx=b.x-a.x,dz=b.z-a.z,d=Math.hypot(dx,dz),m=(a.kind==='becerro'||b.kind==='becerro')?1.1:1.8;
   if(d<m&&d>1e-4&&!(a.foe===b&&a.contact)){const p=(m-d)/2;a.x-=dx/d*p;a.z-=dz/d*p;b.x+=dx/d*p;b.z+=dz/d*p}}
- for(const h of H){const dd=Math.hypot(h.x-px,h.z-pz);h.B.root.position.set(h.x,gH(h.x,h.z)+(h.jump>0?Math.sin(h.jump/.6*Math.PI)*.5:0),h.z);h.B.root.rotation.y=h.yaw;
+ for(const h of H){const dd=Math.hypot(h.x-px,h.z-pz);const fl=h.mode==='derribado'?Math.min(1,(2.2-h.dT)*4)*Math.min(1,h.dT*2.5):0;h.B.root.position.set(h.x,gH(h.x,h.z)+(h.jump>0?Math.sin(h.jump/.6*Math.PI)*.5:0)+fl*.22,h.z);h.B.root.rotation.set(0,h.yaw,-(h.fallSide||1)*fl*1.4);
   h.B.root.visible=dd<200;if(dd<110)animBull(h.B,dt,h.anim)}}
 
 /* ---------- menús ---------- */
@@ -708,7 +722,7 @@ function ttEndVaca(){const T=TT;if(!T||!T.a||T.phase==='fin')return;
  $('#h3dim').hidden=false;$('#h3dim').style.opacity=1;$('#h3dim').innerHTML=`<div class="stack" style="max-width:460px;width:100%"><h2>${esc(a.name)}: ${a.nota}</h2><div>${notaTxt(a.nota)} · ${T.pases} pases, ${T.emb} embestidas${T.rehuse?`, ${T.rehuse} rehúses`:''}</div>
  <small class="muted">${T.pases>=4?'Lo has visto bien: la nota es fiable.':'Con pocos pases la nota es aproximada.'}</small>
  <div class="row" style="justify-content:center"><button class="btn oro" onclick="ttDecide(1)">${M_?'Aprobar como semental':'Aprobar para vientre'}</button><button class="btn" onclick="ttDecide(0)">${M_?'Vender para festejos populares':'Al matadero'}</button></div></div>`}
-function ttDecide(ok){const a=TT.a,M_=TT.sex==='M';
+function ttDecide(ok){const a=TT.a,M_=TT.sex==='M';mesInc('tient');
  if(ok){a.role=M_?'semental':'vaca';if(M_&&(!byId(S.semAct)||byId(S.semAct).role!=='semental'))S.semAct=a.id;log(`Tienta: ${a.name} aprobado${M_?' como semental':'a'} (${a.nota}).`)}
  else{const p=Math.round(M_?700+a.peso*2.2:a.peso*1.3);S.money+=p;a.st='vendido';S.animals=S.animals.filter(x=>x.id!==a.id);log(`Tienta: ${a.name} desechad${M_?'o':'a'}.`)}
  save();$('#h3dim').hidden=true;TT.a=null;ttNext()}
@@ -842,7 +856,11 @@ function enterPlaza(id){
  CP={r,i:-1,spd:1,view:'tv',ban,pe,hor,me,cab,team,sword,pas:rows,actors,bull:null,saludo:false,exc:0,cut:true};
  W3.yaw=-.4;W3.pitch=.35;W3.cam.fov=46;W3.cam.updateProjectionMatrix();
  $('#pv').textContent='Cámara: TV';$('#ps').textContent='×1';
- cpNext()}
+ cpNext();CP.paused=true;const dm=$('#h3dim');dm.hidden=false;dm.style.opacity=1;dm.dataset.k='cartel';dm.innerHTML=cartelHTML(CP)}
+function cartelHTML(C){const r=C.r,mats=[];for(const t of r.toros){if(!mats.some(m=>m.n===t.mat))mats.push({n:t.mat,e:t.estilo})}
+ return `<div class="cartel"><span class="lbl">${esc(r.feria)} · ${r.cat===1?'Plaza de primera':'Festejo'}</span><h2>${esc(r.plaza)}</h2><div class="cm">${mats.slice(0,3).map(m=>`<div class="mt"><span class="mr">${matRating(m.n)}</span><b>${esc(m.n)}</b><small>${ESTILO[m.e]||''}</small></div>`).join('')}</div>
+ <div class="ct">${r.toros.map((t,i)=>`<div class="tt"><b>${i+1}º</b><span>${esc(t.name)}${t.num!=null?' · '+t.num:''}</span><small>${t.peso} kg · ${t.pelo}</small></div>`).join('')}</div><button class="btn oro adv" onclick="cartelGo()">Empezar el festejo</button></div>`}
+function cartelGo(){const d=$('#h3dim');d.hidden=true;d.dataset.k='';if(CP)CP.paused=false;auInit()}
 function cpNext(){
  const P=W3.P,C=CP;C.i++;$('#h3dim').hidden=true;$('#psal').hidden=true;$('#h3ban').hidden=true;C.salDone=false;C.saludo=false;musicStop();
  P.flw.forEach(f=>{f.act=false;f.m.visible=false});
@@ -856,18 +874,21 @@ function cpNext(){
  C.tor=mkT(t.traje||'#7a1525');if(t.sust)C.sus=mkT(t.sust.t);
  C.s=freshState();C.g=buildGuion(t,C.i===0,C);C.ai=0;C.at=0;if(C.g[0].init)C.g[0].init(C.s);C.done=false;C.cut=true;C.shotI=0;C.lastA=-1;
  setPanu(0);P.pp.visible=false;
- $('#h3toro').textContent=`Toro ${C.i+1} de ${C.r.toros.length} · ${t.name}${t.num!=null?' nº '+t.num:''} · ${t.peso} kg · ${t.mat} (${ESTILO[t.estilo]||'lidiador'})`;$('#h3cap').textContent=C.g[0].cap}
+ const hechos=C.r.toros.slice(0,C.i),or=hechos.reduce((s,x)=>s+(x.trof||0),0);$('#h3toro').textContent=`${C.i+1}/${C.r.toros.length} · ${t.name} · ${t.peso} kg · ${t.mat} · orejas ${or}`;$('#h3cap').textContent=C.g[0].cap}
 function freshState(){const T=()=>({x:0,z:3,yaw:Math.PI,pose:'stand',cape:null,hand:0,sweep:0,y:0,rx:0,spin:0,vis:false,sp:0,arm:null,sword:false,capeUp:false});
  return {b:{x:0,z:-PR+1.2,yaw:0,head:.3,sp:0,kneel:0,toss:0,look:0,push:false,band:0,vis:true,fall:0,sword:0,drag:false},t:{...T(),x:-PR+3,z:2,vis:true},s2:T(),act:'t',ban:{vis:false,x:0,z:0,yaw:0,y:0,sp:0},
   pe:[{x:Math.sin(1.4)*(PR-2.5),z:Math.cos(1.4)*(PR-2.5),vis:true,sw:0,sp:0,yaw:null},{x:Math.sin(-1.1)*(PR-2.5),z:Math.cos(-1.1)*(PR-2.5),vis:true,sw:0,sp:0,yaw:null}],
   hor:{vis:false,fall:0,x:-13,z:-6,yaw:.87},cab:{vis:false,x:0,z:-PR,yaw:0,sp:0},team:{vis:false,x:DOOR.x,z:DOOR.z,yaw:0,sp:0},toril:0,palco:null,cam:null}}
-function cpEnd(){const C=CP;C.done=true;const r=C.r;musicStop();applause(3,.25);
- $('#h3dim').hidden=false;$('#h3dim').style.opacity=1;$('#h3dim').innerHTML=`<div class="stack" style="max-width:560px;width:100%"><h2>Fin del festejo</h2><div>${esc(r.resumen)}</div>
- <div class="kv" style="justify-content:center"><span>Prestigio <b>${r.dp>=0?'+':''}${r.dp}</b></span><span>Ingresos <b>${eur(r.ingreso)}</b></span>${r.premio?`<span>Premio al toro más bravo: <b>${esc(r.premio)}</b></span>`:''}</div>
- <div class="tw"><table class="t">${r.toros.map(t=>`<tr><td><b>${esc(t.name)}</b> <span class="mono muted">${t.num??''}</span></td><td>${esc(t.mat)}${t.cogida?' <span class="badge bad">cogida</span>':''}</td><td class="res-${t.res}">${RESTXT[t.res]}</td><td class="num">${t.res==='indulto'?'Indulto':t.trof?`${t.trof} ${t.trof>1?'orejas':'oreja'}`:'—'}</td></tr>`).join('')}</table></div>
- <button class="btn oro" onclick="exitPlaza()">Salir de la plaza</button></div>`;$('#h3cap').textContent=''}
+function nota10(t){return t.res==='devuelto'?'—':(clamp((t.score||60)/10+(t.trof||0)*.3,0,10)).toFixed(1)}
+function cpEnd(){const C=CP;C.done=true;const r=C.r;musicStop();applause(3,.25);mesInc('vista');
+ const mvp=r.toros.filter(t=>t.res!=='devuelto').sort((a,b)=>(b.score||0)-(a.score||0))[0],ore=r.toros.reduce((s,t)=>s+(t.trof||0),0);
+ $('#h3dim').hidden=false;$('#h3dim').style.opacity=1;$('#h3dim').dataset.k='fin';$('#h3dim').innerHTML=`<div class="cartel"><span class="lbl">Fin del festejo · ${esc(r.feria)}</span><h2>${esc(r.plaza)}</h2>
+ <div class="kpis"><div><b>${ore}</b><small>orejas</small></div><div><b>${r.pts!=null?(r.pts>=0?'+':'')+r.pts:'—'}</b><small>pts escalafón</small></div><div><b>${r.dp>=0?'+':''}${r.dp}</b><small>prestigio</small></div><div><b>${eur(r.ingreso)}</b><small>ingresos</small></div></div>
+ ${mvp?`<div class="mvp"><span class="lbl">Toro de la tarde</span><b>${esc(mvp.name)}${mvp.num!=null?' · nº '+mvp.num:''}</b><small>${mvp.peso} kg · ${mvp.pelo} · ${RESTXT[mvp.res]}</small><span class="nt10">${nota10(mvp)}</span></div>`:''}
+ <div class="tw"><table class="t"><tr><th>Toro</th><th>Matador</th><th>Arrastre</th><th>Nota</th></tr>${r.toros.map(t=>`<tr><td><b>${esc(t.name)}</b></td><td>${esc(t.mat)}${t.cogida?' <span class="badge bad">cogida</span>':''}${t.trof?` <span class="badge oro">${t.res==='indulto'?'indulto':t.trof+' or.'}</span>`:''}</td><td class="res-${t.res}">${RESTXT[t.res]}</td><td class="num"><b>${nota10(t)}</b></td></tr>`).join('')}</table></div>
+ <button class="btn oro adv" onclick="exitPlaza()">Salir de la plaza</button></div>`;$('#h3cap').textContent=''}
 function exitPlaza(){if(CP&&CP.actors)for(const a of CP.actors)W3.P.sc.remove(a);if(CP&&CP.sword&&CP.sword.parent)CP.sword.parent.remove(CP.sword);$('#h3dim').hidden=true;W3.cam.fov=60;W3.cam.updateProjectionMatrix();musicStop();crowdStop();
- if(W3.from==='finca')enterFinca();else exit3D()}
+ if(W3.from==='finca')enterFinca();else exit3D();render()}
 function saludar(){const C=CP;if(!C||C.saludo||C.salDone)return;C.saludo=true;C.salT=0;$('#psal').hidden=true;S.pres=clamp(S.pres+.5,0,100);save();ole('¡Ganadero!');applause(3,.35)}
 function oleP(txt,big){ole(txt);oleSnd(big);if(CP)CP.exc=Math.min(1,(CP.exc||0)+(big?.6:.35))}
 
@@ -1059,7 +1080,7 @@ function actCabestros(kind){let p0;return {d:8,shots:['wide'],cap:kind==='indult
  f(Z,u){const b=Z.b,c=Z.cab;Z.toril=1;if(u<.45){const v=ease(u/.45);c.x=lerp(0,p0.x,v);c.z=lerp(-PR+1,p0.z-2,v);c.sp=1;c.yaw=Math.atan2(p0.x,p0.z-2+PR-1);b.head=.2;b.yawOverride=Math.atan2(c.x-b.x,c.z-b.z)}
   else{const v=ease((u-.45)/.55);c.x=lerp(p0.x,0,v);c.z=lerp(p0.z-2,-PR+.5,v);c.sp=.9;c.yaw=Math.atan2(-p0.x,-PR+.5-p0.z+2);b.x=lerp(p0.x,0,Math.max(0,v-.08));b.z=lerp(p0.z,-PR+.5,Math.max(0,v-.08));b.sp=.8;b.head=.2;if(u>.97){b.vis=false;c.vis=false}}}}}
 function plazaTick(dt){
- const C=CP;if(!C)return;const P=W3.P;dt*=C.spd;const now=performance.now()/1000;
+ const C=CP;if(!C)return;const P=W3.P;if(C.paused){camPlaza(dt);return}dt*=C.spd;const now=performance.now()/1000;
  if(!C.done&&C.g){C.at+=dt;let a=C.g[C.ai];if(C.at>=a.d){C.ai++;C.at=0;if(C.ai>=C.g.length){cpNext();return}a=C.g[C.ai];if(a.init)a.init(C.s);if(a.cap)$('#h3cap').textContent=a.cap}}
  if(C.done||!C.bull){camPlaza(dt);return}
  const Z=C.s,a=C.g[C.ai],u=clamp(C.at/a.d,0,1);

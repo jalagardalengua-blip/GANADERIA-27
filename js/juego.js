@@ -133,14 +133,10 @@ function newGame(cfg){
  newSeason();regenMkt();
  for(let k=2;k<=4;k++)genOffers(k,true);
  log(`Comienza la temporada ${S.year} en ${cfg.name}.`);
- save();UI.tab='inicio';render();
- setTimeout(()=>modal('Bienvenido a la finca',`<div class="stack">
-  <p style="margin:0">Eres el ganadero de <b>${esc(cfg.name)}</b>. Cada mes decides cómo alimentar la camada, qué hembras pasan a vacas de vientre, qué toros reseñas para cada feria y qué vendes.</p>
-  <p class="muted" style="margin:0">Los toros sin tentar esconden su bravura y su nobleza. Solo la reata (lo que sabes de sus padres) da una pista. La verdad sale en la plaza.</p>
-  <button class="btn pri adv" onclick="closeModal()">Ir a la finca</button></div>`),120);
+ migrate(S);save();UI.tab='inicio';render();
 }
 function newSeason(){
- S.season={lid:0,c1:0,ov:0,vu:0,ind:0};
+ S.season={lid:0,c1:0,ov:0,vu:0,ind:0,pts:0,ore:0};
  const p=S.pres, pool=[
   {id:'lid',n:p<30?6:12,txt:n=>`Lidiar ${n} toros o novillos`,chk:(s,o)=>s.lid>=o.n},
   {id:'ov',n:2,txt:()=>'Conseguir 2 ovaciones o mejor',chk:s=>s.ov>=2},
@@ -187,6 +183,7 @@ function eligible(a,o){
 function est(a){
  if(a.known==='lidia')return {bra:a.g.bra,nob:a.g.nob,fue:a.g.fue,cas:a.g.cas,mode:'real'};
  if(a.known==='tienta')return {bra:a.rev.bra,cas:a.rev.cas,mode:'tienta'};
+ if(a.campo)return {bra:a.campo,cas:a.reata?a.reata.cas:null,mode:'campo'};
  if(a.reata)return {bra:a.reata.bra,cas:a.reata.cas,mode:'reata'};
  return {mode:'none'};
 }
@@ -204,6 +201,7 @@ function advance(){
   S.pres=clamp(S.pres+ok*1-(3-ok)*.8,0,100);
   rep.lines.push(`Balance de la temporada: ${ok} de 3 objetivos cumplidos${ok?` (+${eur(ok*S.objs[0].reward)})`:''}.`);
   S.presHist.push({y:S.year,p:Math.round(S.pres)});
+  finTemporada(rep,ok);
  }
  if(typeof finTareas==='function')finTareas(rep);
  // gastos
@@ -216,6 +214,7 @@ function advance(){
  rep.lines.push(`Alimentación ${FEED[S.feed].n.toLowerCase()}: ${eur(fc)} · Personal y finca: ${eur(pc)}`);
  // avanzar calendario
  S.month++;if(S.month>11){S.month=0;S.year++;newSeason();rep.lines.push(`Empieza la temporada ${S.year}. Nuevos objetivos de la propiedad.`)}
+ if(S.money<0)S.conf=clamp(S.conf-2,0,100);
  if(S.month===1){const c=8*n;S.money-=c;rep.cost+=c;rep.lines.push(`Campaña de saneamiento ganadero: ${eur(c)}.`)}
  // envejecimiento
  if(S.month===0){
@@ -271,12 +270,12 @@ function advance(){
  for(const o of S.offers)o.nuevo=false;
  const before=S.offers.length;genOffers(3);genOffers(2);
  const nuevas=S.offers.length-before;if(nuevas)rep.lines.push(`${nuevas} ${nuevas>1?'nuevas ofertas':'nueva oferta'} de empresas. Míralas en Ofertas.`);
- regenMkt();
- S.animals=S.animals.filter(a=>a.st==='campo');
+ regenMkt();rivalsTick();
+ S.animals=S.animals.filter(a=>a.st==='campo');genRetos(S);
  log(rep.lines[0]);for(const r of rep.corridas)log(`${r.plaza}: ${r.resumen}`);
  save();render();
- if(S.money<-90000)return gameOver();
- showReport(rep);
+ if(S.money<-90000||S.conf<=0)return gameOver();
+ newsToast(rep);
 }
 function herradero(auto){
  const sin=campo().filter(a=>!a.herrado);
@@ -334,11 +333,12 @@ function celebrar(o){
   if(t.res==='vuelta'){S.stats.vueltas++;S.season.vu++}
  }
  S.stats.corridas++;if(o.cat===1)S.season.c1++;
+ let pts=0;for(const t of toros)pts+=Math.round((PTS[t.res]||0)*(o.cat===1?1.5:o.cat===2?1.2:1))+t.trof*4;S.season.pts=(S.season.pts||0)+pts;S.season.ore=(S.season.ore||0)+toros.reduce((s,t)=>s+t.trof,0);
  o.st='lidiada';
  const cnt=k=>toros.filter(t=>t.res===k).length;
  const parts=[];for(const k of ['indulto','vuelta','ovacion','silencio','pitos','devuelto']){const c=cnt(k);if(c)parts.push(`${c} ${RESPL[k][c>1?1:0]}`)}
  for(const t of toros)if(t.cogida)parts.push(`cogida de ${t.mat}`);
- const r={id:S.hist.length+1,plaza:o.plaza,feria:o.feria,cat:o.cat,tipo:o.tipo,y:S.year,m:S.month,toros,dp:Math.round(dp*10)/10,ingreso,premio,resumen:parts.join(', '),visto:false};
+ const r={id:S.hist.length+1,plaza:o.plaza,feria:o.feria,cat:o.cat,tipo:o.tipo,y:S.year,m:S.month,toros,dp:Math.round(dp*10)/10,ingreso,premio,resumen:parts.join(', '),visto:false,pts};
  S.hist.unshift(r);S.porVer.push(r.id);
  return r;
 }
@@ -482,8 +482,8 @@ function render(){
  app.innerHTML=`
  <header class="hdr"><div class="bgimg" style="background-image:url(img/cabeza.jpg)"></div><div class="wrap">
   ${emblem(S.g,54)}
-  <div class="id"><div class="gname">${esc(S.g.name)}</div><div class="gsub">${esc(subtitulo())}</div></div>
-  <div class="lvl" title="Nivel de la ganadería"><span class="ring">${ICO.escudo}</span><span><span class="lt">Nivel ${L.n}</span><span class="lb"><i style="width:${L.p}%"></i></span></span></div>
+  <div class="id"><div class="gname">${esc(S.g.name)}</div><div class="gsub">${estrellas(S.pres)}<span>${esc(subtitulo())}</span></div></div>
+  <div class="lvl" title="Valoración y nivel"><span class="ring"><b>${valoracion()}</b></span><span><span class="lt">Nivel ${L.n}</span><span class="lb"><i style="width:${L.p}%"></i></span></span></div>
  </div></header>
  <div class="sbar"><div class="wrap">
   <div class="st"><span class="it hm">${ICO.cal}<span class="l">${MESES[S.month]} ${S.year}</span><span class="s">${MESES[S.month].slice(0,3)} ${String(S.year).slice(2)}</span></span><span class="it">${ICO.monG}<b class="num">${eur(S.money)}</b></span><span class="it">${ICO.star}<span><span class="l">Prestigio </span><b class="num">${Math.round(S.pres)}</b></span></span></div>
@@ -495,7 +495,7 @@ function render(){
  ({inicio:renderInicio,finca:renderFinca,camada:renderCamada,ofertas:renderOfertas,mercado:renderMercado,tareas:renderTareas,palmares:renderPalmares})[UI.tab](scr);
 }
 const TABS=[['inicio','Inicio','casa'],['finca','Finca','finca'],['camada','Ganadería','toro'],['ofertas','Ofertas','mon'],['mercado','Mercado','bolsa'],['tareas','Tareas','tareas'],['palmares','Perfil','perfil']];
-function go(t){UI.tab=t;render();window.scrollTo(0,0)}
+function go(t){UI.tab=t;const nt=document.getElementById('newsT');if(nt)nt.hidden=true;try{navigator.vibrate&&navigator.vibrate(6)}catch(e){}render();window.scrollTo(0,0)}
 const ICO={
  casa:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5.5 10v10h5v-6h3v6h5V10"/></svg>',
  finca:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M2 20h20M4 20v-8l5-4 5 4v8M9 20v-4h0M14 12l4-3 4 3v8M7 13h4M17 13h2"/></svg>',
@@ -543,7 +543,7 @@ function hierroSVG(h,sz,col){
 }
 const divisa=d=>`<span class="div" aria-hidden="true"><i style="background:${d[0]}"></i><i style="background:${d[1]}"></i></span>`;
 function subtitulo(){return S.g.real?`Ganadería · encaste ${S.g.enc}`:`Ganadería fundada en ${S.g.fund||2027}`}
-function nivel(){const st=S.stats||{};const xp=Math.round(S.pres*6+(st.corridas||0)*25+(st.indultos||0)*150+(st.vueltas||0)*40);return {n:1+Math.floor(xp/100),p:xp%100}}
+function nivel(){const st=S.stats||{};const xp=Math.round((S.xp||0)+S.pres*6+(st.corridas||0)*25+(st.indultos||0)*150+(st.vueltas||0)*40);return {n:1+Math.floor(xp/100),p:xp%100}}
 const FAMP={negro:'negro',burraco:'negro',entrepelado:'negro','cárdeno':'cardeno',salinero:'cardeno',colorado:'colorado','castaño':'castano',jabonero:'jabonero'};
 function retrato(a){return `img/toro-${FAMP[a.pelo]||'negro'}-${(a.id*7+3)%8}.jpg`}
 function calidad(a){const e=est(a);let q;
@@ -560,15 +560,13 @@ function startScreen(){
  const sv=load();
  return `<main style="padding-block:max(14px,env(safe-area-inset-top,0px)) 40px"><div class="wrap stack" style="gap:1.1rem">
  <div class="hero2"><div class="img" style="background-image:url(img/hero.jpg)"></div><div class="txt"><div class="k">Modo carrera · ganadero de bravo</div><h1>Hierro y Divisa</h1><div class="tag">Tradición<i>·</i>Pasión<i>·</i>Toros</div></div></div>
- <p class="muted" style="margin:0">Cría, alimenta y selecciona tu camada en la dehesa. Reseña toros para las ferias, vive la lidia desde el tendido y haz que tu hierro se anuncie en los carteles.</p>
  ${sv&&sv.g?`<button class="btn oro adv" onclick="continuar()">Continuar · ${esc(sv.g.name)} · ${MESES[sv.month]} ${sv.year}</button>`:''}
  <section class="sect"><header><h2>Ganaderías históricas</h2></header>
-  <p class="muted" style="margin:0;font-size:.88rem">Empiezas con prestigio, camada completa y presión por mantener el nombre. Hierros y divisas son ilustrativos.</p>
   <div class="list">${GANADERIAS.map((g,i)=>`<button class="gan" onclick="startReal(${i})">${emblem({hierro:{l:g.name[0]}},44)}
    <span style="min-width:0"><b>${esc(g.name)}</b><br><small class="muted">Encaste ${g.enc} · prestigio ${g.pres}</small><div class="pres"><i style="width:${g.pres}%"></i></div></span>${divisa(g.div)}</button>`).join('')}</div>
  </section>
  <section class="sect card goldline"><header><h2>Funda tu ganadería</h2></header>
-  <p class="muted" style="margin:0;font-size:.88rem">Empiezas desde abajo: 20 vacas, un semental y plazas de tercera. Más difícil, más tuyo.</p>
+  <small class="muted">20 vacas, un semental y plazas de tercera para empezar.</small>
   <div class="field"><label class="lbl" for="ng-name">Nombre</label><input type="text" id="ng-name" maxlength="32" placeholder="Ej.: Hermanos Valdeolmos" value="${esc(NEWG.name)}" oninput="NEWG.name=this.value;updPrev()"></div>
   <div class="two">
    <div class="field"><label class="lbl" for="ng-l">Letras del hierro</label><input type="text" id="ng-l" maxlength="2" placeholder="VH" value="${esc(NEWG.l)}" oninput="NEWG.l=this.value;updPrev()"></div>
@@ -591,7 +589,7 @@ function rerStart(){const y=window.scrollY;render();window.scrollTo(0,y)}
 function startReal(i){const g=GANADERIAS[i];newGame({real:true,name:g.name,enc:g.enc,pres:g.pres,div:g.div,hierro:{l:g.name[0],a:'none'},prov:''})}
 function startNew(){const n=NEWG.name.trim();if(!n){toast('Ponle nombre a tu ganadería');$('#ng-name').focus();return}
  newGame({real:false,name:n,enc:NEWG.enc,div:[NEWG.c1,NEWG.c2],hierro:{l:(NEWG.l.trim()||n[0]),a:NEWG.a},prov:NEWG.prov,fund:2027})}
-function continuar(){S=load();if(!S.animals){S=null;return}if(!S.mej)S.mej=S.g.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{};UI.tab='inicio';render()}
+function continuar(){S=load();if(!S.animals){S=null;return}migrate(S);if(!S.mej)S.mej=S.g.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{};UI.tab='inicio';render()}
 
 /* ============ INICIO ============ */
 function offerCard(o){
@@ -610,49 +608,7 @@ function offerCard(o){
    ${elig<o.n?`<div class="note" style="color:var(--warn)">Te faltan animales aptos: necesitas ${o.n} ${o.tipo==='novillada'?'erales o utreros':'cuatreños o cinqueños'} de ${min} kg o más, sin tentar.</div>`:''}<div class="note">Responde antes de ${MESES[(o.abs-1+12)%12]}.</div>`
   :`<div style="font-size:.9rem">${o.toros.map(id=>{const a=byId(id);return a?`${esc(a.name)} <span class="mono muted">${a.num}</span>`:''}).join(' · ')}</div><div class="note">Total: ${eur(o.precio*o.toros.length)} al lidiarse.</div>`}
  </article>`}
-function renderInicio(el){
- const nuevas=S.offers.filter(o=>o.st==='nueva').sort((a,b)=>a.abs-b.abs),acep=S.offers.filter(o=>o.st==='aceptada').sort((a,b)=>a.abs-b.abs);
- const pend=pendientes();const L=listaTareas().filter(t=>!t.ok);
- const pv=S.porVer.length?S.hist.find(h=>h.id===S.porVer[0]):null;
- el.innerHTML=`<div class="stack" style="gap:1rem">
- ${pv||acep.length?(()=>{const o=pv||acep[0],tor=pv?pv.toros:o.toros.map(id=>byId(id)).filter(Boolean),pm=tor.length?Math.round(tor.reduce((s,t)=>s+t.peso,0)/tor.length):0,ciudad=(o.plaza.match(/\(([^)]+)\)/)||[])[1]||o.plaza.split(' · ')[0];
-  return `<div class="palco"><div class="img" style="background-image:url(img/palco.jpg)"></div><span class="ptag">${ICO.plazaI.replace('<svg','<svg class="ico"')}<span><b>Plaza de toros</b><small>${esc(ciudad)}</small></span></span>
-  <div class="pcard">${emblem(S.g,48)}<span class="pt"><b>Tarde de toros · ${esc(ciudad)}</b><small>${pv?'Hoy en el ruedo':`${MESES[o.abs%12]} ${Math.floor(o.abs/12)}`}<i>|</i>${tor.length} ${o.tipo==='novillada'?'novillos':'toros'}<i>|</i>${pm} kg (media)</small></span>
-  <button class="btn ${pv?'oro':''}" onclick="${pv?`enterPlaza(${pv.id})`:`go('ofertas')`}">${pv?'Ver la corrida':'Ver detalles'}${ICO.chev}</button></div></div>
-  ${pv?`<div class="duo"><button class="btn oro big" onclick="enterPlaza(${pv.id})">${ICO.plazaI.replace('<svg','<svg class="ico"')}Plaza en 3D</button><button class="btn big" onclick="verCorrida(${pv.id})">Vista rápida</button></div>`:''}`})()
- :`<div class="hero2"><div class="img" style="background-image:url(img/hero.jpg)"></div><div class="txt"><div class="k">Ganadería</div><h1>${esc(S.g.name)}</h1><div class="tag">Tradición<i>·</i>Pasión<i>·</i>Toros</div></div></div>`}
- ${nuevas.slice(0,2).map(offerCard).join('')}
- ${nuevas.length>2?`<button class="btn adv" onclick="go('ofertas')">Ver las ${nuevas.length} ofertas${ICO.chev}</button>`:''}
- ${acep.length?`<section class="sect"><header><h2>Carteles anunciados</h2></header><div class="list">${acep.map(o=>`<div class="task"><span class="dot ok"></span><span class="t"><b>${esc(o.plaza)}</b><br><small class="muted">${o.feria} · ${MESES[o.abs%12]} ${Math.floor(o.abs/12)} · ${o.toros.length} ${o.tipo==='novillada'?'novillos':'toros'}</small></span></div>`).join('')}</div></section>`:''}
- <button class="tcard" onclick="go('tareas')">${ICO.portapapeles}<span style="flex:1;min-width:0"><b>Tareas</b><small>${L.length?esc(L[0].t):'Todo al día. El mayoral espera órdenes.'}${pend>1?` · y ${pend-1} más`:''}</small></span>${ICO.chev}</button>
- <div class="row" style="flex-wrap:nowrap"><button class="btn oro adv" style="flex:2" onclick="enter3D()">Bajar a la finca 3D</button><button class="btn adv" style="flex:1" onclick="go('camada')">Ganadería</button></div>
- <div class="foot-deco" style="background-image:url(img/cuerno.jpg)"></div>
- </div>`}
-
 /* ============ TAREAS ============ */
-function listaTareas(){const c=campo(),T=[];
- const sin=c.filter(a=>!a.herrado).length,pendT=c.filter(a=>a.sex==='H'&&!a.tentado&&!a.role&&ageY(a)>=2).length,dec=c.filter(a=>a.sex==='H'&&a.tentado&&!a.role).length,nuevas=S.offers.filter(o=>o.st==='nueva').length,sems=c.filter(a=>a.role==='semental');
- if(S.porVer.length)T.push({t:`Tienes ${S.porVer.length===1?'una corrida':S.porVer.length+' corridas'} por ver`,b:'Ver',fn:`enterPlaza(${S.porVer[0]})`,oro:1});
- if(nuevas)T.push({t:`${nuevas} ${nuevas>1?'ofertas':'oferta'} de empresas sin responder`,b:'Ver',fn:`go('ofertas')`});
- if(sin)T.push({t:`${sin} becerros sin herrar${S.month>=7?'':' · herradero desde agosto'}`,b:'Herradero',fn:`herradero();render()`,dis:S.month<7});
- if(pendT)T.push({t:`${pendT} hembras esperan tienta`,b:'Tentar',fn:`tientaLote()`});
- if(dec)T.push({t:`${dec} hembras tentadas sin decidir`,b:'Decidir',fn:`UI.filter='hjov';go('camada')`});
- if(!sems.length)T.push({t:'No tienes semental: la próxima paridera usará uno prestado',b:'Mercado',fn:`go('mercado')`});
- if(S.roto)T.push({t:`Cerca rota en el cercado de ${RKN[S.roto.rk]}`,b:'A la finca',fn:'enter3D()'});
- if(S.escapado){const a=byId(S.escapado.id);if(a)T.push({t:`${a.name} se ha escapado: devuélvelo a caballo`,b:'A la finca',fn:'enter3D()'})}
- const inj=c.filter(a=>a.salud<55);if(inj.length)T.push({t:`${inj.length} ${inj.length>1?'animales cojean':'animal cojea'}: necesitan cura`,b:'A la finca',fn:'enter3D()'});
- return T}
-function renderTareas(el){
- const T=listaTareas(),F=typeof tareas==='function'?tareas():[];
- el.innerHTML=`<div class="stack" style="gap:1rem">
- <section class="sect"><header><h2>Pendiente</h2></header><div class="list">${T.length?T.map(x=>`<div class="task"><span class="dot ${x.oro?'ok':''}"></span><span class="t">${esc(x.t)}</span><button class="btn sm ${x.oro?'oro':''}" ${x.dis?'disabled':''} onclick="${x.fn}">${x.b}</button></div>`).join(''):`<div class="task"><span class="dot ok"></span><span class="t">Todo al día. El mayoral espera órdenes.</span></div>`}</div></section>
- <section class="sect"><header><h2>Trabajo en la finca</h2><span class="sp"></span><small class="muted">se hace en 3D</small></header><div class="list">${F.map(x=>`<div class="task"><span class="dot ${x.d?'ok':''}"></span><span class="t" style="${x.d?'opacity:.6;text-decoration:line-through':''}">${esc(x.t)}</span></div>`).join('')}</div>
-  <button class="btn oro adv" onclick="enter3D()">Bajar a la finca 3D${ICO.chev}</button></section>
- <section class="sect"><header><h2>Objetivos ${S.year}</h2><span class="sp"></span><small class="muted">${eur(S.objs[0]?.reward||0)} cada uno</small></header>
-  <div class="list">${S.objs.map(o=>{const ok=OBJCHK[o.id](S.season,o);return `<div class="task"><span class="dot ${ok?'ok':''}"></span><span class="t">${o.txt}</span><span class="badge ${ok?'ok':''}">${ok?'Cumplido':'Pendiente'}</span></div>`}).join('')}</div></section>
- <button class="btn pri adv" onclick="advance()">Avanzar a ${MESES[(S.month+1)%12]}${ICO.chev}</button>
- </div>`}
-
 /* ============ FINCA ============ */
 let DEH=null;
 function renderFinca(el){
@@ -676,11 +632,11 @@ function renderFinca(el){
  ${prox.length?`<section class="sect"><header><h2>Carteles anunciados</h2></header><div class="list">${prox.map(o=>`<div class="task"><span class="dot ok"></span><span class="t"><b>${esc(o.plaza)}</b><br><small class="muted">${o.feria} · ${MESES[o.abs%12]} ${Math.floor(o.abs/12)} · ${o.toros.length} ${o.tipo==='novillada'?'novillos':'toros'}</small></span></div>`).join('')}</div></section>`:''}
  <section class="sect"><header><h2>Alimentación</h2><span class="sp"></span><small class="muted">por cabeza y mes</small></header>
   <div class="seg">${Object.entries(FEED).map(([k,f])=>`<button aria-pressed="${S.feed===k}" onclick="S.feed='${k}';save();render()"><b>${f.n}</b><span>${Math.round(f.c*feedMul())} € · ${f.d}</span></button>`).join('')}</div>
-  <small class="muted">Más pienso, más kilos y salud; los toros por encima de 580 kg pierden movilidad en la plaza.</small></section>
+</section>
  <section class="sect"><header><h2>Cubrición</h2></header>
   <div class="field"><label class="lbl" for="semsel">Semental que cubre a las vacas</label>
   <select id="semsel" onchange="S.semAct=+this.value;save();toast('Semental asignado')">${sems.length?sems.map(s=>`<option value="${s.id}" ${s.id===S.semAct?'selected':''}>${esc(s.name)} nº ${s.num} · tienta ${s.nota} (${notaTxt(s.nota)})${s.indultado?' · indultado':''}</option>`).join(''):'<option>Sin semental</option>'}</select></div>
-  <small class="muted">Las crías nacen en marzo. Heredan la media de madre y padre, con variación.</small></section>
+</section>
  <section class="sect"><header><h2>Instalaciones</h2></header><div class="list">${Object.entries(MEJ).map(([k,d])=>`<div class="task"><span class="dot ${mej(k)?'ok':''}"></span><span class="t"><b>${d.n}</b><br><small class="muted">${d.d}</small></span>${mej(k)?'<span class="badge ok">Hecha</span>':`<button class="btn sm oro" ${S.money<d.c?'disabled':''} onclick="construir('${k}',true)">${eur(d.c)}</button>`}</div>`).join('')}</div></section>
  <button class="btn pri adv" onclick="advance()">Avanzar a ${MESES[(S.month+1)%12]}${ICO.chev}</button>
  </div>`;
@@ -766,9 +722,9 @@ function rowAnimal(a){
  if(a.sex==='H'&&!a.tentado&&!a.role&&ageY(a)>=2)badges.push('<span class="badge">Por tentar</span>');
  if(a.salud<55)badges.push('<span class="badge bad">Lesionado</span>');
  if(!a.herrado)badges.push('<span class="badge">Sin herrar</span>');
- const dato=e.mode==='none'?'sin reata':e.mode==='reata'?`reata ~${e.bra}`:e.mode==='tienta'?`tienta ${a.nota}`:`bravura ${e.bra}`;
+ const dato=e.mode==='none'?'sin reata':e.mode==='campo'?`campo ~${e.bra}`:e.mode==='reata'?`reata ~${e.bra}`:e.mode==='tienta'?`tienta ${a.nota}`:`bravura ${e.bra}`;
  return `<button class="ac t-${q.k}" onclick="openFicha(${a.id})" aria-label="${esc(a.name)}, ${q.n}">
-  <span class="ph" style="background-image:url(${retrato(a)})"></span>
+  <span class="ph" style="background-image:url(${retrato(a)})"><span class="ovr"><b>${q.q}</b><small>${posDe(a)}</small></span></span>
   <span class="t"><span class="nm">${a.num!=null?`<span class="n">${a.num}</span><span class="g">- ${a.born%10}</span>`:''}<span class="n">${esc(a.name)}</span>${MEDAL[q.medal]}</span>
    <span class="sub">${cat(a)}<i>•</i>${a.pelo}<i>•</i>${dato}</span>${badges.length?`<span class="bdgs">${badges.join('')}</span>`:''}</span>
   <span class="r"><span class="kg">${ICO.kg}${a.peso} kg</span><span class="hp ${a.salud<55?'low':''}">${ICO.pulso}<span class="w">salud </span>${Math.round(a.salud)}</span></span></button>`;
@@ -802,15 +758,8 @@ function openFicha(id){
   ${(()=>{const q=calidad(a);return `<div class="ficha-ph t-${q.k}" style="background-image:url(${retrato(a)})"><span class="cap"><small>${q.n} · calidad ${q.q}</small>${esc(a.name)}</span></div>`})()}
   <div class="ring-wrap" style="background:linear-gradient(#cfb98f,#a98a55)"><canvas id="fcv"></canvas></div>
   <div class="kv"><span>${cat(a)}</span><span>${(()=>{const m=morf(a);return `Encornadura <b>${hornTxt(m)}</b></span><span>Hechuras <b>${hechTxt(a,m)}</b>`})()}</span><span><b>${y}</b> años</span><span><b>${a.peso}</b> kg</span><span>Pelo <b>${a.pelo}</b></span><span>Guarismo <b>${a.born%10}</b></span><span>Encaste <b>${a.enc}</b></span></div>
-  <div class="bars">
-   ${bar('Salud',Math.round(a.salud))}
-   ${bar('Trapío',a.g.tra)}
-   ${bar('Bravura',e.bra,e.mode)}
-   ${bar('Casta',e.cas,e.mode)}
-   ${bar('Nobleza',e.nob,e.mode)}
-   ${bar('Fuerza',e.fue,e.mode)}
-  </div>
-  <small class="muted">${e.mode==='none'?'Sin datos de reata: hijo de semental prestado o vaca sin tentar.':e.mode==='reata'?'Rayado: estimación por la reata (tienta de sus padres). La nobleza y la fuerza solo se ven en la plaza.':e.mode==='tienta'?`Tentado: nota ${a.nota}, ${notaTxt(a.nota).toLowerCase()}. La nobleza y la fuerza no se miden en la tienta.`:'Datos reales, comprobados en la plaza.'}</small>
+  <div class="stats">${[['BRA',e.bra,1],['NOB',e.nob,0],['CAS',e.cas,1],['FUE',e.fue,0],['TRA',a.g.tra,0],['SAL',Math.round(a.salud),0]].map(([k,v,est2])=>`<div class="sx ${v==null?'s0':v>=85?'s5':v>=78?'s4':v>=70?'s3':v>=60?'s2':'s1'}"><b>${v==null?'?':(est2&&(e.mode==='reata'||e.mode==='campo')?'~':'')+v}</b><span>${k}</span></div>`).join('')}</div>
+  <small class="muted">${e.mode==='campo'?'Estimación de la prueba de campo (acoso y derribo).':e.mode==='none'?'Sin datos de reata: hijo de semental prestado o vaca sin tentar.':e.mode==='reata'?'Rayado: estimación por la reata (tienta de sus padres). La nobleza y la fuerza solo se ven en la plaza.':e.mode==='tienta'?`Tentado: nota ${a.nota}, ${notaTxt(a.nota).toLowerCase()}. La nobleza y la fuerza no se miden en la tienta.`:'Datos reales, comprobados en la plaza.'}</small>
   <div class="card stack" style="gap:.35rem;padding:12px"><span class="lbl">Reata</span>
    <div style="font-size:.88rem">Madre: <b>${a.madre?`${esc(a.madre.name)}${a.madre.num!=null?' nº '+a.madre.num:''}`:'origen de compra o fundación'}</b><br>Padre: <b>${a.padre?`${esc(a.padre.name)}${a.padre.num!=null?' nº '+a.padre.num:''}`:'—'}</b></div>
    ${a.indultado?`<div style="font-size:.88rem;color:var(--oro)">Indultado en ${esc(a.indultado)}.</div>`:''}
@@ -853,7 +802,6 @@ function cerrarTienta(ids){let ap=0,ds=0,ing=0;for(const id of ids){const a=byId
 function renderOfertas(el){
  const act=S.offers.filter(o=>o.st==='nueva'||o.st==='aceptada').sort((a,b)=>a.abs-b.abs);
  el.innerHTML=`<div class="stack" style="gap:1rem">
- <p class="muted" style="margin:0;font-size:.9rem">Las empresas piden toros según tu prestigio. Para aceptar, reseña los toros que irán a la plaza: edad, peso mínimo y sin tentar. En la finca 3D puedes apartarlos y encerrarlos a caballo.</p>
  ${act.length?act.map(offerCard).join(''):`<div class="card muted">No hay ofertas abiertas. Llegan cada mes según la temporada y tu prestigio (${Math.round(S.pres)}).</div>`}
  <section class="sect"><header><h2>Ferias de la temporada</h2></header><div class="list tw"><table class="t"><tr><th>Mes</th><th>Feria</th><th>Plaza</th><th>Prestigio</th></tr>${FERIAS.map(f=>`<tr><td>${MESES[f.m].slice(0,3)}</td><td>${f.feria}</td><td>${f.plaza}</td><td class="num" style="color:${S.pres>=f.minP?'var(--good)':'var(--muted)'}">${f.minP}</td></tr>`).join('')}</table></div></section>
  </div>`;
@@ -894,7 +842,6 @@ function renderMercado(el){
    <div class="task"><span class="t">Vacas de 14 años o más<br><small class="muted">${viejas.length} animales · bajan la paridera</small></span><button class="btn sm" ${!viejas.length?'disabled':''} onclick="bloque('viejas')">Matadero</button></div>
    <div class="task"><span class="t">Machos tentados no aprobados<br><small class="muted">${tentM.length} animales · ya no pueden lidiarse en plaza</small></span><button class="btn sm" ${!tentM.length?'disabled':''} onclick="bloque('tent')">Festejos populares</button></div>
   </div></section>
- <small class="muted">Precios orientativos del juego: matadero 1,5 €/kg en machos y 1,3 €/kg en hembras; festejos populares 700 € más 2,2 €/kg.</small>
  </div>`;
 }
 function comprarSem(i){const s=S.mkt.sem[i];S.money-=s.precio;const a=mk({sex:'M',born:S.year-s.age,enc:s.enc,g:s.g,pelo:s.pelo,name:s.name,role:'semental'});a.tentado=true;a.known='tienta';a.rev=s.rev;a.nota=s.nota;S.animals.push(a);
@@ -905,28 +852,6 @@ function bloque(k){let ing=0,n=0;for(const a of campo()){if(k==='viejas'&&a.role
  S.animals=S.animals.filter(a=>a.st==='campo');S.money+=Math.round(ing);save();render();toast(`${n} vendidos por ${eur(ing)}`)}
 
 /* ============ PALMARÉS ============ */
-function renderPalmares(el){
- const st=S.stats,L=nivel(),q=getQual();
- el.innerHTML=`<div class="stack" style="gap:1rem">
- <div class="card goldline"><div class="row" style="flex-wrap:nowrap">${emblem(S.g,64)}<div style="min-width:0;flex:1"><div style="font-family:var(--serif);font-weight:700;font-size:1.3rem;text-transform:uppercase">${esc(S.g.name)}</div><div class="row" style="gap:.4rem;margin-top:.25rem">${divisa(S.g.div)}${hierroSVG(S.g.hierro,30,'var(--oro)')}<small class="muted">Encaste ${S.g.enc}${S.g.prov?' · '+esc(S.g.prov):''}</small></div>
-  <div class="lvl" style="margin-top:.5rem"><span class="lt">Nivel ${L.n}</span><span class="lb" style="width:140px;margin:0 0 0 .5rem"><i style="width:${L.p}%"></i></span></div></div></div></div>
- <div class="tiles">
-  <div class="tile"><div class="lbl">Festejos</div><div class="v">${st.corridas}</div></div>
-  <div class="tile"><div class="lbl">Toros lidiados</div><div class="v">${st.toros}</div></div>
-  <div class="tile"><div class="lbl">Indultos</div><div class="v">${st.indultos}</div></div>
-  <div class="tile"><div class="lbl">Vueltas</div><div class="v">${st.vueltas}</div></div>
- </div>
- ${S.presHist.length>1?`<section class="sect"><header><h2>Prestigio por temporada</h2></header><div class="card">${spark()}</div></section>`:''}
- <section class="sect"><header><h2>Historial de festejos</h2></header>
- ${S.hist.length?`<div class="list">${S.hist.map(h=>`<button class="li" onclick="verCorrida(${h.id})"><span class="sw" style="background:${h.cat===1?'var(--gold-grad)':'#1d222c'}"></span><span class="t"><b>${esc(h.plaza)}</b><small>${h.feria} · ${MESES[h.m].slice(0,3)} ${h.y} · ${esc(h.resumen)}</small></span><span class="r"><b style="color:${h.dp>=0?'var(--good)':'var(--bad)'}">${h.dp>=0?'+':''}${h.dp}</b><br><small class="muted">prestigio</small></span></button>`).join('')}</div>`:'<div class="card muted">Aún no has lidiado. Acepta una oferta y prepara la camada.</div>'}</section>
- <section class="sect"><header><h2>Diario de la finca</h2></header><div class="list">${S.log.slice(0,12).map(l=>`<div class="task"><span class="mono muted" style="min-width:64px">${l.d}</span><span class="t" style="font-size:.88rem">${esc(l.t)}</span></div>`).join('')}</div></section>
- <section class="sect"><header><h2>Ajustes</h2></header>
-  <div class="field"><span class="lbl">Calidad gráfica en 3D</span><div class="seg">${[['alta','Alta','Sombras finas y máxima nitidez'],['media','Media','Equilibrada para móviles'],['baja','Baja','Más fluidez y menos batería']].map(([k,n,d])=>`<button aria-pressed="${q===k}" onclick="setQual('${k}')"><b>${n}</b><span>${d}</span></button>`).join('')}</div></div>
-  <button class="btn" onclick="instalar()">Instalar el juego en el móvil</button>
- </section>
- <div id="reset"><button class="btn ghost" onclick="$('#reset').innerHTML='<div class=&quot;card stack&quot;><span>Se borrará esta partida. ¿Empezar de nuevo?</span><div class=&quot;row&quot;><button class=&quot;btn pri&quot; onclick=&quot;resetGame()&quot;>Borrar y salir</button><button class=&quot;btn&quot; onclick=&quot;render()&quot;>Cancelar</button></div></div>'">Nueva partida</button></div>
- </div>`;
-}
 function getQual(){try{return localStorage.getItem('hd-qual')||(matchMedia('(pointer:coarse)').matches?'media':'alta')}catch(e){return 'media'}}
 function setQual(k){try{localStorage.setItem('hd-qual',k)}catch(e){}toast(`Calidad ${k}: se aplica al volver a entrar en 3D`);if(W3.R){const pr={alta:1.6,media:1.2,baja:.9}[k];W3.R.setPixelRatio(Math.min(pr,window.devicePixelRatio||1));W3.R.shadowMap.enabled=k!=='baja';W3.resize&&W3.resize()}render()}
 let DEFER=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DEFER=e});
@@ -940,7 +865,7 @@ function resetGame(){try{localStorage.removeItem(KEY)}catch(e){}S=null;render()}
 function gameOver(){modal('Bancarrota',`<div class="stack"><p style="margin:0">El banco ejecuta la deuda y la finca sale a subasta. ${esc(S.g.name)} cierra con ${S.stats.toros} toros lidiados y ${S.stats.indultos} indultos.</p><button class="btn pri adv" onclick="closeModal();resetGame()">Empezar otra carrera</button></div>`)}
 
 /* ============ informe mensual ============ */
-function showReport(rep){
+function showReport(rep){if(!rep)return;if(!rep.corridas)rep={...rep,corridas:(rep.cor||[]).map(id=>S.hist.find(h=>h.id===id)).filter(Boolean)};
  modal(`${MESES[S.month]} ${S.year}`,`<div class="stack">
   <div class="kv"><span>Gastos <b style="color:var(--bad)">${eur(-rep.cost)}</b></span><span>Ingresos <b style="color:var(--good)">${eur(rep.inc)}</b></span><span>Saldo <b>${eur(S.money)}</b></span></div>
   ${rep.corridas.map(r=>`<div class="card stack" style="gap:.4rem"><span class="lbl">${r.cat===1?'Plaza de primera':'Festejo'}</span><b style="font-family:var(--display);font-size:1.3rem">${esc(r.plaza)} · ${r.feria}</b><small class="muted">${r.toros.length} ${r.tipo==='novillada'?'novillos':'toros'} de tu hierro han saltado al ruedo.</small><div class="row"><button class="btn oro" onclick="closeModal();enterPlaza(${r.id})">Verla en la plaza 3D</button><button class="btn" onclick="closeModal();verCorrida(${r.id})">Vista rápida</button></div></div>`).join('')}
@@ -1061,7 +986,7 @@ function endCorrida(){
  c.font=`600 ${Math.round(H/22)}px Archivo, sans-serif`;c.fillStyle='#d9a85b';c.fillText(r.resumen,W/2,H*.57);c.textAlign='left';
  $('#pcap').textContent=`Prestigio ${r.dp>=0?'+':''}${r.dp} · Ingresos ${eur(r.ingreso)}${r.premio?` · ${r.premio} gana el premio al toro más bravo de la feria`:''}`;
  $('#ptoro').textContent='Resumen';
- $('#psum').innerHTML=`<div class="tw"><table class="t"><tr><th>Toro</th><th>Matador</th><th>Toro en el arrastre</th><th>Trofeos</th></tr>${r.toros.map(t=>`<tr><td><b>${esc(t.name)}</b> <span class="mono muted">${t.num??''}</span><br><small class="muted">${t.peso} kg · ${t.pelo}</small></td><td>${esc(t.mat)}</td><td class="res-${t.res}">${RESTXT[t.res]}</td><td class="num">${t.res==='indulto'?'Indulto':t.trof?`${t.trof} ${t.trof>1?'orejas':'oreja'}`:'—'}</td></tr>`).join('')}</table></div>
+ $('#psum').innerHTML=`<div class="tw"><table class="t"><tr><th>Toro</th><th>Matador</th><th>Arrastre</th><th>Trofeos</th><th>Nota</th></tr>${r.toros.map(t=>`<tr><td><b>${esc(t.name)}</b><br><small class="muted">${t.peso} kg · ${t.pelo}</small></td><td>${esc(t.mat)}</td><td class="res-${t.res}">${RESTXT[t.res]}</td><td class="num">${t.res==='indulto'?'Indulto':t.trof?`${t.trof} ${t.trof>1?'or.':'or.'}`:'—'}</td><td class="num"><b>${nota10(t)}</b></td></tr>`).join('')}</table></div>
  <small class="muted">Las madres de cada toro guardan su resultado en la ficha: úsalo para decidir qué vacas siguen en la ganadería.</small>`;
  render();
 }
@@ -1076,4 +1001,3 @@ let tt=null;function toast(m){let t=$('.toast');if(!t){t=document.createElement(
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
 /* ============ arranque ============ */
-(function(){const sv=load();if(sv&&sv.animals&&sv.v===1){S=sv;if(!S.mej)S.mej=S.g.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{}}render()})();

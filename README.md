@@ -4,10 +4,12 @@ Modo carrera de ganadero de bravo para el navegador y el móvil. Eliges una gana
 
 ## Qué incluye
 
+- **Modo carrera**: escalafón ganadero contra nueve rivales, confianza de la propiedad, retos del mes con premios, valoración tipo carta en cada toro, vitrina de trofeos y buzón de noticias.
 - **Gestión**: Inicio, Finca, Ganadería, Ofertas, Mercado, Tareas y Perfil, con interfaz negra y oro pensada para móvil.
 - **Camada**: cada animal tiene genética, reata, hechuras y encornadura propias, y una calidad (de Común a Leyenda) que colorea su tarjeta.
 - **Finca en 3D**: tu personaje a pie, a caballo con garrocha o en camioneta. Echas pienso, hierras becerros, curas lesionados, reparas cercas, devuelves reses escapadas, apartas y encierras toros, y tientas en la placita.
-- **Plaza en 3D**: paseíllo, tercios de varas, banderillas y muleta, estilos de torero distintos, cogidas, estocada con pinchazos, descabellos y avisos, petición de oreja, mulillas, vuelta al ruedo e indultos. Clarín, pasodoble y público con sonido.
+- **Tareas**: cada una se puede hacer en persona en la finca 3D (incluido el acoso y derribo a caballo) o delegar pagando al mayoral, vaqueros o veterinario.
+- **Plaza en 3D**: cartel previo, marcador en directo, resumen con nota de cada toro y toro de la tarde; paseíllo, tercios de varas, banderillas y muleta, estilos de torero distintos, cogidas, estocada con pinchazos, descabellos y avisos, petición de oreja, mulillas, vuelta al ruedo e indultos. Clarín, pasodoble y público con sonido.
 
 ## Cómo jugar
 
