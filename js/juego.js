@@ -149,14 +149,14 @@ function newSeason(){
 const OBJCHK={lid:(s,o)=>s.lid>=o.n,ov:s=>s.ov>=2,cash:(s,o)=>S.money>=o.n,c1:s=>s.c1>=1,vu:s=>s.vu+s.ind>=1};
 
 /* ============ ofertas y mercado ============ */
-function priceFor(cat,tipo){const p=S.pres;let v=cat===1?6000+p*95:cat===2?3400+p*45:1800+p*22;if(tipo==='novillada')v*=.45;return r100(v*R(.9,1.1))}
+function priceFor(cat,tipo){const p=S.pres,bonus=1+(mejLv('corrales')>=2?.05:0)+(mej('oficina')?.05:0);let v=cat===1?6000+p*95:cat===2?3400+p*45:1800+p*22;if(tipo==='novillada')v*=.45;return r100(v*bonus*R(.9,1.1))}
 function genOffers(ahead,init){
  const tgt=absNow()+ahead, tm=tgt%12;
  for(const f of FERIAS){
   if(f.m!==tm)continue;
   if(S.offers.some(o=>o.fid===f.id&&o.abs===tgt))continue;
   if(S.pres<f.minP-10)continue;
-  const ch=clamp((S.pres-f.minP+30)/50,.12,.92);
+  const ch=clamp((S.pres-f.minP+30)/50*(mej('oficina')?1.25:1),.12,.95);
   if(Math.random()<ch)addOffer({fid:f.id,plaza:f.plaza,feria:f.feria,cat:f.cat,tipo:f.tipo,abs:tgt,n:6});
  }
  if(!init||ahead===2){
@@ -205,13 +205,13 @@ function advance(){
  }
  if(typeof finTareas==='function')finTareas(rep);
  // gastos
- let feedMod=1;const aMano=(S.fedM||0)>=4;if(aMano){feedMod*=.9;rep.lines.push('Has echado de comer tú mismo: la camada está más tranquila y ahorras un 10 % de pienso.')}S.fedM=0;S.feedSpots=[0,0,0];for(const a of S.animals)if(a.mark&&!S.offers.some(o=>o.id===a.mark&&o.st==='nueva')){a.mark=null;a.encd=false}
+ let feedMod=1;const aMano=(S.fedM||0)>=4;if(aMano){feedMod*=.9;rep.lines.push('Has echado de comer tú mismo: la camada está más tranquila y ahorras un 10 % de pienso.')}S.fedM=0;S.feedSpots=mejLv('comederos')>=3?Array(9).fill(.5):[];for(const a of S.animals)if(a.mark&&!S.offers.some(o=>o.id===a.mark&&o.st==='nueva')){a.mark=null;a.encd=false}
  const ev=Math.random()<.42?pick(['pelea','lluvia','sequia','veedor','visita','cojera']):null;
  if(ev==='lluvia'&&[1,2,3,9,10].includes(S.month))feedMod=.72;
- if(ev==='sequia'&&[5,6,7,8].includes(S.month))feedMod=1.35;
- const fc=Math.round(n*FEED[S.feed].c*feedMod*feedMul()), pc=2500+10*n;
+ if(ev==='sequia'&&[5,6,7,8].includes(S.month)&&!mej('pozo'))feedMod=1.35;
+ const fc=Math.round(n*FEED[S.feed].c*feedMod*feedMul()), pc=2500+10*n+mantenimiento();
  S.money-=fc+pc;rep.cost+=fc+pc;
- rep.lines.push(`Alimentación ${FEED[S.feed].n.toLowerCase()}: ${eur(fc)} · Personal y finca: ${eur(pc)}`);
+ rep.lines.push(`Alimentación ${FEED[S.feed].n.toLowerCase()}: ${eur(fc)} · Personal y mantenimiento: ${eur(pc)}`);
  // avanzar calendario
  S.month++;if(S.month>11){S.month=0;S.year++;newSeason();rep.lines.push(`Empieza la temporada ${S.year}. Nuevos objetivos de la propiedad.`)}
  if(S.money<0)S.conf=clamp(S.conf-2,0,100);
@@ -230,10 +230,11 @@ function advance(){
  const f=FEED[S.feed];
  for(const a of campo()){
   const m=ageM(a);if(m<0)continue;
-  a.peso=Math.round(Math.min(capPeso(a),a.peso+rate(m,a)*f.m*R(.85,1.15)));
-  a.salud=clamp(a.salud+f.s+R(-1.2,1.4)+(a.lesion>0?4:0)+(ev==='lluvia'?1.5:0)+(mej('abrev')?.5:0)+(aMano?.6:0),5,100);
+  a.peso=Math.round(Math.min(capPeso(a),a.peso+rate(m,a)*f.m*(mej('fabrica')?1.04:1)*R(.85,1.15)));
+  a.salud=clamp(a.salud+f.s+R(-1.2,1.4)+(a.lesion>0?(mej('clinica')?8:4):0)+(ev==='lluvia'?1.5:0)+mejLv('abrev')*.5+(mej('pozo')&&[5,6,7,8].includes(S.month)?.4:0)+(aMano?.6:0),5,100);
   if(a.lesion>0)a.lesion--;
  }
+ {const cap=capacidad(),nc=campo().length;if(nc>cap){for(const a of campo())a.salud=clamp(a.salud-1.5,5,100);rep.lines.push(`Finca saturada: ${nc} cabezas para ${cap} de capacidad. Vende ganado o compra una finca colindante.`)}}
  // paridera
  if(S.month===2){
   const sem=byId(S.semAct);const p=sem&&sem.st==='campo'&&sem.role==='semental'?sem:null;
@@ -255,13 +256,14 @@ function advance(){
  if(S.pres>40)S.pres-=(S.pres-40)*.006;
  // evento
  const males=campo().filter(a=>a.sex==='M'&&ageY(a)>=3&&!a.role);
- if(ev==='pelea'&&males.length>=2&&!(mej('cercas')&&Math.random()<.5)){const v=pick(males);const d=RI(22,50);v.salud=clamp(v.salud-d,5,100);v.lesion=3;rep.lines.push(`Pelea en el cercado: ${v.name} nº ${v.num} sale herido (salud ${Math.round(v.salud)}).`)}
+ if(ev==='pelea'&&males.length>=2&&!(Math.random()<[0,.5,.8][mejLv('cercas')])){const v=pick(males);const d=RI(22,50);v.salud=clamp(v.salud-d,5,100);v.lesion=3;rep.lines.push(`Pelea en el cercado: ${v.name} nº ${v.num} sale herido (salud ${Math.round(v.salud)}).`)}
  else if(ev==='lluvia'&&feedMod<1)rep.lines.push('Buenas lluvias: el pasto rebrota, baja el gasto en pienso y mejora la salud de la camada.');
  else if(ev==='sequia'&&feedMod>1)rep.lines.push('Sequía en la dehesa: hay que suplementar más y el pienso sale un 35 % más caro.');
  else if(ev==='veedor'){const s=pick(SMALL);addOffer({...s,tipo:'corrida',abs:absNow()+2,n:s.cat===3?4:6,precio:r100(priceFor(s.cat,'corrida')*1.1)});rep.lines.push(`Un veedor visita la finca y deja una oferta para ${s.plaza}.`)}
  else if(ev==='visita'){S.money+=1500;rep.inc+=1500;rep.lines.push('Visita de aficionados a la finca: +1.500 €.')}
  else if(ev==='cojera'){const a=pick(campo());if(a){a.salud=clamp(a.salud-18,5,100);a.lesion=2;rep.lines.push(`${a.name} nº ${a.num??'s/n'} aparece cojo; el mayoral lo aparta para curarlo.`)}}
- if(mej('casa')){const v=RI(600,1200);S.money+=v;rep.inc+=v;rep.lines.push(`Visitas y catas en el cortijo: +${eur(v)}.`)}
+ {let tur=0;if(mej('casa'))tur+=RI(600,1200);const hl=mejLv('hospederia');if(hl)tur+=hl>=2?RI(3500,5500):RI(1500,2500);if(mej('museo'))tur+=RI(800,1400);if(mej('escuela')&&S.month>=2&&S.month<=9)tur+=RI(1200,2400);if(mejLv('placita')>=2)tur+=900;
+  if(hl>=2||mej('museo'))S.pres=clamp(S.pres+.1*((hl>=2?1:0)+(mej('museo')?1:0)),0,100);if(tur){S.money+=tur;rep.inc+=tur;rep.lines.push(`Turismo, visitas y cursos en la finca: +${eur(tur)}.`)}}
  // corridas del mes
  for(const o of S.offers.filter(o=>o.st==='aceptada'&&o.abs===absNow())){const r=celebrar(o);rep.corridas.push(r);rep.inc+=r.ingreso}
  // ofertas
@@ -288,7 +290,7 @@ function herradero(auto){
 /* ============ la lidia ============ */
 function lidiar(a,o,mat){
  const B=a.g.bra+gauss()*7, N=a.g.nob+gauss()*7, C=a.g.cas+gauss()*6;
- const F=a.g.fue-Math.max(0,(a.peso-580)/3)-(100-Math.min(100,a.salud+(mej('corrales')?4:0)))*.35+gauss()*6;
+ const F=a.g.fue-Math.max(0,(a.peso-580)/3)-(100-Math.min(100,a.salud+mejLv('corrales')*4))*.35+gauss()*6;
  const t={id:a.id,name:a.name,num:a.num,peso:a.peso,pelo:a.pelo,enc:a.enc,mat:mat.n,traje:mat.t,estilo:mat.e||'tecnico',B,N,C,F,madre:a.madre,m:morf(a),div:S.g.div};
  const st=t.estilo;
  t.gal=clamp(.75+(F-50)/150+(B-60)/250,.6,1.35);t.rec=clamp((N-40)/45,.15,1);t.hum=clamp((N-45)/45,0,1);t.derr=clamp(((100-N)+(C-60))/80,0,1);
@@ -621,14 +623,14 @@ function renderFinca(el){
  el.innerHTML=`<div class="stack" style="gap:1rem">
  <div class="fhero"><div class="img" style="background-image:url(img/dehesa.jpg)"></div><span class="season">${estacion()}${S.g.prov?' · '+esc(S.g.prov):''}</span><button class="hint2" onclick="UI.deh=!UI.deh;render()">${UI.deh?'Ocultar la dehesa en directo':'Toca un animal'}</button></div>
  ${UI.deh?`<div class="deh"><canvas id="deh"></canvas><span class="cap">Dehesa en directo</span><span class="hint">Toca un animal para ver su ficha</span></div>`:''}
- <div class="duo"><button class="btn oro big" onclick="enter3D()">${ICO.cortijo}Bajar a la finca en 3D</button><button class="btn big" onclick="obras()">${ICO.martillo}Obras</button></div>
+ <div class="duo"><button class="btn oro big" onclick="enter3D()">${ICO.cortijo}Bajar a la finca</button><button class="btn big" onclick="obras()">${ICO.martillo}Obras</button></div>
  <div class="tiles t2">
-  <div class="tile">${ICO.toroG.replace('<svg','<svg class="ti"')}<div><div class="lbl">Cabezas</div><div class="v">${c.length}</div></div></div>
+  <div class="tile">${ICO.toroG.replace('<svg','<svg class="ti"')}<div><div class="lbl">Cabezas</div><div class="v">${c.length}<small class="cap">/${capacidad()}</small></div></div></div>
   <div class="tile">${ICO.capote}<div><div class="lbl">Para lidiar</div><div class="v">${lid}</div></div></div>
   <div class="tile">${ICO.vaca}<div><div class="lbl">Vacas</div><div class="v">${vacas}</div></div></div>
   <div class="tile">${ICO.monG.replace('<svg','<svg class="ti"')}<div><div class="lbl">Gasto/mes</div><div class="v">${eur(coste)}</div></div></div>
  </div>
- <section class="sect"><header><h2>Tareas</h2></header><div class="list">${listaTareas().slice(0,3).map(x=>`<div class="task"><span class="dot ${x.oro?'ok':''}"></span><span class="t">${esc(x.t)}</span><button class="btn sm ${x.oro?'oro':''}" ${x.dis?'disabled':''} onclick="${x.fn}">${x.b}</button></div>`).join('')||'<div class="task"><span class="dot ok"></span><span class="t">Todo al día. El mayoral espera órdenes.</span></div>'}</div></section>
+ <section class="sect"><header><h2>Tareas</h2></header><div class="list">${listaTareas().slice(0,3).map(x=>`<div class="task"><span class="dot ${x.oro?'ok':''}"></span><span class="t">${esc(x.t)}</span>${x.p?`<button class="btn sm oro" onclick="${x.p}">${x.pl}</button>`:x.d?`<button class="btn sm" onclick="${x.d}">${x.dl}</button>`:''}</div>`).join('')||'<div class="task"><span class="dot ok"></span><span class="t">Todo al día. El mayoral espera órdenes.</span></div>'}</div></section>
  ${prox.length?`<section class="sect"><header><h2>Carteles anunciados</h2></header><div class="list">${prox.map(o=>`<div class="task"><span class="dot ok"></span><span class="t"><b>${esc(o.plaza)}</b><br><small class="muted">${o.feria} · ${MESES[o.abs%12]} ${Math.floor(o.abs/12)} · ${o.toros.length} ${o.tipo==='novillada'?'novillos':'toros'}</small></span></div>`).join('')}</div></section>`:''}
  <section class="sect"><header><h2>Alimentación</h2><span class="sp"></span><small class="muted">por cabeza y mes</small></header>
   <div class="seg">${Object.entries(FEED).map(([k,f])=>`<button aria-pressed="${S.feed===k}" onclick="S.feed='${k}';save();render()"><b>${f.n}</b><span>${Math.round(f.c*feedMul())} € · ${f.d}</span></button>`).join('')}</div>
@@ -637,7 +639,7 @@ function renderFinca(el){
   <div class="field"><label class="lbl" for="semsel">Semental que cubre a las vacas</label>
   <select id="semsel" onchange="S.semAct=+this.value;save();toast('Semental asignado')">${sems.length?sems.map(s=>`<option value="${s.id}" ${s.id===S.semAct?'selected':''}>${esc(s.name)} nº ${s.num} · tienta ${s.nota} (${notaTxt(s.nota)})${s.indultado?' · indultado':''}</option>`).join(''):'<option>Sin semental</option>'}</select></div>
 </section>
- <section class="sect"><header><h2>Instalaciones</h2></header><div class="list">${Object.entries(MEJ).map(([k,d])=>`<div class="task"><span class="dot ${mej(k)?'ok':''}"></span><span class="t"><b>${d.n}</b><br><small class="muted">${d.d}</small></span>${mej(k)?'<span class="badge ok">Hecha</span>':`<button class="btn sm oro" ${S.money<d.c?'disabled':''} onclick="construir('${k}',true)">${eur(d.c)}</button>`}</div>`).join('')}</div></section>
+ <section class="sect"><header><h2>Obras e imperio</h2></header>${obrasHTML()}</section>
  <button class="btn pri adv" onclick="advance()">Avanzar a ${MESES[(S.month+1)%12]}${ICO.chev}</button>
  </div>`;
  if(UI.deh)startDehesa();
@@ -776,7 +778,7 @@ function openFicha(id){
   drawBull(c,w/2+8,h*.9,s,1,{pelo:a.pelo,ph:0,speed:0,head:.15+Math.sin((now-t0)/1400)*.05,t:(now-t0)/1000,seed:a.id,cow:a.sex==='H'});
   requestAnimationFrame(loop)};requestAnimationFrame(loop);
 }
-function tCost(sex){return sex==='H'?(mej('placita')?250:450):(mej('placita')?800:1200)}
+function tCost(sex){const lv=mejLv('placita');return sex==='H'?[450,250,125][lv]:[1200,800,400][lv]}
 function tentarUno(id){const a=byId(id);const cost=tCost(a.sex);S.money-=cost;tentar(a);save();
  toast(`Tienta de ${a.name}: nota ${a.nota} (${notaTxt(a.nota)})`);openFicha(id);render()}
 function aprobarVaca(id){const a=byId(id);a.role='vaca';save();closeModal();render();toast(`${a.name} pasa a vaca de vientre`)}

@@ -377,3 +377,15 @@ table.rank tr.me td{background:rgba(230,187,85,.1);color:var(--oro3)}table.rank 
 .cartel .mvp b{display:block;font-family:var(--display);font-size:1.3rem}.cartel .mvp small{color:#d6d0c4}
 .cartel .mvp .nt10{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-family:var(--display);font-weight:800;font-size:2.2rem;color:var(--oro)}
 @media (max-width:440px){.cartel .cm{grid-template-columns:1fr}.cartel .kpis{grid-template-columns:1fr 1fr}.cartel .ct{grid-template-columns:1fr}}
+/* ---------- obras e imperio ---------- */
+.imp{display:grid;grid-template-columns:1fr 1fr;gap:8px}.imp>div:first-child{grid-column:1/-1;display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap}.imp>div:first-child .lbl{flex-basis:100%;font-size:.72rem}.imp>div:first-child b{font-size:clamp(1.3rem,6vw,1.7rem)}
+.imp>div{padding:10px 11px;border-radius:10px;border:1px solid rgba(230,187,85,.45);background:linear-gradient(180deg,#1a1710,#0d0c09);min-width:0}
+.imp .lbl{display:block;font-size:.64rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.imp b{display:block;font-family:var(--display);font-weight:800;font-size:clamp(1rem,4.6vw,1.35rem);white-space:nowrap}.imp small{color:var(--muted);font-size:.7rem}
+.obras{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.obra{display:flex;flex-direction:column;gap:.35rem;padding:12px 13px;border-radius:10px;border:1px solid #2a3040;background:linear-gradient(180deg,#131722,#0b0d12)}
+.obra.hecha{border-color:rgba(230,187,85,.5)}
+.obra .oh{display:flex;align-items:center;justify-content:space-between;gap:.5rem}.obra .oh b{font-family:var(--display);font-size:1.12rem}
+.obra small{font-size:.82rem;color:#cfc9bc;line-height:1.3}.obra small .muted{display:block;margin-top:2px}
+.lvd{display:flex;gap:3px}.lvd i{width:14px;height:6px;border-radius:2px;background:#2a2f3a;transform:skewX(-20deg)}.lvd i.on{background:var(--gold-grad);box-shadow:0 0 6px rgba(230,187,85,.5)}
+.obra .ob{margin-top:auto;padding-top:.3rem}.obra .ob .btn{width:100%}
+.tile .v small.cap{font-size:.55em;color:var(--muted);font-style:normal}
