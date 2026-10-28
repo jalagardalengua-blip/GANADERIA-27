@@ -4,16 +4,32 @@ const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
 const lerp=(a,b,v)=>a+(b-a)*v,ease=v=>v<.5?2*v*v:1-Math.pow(-2*v+2,2)/2,angD=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 const ga=(t,c,w)=>Math.exp(-((t-c)*(t-c))/(2*w*w));
 const MEJ={
- placita:{n:'Placita de tientas',c:45000,d:'Tientas en casa, toreando tú mismo: hembras a 250 € y machos a 800 €. Sin ella el mayoral alquila una placita ajena (450 € y 1.200 €).',pos:[-30,24]},
- corrales:{n:'Corrales de piedra y embarcadero',c:22000,d:'Los toros viajan descansados y llegan con más fuerza a la plaza.',pos:[28,-35]},
- comederos:{n:'Comederos de pienso',c:15000,d:'Menos desperdicio: la alimentación cuesta un 12 % menos.',pos:[30,4]},
- abrev:{n:'Abrevaderos',c:12000,d:'Agua limpia todo el año: más salud cada mes en toda la camada.',pos:[-34,6]},
- cercas:{n:'Cercas de piedra por lotes',c:30000,d:'Lotes bien separados: la mitad de peleas en el cercado y menos cercas rotas.',pos:[30,32]},
- nave:{n:'Nave y silos de pienso',c:25000,d:'Compras a granel: la alimentación cuesta un 8 % menos.',pos:[6,-26]},
- casa:{n:'Reformar el cortijo',c:40000,d:'Visitas y catas de aficionados: unos 900 € al mes.',pos:[-16,6]}
+ comederos:{n:'Comederos',max:3,c:[15000,28000,45000],pos:[30,4],d:['Comederos de obra en la cerca: un 12 % menos de pienso.','Tres comederos por cercado: un 18 % menos de pienso.','Tolvas automáticas: un 24 % menos y empiezan cada mes medio llenas.']},
+ placita:{n:'Placita de tientas',max:2,c:[45000,90000],pos:[-30,24],d:['Tientas en casa: hembras a 250 € y machos a 800 €.','Placita cubierta con tendido: tientas a mitad de precio y visitas de aficionados (+900 €/mes).']},
+ corrales:{n:'Corrales y embarcadero',max:2,c:[22000,50000],pos:[28,-35],d:['Los toros viajan descansados y llegan con más fuerza a la plaza.','Camión propio y mangas: aún más fuerza en plaza y +5 % por cabeza.']},
+ abrev:{n:'Abrevaderos',max:2,c:[12000,30000],pos:[-34,6],d:['Agua limpia todo el año: más salud cada mes.','Red de abrevaderos con bombeo: el doble de efecto.']},
+ cercas:{n:'Cercas de piedra',max:2,c:[30000,60000],pos:[30,32],d:['La mitad de peleas y menos cercas rotas.','Doble vallado perimetral: casi nunca se rompe una cerca.']},
+ nave:{n:'Nave y silos de pienso',max:1,c:[25000],pos:[6,-26],d:['Compras a granel: un 8 % menos de pienso.']},
+ casa:{n:'Reformar el cortijo',max:1,c:[40000],pos:[-16,6],d:['Visitas y catas en el cortijo: unos 900 € al mes.']},
+ fabrica:{n:'Fábrica de pienso propia',max:1,c:[85000],pos:[8,-40],req:'nave',d:['Fabricas tu propio pienso: un 15 % menos y mejor engorde.']},
+ clinica:{n:'Clínica veterinaria',max:1,c:[55000],pos:[-8,22],d:['Curas a 60 €, veterinario a 120 € por animal y los lesionados sanan antes.']},
+ cuadra:{n:'Cuadra de caballos',max:2,c:[35000,70000],pos:[-22,12],d:['Mejores caballos de campo: galopas un 15 % más rápido.','Yeguada propia: galope un 30 % más rápido.']},
+ pozo:{n:'Pozo y regadío',max:1,c:[40000],pos:[-36,-6],d:['Pasto verde en verano: la sequía deja de afectarte.']},
+ hospederia:{n:'Hospedería rural',max:2,c:[120000,220000],pos:[14,24],req:'casa',d:['Turismo de dehesa: 1.500–2.500 € al mes.','Hotel con encanto: 3.500–5.500 € al mes y más prestigio.']},
+ museo:{n:'Museo y tienda',max:1,c:[70000],pos:[-12,36],d:['Cabezas históricas y trofeos: 800–1.400 € al mes y más prestigio.']},
+ oficina:{n:'Oficina comercial',max:1,c:[60000],pos:[20,40],d:['Un apoderado mueve tu hierro: más ofertas y +5 % por cabeza.']},
+ escuela:{n:'Tentadero para aficionados',max:1,c:[90000],pos:[14,54],req:'placita',d:['Cursos y capeas privadas de marzo a octubre: 1.200–2.400 € al mes.']},
+ finca:{n:'Finca colindante',max:3,c:[150000,260000,400000],pos:[-4,62],d:['Compras la finca vecina: +80 cabezas de capacidad.','Segunda finca: +80 cabezas más.','Tercera finca: +80 cabezas más. Un imperio de dehesa.']}
 };
-const mej=k=>!!(S&&S.mej&&S.mej[k]);
-function feedMul(){return (mej('comederos')?.88:1)*(mej('nave')?.92:1)}
+const mejLv=k=>S&&S.mej?(+S.mej[k]||0):0;
+const mej=k=>mejLv(k)>0;
+function feedMul(){return (1-[0,.12,.18,.24][mejLv('comederos')])*(mej('nave')?.92:1)*(mej('fabrica')?.85:1)}
+function capacidad(){return 160+80*mejLv('finca')}
+function mantenimiento(){let t=0;for(const k in MEJ)t+=mejLv(k)*180;return t}
+function invertido(){let t=0;for(const k in MEJ)for(let l=0;l<mejLv(k);l++)t+=MEJ[k].c[l]||0;return t}
+function valorGanado(){let t=0;for(const a of campo()){t+=a.role==='semental'?15000+(a.nota||60)*200:a.role==='vaca'?1800+(a.nota||60)*15:a.sex==='M'&&ageY(a)>=3?a.peso*7:a.peso*3}return Math.round(t)}
+function patrimonio(){return Math.round(S.money+valorGanado()+invertido()*.7)}
+function rangoImperio(){const p=patrimonio();return p>=6e6?'Imperio ganadero':p>=3e6?'Gran casa ganadera':p>=1.5e6?'Ganadería consolidada':p>=7e5?'Ganadería en auge':'Ganadería modesta'}
 const RKN={toros:'los toros',vacas:'las vacas',sem:'los sementales'};
 const MC={};
 function M(col,r=.85,m=0,side){const k=col+'|'+r+'|'+m+'|'+(side||0);if(!MC[k])MC[k]=new THREE.MeshStandardMaterial({color:col,roughness:r,metalness:m,side:side||THREE.FrontSide});return MC[k]}
@@ -285,7 +301,7 @@ function finTareas(rep){
  const c=campo();
  if(S.escapado){const a=byId(S.escapado.id);if(a&&a.st==='campo'){S.money-=800;rep.cost+=800;rep.lines.push(`Un vecino encontró a ${a.name} fuera de la finca y la Guardia Civil lo ha devuelto. Multa y gastos: 800 €.`)}S.escapado=null}
  if(S.roto){const grp=c.filter(a=>rkOf(a)===S.roto.rk&&!a.mark&&a.res==null&&ageY(a)>=1);if(grp.length&&Math.random()<.85){const a=pick(grp),o=outward(S.roto);S.escapado={id:a.id,rk:S.roto.rk,x:o.x,z:o.z};rep.lines.push(`Por la cerca rota del cercado de ${RKN[S.roto.rk]} se ha escapado ${a.name}${a.num!=null?' nº '+a.num:''}. Hay que devolverlo a caballo.`)}}
- else if(Math.random()<(mej('cercas')?.14:.3)){S.roto=newRoto();rep.lines.push(`El mayoral avisa: hay una cerca rota en el cercado de ${RKN[S.roto.rk]}.`)}
+ else if(Math.random()<[.3,.14,.05][mejLv('cercas')]){S.roto=newRoto();rep.lines.push(`El mayoral avisa: hay una cerca rota en el cercado de ${RKN[S.roto.rk]}.`)}
  const inj=c.filter(a=>a.salud<55).length;if(inj)rep.lines.push(`${inj} ${inj>1?'animales necesitan':'animal necesita'} cura. El botiquín está en el cuarto de aperos.`)}
 function tareas(){const c=campo(),L=[];
  L.push({t:`Echar pienso en los comederos (${Math.min(4,S.fedM||0)}/4 sacos)`,d:(S.fedM||0)>=4});
@@ -303,7 +319,9 @@ function drawTasks(){const el=$('#h3tasks');if(!el||el.hidden)return;const L=tar
 
 /* ---------- la finca ---------- */
 const RECTS={toros:{x0:36,x1:112,z0:-8,z1:72,gate:['x0',12,22]},vacas:{x0:-116,x1:-40,z0:-24,z1:56,gate:['x1',2,12]},sem:{x0:-30,x1:2,z0:-74,z1:-44,gate:['z1',-20,-12]},pen:{x0:-27,x1:-19,z0:-19,z1:-11,gate:['x1',-16,-13]},emb:{x0:22,x1:34,z0:-30,z1:-20,gate:['z1',25,31]}};
-const FEEDS=[{x:46,z:20,r:'toros'},{x:-54,z:20,r:'vacas'},{x:-14,z:-58,r:'sem'}];
+const FEED_ALL={toros:[[37.7,5,0],[37.7,30,0],[60,-6.3,Math.PI/2]],vacas:[[-41.7,-2,0],[-41.7,24,0],[-62,-22.3,Math.PI/2]],sem:[[-24,-45.7,Math.PI/2],[-6,-45.7,Math.PI/2],[.3,-60,0]]};
+function feedList(){const n=mejLv('comederos')>=2?3:2,L=[];for(const r of ['toros','vacas','sem'])FEED_ALL[r].slice(0,n).forEach(([x,z,rot])=>L.push({x,z,r,rot}));return L}
+const SACOS=[[32,24],[-36,15],[-10,-40]];
 const INW={z0:[0,1],z1:[0,-1],x0:[1,0],x1:[-1,0]};
 function openings(k){const Rc=RECTS[k];const L=[[...Rc.gate]];if(S.roto&&S.roto.rk===k)L.push([S.roto.side,S.roto.a,S.roto.b]);
  return L.map(([sd,a,b])=>{const c=(a+b)/2,hz=sd[0]==='z',x=hz?c:Rc[sd],z=hz?Rc[sd]:c,n=INW[sd];return {x,z,ix:x+n[0]*4,iz:z+n[1]*4}})}
@@ -375,6 +393,7 @@ function rebuildFinca(){
   const fl=new THREE.Mesh(new THREE.CircleGeometry(6.95,40),M('#d6a75f',.95));fl.rotation.x=-Math.PI/2;fl.position.y=.03;fl.receiveShadow=true;pl.add(fl);
   for(const a of [0,2.1,4.2]){mesh(G.box,M('#8e2a26'),1.4,1.6,.12,Math.sin(a)*6.4,.8,Math.cos(a)*6.4,pl).rotation.y=a}
   mesh(G.box,wall,3,2.6,2,0,1.3,-8,pl);
+  if(mejLv('placita')>=2){const rf=new THREE.Mesh(new THREE.ConeGeometry(8.4,2.4,40,1,true),M('#9b4a2a',.8,0,THREE.DoubleSide));rf.position.y=5;rf.castShadow=true;pl.add(rf);for(let i=0;i<8;i++){const a=i/8*Math.PI*2;mesh(G.cyl,M('#e9e2d4',.8),.12,3.8,.12,Math.cos(a)*7.3,1.9,Math.sin(a)*7.3,pl,true)}}
   col.push({t:'circ',x:-30,z:24,r:7.4});
   const nH=()=>campo().filter(a=>a.sex==='H'&&!a.tentado&&!a.role&&ageY(a)>=2).length;
   acts.push({x:-30,z:24,r:9.8,plac:true,l:()=>{const n=nH();return n?`Placita: tentar ${n} ${n>1?'hembras':'hembra'}`:'Placita: tentar un macho'},fn:()=>{if(nH())startTienta('H');else machoModal()}})}
@@ -400,25 +419,28 @@ function rebuildFinca(){
  if(posts.length){const im=new THREE.InstancedMesh(postG,M('#6b5640',.9),posts.length);const o=new THREE.Object3D();posts.forEach((p,i)=>{o.position.set(p[0],gH(p[0],p[1])+.75,p[1]);o.updateMatrix();im.setMatrixAt(i,o.matrix)});im.castShadow=true;sc.add(im)}
  if(S.roto){const r=S.roto,y=gH(r.x,r.z);for(let i=0;i<3;i++){const pp=mesh(G.cyl,M('#6b5640',.9),.08,1.5,.08,r.x+R(-1.5,1.5),y+.12,r.z+R(-1.5,1.5),sc);pp.rotation.set(Math.PI/2,R(0,3),0)}
   acts.push({x:r.x,z:r.z,r:2.8,l:'Reparar la cerca',hold:true,dur:2.5,cond:()=>W3.F.carry==='herr',fn:repararCerca})}
- W3.feeds=FEEDS.map((f,i)=>{const g=new THREE.Group();g.position.set(f.x,gH(f.x,f.z),f.z);g.rotation.y=.3;sc.add(g);
-  if(mej('comederos')){mesh(G.box,M('#7c776d',.9),1.2,.7,5,0,.35,0,g);col.push({t:'circ',x:f.x,z:f.z,r:1.4})}
-  const fill=mesh(G.box,M('#b89a5e',.95),mej('comederos')?.9:2.2,.3,mej('comederos')?4.6:3,0,mej('comederos')?.55:0,0,g,true);
+ W3.feeds=feedList().map((f,i)=>{const g=new THREE.Group();g.position.set(f.x,gH(f.x,f.z),f.z);g.rotation.y=f.rot;sc.add(g);
+  const obra=mej('comederos');mesh(G.box,M(obra?'#8a857a':'#6b5640',.9),1.2,obra?.7:.45,5,0,obra?.35:.22,0,g);if(!obra)mesh(G.box,M('#6b5640',.9),.12,.7,5.2,.62,.35,0,g,true);
+  if(mejLv('comederos')>=3){mesh(G.cyl,M('#b8bcc0',.35,.6),.7,2.2,.7,0,1.9,-1.6,g);mesh(new THREE.ConeGeometry(.7,.8,12),M('#b8bcc0',.35,.6),1,1,1,0,.5,-1.6,g).rotation.x=Math.PI}
+  col.push({t:'circ',x:f.x,z:f.z,r:1.3,po:1});
+  const fill=mesh(G.box,M('#b89a5e',.95),.9,.3,4.6,0,obra?.55:.32,0,g,true);
   const st=S.feedSpots&&S.feedSpots[i]||0;fill.scale.y=Math.max(.001,st*.3);fill.visible=st>0;return {...f,g,fill,lvl:st}});
  if(mej('abrev')){for(const [x,z,r] of [[60,46,1.2],[-70,28,1],[-14,-62,0]]){const g=new THREE.Group();g.position.set(x,gH(x,z),z);g.rotation.y=r;sc.add(g);mesh(G.box,M('#9c9a92',.9),1.2,.7,5,0,.35,0,g);mesh(G.box,M('#4f7d8f',.15,.2),.9,.05,4.6,0,.68,0,g,true);col.push({t:'circ',x,z,r:1.6})}}
  else{const pd=new THREE.Mesh(new THREE.CircleGeometry(5,24),M('#5c6f5a',.2,.1));pd.rotation.x=-Math.PI/2;pd.position.set(-70,gH(-70,30)+.06,30);sc.add(pd)}
- const rem=new THREE.Group();rem.position.set(32,0,24);sc.add(rem);mesh(G.box,M('#7a6a4a'),2,1.1,3,0,.9,0,rem);for(let i=0;i<5;i++)mesh(G.box,M('#d9c79a'),.7,.3,.45,-.4+(i%2)*.8,1.6+Math.floor(i/2)*.3,-.8+i*.35,rem);col.push({t:'circ',x:32,z:24,r:1.8});
- acts.push({x:32,z:24,r:2.8,l:'Coger un saco de pienso',cond:()=>!W3.F.carry&&!W3.ride,fn:()=>carry('saco')});
+ SACOS.forEach(([x,z],i)=>{const rem=new THREE.Group();rem.position.set(x,gH(x,z),z);sc.add(rem);if(i===0)mesh(G.box,M('#7a6a4a'),2,1.1,3,0,.9,0,rem);else mesh(G.box,M('#5a4636'),2.2,.15,2.2,0,.08,0,rem);for(let k=0;k<5;k++)mesh(G.box,M('#d9c79a'),.7,.3,.45,-.4+(k%2)*.8,(i===0?1.6:.3)+Math.floor(k/2)*.3,-.8+k*.35,rem);col.push({t:'circ',x,z,r:1.5});
+  acts.push({x,z,r:2.8,l:'Coger un saco de pienso',cond:()=>!W3.F.carry&&!W3.ride,fn:()=>carry('saco')})});
  const lum=new THREE.Group();lum.position.set(-15.5,0,-13);sc.add(lum);for(let i=0;i<8;i++){const a=i/8*Math.PI*2;mesh(G.sph,M('#6f6a62'),.22,.16,.22,Math.cos(a)*.6,.1,Math.sin(a)*.6,lum,true)}
  const fireOn=S.month>=7&&campo().some(a=>!a.herrado);
  W3.flames=[0,1,2].map(i=>{const f=new THREE.Mesh(new THREE.ConeGeometry(.22-i*.05,.7-i*.12,7),new THREE.MeshBasicMaterial({color:i?'#ffb347':'#ff6a1a',transparent:true,opacity:.9}));f.position.set((i-1)*.15,.35,0);f.visible=fireOn;lum.add(f);return f});
  acts.push({x:-15.5,z:-13,r:2.2,l:()=>fireOn?'Coger el hierro de la lumbre':'Lumbre del herradero',cond:()=>!W3.F.carry&&!W3.ride,fn:()=>{if(!fireOn){toast(S.month<7?'El herradero se hace de agosto a diciembre':'No quedan becerros sin herrar');return}carry('hierro')}});
  col.push({t:'circ',x:-15.5,z:-13,r:.9});
- for(const [k,d] of Object.entries(MEJ)){if(mej(k))continue;const [x,z]=d.pos;const g=new THREE.Group();g.position.set(x,gH(x,z),z);sc.add(g);
+ for(const k of Object.keys(EDIF))if(mej(k))edificio(sc,k,col);
+ for(const [k,d] of Object.entries(MEJ)){if(mej(k)||(d.req&&!mej(d.req)))continue;const [x,z]=d.pos;const g=new THREE.Group();g.position.set(x,gH(x,z),z);sc.add(g);
   mesh(G.box,M('#5a3d26'),.12,1.6,.12,0,.8,0,g);mesh(G.box,M('#e0962f',.7),1.4,.8,.08,0,1.5,0,g);
   for(let i=0;i<6;i++){const a=i/6*Math.PI*2;mesh(G.cyl,M('#e0962f'),.05,.6,.05,Math.cos(a)*1.6,.3,Math.sin(a)*1.6,g,true)}
   acts.push({x,z,r:2.6,l:`Solar: ${d.n}`,cond:()=>!W3.ride,fn:()=>construir(k)})}
  const tp=[];const rt=mulberry(S.g.name.length*13+3);
- const blocked=(x,z)=>(x>-42&&x<40&&z>-44&&z<34)||Math.abs(x)<6&&z>10;
+ const blocked=(x,z)=>(x>-42&&x<40&&z>-48&&z<66)||Math.abs(x)<6&&z>10;
  while(tp.length<300){const x=(rt()-.5)*540,z=(rt()-.5)*540;if(blocked(x,z))continue;tp.push([x,z,.75+rt()*.7,rt()*6])}
  const trunk=new THREE.InstancedMesh(new THREE.CylinderGeometry(.28,.42,2.4,7),M('#4a3626',.95),tp.length);
  const crown=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(2.6,1),new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.9,flatShading:true}),tp.length*2);
@@ -463,14 +485,14 @@ function setCarry(){const c=W3.F.carry;if(W3.sack)W3.sack.visible=c==='saco';if(
 function carry(c){W3.F.carry=c;setCarry();toast({saco:'Saco al hombro. Llévalo a un comedero.',hierro:'Hierro al rojo. Busca un becerro en la corraleta.',botiquin:'Botiquín cogido. Busca a los animales que cojean.',herr:'Herramientas listas. Busca la cerca rota.'}[c])}
 function markBull(h,on){if(h.mk){h.B.b.remove(h.mk);h.mk=null}if(on){h.mk=mesh(geos().sph,M('#f4f1ea',.9),.3,.16,.3,.3,1.55,-.7,h.B.b,true)}}
 function collide(p,r=.42,skipTruck){
- for(const c of W3.col){
+ for(const c of W3.col){if(c.po&&r>.6)continue;
   if(c.t==='box'){if(p.x>c.x0-r&&p.x<c.x1+r&&p.z>c.z0-r&&p.z<c.z1+r){const d=[p.x-(c.x0-r),(c.x1+r)-p.x,p.z-(c.z0-r),(c.z1+r)-p.z];const mi=Math.min(...d);if(mi===d[0])p.x=c.x0-r;else if(mi===d[1])p.x=c.x1+r;else if(mi===d[2])p.z=c.z0-r;else p.z=c.z1+r;p.hit=1}}
   else if(c.t==='circ'){const dx=p.x-c.x,dz=p.z-c.z,d=Math.hypot(dx,dz),m=c.r+r;if(d<m&&d>1e-4){p.x=c.x+dx/d*m;p.z=c.z+dz/d*m;p.hit=1}}
   else{const [ax,az]=c.a,[bx,bz]=c.b;const vx=bx-ax,vz=bz-az,L2=vx*vx+vz*vz;let t=((p.x-ax)*vx+(p.z-az)*vz)/L2;t=clamp(t,0,1);const qx=ax+vx*t,qz=az+vz*t,dx=p.x-qx,dz=p.z-qz,d=Math.hypot(dx,dz);if(d<r){if(d>1e-4){p.x=qx+dx/d*r;p.z=qz+dz/d*r}else{p.x=qx+r}p.hit=1}}}
  if(!skipTruck&&W3.truck&&!W3.drive){const T=W3.truck,dx=p.x-T.x,dz=p.z-T.z,d=Math.hypot(dx,dz),m=2.3+r;if(d<m&&d>1e-4){p.x=T.x+dx/d*m;p.z=T.z+dz/d*m}}
  p.x=clamp(p.x,-275,275);p.z=clamp(p.z,-275,275)}
 const inR=(Rc,x,z,mg=0)=>x>Rc.x0+mg&&x<Rc.x1-mg&&z>Rc.z0+mg&&z<Rc.z1-mg;
-function tossPlayer(dx,dz,bull){const F=W3.F;if(F.toss>0)return;try{navigator.vibrate&&navigator.vibrate([60,40,120])}catch(e){}F.toss=2.2;F.tv={x:dx*5,z:dz*5};F.carry=null;setCarry();bufido(.8);
+function tossPlayer(dx,dz,bull){const F=W3.F;if(F.toss>0)return;F.safeT=25;try{navigator.vibrate&&navigator.vibrate([60,40,120])}catch(e){}F.toss=2.2;F.tv={x:dx*5,z:dz*5};F.carry=null;setCarry();bufido(.8);
  const now=performance.now();F.hits=(F.lastHit&&now-F.lastHit<40000)?F.hits+1:1;F.lastHit=now;
  if(F.hits>=2){S.money-=2500;save();toast(`${bull} te ha cogido otra vez. Urgencias y puntos: −2.500 €. Sal del cercado.`)}else toast(`¡Revolcón de ${bull}! Te levantas dolorido.`)}
 function dayTick(dt){
@@ -495,7 +517,7 @@ function fincaTick(dt){
   F.p.set(T.x,gH(T.x,T.z),T.z);pl.root.visible=false;
   W3.truckM.wheels.forEach((w,i)=>{w.children[0].rotation.x+=T.v*dt/.42;if(i<2)w.rotation.y=-jx*.4})}
  else if(W3.ride){
-  const tv=L>.08?(W3.run?9.5:3.4)*L:0;if(L>.08)Hh.yaw+=clamp(angD(Hh.yaw,Math.atan2(mx,mz)),-2.4*dt,2.4*dt);Hh.v+=(tv-Hh.v)*Math.min(1,dt*1.8);
+  const hb=1+.15*mejLv('cuadra'),tv=L>.08?(W3.run?9.5*hb:3.4*(1+.05*mejLv('cuadra')))*L:0;if(L>.08)Hh.yaw+=clamp(angD(Hh.yaw,Math.atan2(mx,mz)),-2.4*dt,2.4*dt);Hh.v+=(tv-Hh.v)*Math.min(1,dt*1.8);
   const np={x:Hh.x+Math.sin(Hh.yaw)*Hh.v*dt,z:Hh.z+Math.cos(Hh.yaw)*Hh.v*dt,hit:0};collide(np,1.0);if(np.hit)Hh.v*=.6;Hh.x=np.x;Hh.z=np.z;
   F.p.set(Hh.x,gH(Hh.x,Hh.z),Hh.z);F.yaw=Hh.yaw;if(Hh.v>7&&Math.random()<dt*6)dust(W3.D,Hh.x,F.p.y,Hh.z,.4);
   W3.dAcc=(W3.dAcc||0)+Math.abs(Hh.v)*dt;if(W3.dAcc>=25){W3.dAcc-=25;mesInc('dist',25)}
@@ -529,7 +551,7 @@ function fincaTick(dt){
   if(best&&best.plac&&campo().some(a=>a.sex==='H'&&!a.tentado&&!a.role&&ageY(a)>=2))sec={l:'Tentar un macho',fn:machoModal};
   const dT=Math.hypot(T.x-px,T.z-pz);if(dT<3.6&&!F.carry&&dT<bd){bd=dT;best={l:'Subir a la camioneta',fn:subir}}
   const dH=Math.hypot(Hh.x-px,Hh.z-pz);if(dH<2.8&&!F.carry&&dH<bd){bd=dH;best={l:'Montar a caballo',fn:montar}}
-  if(F.carry==='saco'){W3.feeds.forEach((f,i)=>{const d=Math.hypot(f.x-px,f.z-pz);if(d<3.4&&d<bd+1){bd=d;best={l:f.lvl>=1?'El comedero está lleno':'Echar el pienso',hold:f.lvl<1,dur:1.2,fn:()=>echarPienso(i)}}});sec={l:'Soltar el saco',fn:()=>{F.carry=null;setCarry()}}}
+  if(F.carry==='saco'){W3.feeds.forEach((f,i)=>{const d=Math.hypot(f.x-px,f.z-pz);if(d<4.3&&d<bd+1){bd=d;best={l:f.lvl>=1?'El comedero está lleno':'Echar el pienso',hold:f.lvl<1,dur:1,fn:()=>echarPienso(i)}}});sec={l:'Soltar el saco',fn:()=>{F.carry=null;setCarry()}}}
   else if(F.carry==='hierro'){sec={l:'Dejar el hierro',fn:()=>{F.carry=null;setCarry()}};
    for(const h of W3.herd){if(h.rk!=='pen'||h.a.herrado)continue;const d=Math.hypot(h.x-px,h.z-pz);if(d<2.2&&d<bd+2){bd=d;best={l:`Herrar a ${h.a.name}`,hold:true,dur:1.5,fn:()=>herrarUno(h)}}}}
   else if(F.carry==='botiquin'){sec={l:'Dejar el botiquín',fn:()=>{F.carry=null;setCarry()}};
@@ -540,7 +562,7 @@ function fincaTick(dt){
  const b=$('#h3do');if(best){b.hidden=false;const l=typeof best.l==='function'?best.l():best.l;if(b.textContent!==l){b.textContent=l;W3.holding=false;W3.hold=0;b.style.backgroundImage=''}}else b.hidden=true;
  const b2=$('#h3do2');if(sec){b2.hidden=false;if(b2.textContent!==sec.l)b2.textContent=sec.l}else b2.hidden=true;
  $('#h3run').hidden=!!W3.drive;$('#h3run').textContent=W3.ride?'Galope':'Correr';
- W3.camT=Math.max(0,(W3.camT||0)-dt);
+ W3.camT=Math.max(0,(W3.camT||0)-dt);if(F.safeT>0)F.safeT-=dt;
  if((W3.drive||W3.ride)&&W3.camT<=0){const ty=(W3.drive?T.yaw:Hh.yaw)+Math.PI;W3.yaw+=angD(W3.yaw,ty)*Math.min(1,dt*(W3.drive?2.5:1.5))}
  const d=(W3.drive?11:W3.ride?8:6.2)*(W3.zoom||1),cp=W3.cam.position;const tx=F.p.x+Math.sin(W3.yaw)*Math.cos(W3.pitch)*d,tz=F.p.z+Math.cos(W3.yaw)*Math.cos(W3.pitch)*d,ty=F.p.y+1.6+Math.sin(W3.pitch)*d;
  cp.x+=(tx-cp.x)*Math.min(1,dt*8);cp.z+=(tz-cp.z)*Math.min(1,dt*8);cp.y+=(Math.max(ty,gH(cp.x,cp.z)+.6)-cp.y)*Math.min(1,dt*8);
@@ -555,15 +577,15 @@ function subir(){W3.drive=true;W3.F.carry=null;setCarry();toast('En la portería
 function bajar(){const T=W3.truck;W3.drive=false;T.v=0;const F=W3.F;F.p.set(T.x+Math.cos(T.yaw)*2.8,0,T.z-Math.sin(T.yaw)*2.8);collide(F.p,.42,true);W3.pl.root.visible=true}
 function montar(){W3.ride=true;W3.horse.v=0;W3.F.carry=null;seat(W3.pl);setCarry();toast('A caballo: arrea por detrás o acosa erales y becerras')}
 function desmontar(){const Hh=W3.horse;W3.ride=false;Hh.v=0;const P=W3.pl;P.seated=false;P.legs.forEach(l=>{l.hip.rotation.set(0,0,0);l.kn.rotation.x=0});const F=W3.F;F.p.set(Hh.x+Math.cos(Hh.yaw)*1.6,0,Hh.z-Math.sin(Hh.yaw)*1.6);collide(F.p);setCarry()}
-function echarPienso(i){const f=W3.feeds[i];if(f.lvl>=1)return;f.lvl=Math.min(1,f.lvl+.34);S.feedSpots=S.feedSpots||[0,0,0];S.feedSpots[i]=f.lvl;S.fedM=(S.fedM||0)+1;
+function echarPienso(i){const f=W3.feeds[i];if(f.lvl>=1)return;f.lvl=Math.min(1,f.lvl+.34);S.feedSpots=S.feedSpots||[];S.feedSpots[i]=f.lvl;S.fedM=(S.fedM||0)+1;
  f.fill.visible=true;f.fill.scale.y=Math.max(.001,f.lvl*.3);W3.F.carry=null;setCarry();for(let j=0;j<4;j++)dust(W3.D,f.x,f.g.position.y+.5,f.z,.35);save();
  toast(`Pienso echado · ${Math.min(4,S.fedM)}/4`);retosCheck()}
 function herrarUno(h){const a=h.a;if(a.herrado)return;a.herrado=true;a.num=nextNum(a.born);S.money-=35;mesInc('herr');
  h.mode='flee';h.t=2.5;const dx=h.x-W3.F.p.x,dz=h.z-W3.F.p.z,d=Math.hypot(dx,dz)||1;h.tx=h.x+dx/d*5;h.tz=h.z+dz/d*5;h.jump=.6;mugido(.5);
  for(let j=0;j<5;j++)dust(W3.D,h.x,gH(h.x,h.z)+.8,h.z,.25);save();
  const left=campo().filter(x=>!x.herrado).length;toast(`${a.name} lleva ya tu hierro y el número ${a.num}. ${left?`Quedan ${left}.`:'Herradero terminado.'}`);if(!left){W3.F.carry=null;setCarry()}}
-function curar(h){const a=h.a;a.salud=Math.min(100,a.salud+30);a.lesion=0;S.money-=120;W3.F.uses--;mesInc('cur');save();h.mode='flee';h.t=1.5;const dx=h.x-W3.F.p.x,dz=h.z-W3.F.p.z,d=Math.hypot(dx,dz)||1;h.tx=h.x+dx/d*4;h.tz=h.z+dz/d*4;
- toast(`${a.name} curado (salud ${Math.round(a.salud)}). −120 € de veterinaria.`);if(W3.F.uses<=0){W3.F.carry=null;toast('El botiquín se ha quedado vacío.')}setCarry()}
+function curar(h){const a=h.a;const cc=mej('clinica')?60:120;a.salud=Math.min(100,a.salud+30);a.lesion=0;S.money-=cc;W3.F.uses--;mesInc('cur');save();h.mode='flee';h.t=1.5;const dx=h.x-W3.F.p.x,dz=h.z-W3.F.p.z,d=Math.hypot(dx,dz)||1;h.tx=h.x+dx/d*4;h.tz=h.z+dz/d*4;
+ toast(`${a.name} curado · −${cc} €`);if(W3.F.uses<=0){W3.F.carry=null;toast('El botiquín se ha quedado vacío.')}setCarry()}
 function repararCerca(){if(!S.roto)return;S.roto=null;mesInc('cerca');W3.F.carry=null;S.money-=150;save();log('Cerca reparada.');rebuildFinca();toast('Cerca reparada (−150 € de material).')}
 function apartar(h,o){const a=h.a;if(a.mark){a.mark=null;a.encd=false;markBull(h,false);save();toast(`${a.name} vuelve al lote`);return}
  const n=campo().filter(x=>x.mark===o.id).length;if(n>=o.n){toast(`Ya tienes ${o.n} apartados para ${o.feria}`);return}
@@ -582,15 +604,16 @@ function herdTick(dt){
   if(W3.drive&&Math.hypot(T.x-h.x,T.z-h.z)<9&&!['spar','flee'].includes(h.mode)){h.mode='flee';h.t=2;const ex=h.x-T.x,ez=h.z-T.z,el=Math.hypot(ex,ez)||1;h.tx=h.x+ex/el*8;h.tz=h.z+ez/el*8}
   const herdR=W3.ride?12:(h.kind==='toro'?0:4.5);
   if(dH<herdR&&!['spar','charge','arreo','flee','acoso','derribado'].includes(h.mode)){h.mode='arreo';h.arT=1.5}
-  if(h.bravo&&pin&&dP<10&&!['charge','calm','spar','flee','arreo','acoso','derribado'].includes(h.mode))h.mode='watch';
+  if(h.bravo&&pin&&dP<8&&!['charge','calm','spar','flee','arreo','acoso','derribado','sigue'].includes(h.mode))h.mode=F.carry==='saco'?'sigue':'watch';
   if(h.kind==='vaca'&&pin&&dP<6&&!['charge','calm'].includes(h.mode)&&H.some(c=>c.mother===h&&Math.hypot(c.x-px,c.z-pz)<5)&&Math.random()<dt*.6){h.mode='charge';h.t=1.4;toast(`¡${h.a.name} defiende a su becerro!`)}
   switch(h.mode){
    case 'watch':{head=.1;h.tyaw=Math.atan2(dx,dz);if(Math.random()<dt*.5)h.paw=.8;if(h.paw>0){h.paw-=dt;paw=true;if(Math.random()<dt*4)dust(W3.D,h.x+Math.sin(h.yaw),gH(h.x,h.z),h.z+Math.cos(h.yaw),.3)}
-    const e=est(h.a);if(Math.random()<dt*((e.bra||70)/100)*.35&&dP<8&&!(F.toss>0)){h.mode='charge';h.t=1.8;bufido(.6);toast(`¡${h.a.name} se arranca!`)}if(dP>13||!pin)h.mode='idle';break}
+    const e=est(h.a);if(F.carry==='saco'){h.mode='sigue';break}if(Math.random()<dt*((e.bra||70)/100)*.11&&dP<5.5&&!(F.toss>0)&&!(F.safeT>0)){h.mode='charge';h.t=1.8;bufido(.6);toast(`¡${h.a.name} se arranca!`)}if(dP>13||!pin)h.mode='idle';break}
    case 'charge':{h.t-=dt;head=1;const v=6.8;if(dP>.01){h.x+=dx/dP*v*dt;h.z+=dz/dP*v*dt}h.tyaw=Math.atan2(dx,dz);spd=1.35;if(Math.random()<dt*6)dust(W3.D,h.x,gH(h.x,h.z),h.z,.35);
     if(dP<1.5&&!(F.toss>0)&&!W3.ride){tossPlayer(dx/dP,dz/dP,h.a.name);toss=1;h.mode='calm';h.t=6}
     if(h.t<=0||W3.ride){h.mode='calm';h.t=5}break}
    case 'calm':{h.t-=dt;head=.6;if(h.t<=0)h.mode='idle';break}
+   case 'sigue':{head=.35;if(F.carry!=='saco'||!pin||dP>14){h.mode='idle';h.t=R(2,4);break}h.tyaw=Math.atan2(dx,dz);if(dP>4.5){const v=1.3;h.x+=dx/dP*v*dt;h.z+=dz/dP*v*dt;spd=.6}if(Math.random()<dt*.15&&dP<25)mugido(.25);break}
    case 'acoso':{const ex=h.x-Hh.x,ez=h.z-Hh.z,d=Math.hypot(ex,ez)||1;let vx=ex/d,vz=ez/d;const zz=Math.sin(now/650+h.acz)*.7;vx+=-vz*zz;vz+=vx*zz;
     const cx=(Rc.x0+Rc.x1)/2,cz=(Rc.z0+Rc.z1)/2,edge=Math.min(h.x-Rc.x0,Rc.x1-h.x,h.z-Rc.z0,Rc.z1-h.z);if(edge<9){vx+=(cx-h.x)/30*(9-edge)/3;vz+=(cz-h.z)/30*(9-edge)/3}
     const vl=Math.hypot(vx,vz)||1,v=6.3*clamp((h.a.g.fue+20)/95,.8,1.1)*(d>20?.55:1);h.x+=vx/vl*v*dt;h.z+=vz/vl*v*dt;h.tyaw=Math.atan2(vx,vz);spd=1.3;head=.3;if(Math.random()<dt*7)dust(W3.D,h.x,gH(h.x,h.z),h.z,.35);break}
@@ -598,7 +621,7 @@ function herdTick(dt){
    case 'flee':{h.t-=dt;const ex=h.tx-h.x,ez=h.tz-h.z,d=Math.hypot(ex,ez);if(d>.3&&h.t>0){const v=4;h.x+=ex/d*v*dt;h.z+=ez/d*v*dt;h.tyaw=Math.atan2(ex,ez);spd=1.1;head=.2}else{h.mode='idle';h.t=R(2,5)}break}
    case 'arreo':{const ex=h.x-hx,ez=h.z-hz,d=Math.max(.1,dH);let vx=ex/d,vz=ez/d;
     if(h.free&&h.tk){let best=null,bd=1e9;const ok=h.tk==='emb'&&inR(RECTS.toros,h.x,h.z)?'toros':h.tk;for(const op of openings(ok)){const dd=Math.hypot(op.x-h.x,op.z-h.z);if(dd<bd){bd=dd;best=op}}
-     if(best&&(bd<11||ok!==h.tk)){const ax=(ok!==h.tk?best.x-(best.ix-best.x):best.ix)-h.x,az=(ok!==h.tk?best.z-(best.iz-best.z):best.iz)-h.z,al=Math.hypot(ax,az)||1;vx+=ax/al*.9;vz+=az/al*.9}}
+     if(best&&(bd<11||ok!==h.tk)){const sal=ok!==h.tk&&bd<5,ax=(sal?best.x-(best.ix-best.x):best.ix)-h.x,az=(sal?best.z-(best.iz-best.z):best.iz)-h.z,al=Math.hypot(ax,az)||1;vx+=ax/al*.9;vz+=az/al*.9}}
     const vl=Math.hypot(vx,vz)||1;const v=(W3.ride?(Hh.v>5?4.6:2.4):1.5)*clamp(1.35-dH/(herdR||1),.3,1);
     h.x+=vx/vl*v*dt;h.z+=vz/vl*v*dt;h.tyaw=Math.atan2(vx,vz);spd=v>3?1.15:.6;head=.45;if(v>3&&Math.random()<dt*4)dust(W3.D,h.x,gH(h.x,h.z),h.z,.3);
     if(dH>herdR+2||!herdR){h.arT-=dt;if(h.arT<=0){h.mode='idle';h.t=R(2,4)}}else h.arT=1.5;break}
@@ -616,7 +639,7 @@ function herdTick(dt){
    case 'idle':{h.t-=dt;head=.9;look=Math.sin(now/2000+h.a.id)*.6;
     if(h.kind==='becerro'&&h.mother){const md=Math.hypot(h.mother.x-h.x,h.mother.z-h.z);if(md>4){h.mode='walk';h.tx=h.mother.x-Math.sin(h.mother.yaw)*2;h.tz=h.mother.z-Math.cos(h.mother.yaw)*2;h.fast=md>10;break}}
     if(h.t<=0){const fi=h.free?-1:W3.feeds.findIndex(f=>f.r===h.rk&&f.lvl>.05);
-     if(fi>=0&&Math.random()<.5){const f=W3.feeds[fi],ang=Math.random()*6.28;h.mode='walk';h.tx=f.x+Math.cos(ang)*2.4;h.tz=f.z+Math.sin(ang)*2.4;h.feedGo=fi}
+     if(fi>=0&&Math.random()<.5){const f=W3.feeds[fi],Rc=RECTS[f.r],cx=(Rc.x0+Rc.x1)/2-f.x,cz=(Rc.z0+Rc.z1)/2-f.z,ang=Math.atan2(cz,cx)+R(-.7,.7);h.mode='walk';h.tx=f.x+Math.cos(ang)*2.4;h.tz=f.z+Math.sin(ang)*2.4;h.feedGo=fi}
      else if(h.free){h.mode='walk';h.tx=h.x+R(-5,5);h.tz=h.z+R(-5,5);h.fast=false}
      else{h.mode='walk';h.tx=clamp(h.x+R(-14,14),Rc.x0+2,Rc.x1-2);h.tz=clamp(h.z+R(-14,14),Rc.z0+2,Rc.z1-2);h.fast=h.kind==='becerro'&&Math.random()<.3}}
     else if(!h.free&&h.kind==='toro'&&h.rk==='toros'&&ageY(h.a)>=3&&Math.random()<dt*.025){const foe=H.find(o=>o!==h&&!o.free&&o.kind==='toro'&&o.rk===h.rk&&['idle','walk'].includes(o.mode)&&Math.hypot(o.x-h.x,o.z-h.z)<16);
@@ -655,18 +678,40 @@ function mayoral(){
  if(nuevas.length)t.push(`Han llamado ${nuevas.length} ${nuevas.length>1?'empresas':'empresa'}. Aparta los toros en el cercado y luego, a caballo, arréalos a los corrales.`);
  if(sin&&S.month>=7)t.push(`Tengo ${sin} becerros en la corraleta. La lumbre está encendida: coge el hierro y hérralos tú.`);
  if(pendT)t.push(`${pendT} hembras ya tienen edad de tienta.${mej('placita')?' En la placita las toreas tú y ves de qué son.':' Sin placita propia las tiento yo fuera, y sale más caro.'}`);
- if((S.fedM||0)<4)t.push(`Este mes llevas ${S.fedM||0} sacos echados. Los sacos están en el remolque, junto a la puerta del cercado de los toros.`);
+ if((S.fedM||0)<4)t.push(`Este mes llevas ${S.fedM||0} sacos echados. Hay sacos en el remolque junto al cercado de los toros y en los montones de cada cercado. Los comederos están en la cerca: échalo desde fuera, sin entrar con los toros.`);
  if(her.length)t.push(`${her.length} ${her.length>1?'animales cojean':'animal cojea'}: ${her.slice(0,3).map(a=>a.name).join(', ')}. El botiquín está en el cuarto de aperos.`);
  if(!sems.length)t.push('No tenemos semental. Habría que comprar uno en el mercado o tentar un macho.');
  t.push('Cuidado a pie en el cercado de los toros: si se te queda mirando y escarba, sal de ahí. A caballo te respetan.');
  modal('El mayoral',`<div class="stack"><div class="list">${t.map(x=>`<div class="task"><span class="dot"></span><span class="t">«${esc(x)}»</span></div>`).join('')}</div>
  <div class="row"><button class="btn" onclick="piensoModal()">Plan de pienso</button>${!mej('placita')&&pendT?'<button class="btn" onclick="closeModal();tientaLote()">Que tiente el mayoral</button>':''}<button class="btn" onclick="obras()">Obras</button></div></div>`)}
-function obras(){modal('Obras y mejoras',`<div class="stack"><p class="muted" style="margin:0">Cada obra aparece en la finca y cambia la economía de la ganadería. También puedes ir a los solares con estaca naranja.</p>
- <div class="list">${Object.entries(MEJ).map(([k,d])=>`<div class="task"><span class="dot ${mej(k)?'ok':''}"></span><span class="t"><b>${d.n}</b><br><small class="muted">${d.d}</small></span>${mej(k)?'<span class="badge ok">Hecha</span>':`<button class="btn sm oro" ${S.money<d.c?'disabled':''} onclick="construir('${k}',true)">${eur(d.c)}</button>`}</div>`).join('')}</div></div>`)}
-function construir(k,now){const d=MEJ[k];if(mej(k))return;
- if(!now){modal(d.n,`<div class="stack"><p style="margin:0">${d.d}</p><div class="kv"><span>Coste <b>${eur(d.c)}</b></span><span>Saldo <b>${eur(S.money)}</b></span></div>
-  <button class="btn pri adv" ${S.money<d.c?'disabled':''} onclick="construir('${k}',true)">Construir</button>${S.money<d.c?'<small class="muted">No tienes saldo suficiente.</small>':''}</div>`);return}
- if(S.money<d.c)return;S.money-=d.c;S.mej[k]=1;log(`Obra terminada: ${d.n}.`);save();closeModal();if(W3.mode==='finca')rebuildFinca();render();toast(`${d.n}: obra terminada`)}
+function obraRow(k){const d=MEJ[k],lv=mejLv(k),nx=lv<d.max?d.c[lv]:null,bloq=d.req&&!mej(d.req);
+ return `<div class="obra ${lv?'hecha':''}"><div class="oh"><b>${d.n}</b><span class="lvd">${Array.from({length:d.max},(_,i)=>`<i class="${i<lv?'on':''}"></i>`).join('')}</span></div>
+ <small>${esc(d.d[lv?lv-1:0]||'')}${lv&&lv<d.max?` <span class="muted">Siguiente: ${esc(d.d[lv])}</span>`:''}</small>
+ <div class="ob">${nx==null?'<span class="badge ok">Completa</span>':bloq?`<span class="badge">Requiere ${esc(MEJ[d.req].n.toLowerCase())}</span>`:`<button class="btn sm oro" ${S.money<nx?'disabled':''} onclick="construir('${k}',true)">${lv?'Mejorar':'Construir'} · ${eur(nx)}</button>`}</div></div>`}
+function obrasHTML(){return `<div class="imp"><div><span class="lbl">${esc(rangoImperio())}</span><b>${eur(patrimonio())}</b><small>patrimonio</small></div><div><span class="lbl">Capacidad</span><b>${campo().length}/${capacidad()}</b><small>cabezas</small></div><div><span class="lbl">Mantenimiento</span><b>${eur(mantenimiento())}</b><small>al mes</small></div></div>
+ <div class="obras">${Object.keys(MEJ).map(obraRow).join('')}</div>`}
+function obras(){modal('Obras e imperio',`<div class="stack">${obrasHTML()}</div>`)}
+function construir(k,now){const d=MEJ[k],lv=mejLv(k);if(lv>=d.max)return;if(d.req&&!mej(d.req)){toast(`Antes necesitas ${MEJ[d.req].n.toLowerCase()}`);return}const c=d.c[lv];
+ if(!now){modal(d.n,`<div class="stack"><p style="margin:0">${esc(d.d[lv])}</p><div class="kv"><span>Nivel <b>${lv+1}/${d.max}</b></span><span>Coste <b>${eur(c)}</b></span><span>Saldo <b>${eur(S.money)}</b></span></div>
+  <button class="btn pri adv" ${S.money<c?'disabled':''} onclick="construir('${k}',true)">${lv?'Mejorar':'Construir'}</button></div>`);return}
+ if(S.money<c)return;S.money-=c;S.mej[k]=lv+1;S.xp=(S.xp||0)+20;log(`Obra terminada: ${d.n}${d.max>1?' (nivel '+(lv+1)+')':''}.`);save();closeModal();if(W3.mode==='finca')rebuildFinca();render();toast(`${d.n}: ${lv?'mejorada':'terminada'}`)}
+const EDIF={fabrica:{w:10,d:8,h:6,wall:'#b9b2a6',roof:'#6e7478',silo:1},clinica:{w:7,d:5,h:3.2,wall:'#f4f2ec',roof:'#2b5aa0',cruz:1},cuadra:{w:8,d:4,h:3,wall:'#d9cbae',roof:'#a4532f',boxes:1},pozo:{torre:1},hospederia:{w:10,d:6,h:4.6,wall:'#f2ede2',roof:'#a4532f'},museo:{w:9,d:6,h:4.2,wall:'#e9dcc5',roof:'#7a1d22',cols:1},oficina:{w:6,d:5,h:3.4,wall:'#e6e2d8',roof:'#3a3f4b'},escuela:{ruedo:1},finca:{letrero:1}};
+function edificio(sc,k,col){const G=geos(),e=EDIF[k],d=MEJ[k],[x,z]=d.pos,lv=mejLv(k),g=new THREE.Group();g.position.set(x,gH(x,z),z);sc.add(g);
+ const sign=(txt,y,zz)=>{const cv=document.createElement('canvas');cv.width=512;cv.height=96;const c=cv.getContext('2d');c.fillStyle='#1d1710';c.fillRect(0,0,512,96);c.strokeStyle='#e6bb55';c.lineWidth=6;c.strokeRect(6,6,500,84);c.fillStyle='#e6bb55';c.font='42px "Cinzel", Georgia, serif';c.textAlign='center';c.textBaseline='middle';c.fillText(txt.toUpperCase().slice(0,24),256,50);
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(3.2,.6),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv)}));m.position.set(0,y,zz);g.add(m)};
+ if(e.w){const sc2=k==='hospederia'&&lv>=2?1.35:k==='cuadra'&&lv>=2?1.3:1,w=e.w*sc2,dd=e.d,h=e.h;mesh(G.box,M(e.wall,.9),w,h,dd,0,h/2,0,g);
+  const rf=new THREE.Mesh(new THREE.ConeGeometry(Math.hypot(w,dd)/2*1.02,1.8,4),M(e.roof,.8));rf.rotation.y=Math.PI/4;rf.scale.set(w/Math.hypot(w,dd)*1.42,1,dd/Math.hypot(w,dd)*1.42);rf.position.y=h+.9;rf.castShadow=true;g.add(rf);
+  mesh(G.box,M('#4a2c1a',.7),1.3,2.2,.1,0,1.1,dd/2+.03,g,true);for(const sx of [-w/3,w/3])mesh(G.box,W3.win,1,1,.1,sx,h*.6,dd/2+.03,g,true);
+  if(e.silo)for(const sx of [w/2+1.6,w/2+3.4]){mesh(G.cyl,M('#c7cbcc',.35,.6),.8,7,.8,sx,3.5,0,g)}
+  if(e.cruz){mesh(G.box,M('#c0303a',.6),.9,.25,.06,0,h-.5,dd/2+.06,g,true);mesh(G.box,M('#c0303a',.6),.25,.9,.06,0,h-.5,dd/2+.06,g,true)}
+  if(e.boxes)for(let i=-1;i<=1;i++)mesh(G.box,M('#4a2c1a',.7),1.4,1.2,.08,i*2.4*sc2,.9,dd/2+.05,g,true);
+  if(e.cols)for(const sx of [-3,-1.2,1.2,3])mesh(G.cyl,M('#f4efe3',.7),.22,h,.22,sx,h/2,dd/2+.6,g);
+  sign(d.n,h+.15,dd/2+.08);col.push({t:'box',x0:x-w/2-.3,x1:x+w/2+(e.silo?4.4:.3),z0:z-dd/2-.3,z1:z+dd/2+.3})}
+ else if(e.torre){mesh(G.cyl,M('#6b6f74',.5,.5),1.6,1.6,1.6,0,4.6,0,g);for(const [sx,sz] of [[-1,-1],[1,-1],[-1,1],[1,1]])mesh(G.cyl,M('#3a3f45',.5,.6),.08,4,.08,sx*1.1,2,sz*1.1,g,true);mesh(G.cyl,M('#8a6a45'),.9,.6,.9,3,.3,1,g);col.push({t:'circ',x,z,r:2})}
+ else if(e.ruedo){const w2=new THREE.Mesh(new THREE.CylinderGeometry(5.5,5.5,1.6,32,1,true),M('#f1ece0',.9,0,THREE.DoubleSide));w2.position.y=.8;w2.castShadow=true;g.add(w2);const fl=new THREE.Mesh(new THREE.CircleGeometry(5.45,32),M('#d6a75f',.95));fl.rotation.x=-Math.PI/2;fl.position.y=.03;g.add(fl);sign(d.n,2.4,5.6);col.push({t:'circ',x,z,r:5.9})}
+ else if(e.letrero){mesh(G.box,M('#4a2c1a',.8),.2,2.4,.2,-1.7,1.2,0,g);mesh(G.box,M('#4a2c1a',.8),.2,2.4,.2,1.7,1.2,0,g);sign(`${lv} ${lv>1?'fincas colindantes':'finca colindante'}`,2.2,.12);col.push({t:'circ',x,z,r:1.2})}
+ if(k==='placita'&&lv>=2){}
+ return g}
 function ofertasModal(){const act=S.offers.filter(o=>o.st==='nueva'||o.st==='aceptada').sort((a,b)=>a.abs-b.abs);
  modal('Ofertas y embarque',act.length?`<div class="stack"><p class="muted" style="margin:0">Aparta los toros en el cercado, arréalos a caballo hasta los corrales y embárcalos aquí.</p>${act.map(o=>{const elig=campo().filter(a=>eligible(a,o)).length;const mk=campo().filter(a=>a.mark===o.id&&eligible(a,o));const en=mk.filter(a=>a.encd).length;
   return `<div class="card offer"><div class="pl">${esc(o.plaza)}</div><div class="kv"><span>${esc(o.feria)}</span><span><b>${MESES[o.abs%12]}</b></span><span><b>${o.n}</b> ${o.tipo==='novillada'?'novillos':'toros'}</span><span><b>${eur(o.precio)}</b>/cabeza</span><span>apartados <b>${mk.length}/${o.n}</b></span><span>en corrales <b>${en}/${o.n}</b></span></div>
