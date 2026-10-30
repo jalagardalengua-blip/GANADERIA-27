@@ -16,6 +16,8 @@ También se puede publicar tal cual en GitHub Pages.
 
 ## Qué incluye
 
+- **Menús como en un juego de consola:** cinco pestañas arriba (Inicio, Plantilla, Traspasos, Competiciones y Club) que se cambian con un toque o con las teclas Q y E. Cada pestaña abre fichas grandes con foto, y Escape o "Volver" regresa. La plantilla se ve en cartas de jugador o en lista.
+- **Fotos generadas:** las imágenes de las fichas (estadio, jugadores con la equipación del club, pizarra táctica, entrenamiento, cantera, trofeo) las dibuja el propio motor 3D del juego.
 - **Mundo ficticio:** 10 ligas (España, Inglaterra, Italia, Alemania, Francia, Portugal, Países Bajos, Brasil, Argentina y México), 186 clubes y unos 4.700 jugadores. Cada jugador tiene nombre, nacionalidad, edad, posición, siete atributos (ritmo, tiro, pase, regate, defensa, físico y portería), media, potencial, rasgos, valor, sueldo y contrato.
 - **Modo carrera:** calendario de liga a doble vuelta, Copa Continental y Copa Libertad, clasificaciones, estadísticas, objetivos de la directiva, despidos y ofertas de otros clubes.
 - **Partidos en 3D:** estadio con gradas, focos, vallas y banquillos; jugadores animados; repeticiones de los goles. Hay cinco cámaras: Banquillo (vista del entrenador desde el área técnica), TV, Aérea, Detrás y Jugador.
@@ -46,6 +48,7 @@ El club debe existir en el juego. Si quieres usar otro nombre, renombra antes el
 | `js/engine.js` | Motor del partido: simulación física de 22 jugadores con IA (el mismo motor sirve para ver el partido o simularlo) |
 | `js/career.js` | Modo carrera: jornadas, copas, entrenamiento, mercado, decisiones, finanzas, premios y guardado |
 | `js/match3d.js` | Render 3D del estadio y del partido (Three.js r128) |
+| `js/photos.js` | Fotos de los menús generadas con el motor 3D |
 | `js/matchday.js` | Pantalla del partido: marcador, cámaras, órdenes, tablet y descanso |
 | `js/art.js` | Escudos, caras de jugadores e iconos generados |
 | `js/ui.js` | Menús del modo carrera |

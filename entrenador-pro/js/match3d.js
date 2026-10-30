@@ -580,6 +580,7 @@
     }
   }
   G.Match3D = Match3D;
+  G.makePlayerMesh = makePlayerMesh;
 
   // Escena decorativa del estadio que gira lentamente (portada y cabecera del menú).
   G.HeroStadium = class {

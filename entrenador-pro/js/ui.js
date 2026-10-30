@@ -35,38 +35,6 @@
   const modal = G.ui.modal, closeModal = G.ui.closeModal, toast = G.ui.toast;
   const closeBtn = `<button class="icon-btn" data-close aria-label="Cerrar">${ic('x', 20)}</button>`;
 
-  // ------------------------------------------------------------------ escenas 3D persistentes
-  let heroEl = null, heroFor = null;
-  function heroNode() {
-    const club = me();
-    if (!window.THREE) return document.createElement('div');
-    if (!heroEl || heroFor !== club.id) {
-      if (heroEl && heroEl._hero) heroEl._hero.dispose();
-      heroEl = document.createElement('div'); heroEl.className = 'hero-3d';
-      heroFor = club.id;
-      requestAnimationFrame(() => { try { heroEl._hero = new G.HeroStadium(heroEl, club.colors, club.name); } catch (e) { /* sin WebGL */ } });
-    } else if (heroEl._hero) requestAnimationFrame(() => heroEl._hero.resize());
-    return heroEl;
-  }
-  // Foto fija del estadio (para la tarjeta de noticias).
-  const snapCache = {};
-  function stadiumSnap(club) {
-    if (snapCache[club.id]) return snapCache[club.id];
-    try {
-      const cv = document.createElement('div'); cv.style.cssText = 'position:fixed;left:-2000px;top:0;width:900px;height:420px';
-      document.body.appendChild(cv);
-      const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-      r.setSize(900, 420); r.outputEncoding = THREE.sRGBEncoding; r.toneMapping = THREE.ACESFilmicToneMapping;
-      cv.appendChild(r.domElement);
-      const sc = new THREE.Scene(); G.setupLights(sc, false); G.buildStadium(sc, r, { colors: club.colors, homeName: club.name });
-      const cam = new THREE.PerspectiveCamera(42, 900 / 420, 0.5, 700); cam.position.set(-120, 85, 120); cam.lookAt(0, 0, 0);
-      r.render(sc, cam);
-      snapCache[club.id] = r.domElement.toDataURL('image/jpeg', 0.82);
-      r.dispose(); r.forceContextLoss && r.forceContextLoss(); cv.remove();
-    } catch (e) { snapCache[club.id] = ''; }
-    return snapCache[club.id];
-  }
-
   // ------------------------------------------------------------------ arranque
   function boot() {
     G.C = null;
@@ -152,28 +120,44 @@
   }
 
   // ------------------------------------------------------------------ estructura principal
-  const NAV = [['inicio', 'Inicio', 'home'], ['plantilla', 'Plantilla', 'squad'], ['tacticas', 'Tácticas', 'tactics'], ['entrenamiento', 'Entrenamiento', 'training'], ['traspasos', 'Traspasos', 'transfer'], ['calendario', 'Calendario', 'calendar'], ['oficina', 'Oficina', 'office'], ['club', 'Club', 'club'], ['competiciones', 'Competiciones', 'comps'], ['ojeo', 'Ojeo', 'scout'], ['cantera', 'Cantera', 'youth'], ['basedatos', 'Base de datos', 'db'], ['config', 'Configuración', 'settings']];
+  // Pestañas superiores (como LB/RB en el mando) y pantallas de fichas con foto.
+  const SECTIONS = [
+    ['inicio', 'Inicio', ['inicio']],
+    ['plantilla', 'Plantilla', ['hub-plantilla', 'plantilla', 'tacticas', 'entrenamiento', 'cantera']],
+    ['traspasos', 'Traspasos', ['hub-traspasos', 'traspasos', 'ojeo']],
+    ['competiciones', 'Competiciones', ['hub-competiciones', 'competiciones', 'calendario']],
+    ['club', 'Club', ['hub-club', 'oficina', 'club', 'basedatos', 'config']]
+  ];
+  const TITLES = { plantilla: 'Jugadores', tacticas: 'Tácticas', entrenamiento: 'Entrenamiento', cantera: 'Cantera', traspasos: 'Mercado de fichajes', ojeo: 'Ojeo', competiciones: 'Competiciones', calendario: 'Calendario', oficina: 'Oficina', club: 'Club', basedatos: 'Base de datos', config: 'Configuración' };
+  const sectionOf = v => SECTIONS.find(s => s[2].includes(v)) || SECTIONS[0];
+  const sectionHome = k => k === 'inicio' ? 'inicio' : 'hub-' + k;
 
   function renderShell() {
     const app = document.getElementById('app');
-    app.innerHTML = `<div class="shell">
-      <div class="brand">${G.logo(34)}<span>ELITEMANAGER</span></div>
-      <header class="topbar" id="topbar"></header>
-      <nav class="sidebar" id="sidebar" aria-label="Menú"></nav>
+    app.innerHTML = `<div class="shell2">
+      <header class="hdr">
+        <div class="brand">${G.logo(30)}<span>ELITEMANAGER</span></div>
+        <nav class="toptabs" id="toptabs" aria-label="Menú principal"></nav>
+        <div class="hdr-r" id="topbar"></div>
+      </header>
       <main class="main" id="main"></main>
     </div>`;
     render();
   }
 
   function render() {
-    renderTop(); renderSide();
+    renderTop(); renderNav();
     const main = document.getElementById('main');
     const v = VIEWS[S.view] || VIEWS.inicio;
-    main.innerHTML = v.html();
+    const sec = sectionOf(S.view);
+    const detail = !S.view.startsWith('hub-') && S.view !== 'inicio';
+    main.innerHTML = (detail ? `<div class="crumb"><button class="back" data-go="${sectionHome(sec[0])}">${ic('left', 18)} Volver</button><span>${esc(sec[1])}</span><span class="dim">/</span><b>${esc(TITLES[S.view] || '')}</b></div>` : '') + v.html();
     v.bind && v.bind(main);
-    main.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
+    main.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { if (b.dataset.pre) { const [k, val] = b.dataset.pre.split(':'); S[k] = val; } go(b.dataset.go); });
     main.querySelectorAll('[data-player]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); playerModal(+b.dataset.player); }));
     main.querySelectorAll('[data-clubinfo]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); clubModal(+b.dataset.clubinfo); }));
+    main.querySelectorAll('[data-act="play"]').forEach(b => b.onclick = e => { e.stopPropagation(); continueFlow(); });
+    G.fillPhotos && G.fillPhotos(main, me());
   }
   G.ui.render = render;
   function go(v) { S.view = v; render(); document.getElementById('main').scrollTop = 0; }
@@ -190,21 +174,45 @@
     const fxs = G.userFixtures();
     const label = fxs.length ? 'Jugar partido' : 'Continuar';
     document.getElementById('topbar').innerHTML = `
-      <button class="btn-continue" id="cont">${ic(fxs.length ? 'play' : 'ff', 18)} ${label}</button>
-      <span class="tb-item dt">${ic('calendar')} ${esc(G.fmtDate(G.weekDate(c.week)))} ${c.week > 0 || true ? '· Sem. ' + (c.week + 1) : ''}</span>
+      <span class="tb-item dt">${ic('calendar')} ${esc(G.fmtDate(G.weekDate(c.week)))} · Sem. ${c.week + 1}</span>
       <span class="tb-item wx">${ic('cloud')} ${weather()}</span>
       <span class="tb-club">${G.crest(club, 28)}<div><b>${esc(club.name)}</b><small>${esc(c.user.name)} · Mánager</small></div></span>
+      <button class="btn-continue" id="cont">${ic(fxs.length ? 'play' : 'ff', 18)} ${label}</button>
       <button class="icon-btn" id="exit" aria-label="Guardar y salir" title="Guardar y salir">${ic('power', 22)}</button>`;
     document.getElementById('cont').onclick = continueFlow;
     document.getElementById('exit').onclick = () => { G.save(); toast('Partida guardada.', 'good'); renderStart(); };
   }
 
-  function renderSide() {
+  function renderNav() {
+    const cur = sectionOf(S.view)[0];
     const unread = G.C.inbox.filter(m => !m.read).length;
-    document.getElementById('sidebar').innerHTML = NAV.map(([k, l, i]) => `<button class="nav-item ${S.view === k ? 'active' : ''}" data-nav="${k}">${ic(i, 22)}<span>${l}</span>${k === 'oficina' && unread ? `<span class="badge">${unread}</span>` : ''}</button>`).join('') +
-      `<div class="side-foot">${G.logo(30)}<div><b>ELITEMANAGER</b><small>TU CLUB. TU HISTORIA.</small></div></div>`;
-    document.querySelectorAll('[data-nav]').forEach(b => b.onclick = () => go(b.dataset.nav));
+    const el = document.getElementById('toptabs');
+    el.innerHTML = `<button class="bumper" data-step="-1" aria-label="Pestaña anterior (Q)">Q</button>` +
+      SECTIONS.map(([k, l]) => `<button class="ttab ${cur === k ? 'on' : ''}" data-sec="${k}">${l}${k === 'club' && unread ? ` <span class="badge">${unread}</span>` : ''}</button>`).join('') +
+      `<button class="bumper" data-step="1" aria-label="Pestaña siguiente (E)">E</button>`;
+    el.querySelectorAll('[data-sec]').forEach(b => b.onclick = () => go(sectionHome(b.dataset.sec)));
+    el.querySelectorAll('[data-step]').forEach(b => b.onclick = () => stepSection(+b.dataset.step));
+    const on = el.querySelector('.ttab.on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }
+  function stepSection(d) {
+    const i = SECTIONS.indexOf(sectionOf(S.view));
+    go(sectionHome(SECTIONS[(i + d + SECTIONS.length) % SECTIONS.length][0]));
+  }
+  // Q / E cambian de pestaña (como LB / RB); Escape vuelve atrás.
+  document.addEventListener('keydown', e => {
+    if (!G.C || !document.getElementById('toptabs') || document.querySelector('.match-screen') || document.querySelector('.modal-bg')) return;
+    if (/input|select|textarea/i.test(e.target.tagName)) return;
+    if (e.key === 'q' || e.key === 'Q') stepSection(-1);
+    else if (e.key === 'e' || e.key === 'E') stepSection(1);
+    else if (e.key === 'Escape' && !S.view.startsWith('hub-') && S.view !== 'inicio') go(sectionHome(sectionOf(S.view)[0]));
+  });
+
+  // Ficha con foto (estilo menú de consola).
+  function tile(o) {
+    const attrs = o.go ? `data-go="${o.go}"${o.pre ? ` data-pre="${o.pre}"` : ''}` : o.player ? `data-player="${o.player}"` : o.act ? `data-act="${o.act}"` : '';
+    return `<button class="tile ${o.cls || ''}" ${attrs}>${o.photo ? `<div class="tile-img" data-photo="${o.photo}"></div>` : `<div class="tile-img tile-ico">${ic(o.icon || 'star', 64)}</div>`}<div class="tile-shade"></div>${o.badge ? `<span class="tile-badge">${o.badge}</span>` : ''}<div class="tile-txt"><b>${o.title}</b>${o.sub ? `<small>${o.sub}</small>` : ''}${o.extra || ''}</div></button>`;
+  }
+  G.ui.tile = tile;
 
   // ------------------------------------------------------------------ avanzar
   function continueFlow() {
@@ -312,7 +320,7 @@
     const offers = G.jobOffers();
     modal(`<div class="modal-h"><h2>Destituido</h2></div><p>La directiva ha decidido prescindir de sus servicios. Estos clubes le ofrecen el banquillo:</p>
       <div class="club-pick">${offers.map(c => `<button class="club-tile" data-job="${c.id}">${G.crest(c, 40)}<div><b>${esc(c.name)}</b>${stars(c.rep)}<div class="muted" style="font-size:12px">${esc(G.leagueOf(c.league).name)}</div></div></button>`).join('')}</div>`, mm => {
-      mm.querySelectorAll('[data-job]').forEach(b => b.onclick = () => { G.takeJob(+b.dataset.job); G.save(); closeModal(); heroFor = null; render(); });
+      mm.querySelectorAll('[data-job]').forEach(b => b.onclick = () => { G.takeJob(+b.dataset.job); G.save(); closeModal(); render(); });
     }, true);
   }
 
@@ -333,92 +341,100 @@
   // ------------------------------------------------------------------ VISTAS
   const VIEWS = {};
 
-  // ---- Inicio
+  // ---- Inicio (central del modo carrera)
   VIEWS.inicio = {
     html() {
       const c = G.C, club = me(), lid = club.league;
       const t = G.table(lid), row = t.find(r => r.id === club.id), pos = t.indexOf(row) + 1;
       const nx = G.nextUserFixture();
       const opp = nx ? CL(nx.h === club.id ? nx.a : nx.h) : null;
-      const news = c.news.slice(0, 4);
-      const n = news[S.newsIdx % Math.max(1, news.length)];
-      const up = G.upcoming(7);
-      let lastMonth = '';
-      const cal = up.map(f => {
-        const d = G.weekDate(f.week);
-        const mo = d.toLocaleDateString('es-ES', { month: 'long', year: 'numeric', timeZone: 'UTC' });
-        const head = mo !== lastMonth ? `<div class="cal-month">${esc(mo[0].toUpperCase() + mo.slice(1))}</div>` : '';
-        lastMonth = mo;
-        return head + `<div class="list-row cal-row"><span class="d">${d.getUTCDate()}</span><span class="muted">${d.toLocaleDateString('es-ES', { weekday: 'short', timeZone: 'UTC' })}</span><span class="chip">${esc(G.LEAGUES.some(l => l.id === f.comp) ? G.leagueOf(f.comp).name.split(' ')[0] : G.CUPS.find(x => x.id === f.comp).short)}</span><span class="t team-cell">${G.crest(CL(f.h === club.id ? f.a : f.h), 18)}${esc(CL(f.h).name)} vs ${esc(CL(f.a).name)}</span><span>${f.res ? `<b>${f.res[0]}-${f.res[1]}</b>` : '21:00'}</span></div>`;
-      }).join('');
-      const msgs = c.inbox.slice(0, 4);
+      const isNow = nx && nx.week === c.week;
       const unread = c.inbox.filter(m => !m.read).length;
-      const top = t.slice(0, 5); if (pos > 5) top.push(row);
-      const lineup = (club.lineup || G.autoLineup(club)).map(P);
-      const F = G.FORMATIONS[club.formation];
-      const transfers = c.transfers.filter(x => x.fee > 0).slice(0, 4);
-      const rumors = Object.values(c.world.players).filter(p => p.club !== club.id && p.ovr >= club.rep - 2 && p.ovr <= club.rep + 8 && p.age <= 27).sort((a, b) => b.ovr - a.ovr).slice(0, 4);
-      const hist = c.fin.history.slice(-24);
-      const spark = sparkSVG(hist);
-      return `
-      <section class="hero"><div id="heroslot" class="hero-3d"></div>
-        <div class="hero-text"><small>Bienvenido, ${esc(c.user.name)}</small><h1>${esc(club.name)}</h1><p>La grandeza no se construye en un día. Tú decides el próximo capítulo.</p></div>
-        <div class="hero-card">
-          <div><div class="hc-club">${G.crest(club, 64)}<div><h2>${esc(club.name)}</h2><div class="muted">${esc(G.leagueOf(lid).name)}</div></div></div>
-            <div class="hc-stats"><div><small>Posición</small><b>${pos}º</b></div><div><small>Puntos</small><b>${row.pts}</b></div><div><small>Partidos jugados</small><b>${row.p}</b></div><div><small>Diferencia de goles</small><b>${row.gf - row.ga > 0 ? '+' : ''}${row.gf - row.ga}</b></div></div></div>
-          <div class="next-m"><h4>Próximo partido</h4>${opp ? `<div class="opp">${G.crest(opp, 50)}<div><b>${esc(opp.name)}</b><div class="muted" style="font-size:13px">${esc(G.compName(nx.comp))}</div><div style="font-size:14px;margin-top:4px">${esc(G.fmtDate(G.weekDate(nx.week)))} · 21:00</div><div class="dim" style="font-size:12px">${esc(CL(nx.h).stadium)}</div></div></div>
-            <button class="btn primary" id="seematch">${nx.week === c.week ? 'Ver partido' : 'Avanzar hasta el partido'}</button>` : '<p class="muted">No quedan partidos esta temporada.</p><button class="btn primary" id="seematch">Continuar</button>'}</div>
+      const pending = c.inbox.filter(m => (m.kind === 'decision' || m.kind === 'oferta') && !m.done).length;
+      const n = c.news[0];
+      const top = t.slice(0, 4); if (pos > 4) top.push(row);
+      const best = club.players.map(P).sort((a, b) => b.ovr - a.ovr)[0];
+      const T = club.tactics;
+      const match = nx ? `<div class="nm-card">
+          <div class="nm-comp">${esc(G.compName(nx.comp))} · ${esc(G.fmtDate(G.weekDate(nx.week)))} · 21:00</div>
+          <div class="nm-vs"><div>${G.crest(CL(nx.h), 64)}<b>${esc(CL(nx.h).name)}</b></div><span>VS</span><div>${G.crest(CL(nx.a), 64)}<b>${esc(CL(nx.a).name)}</b></div></div>
+          <div class="nm-foot"><span class="muted">${esc(CL(nx.h).stadium)}</span><span class="btn-continue nm-play">${ic(isNow ? 'play' : 'ff', 20)} ${isNow ? 'Jugar partido' : 'Avanzar hasta el partido'}</span></div>
+        </div>` : `<div class="nm-card"><div class="nm-vs"><b>Temporada terminada</b></div><div class="nm-foot"><span class="btn-continue nm-play">${ic('ff', 20)} Continuar</span></div></div>`;
+      return `<div class="welcome"><div><small>Bienvenido, ${esc(c.user.name)}</small><h1>${esc(club.name)}</h1></div>
+          <div class="welcome-r"><span class="chip">${pos}º en ${esc(G.leagueOf(lid).name)}</span><span class="chip">${row.pts} pts</span><span class="chip">Objetivo: ${esc(c.board.objective.text)}</span><span class="chip ${c.board.conf >= 50 ? '' : 'warn'}">Directiva ${Math.round(c.board.conf)}%</span></div></div>
+        <div class="central">
+          <button class="tile tile-hero" data-act="play"><div class="tile-img" data-photo="partido"></div><div class="tile-shade"></div><div class="tile-txt"><b>Próximo partido</b></div>${match}</button>
+          <button class="tile tile-side" data-go="oficina"><div class="tile-img" data-photo="estadio"></div><div class="tile-shade strong"></div>${unread ? `<span class="tile-badge">${unread}</span>` : ''}<div class="tile-txt"><b>Mensajes</b><small>${pending ? pending + ' decisión(es) pendiente(s)' : 'Todo al día'}</small>
+            <div class="mini-msgs">${c.inbox.slice(0, 3).map(m => `<span class="${m.read ? '' : 'unread'}">${esc(m.from)}: ${esc(m.subject)}</span>`).join('')}</div></div></button>
+          <button class="tile tile-side" data-go="competiciones" data-pre="compTab:liga"><div class="tile-img" data-photo="estadioDia"></div><div class="tile-shade strong"></div><div class="tile-txt"><b>Clasificación</b>
+            <div class="mini-table">${top.map(r => `<span class="${r.id === club.id ? 'me' : ''}"><i>${t.indexOf(r) + 1}</i>${G.crest(CL(r.id), 16)}<em>${esc(CL(r.id).name)}</em><b>${r.pts}</b></span>`).join('')}</div></div></button>
         </div>
-      </section>
-      <div class="grid home-grid-2">
-        <section class="panel news-card"><div class="news-bg" id="newsbg"></div>
-          <div class="news-body"><span class="eyebrow">Últimas noticias</span>
-            <h2>${n ? esc(n.title) : esc(club.stadium) + ', listo para la temporada'}</h2><p>${n ? esc(n.body) : 'Todo preparado para el estreno liguero.'}</p>
-            <div class="news-nav"><button class="panel-link" data-go="competiciones">Ver competición ${ic('arrow', 14)}</button><div class="dots">${news.map((x, i) => `<button class="${i === S.newsIdx % news.length ? 'on' : ''}" data-news="${i}" aria-label="Noticia ${i + 1}"></button>`).join('')}</div></div>
-          </div></section>
-        <section class="panel"><div class="panel-h"><h3>Calendario</h3><button class="icon-btn" data-go="calendario" aria-label="Calendario">${ic('right')}</button></div><div class="list">${cal || '<p class="muted">Sin partidos.</p>'}</div></section>
-        <section class="panel"><div class="panel-h"><h3>Mensajes ${unread ? `<span class="badge">${unread}</span>` : ''}</h3></div>
-          <div class="list">${msgs.map(m => `<button class="msg-row ${m.read ? '' : 'unread'}" data-msg="${m.id}"><span class="msg-ico">${ic(msgIcon(m.kind), 16)}</span><span style="min-width:0"><span class="row" style="justify-content:space-between;flex-wrap:nowrap"><b>${esc(m.from)}</b><span class="dim" style="font-size:11px">${ago(m)}</span></span><div class="s">${esc(m.subject)}</div><div class="p">${esc(m.body)}</div></span></button>`).join('')}</div>
-          <button class="panel-link" data-go="oficina" style="margin-top:8px">Ver todos los mensajes ${ic('arrow', 14)}</button></section>
-      </div>
-      <div class="grid home-grid-3">
-        <section class="panel"><div class="panel-h"><h3>Tabla de ${esc(G.leagueOf(lid).name)}</h3></div>
-          <table><thead><tr><th>Pos</th><th>Equipo</th><th class="n">Pts</th></tr></thead><tbody>${top.map(r => `<tr class="${r.id === club.id ? 'me' : ''}"><td>${t.indexOf(r) + 1}</td><td><span class="team-cell">${G.crest(CL(r.id), 18)}${esc(CL(r.id).name)}</span></td><td class="n">${r.pts}</td></tr>`).join('')}</tbody></table></section>
-        <section class="panel"><div class="panel-h"><h3>Plantilla</h3></div>
-          <div class="mini-squad">${lineup.slice(0, 7).map(p => G.face(p, 58, club.colors[0])).join('')}</div>
-          <div style="margin:8px 0"><b style="font:600 18px var(--font-display)">${esc(club.name)}</b><div class="muted">${club.players.length} jugadores · Media ${G.squadOvr(club)}</div></div>
-          <button class="panel-link" data-go="plantilla">Ver plantilla ${ic('arrow', 14)}</button></section>
-        <section class="panel"><div class="panel-h"><h3>Tácticas</h3></div>
-          <div class="muted" style="text-align:center;margin-bottom:6px">${club.formation} ${['Muy defensiva', 'Defensiva', 'Equilibrada', 'Ofensiva', 'Muy ofensiva'][club.tactics.ment + 2]}</div>
-          <div class="mini-pitch">${F.map(s => `<i style="left:${4 + s[1] * 92}%;top:${100 - s[2] * 100}%"></i>`).join('')}</div>
-          <button class="panel-link" data-go="tacticas" style="margin-top:10px">Editar táctica ${ic('arrow', 14)}</button></section>
-        <section class="panel"><div class="panel-h"><h3>Traspasos</h3><span class="chip ${G.isWindowOpen() ? 'on' : ''}">${G.isWindowOpen() ? 'Mercado abierto' : 'Mercado cerrado'}</span></div>
-          <div class="tabs" style="margin-bottom:6px"><button class="tab active" data-ttab="f">Fichajes</button><button class="tab" data-ttab="r">Rumores</button></div>
-          <div id="tlist">${(transfers.length ? transfers.map(x => `<div class="sub-row" data-player="${x.pid}" style="cursor:pointer"><span class="team-cell">${G.crest(CL(x.to), 18)}${esc(x.name.split(' ').slice(-1)[0])} <span class="dim">${x.pos}</span></span><b>${money(x.fee)}</b></div>`).join('') : '<p class="muted">Aún no hay traspasos.</p>')}</div>
-          <div id="rlist" hidden>${rumors.map(p => `<div class="sub-row" data-player="${p.id}" style="cursor:pointer"><span class="team-cell">${G.crest(CL(p.club), 18)}${esc(p.ln)} <span class="dim">${p.pos}</span></span><b>${money(p.value)}</b></div>`).join('')}</div>
-          <button class="panel-link" data-go="traspasos" style="margin-top:8px">Ver mercado ${ic('arrow', 14)}</button></section>
-        <section class="panel"><div class="panel-h"><h3>Finanzas</h3></div>
-          <div class="fin-row"><span class="muted">Balance actual</span><b>${money(c.fin.balance)}</b></div>
-          <div class="fin-row"><span class="muted">Ingresos (temporada)</span><b>${money(c.fin.income)}</b></div>
-          <div class="fin-row"><span class="muted">Gastos (temporada)</span><b>${money(c.fin.expense)}</b></div>
-          <div class="fin-row"><span class="muted">Presupuesto fichajes</span><b class="${club.budget >= 0 ? 'good' : 'bad'}">${money(club.budget)}</b></div>
-          ${spark}
-          <button class="panel-link" data-go="oficina" style="margin-top:8px">Ver finanzas ${ic('arrow', 14)}</button></section>
-      </div>`;
+        <div class="hub hub-5">
+          ${tile({ go: 'plantilla', photo: 'plantilla', title: 'Jugadores', sub: club.players.length + ' jugadores · Media ' + G.squadOvr(club) })}
+          ${tile({ go: 'tacticas', photo: 'tacticas', title: 'Tácticas', sub: club.formation + ' · ' + ['Muy defensiva', 'Defensiva', 'Equilibrada', 'Ofensiva', 'Muy ofensiva'][T.ment + 2] })}
+          ${tile({ go: 'entrenamiento', photo: 'entreno', title: 'Entrenamiento', sub: G.TRAINING_FOCUS[c.training.focus].name + ' · ' + ['', 'Suave', 'Normal', 'Intensa'][c.training.intensity] })}
+          ${tile({ go: 'traspasos', photo: 'traspasos', title: 'Fichajes', sub: (G.isWindowOpen() ? 'Mercado abierto' : 'Mercado cerrado') + ' · ' + money(club.budget) })}
+          ${tile({ go: 'competiciones', pre: 'compTab:premios', photo: 'celebracion', title: 'Noticias', sub: n ? n.title : 'Todo listo para empezar' })}
+        </div>`;
     },
     bind(el) {
-      const slot = el.querySelector('#heroslot');
-      if (slot) slot.replaceWith(heroNode());
-      const bg = el.querySelector('#newsbg');
-      if (bg && window.THREE) { requestAnimationFrame(() => { const u = stadiumSnap(me()); if (u) bg.style.background = `center/cover url(${u})`; }); }
-      el.querySelector('#seematch').onclick = () => {
-        const nx = G.nextUserFixture();
-        if (nx && nx.week === G.C.week) return prematch(G.userFixtures()[0]);
-        advance();
-      };
-      el.querySelectorAll('[data-news]').forEach(b => b.onclick = () => { S.newsIdx = +b.dataset.news; render(); });
-      el.querySelectorAll('[data-msg]').forEach(b => b.onclick = () => { S.officeMsg = +b.dataset.msg; go('oficina'); });
-      el.querySelectorAll('[data-ttab]').forEach(b => b.onclick = () => { el.querySelectorAll('[data-ttab]').forEach(x => x.classList.toggle('active', x === b)); el.querySelector('#tlist').hidden = b.dataset.ttab !== 'f'; el.querySelector('#rlist').hidden = b.dataset.ttab !== 'r'; });
+      el.querySelectorAll('.mini-table [data-clubinfo]').forEach(x => x.removeAttribute('data-clubinfo'));
+    }
+  };
+
+  // ---- Pantallas de fichas de cada pestaña
+  VIEWS['hub-plantilla'] = {
+    html() {
+      const c = G.C, club = me();
+      const best = club.players.map(P).sort((a, b) => b.ovr - a.ovr)[0];
+      const injured = club.players.map(P).filter(p => p.inj).length;
+      return `<div class="hub-h"><h1>Plantilla</h1></div><div class="hub hub-3">
+        ${tile({ go: 'plantilla', photo: 'plantilla', title: 'Jugadores', sub: club.players.length + ' jugadores · Media ' + G.squadOvr(club) + (injured ? ' · ' + injured + ' lesionado(s)' : ''), cls: 'big' })}
+        ${tile({ go: 'tacticas', photo: 'tacticas', title: 'Tácticas y alineación', sub: club.formation + ' · Química ' + Math.round(club.chem) + '%' })}
+        ${tile({ go: 'entrenamiento', photo: 'entreno', title: 'Entrenamiento', sub: G.TRAINING_FOCUS[c.training.focus].name })}
+        ${tile({ player: best.id, photo: 'jugador', title: 'Estrella del equipo', sub: esc(G.fullName(best)) + ' · ' + best.pos + ' · ' + best.ovr })}
+        ${tile({ go: 'cantera', photo: 'cantera', title: 'Cantera', sub: c.youth.length + ' juveniles' })}
+      </div>`;
+    }
+  };
+  VIEWS['hub-traspasos'] = {
+    html() {
+      const c = G.C, club = me();
+      const offers = c.inbox.filter(m => m.kind === 'oferta' && !m.done).length;
+      return `<div class="hub-h"><h1>Traspasos</h1><span class="chip ${G.isWindowOpen() ? 'on' : ''}">${G.isWindowOpen() ? 'Mercado abierto' : 'Mercado cerrado'}</span><span class="chip">Presupuesto ${money(club.budget)}</span></div><div class="hub hub-3">
+        ${tile({ go: 'traspasos', pre: 'mkTab:buscar', photo: 'traspasos', title: 'Buscar jugadores', sub: 'Filtra por posición, edad, media y precio', cls: 'big' })}
+        ${tile({ go: 'ojeo', photo: 'ojeo', title: 'Ojeo', sub: c.scouting.missions.length + '/3 ojeadores trabajando' })}
+        ${tile({ go: 'traspasos', pre: 'mkTab:ofertas', photo: 'estadio', title: 'Ofertas recibidas', sub: offers ? offers + ' sin responder' : 'Sin ofertas nuevas', badge: offers || '' })}
+        ${tile({ go: 'traspasos', pre: 'mkTab:seguimiento', photo: 'jugador', title: 'Seguimiento', sub: (c.shortlist || []).length + ' jugadores' })}
+        ${tile({ go: 'traspasos', pre: 'mkTab:libres', photo: 'cantera', title: 'Agentes libres', sub: c.world.freeAgents.length + ' sin equipo' })}
+        ${tile({ go: 'traspasos', pre: 'mkTab:historial', icon: 'transfer', title: 'Últimos traspasos', sub: c.transfers[0] ? esc(c.transfers[0].name) + ' · ' + (c.transfers[0].fee ? money(c.transfers[0].fee) : 'libre') : 'Aún ninguno' })}
+      </div>`;
+    }
+  };
+  VIEWS['hub-competiciones'] = {
+    html() {
+      const club = me(), t = G.table(club.league), pos = t.findIndex(r => r.id === club.id) + 1;
+      const nx = G.nextUserFixture(), top = G.topScorers(club.league, 1)[0];
+      return `<div class="hub-h"><h1>Competiciones</h1></div><div class="hub hub-3">
+        ${tile({ go: 'competiciones', pre: 'compTab:liga', photo: 'estadioDia', title: 'Clasificación', sub: esc(G.leagueOf(club.league).name) + ' · ' + pos + 'º', cls: 'big' })}
+        ${tile({ go: 'calendario', photo: 'partido', title: 'Calendario', sub: nx ? 'Próximo: ' + esc(CL(nx.h === club.id ? nx.a : nx.h).name) : 'Sin partidos' })}
+        ${tile({ go: 'competiciones', pre: 'compTab:copas', photo: 'trofeo', title: 'Copas', sub: 'Continental y Libertad' })}
+        ${tile({ go: 'competiciones', pre: 'compTab:stats', photo: 'celebracion', title: 'Estadísticas', sub: top && top.st.g ? 'Pichichi: ' + esc(G.shortName(top)) + ' (' + top.st.g + ')' : 'Goleadores, asistentes y notas' })}
+        ${tile({ go: 'competiciones', pre: 'compTab:premios', photo: 'trofeo', title: 'Balón Dorado', sub: 'Carrera por los premios' })}
+      </div>`;
+    }
+  };
+  VIEWS['hub-club'] = {
+    html() {
+      const c = G.C, club = me();
+      const unread = c.inbox.filter(m => !m.read).length;
+      return `<div class="hub-h"><h1>Club</h1></div><div class="hub hub-3">
+        ${tile({ go: 'oficina', photo: 'estadio', title: 'Oficina y mensajes', sub: unread ? unread + ' sin leer' : 'Directiva, finanzas y contratos', badge: unread || '', cls: 'big' })}
+        ${tile({ go: 'club', photo: 'celebracion', title: 'Mi club', sub: esc(club.stadium) + ' · Palmarés' })}
+        ${tile({ go: 'oficina', photo: 'estadioDia', title: 'Finanzas', sub: 'Balance ' + money(c.fin.balance) })}
+        ${tile({ go: 'basedatos', icon: 'db', title: 'Base de datos', sub: 'Ranking, editor e importación' })}
+        ${tile({ go: 'config', icon: 'settings', title: 'Configuración', sub: 'Partida y opciones del 3D' })}
+      </div>`;
     }
   };
 
@@ -441,9 +457,12 @@
       ps.sort(sorters[S.squadSort] || sorters.pos);
       const th = (k, l, n) => `<th class="${n ? 'n' : ''}"><button class="tab" style="padding:0;border:0;font-size:12px;${S.squadSort === k ? 'color:var(--fg)' : ''}" data-sort="${k}">${l}</button></th>`;
       const totalWage = club.players.reduce((s, id) => s + P(id).wage, 0);
-      return `<div class="page-h"><div><h1>Plantilla</h1><p>${club.players.length} jugadores · Media ${G.squadOvr(club)} · Masa salarial ${G.fmtWage(totalWage)} · Valor ${money(club.players.reduce((s, id) => s + P(id).value, 0))}</p></div>
-        <div class="seg">${[['ALL', 'Todos'], ['POR', 'Porteros'], ['DEF', 'Defensas'], ['MED', 'Medios'], ['DEL', 'Delanteros']].map(([k, l]) => `<button data-f="${k}" class="${S.squadFilter === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
-        <div class="panel tbl-wrap"><table><thead><tr><th>#</th><th>Jugador</th>${th('pos', 'POS')}${th('age', 'Edad', 1)}${th('ovr', 'MED', 1)}${th('pot', 'POT', 1)}${th('rt', 'Nota', 1)}<th class="n">PJ</th>${th('g', 'G', 1)}<th class="n">A</th>${th('mor', 'Moral')}${th('fit', 'Físico')}${th('val', 'Valor', 1)}<th class="n">Sueldo</th><th class="n">Contrato</th><th>Estado</th></tr></thead><tbody>
+      const mode = S.squadMode || 'cartas';
+      const head = `<div class="page-h"><div><h1>Jugadores</h1><p>${club.players.length} jugadores · Media ${G.squadOvr(club)} · Masa salarial ${G.fmtWage(totalWage)} · Valor ${money(club.players.reduce((s, id) => s + P(id).value, 0))}</p></div>
+        <div class="row"><div class="seg">${[['ALL', 'Todos'], ['POR', 'Porteros'], ['DEF', 'Defensas'], ['MED', 'Medios'], ['DEL', 'Delanteros']].map(([k, l]) => `<button data-f="${k}" class="${S.squadFilter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+        <div class="seg"><button data-mode="cartas" class="${mode === 'cartas' ? 'on' : ''}">Cartas</button><button data-mode="lista" class="${mode === 'lista' ? 'on' : ''}">Lista</button></div></div></div>`;
+      if (mode === 'cartas') return head + `<div class="fcards">${ps.map(p => fcard(p, club)).join('')}</div>`;
+      return head + `<div class="panel tbl-wrap"><table><thead><tr><th>#</th><th>Jugador</th>${th('pos', 'POS')}${th('age', 'Edad', 1)}${th('ovr', 'MED', 1)}${th('pot', 'POT', 1)}${th('rt', 'Nota', 1)}<th class="n">PJ</th>${th('g', 'G', 1)}<th class="n">A</th>${th('mor', 'Moral')}${th('fit', 'Físico')}${th('val', 'Valor', 1)}<th class="n">Sueldo</th><th class="n">Contrato</th><th>Estado</th></tr></thead><tbody>
         ${ps.map(p => playerRow(p, [
           { f: p => `<b>${p.num}</b>` }, { f: pcell }, { f: p => posTag(p.pos) }, { n: 1, f: p => p.age }, { n: 1, f: p => ovrTag(p.ovr) + (p.ovr0 && p.ovr > p.ovr0 ? ` <span class="good" style="font-size:11px">+${p.ovr - p.ovr0}</span>` : '') }, { n: 1, f: p => G.potText(p) },
           { n: 1, f: p => p.st.ap ? `<span class="rt ${G.ratingClass(G.avgRating(p))}">${G.avgRating(p).toFixed(1)}</span>` : '-' }, { n: 1, f: p => p.st.ap }, { n: 1, f: p => p.st.g }, { n: 1, f: p => p.st.a },
@@ -453,9 +472,23 @@
     },
     bind(el) {
       el.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { S.squadFilter = b.dataset.f; render(); });
+      el.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { S.squadMode = b.dataset.mode; render(); });
       el.querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { S.squadSort = b.dataset.sort; render(); });
     }
   };
+
+  // Carta de jugador (como las del modo Ultimate)
+  function fcard(p, club) {
+    const keys = p.pos === 'POR' ? ['gk', 'phy', 'pas', 'pac', 'def', 'dri'] : ['pac', 'sho', 'pas', 'dri', 'def', 'phy'];
+    const state = p.inj ? `<span class="fc-flag bad">Lesión ${p.inj}s</span>` : p.susp ? '<span class="fc-flag bad">Sanción</span>' : p.listed ? '<span class="fc-flag">En venta</span>' : club.captain === p.id ? '<span class="fc-flag">C</span>' : '';
+    return `<button class="fcard ${G.ovrClass(p.ovr)}" data-player="${p.id}">
+      <span class="fc-top"><b>${p.ovr}</b><i>${p.pos}</i>${G.flag(p.nat)}</span>${state}
+      <span class="fc-face">${G.face(p, 92, club.colors[0])}</span>
+      <span class="fc-name">${esc(p.ln)}</span>
+      <span class="fc-att">${keys.map(k => `<span><b>${p.att[k]}</b>${G.ATTR_SHORT[k]}</span>`).join('')}</span>
+      <span class="fc-bars"><i style="width:${p.fit}%" title="Físico"></i><i style="width:${p.morale}%" title="Moral"></i></span>
+    </button>`;
+  }
 
   // ---- Ficha de jugador
   function playerModal(pid) {
@@ -1004,7 +1037,7 @@ ${esc(me().name)};Nombre;Apellido;ESP;DC;24;85;88;75;84;40;78;10</pre>
       mm.querySelector('#csave').onclick = () => {
         c.name = mm.querySelector('#cn').value.trim() || c.name; c.code = (mm.querySelector('#cc').value.trim() || c.code).toUpperCase().slice(0, 3);
         c.stadium = mm.querySelector('#cst').value.trim() || c.stadium; c.colors = [mm.querySelector('#c1').value, mm.querySelector('#c2').value];
-        delete snapCache[c.id]; if (c.id === G.C.user.club) heroFor = null;
+        G.photoReset && G.photoReset();
         G.save(); closeModal(); toast('Club actualizado.', 'good'); render();
       };
     });
@@ -1039,9 +1072,9 @@ ${esc(me().name)};Nombre;Apellido;ESP;DC;24;85;88;75;84;40;78;10</pre>
         const txt = G.exportSave(); const ta = el.querySelector('#imp');
         navigator.clipboard?.writeText(txt).then(() => msg('Partida copiada al portapapeles (' + Math.round(txt.length / 1024) + ' KB).'), () => { ta.value = txt; ta.select(); msg('Copia el texto seleccionado.'); });
       };
-      el.querySelector('#import').onclick = () => { try { G.importSave(el.querySelector('#imp').value); ensureDefaults(); G.save(); heroFor = null; S.view = 'inicio'; renderShell(); toast('Partida cargada.', 'good'); } catch (e) { msg('No es una partida válida.'); } };
+      el.querySelector('#import').onclick = () => { try { G.importSave(el.querySelector('#imp').value); ensureDefaults(); G.save(); S.view = 'inicio'; renderShell(); toast('Partida cargada.', 'good'); } catch (e) { msg('No es una partida válida.'); } };
       const r = el.querySelector('#reset');
-      r.onclick = () => { if (!r.dataset.c) { r.dataset.c = 1; r.textContent = 'Pulsa otra vez para confirmar'; return; } G.deleteSave(); heroFor = null; renderStart(); };
+      r.onclick = () => { if (!r.dataset.c) { r.dataset.c = 1; r.textContent = 'Pulsa otra vez para confirmar'; return; } G.deleteSave(); renderStart(); };
     }
   };
 
