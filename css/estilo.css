@@ -389,3 +389,46 @@ table.rank tr.me td{background:rgba(230,187,85,.1);color:var(--oro3)}table.rank 
 .lvd{display:flex;gap:3px}.lvd i{width:14px;height:6px;border-radius:2px;background:#2a2f3a;transform:skewX(-20deg)}.lvd i.on{background:var(--gold-grad);box-shadow:0 0 6px rgba(230,187,85,.5)}
 .obra .ob{margin-top:auto;padding-top:.3rem}.obra .ob .btn{width:100%}
 .tile .v small.cap{font-size:.55em;color:var(--muted);font-style:normal}
+/* ---------- ganadería de corro ---------- */
+nav.tabs .wrap{grid-template-columns:repeat(8,1fr)}
+@media (max-width:440px){nav.tabs button{font-size:.6rem;letter-spacing:-.01em}nav.tabs button svg{width:22px;height:22px}nav.tabs button span:not(.bdg){max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+nav.tabs button svg.ti{width:25px;height:25px}
+.gloc{display:block;color:#cfc9bc;font-size:.72rem}
+.cHead{display:flex;gap:12px;align-items:center}.cName{display:block;font-family:var(--display);font-weight:800;font-size:1.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ofc .pic.nit{filter:hue-rotate(200deg) brightness(.55) saturate(1.3)}
+.corroP{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid rgba(230,187,85,.5);background:linear-gradient(100deg,#1d1610,#0d0c09);color:inherit;cursor:pointer}
+.corroP .cpI{flex:0 0 74px;height:56px;border-radius:8px;background-size:cover;background-position:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.corroP .cpT{flex:1;min-width:0;display:flex;flex-direction:column}.corroP small{color:var(--oro);text-transform:uppercase;letter-spacing:.12em;font-size:.66rem;font-weight:700}
+.corroP b{font-family:var(--display);font-size:1.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.corroP span span{font-size:.8rem;color:#cfc9bc}
+/* ---------- calle 3D: retransmisión ---------- */
+.h3cap{pointer-events:none}
+#w3d[data-m="tienta"] .h3cap{top:calc(112px + env(safe-area-inset-top,0px));bottom:auto}
+#w3d[data-m="calle"] .h3cap{top:calc(166px + env(safe-area-inset-top,0px));bottom:auto;max-width:min(560px,calc(100% - 24px));font-size:.82rem}
+#w3d[data-m="calle"] #h3toro{display:none}
+.h3calle{position:absolute;inset:0;pointer-events:none}
+.h3calle .btn{pointer-events:auto}
+.tvTop{position:absolute;left:max(10px,env(safe-area-inset-left,0px));top:calc(54px + env(safe-area-inset-top,0px));display:flex;align-items:stretch;background:rgba(12,12,14,.86);box-shadow:0 4px 18px rgba(0,0,0,.4)}
+.tvTop .tvIco{width:46px;display:grid;place-items:center;background:#c8202a}.tvTop .tvIco svg{width:32px;height:32px;fill:#fff}
+.tvTx{display:flex;flex-direction:column;padding:4px 10px;font-family:var(--display);color:#fff;line-height:1.1}.tvTx b{font-size:1.15rem;font-weight:800;letter-spacing:.02em}
+.tvTx span{display:flex;gap:14px;font-size:.82rem;font-weight:700;text-transform:uppercase;border-top:2px solid #c8202a;padding-top:2px;margin-top:2px}.tvTx i{font-style:normal}
+.tvLive{position:absolute;right:max(10px,env(safe-area-inset-right,0px));top:calc(54px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:6px;font-family:var(--display);font-weight:800;color:#fff}
+.tvLive b{background:#c8202a;padding:3px 8px;font-size:.95rem;letter-spacing:.04em}.tvLive span{font-size:1.5rem;font-style:italic;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+.tvLow{position:absolute;left:max(10px,env(safe-area-inset-left,0px));bottom:calc(160px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:10px;background:rgba(12,12,14,.88);padding:8px 14px 8px 8px;border-bottom:3px solid #c8202a;color:#fff;max-width:calc(100% - 210px)}
+.tvLow:empty{display:none}.tvLow .tvH{width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.75);display:grid;place-items:center;background:#1a1a1d}.tvLow .tvH svg{width:38px;height:38px}
+.tvLow .tvD{display:flex;flex-direction:column;min-width:0;font-family:var(--display)}.tvLow .tvD b{font-size:1.05rem;font-weight:800;border-bottom:2px solid #c8202a;padding-bottom:2px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tvLow small{font-size:.8rem;color:#ececec;font-family:var(--sans,inherit)}
+.tvMap{position:absolute;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(160px + env(safe-area-inset-bottom,0px));width:132px;height:110px;border:1px solid rgba(255,255,255,.4)}
+.clT{position:absolute;left:50%;transform:translateX(-50%);top:calc(112px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center}
+.clres,.clpts{background:rgba(8,9,12,.72);color:#f2e7d5;font-size:.78rem;padding:2px 8px;border-radius:5px;white-space:nowrap}.clres:empty,.clpts:empty{display:none}
+.clB{position:absolute;left:0;right:0;bottom:calc(104px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:0 10px}
+.clB .btn{background:rgba(16,19,26,.88)}.clB .btn.oro{background:var(--gold-grad)}
+.clA{position:absolute;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:flex-end}
+.clA .btn{min-height:52px;background:rgba(16,19,26,.9)}.clA .btn.oro{background:var(--gold-grad);min-width:116px;min-height:70px;font-size:1.2rem}
+#w3d.clspect .clA,#w3d.clspect #joy{display:none}
+#w3d[data-m="calle"] #h3help{display:none}
+@media (max-width:520px){.tvTx b{font-size:.95rem}.tvTx span{font-size:.66rem;gap:8px}.tvTop .tvIco{width:38px}.tvLive span{font-size:1.15rem}.tvLow{max-width:calc(100% - 160px);padding:6px 10px 6px 6px}.tvLow .tvH{width:40px;height:40px}.tvLow .tvD b{font-size:.9rem}.tvLow small{font-size:.68rem}.tvMap{width:110px;height:92px}.clres,.clpts{font-size:.68rem}}
+#w3d.clspect .clB{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+#w3d.clspect .tvLow,#w3d.clspect .tvMap{bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+#w3d[data-m="calle"] #joy{bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+.clFin{width:100%;display:grid;gap:4px}.clFin div{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-radius:6px;background:rgba(255,255,255,.06)}.clFin b{font-family:var(--display);font-size:1.15rem}
+.h3cap{transition:opacity .6s}
+.field{min-width:0}.sect.card .field>.chips{flex-wrap:wrap;overflow:visible}main .wrap>*{min-width:0}

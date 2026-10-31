@@ -272,14 +272,14 @@ function init3D(){
  $('#h3snd').onclick=auToggle;$('#h3fs').onclick=()=>{try{const d=document;if(d.fullscreenElement||d.webkitFullscreenElement){(d.exitFullscreen||d.webkitExitFullscreen).call(d)}else{const e=d.documentElement;const r=(e.requestFullscreen||e.webkitRequestFullscreen);if(r){const p=r.call(e);if(p&&p.catch)p.catch(()=>{});try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})}catch(e2){}}}}catch(e){}};
  $('#h3tasks').onclick=()=>{W3.tasksMin=!W3.tasksMin;W3.tasksKey=''};
  $('#h3adv').onclick=()=>{advance();if(W3.mode==='finca')rebuildFinca()};
- $('#h3exit').onclick=()=>{if(W3.mode==='tienta')ttExit();else exit3D()};
+ $('#h3exit').onclick=()=>{if(W3.mode==='tienta')ttExit();else if(W3.mode==='calle'&&typeof clAbandon==='function')clAbandon();else exit3D()};
  $('#pv').onclick=()=>{const v=['tv','tendido','callejon','toro'],n={tv:'TV',tendido:'tendido',callejon:'callejón',toro:'junto al toro'};CP.view=v[(v.indexOf(CP.view)+1)%4];CP.cut=true;$('#pv').textContent='Cámara: '+n[CP.view]};
  $('#ps').onclick=()=>{CP.spd=CP.spd===1?2:CP.spd===2?4:1;$('#ps').textContent='×'+CP.spd};
  $('#pn').onclick=()=>cpNext();$('#px').onclick=exitPlaza;$('#psal').onclick=saludar;
  $('#ttcita').onclick=ttCitar;$('#tttemp').addEventListener('pointerdown',e=>{e.preventDefault();ttTemplar()});$('#ttend').onclick=ttEndVaca;
  let last=performance.now();
  const loop=now=>{requestAnimationFrame(loop);if(!W3.on)return;const dt=Math.min(.05,(now-last)/1000);last=now;
-  if(W3.mode==='finca')fincaTick(dt);else if(W3.mode==='plaza')plazaTick(dt);else if(W3.mode==='tienta')tientaTick(dt);
+  if(W3.mode==='finca')fincaTick(dt);else if(W3.mode==='plaza')plazaTick(dt);else if(W3.mode==='tienta')tientaTick(dt);else if(W3.mode==='calle'&&typeof calleTick==='function')calleTick(dt);
   if(W3.holding&&W3.act&&W3.act.hold){W3.hold+=dt;const p=Math.min(1,W3.hold/W3.act.dur);doBtn.style.backgroundImage=`linear-gradient(90deg,rgba(191,58,63,.85) ${p*100}%,transparent ${p*100}%)`;if(p>=1){const f=W3.act.fn;W3.holding=false;W3.hold=0;doBtn.style.backgroundImage='';f()}}
   if(W3.scene)R3.render(W3.scene,W3.cam)};
  requestAnimationFrame(loop)}
@@ -750,13 +750,13 @@ function ttCitar(){const T=TT;if(!T||T.phase!=='espera')return;if(T.emb>=7||T.re
  const B=T.a.g.bra,arr=Math.pow(B/100,1.4)*1.25;
  if(Math.random()<arr){T.phase='arranca';T.t=0;const P=W3.F.p,dx=T.cx-P.x,dz=T.cz-P.z,d=Math.hypot(dx,dz)||1;
   const rx=-dz/d,rz=dx/d;const sw=(1-clamp((T.a.g.nob-45)/45,0,1))*.7;T.cp={x:P.x+rx*(1.1-sw),z:P.z+rz*(1.1-sw)};
-  T.spd=3.2+(B-50)/14+(T.a.g.fue-60)/40;T.dir={x:(T.cp.x-T.cx),z:(T.cp.z-T.cz)};const L=Math.hypot(T.dir.x,T.dir.z)||1;T.dir.x/=L;T.dir.z/=L;T.emb++;bufido(.4);
+  T.spd=Math.min(5.6,3+(B-50)/16+(T.a.g.fue-60)/45);T.dir={x:(T.cp.x-T.cx),z:(T.cp.z-T.cz)};const L=Math.hypot(T.dir.x,T.dir.z)||1;T.dir.x/=L;T.dir.z/=L;T.emb++;bufido(.4);
   $('#h3cap').textContent='¡Se arranca! Templa cuando llegue a la muleta.';$('#tttemp').disabled=false;$('#ttcita').disabled=true}
  else{T.rehuse++;T.phase='rehusa';T.t=0;$('#ttcita').disabled=true;$('#h3cap').textContent=T.rehuse>=3?'No quiere pelea. Mansea.':'No se arranca: escarba y cabecea. Vuelve a citar, más cerca.'}
  ttInfo()}
 function ttTemplar(){const T=TT;if(!T||T.phase!=='arranca')return;const d=Math.hypot(T.cp.x-T.cx,T.cp.z-T.cz);
  $('#tttemp').disabled=true;$('#tttemp').style.boxShadow='';
- if(d<=3.4&&d>=.8){T.phase='pase';T.t=0;T.pases++;const L=2.2+clamp((T.a.g.nob-40)/45,.1,1)*4;T.pend={x:T.cp.x+T.dir.x*L,z:T.cp.z+T.dir.z*L};T.p0={x:T.cx,z:T.cz};
+ if(d<=4.4&&d>=.6){T.phase='pase';T.t=0;T.pases++;const L=2.2+clamp((T.a.g.nob-40)/45,.1,1)*4;T.pend={x:T.cp.x+T.dir.x*L,z:T.cp.z+T.dir.z*L};T.p0={x:T.cx,z:T.cz};
   T.pdur=(L+d)/T.spd;ole(d<2.2?'¡Olé!':'¡Bien!');oleSnd(false);$('#h3cap').textContent=T.a.g.nob>72?'Pase largo y templado: humilla y repite con clase.':T.a.g.nob>58?'Pasa, aunque sin terminar de entregarse.':'Pasa a regañadientes, tirando un derrote al final.'}
  else{T.fallos++;T.t=0;if(Math.random()<.6){T.phase='coge'}else{T.phase='queda';$('#h3cap').textContent='Te has adelantado: se queda a mitad de viaje y te mira.'}}
  ttInfo()}
@@ -795,8 +795,8 @@ function tientaTick(dt){
   case 'rehusa':{paw=true;head=.6;face(F.p.x,F.p.z);if(T.t>1.3){T.phase='espera';$('#ttcita').disabled=false}break}
   case 'queda':{head=.2;face(F.p.x,F.p.z);if(T.t>1.2){T.phase='espera';$('#ttcita').disabled=false}break}
   case 'arranca':{T.cx+=T.dir.x*T.spd*dt;T.cz+=T.dir.z*T.spd*dt;face(T.cx+T.dir.x,T.cz+T.dir.z);cs=1.2;head=.5+clamp((T.a.g.nob-45)/45,0,1)*.5;
-   const d=Math.hypot(T.cp.x-T.cx,T.cp.z-T.cz);const ring=$('#tttemp');ring.style.boxShadow=d<3.4&&d>.8?'0 0 0 4px rgba(147,184,92,.95)':'';
-   if(d<.6||((T.cx-T.cp.x)*T.dir.x+(T.cz-T.cp.z)*T.dir.z)>0){T.fallos++;T.phase='coge';T.t=0;ring.style.boxShadow='';$('#tttemp').disabled=true;ttInfo()}
+   const d=Math.hypot(T.cp.x-T.cx,T.cp.z-T.cz);const ring=$('#tttemp');ring.style.boxShadow=d<4.4&&d>.6?'0 0 0 4px rgba(147,184,92,.95)':'';
+   if(d<.45||((T.cx-T.cp.x)*T.dir.x+(T.cz-T.cp.z)*T.dir.z)>.3){T.fallos++;T.phase='coge';T.t=0;ring.style.boxShadow='';$('#tttemp').disabled=true;ttInfo()}
    break}
   case 'coge':{const P=F.p,dx=P.x-T.cx,dz=P.z-T.cz,d=Math.hypot(dx,dz)||1;T.cx+=dx/d*T.spd*dt;T.cz+=dz/d*T.spd*dt;face(P.x,P.z);cs=1.2;head=1;
    if(d<1.3){F.toss=2.2;F.tv={x:dx/d*3,z:dz/d*3};toss=1;T.phase='quite';T.t=0;bufido(.6);$('#h3cap').textContent='¡Volteretón! El mayoral entra al quite con el capote.'}
