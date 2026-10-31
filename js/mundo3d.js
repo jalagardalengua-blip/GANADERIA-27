@@ -973,7 +973,7 @@ function TS(Z){return Z.act==='s2'?Z.s2:Z.t}
 function faceTo(o,x,z){o.yaw=Math.atan2(x-o.x,z-o.z)}
 function actPaseillo(C){const D=DOOR,E={x:0,z:PR-7};const dx=E.x-D.x,dz=E.z-D.z,Ln=Math.hypot(dx,dz),ux=dx/Ln,uz=dz/Ln,px=-uz,pz=ux,yaw=Math.atan2(ux,uz);const rows=C.pas;
  return {d:22,shots:['hint'],cap:'Suena el pasodoble. Los alguacilillos abren plaza y las cuadrillas hacen el paseíllo, montera calada y capote de paseo.',
-  init(Z){musicStart();applause(4,.2);Z.b.vis=false;Z.t.vis=false;Z.pe.forEach(p=>p.vis=false);rows.forEach(r=>r.forEach(a=>{a.o.root.visible=true}))},
+  init(Z){musicStart('feria');applause(4,.2);Z.b.vis=false;Z.t.vis=false;Z.pe.forEach(p=>p.vis=false);rows.forEach(r=>r.forEach(a=>{a.o.root.visible=true}))},
   f(Z,u,dt){const T=u*22;Z.b.vis=false;Z.t.vis=false;Z.pe.forEach(p=>p.vis=false);
    rows.forEach((r,ri)=>{const lim=Ln-ri*2.8-1.2,s=clamp((T-ri*1.2)*1.6,0,lim),mov=s>0&&s<lim-.05;
     r.forEach((a,j)=>{const off=(j-(r.length-1)/2)*(a.kind==='h'?2.3:1.35);a.o.root.position.set(D.x+ux*s+px*off,0,D.z+uz*s+pz*off);a.o.root.rotation.y=yaw;a.o.root.visible=T<21.4;
@@ -1083,9 +1083,9 @@ function actEstocada(t,who,mat){const n=t.ent||1,dsc=t.desc||0,av=t.avisos||0,pe
     else if(v<.62){const e=(v-.45)/.17;T.x=lerp(pf.x,b.x+fx*.4+px*.7,e);T.z=lerp(pf.z,b.z+fz*.4+pz*.7,e);T.sp=1.3;T.arm='perfil';b.toss=e>.7?.4:0;b.head=.95}
     else if(v<.7){T.arm=null;if(k<n-1){T.sword=false;Z.b.sword=.2;if(!Z['pz'+k]){Z['pz'+k]=1;whistles(.2);banner('Pinchazo','',1.6)}}else{T.sword=false;Z.b.sword=t.esto==='media'?.5:1;if(!Z.ent){Z.ent=1;oleP(t.esto==='media'?'¡Bien!':'¡Olé!',t.esto!=='media');applause(2.5,.35)}}}
     else{if(k<n-1)Z.b.sword=0;T.x+=px*.03;T.z+=pz*.03;T.sp=.6;faceTo(T,b.x,b.z)}
-    if(av&&k===n-1&&v>.2&&!Z.av1){Z.av1=1;clarin();banner('Primer aviso','',2)}}
+    if(av&&k===n-1&&v>.2&&!Z.av1){Z.av1=1;clarin('aviso');banner('Primer aviso','',2)}}
    else if(tt<per*n+dsc*2.4){const k=Math.floor((tt-per*n)/2.4),v=(tt-per*n)/2.4-k;T.sword=true;const pf={x:b.x+fx*1.3+px*.4,z:b.z+fz*1.3+pz*.4};T.x=lerp(T.x,pf.x,.1);T.z=lerp(T.z,pf.z,.1);faceTo(T,b.x,b.z);T.arm=v>.55&&v<.7?'perfil':null;b.head=1.05;
-    if(v>.6&&!Z['ds'+k]){Z['ds'+k]=1;if(k===dsc-1)T.sword=false}if(av>1&&k===dsc-1&&!Z.av2){Z.av2=1;clarin();banner('Segundo aviso','',2)}}
+    if(v>.6&&!Z['ds'+k]){Z['ds'+k]=1;if(k===dsc-1)T.sword=false}if(av>1&&k===dsc-1&&!Z.av2){Z.av2=1;clarin('aviso');banner('Segundo aviso','',2)}}
    else{T.sword=false;T.arm=null;faceTo(T,b.x,b.z)}}}}
 function actDobla(t){return {d:4.6,shots:['low'],cap:'El toro se amorcilla, aguanta en pie... y dobla.',
  init(Z){const T=TS(Z);T.sword=false;Z.pe.forEach(p=>p.vis=true)},

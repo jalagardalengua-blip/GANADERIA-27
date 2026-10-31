@@ -3,9 +3,9 @@ UI.casa=UI.casa||'bravo';
 {const i=TABS.findIndex(t=>t[0]==='corro');if(i>=0)TABS.splice(i,1)}
 const TABS_C=[['c_ini','Corro','vaca'],['c_con','Contratos','mon'],['c_res','Reses','toro'],['c_mer','Mercado','bolsa'],['c_inv','Inversiones','martillo']];
 function casaBar(){const c=UI.casa==='corro';const C=S.corro;const nb=C?C.of.filter(o=>o.st==='nueva'||(o.st==='aceptada'&&o.abs===absNow())).length:0;
- return `<div class="casaSw ${c?'c':''}"><div class="wrap"><button class="cs ${c?'':'on'}" onclick="setCasa('bravo')">${ICO.toroG}<span><b>Campo bravo</b><small>${esc(S.g.name)}</small></span></button>
- <button class="cs ${c?'on':''}" onclick="setCasa('corro')">${ICO.vaca}<span><b>Bous al carrer</b><small>${C?esc(C.name):'Sin ganadería de corro'}</small></span>${nb&&!c?`<i class="bdg">${nb}</i>`:''}</button><span class="knob"></span></div></div>`}
-function setCasa(k){if(UI.casa===k)return;UI.casa=k;const d=document.createElement('div');d.className='capWipe'+(k==='corro'?' cC':'');d.innerHTML=`<i></i><b>${k==='corro'?'Bous al carrer':'Campo bravo'}<small>${k==='corro'?(S.corro?esc(S.corro.name):'Ganadería de corro'):esc(S.g.name)}</small></b>`;document.body.appendChild(d);setTimeout(()=>d.remove(),1250);try{uiSnd('cap')}catch(e){}
+ return `<div class="casaSw ${c?'c':''}"><div class="wrap"><button class="cs ${c?'':'on'}" onclick="setCasa('bravo')">${ICO.toroG}<span><b>Ganadería principal</b><small>${esc(S.g.name)}</small></span></button>
+ <button class="cs ${c?'on':''}" onclick="setCasa('corro')">${ICO.vaca}<span><b>Ganadería de corro</b><small>${C?esc(C.name):'Bous al carrer · sin crear'}</small></span>${nb&&!c?`<i class="bdg">${nb}</i>`:''}</button><span class="knob"></span></div></div>`}
+function setCasa(k){if(UI.casa===k)return;UI.casa=k;const d=document.createElement('div');d.className='capWipe'+(k==='corro'?' cC':'');d.innerHTML=`<i></i><b>${k==='corro'?'Ganadería de corro':'Ganadería principal'}<small>${k==='corro'?(S.corro?esc(S.corro.name):'Ganadería de corro'):esc(S.g.name)}</small></b>`;document.body.appendChild(d);setTimeout(()=>d.remove(),1250);try{uiSnd('cap')}catch(e){}
  setTimeout(()=>{UI.tab=k==='corro'?'c_ini':'inicio';render();window.scrollTo(0,0)},420)}
 const _goC=go;go=function(t){if(t==='corro'){setCasa('corro');return}return _goC(t)};
 const _renderCasa=render;

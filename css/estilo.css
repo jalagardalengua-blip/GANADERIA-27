@@ -603,3 +603,51 @@ body.casaC .hdr::before{background:linear-gradient(135deg,#f1c40f,#c0262d)}
 body.casaC nav.tabs::before{background:repeating-linear-gradient(90deg,#f1c40f 0 14px,#c0262d 14px 22px);opacity:.85}
 body.casaC nav.tabs button[aria-current="true"]{color:#ffd23f}
 .capWipe.cC i{background:linear-gradient(90deg,#c0262d 0 20%,#f1c40f 20% 40%,#c0262d 40% 60%,#f1c40f 60% 76%,#e6bb55 76%,#e6bb55 78%,transparent 78.5%)}
+/* ===================== MÁS AIRE EN TODOS LOS MENÚS ===================== */
+.wrap{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+main{padding-block:22px calc(110px + env(safe-area-inset-bottom,0px))}
+#scr>.stack,#scr>div>.stack,#scr>.stack.cH{gap:2rem!important}
+#scr .stack{gap:1rem}
+.sect{gap:.95rem}
+.sect>header{padding-bottom:.55rem;margin-bottom:.1rem}
+.sect>header h2{font-size:clamp(1.3rem,5.6vw,1.6rem);letter-spacing:.03em}
+.list{border-radius:14px}
+.task{padding:1rem 1.1rem;min-height:62px;gap:1rem;line-height:1.35}
+.task .t small{display:inline-block;margin-top:.2rem}
+.tiles.t2{gap:14px}.tiles.t2 .tile{padding:18px 18px;min-height:88px}
+.tiles{gap:12px}.tile{padding:14px 15px}
+.alist{gap:14px}
+.ac{min-height:104px}
+.card{padding:18px}
+.ofc{padding:20px 18px 18px}.ofc .meta{gap:.8rem 1.3rem;margin-bottom:1.1rem}.ofc .pl{margin:.45rem 0 .8rem}
+.ofc .acts{gap:10px}
+.obras{gap:14px}.obra{padding:16px 16px;gap:.55rem}.obra small{line-height:1.4}
+.imp{gap:12px}.imp>div{padding:14px 15px}
+.retos{gap:12px}.reto{padding:14px 15px}
+.kv{gap:.6rem 1.2rem;line-height:1.5}
+.chips{gap:8px;padding-bottom:6px}
+.seg{gap:10px}
+.duo{gap:14px}
+.btn{min-height:48px}.btn.sm{min-height:40px;padding:.45rem .9rem}
+.fhero{margin-bottom:.2rem}
+.corroP{padding:14px 16px;gap:14px}
+/* hojas modales más holgadas */
+.sheet .stack{gap:1.1rem}
+.sheet .sh .wrap{padding-block:.9rem}
+/* selector de las dos ganaderías: más espacio y lectura clara */
+.casaSw .wrap{padding-block:10px;gap:10px}
+.casaSw .cs{padding:10px 14px;gap:10px;min-height:58px}
+.casaSw .cs b{font-size:.92rem;letter-spacing:.04em}
+.casaSw .cs small{font-size:.74rem;margin-top:2px}
+.casaSw .knob{top:10px;bottom:10px;left:max(18px,env(safe-area-inset-left,0px));width:calc(50% - 23px)}
+.casaSw.c .knob{transform:translateX(calc(100% + 10px))}
+@media (max-width:400px){.casaSw .cs svg{display:none}.casaSw .cs{padding:10px 12px}.casaSw .cs b{font-size:.84rem}}
+/* barra de estado y pestañas menos apretadas */
+.sbar .wrap{padding-block:.6rem}
+nav.tabs button{padding:.6rem 0 .7rem;min-height:64px;gap:5px}
+/* menú principal: más separación */
+.mList{gap:14px}.mItem{padding:17px 20px 17px 24px}.mItem small{margin-top:3px}
+.mMain{gap:clamp(26px,5vh,48px)}
+.mPanel{gap:20px;padding:14px 18px calc(30px + env(safe-area-inset-bottom,0px))}
+.mCt{gap:.65rem;padding:0 18px 20px}.mStats{gap:10px 18px;margin:.4rem 0 .6rem}
+.mModos .mMode{gap:16px}.mModos .mMode p{margin:.3rem 12px .7rem 0;line-height:1.4}
