@@ -180,7 +180,7 @@ function calleNext(){const C=S.corro;if(CL.res){CL.ev.luc[CL.res.a.id]=clResLuc(
  if(emb){res.fire=embolar(b)}CL.res=res;CL.cab.forEach(c=>c.b.root.visible=false);
  if(CL.door)CL.door.position.y=4.2;
  $('#h3toro').textContent=`${t==='becerro'?'Becerr'+(a.sex==='H'?'a':'o'):TIPOTXT[t]} · ${a.name}${a.num!=null?' nº '+a.num:''} · ${a.pelo} · ${C.name}`;
- $('#h3cap').textContent=emb?'Sale el toro embolado. Las bolas arden: respeta la distancia y busca los cadafales.':t==='becerro'?'Sale el becerro: es su primera prueba. Fíjate en cómo embiste.':CL.plaza?`Sale ${a.name}. Concurso de anillas: acércate de frente cuando esté parada y pon la anilla en el pitón.`:`Se abre el cajón y sale ${a.name}. Cítala y quiébrala cuando llegue.`;
+ $('#h3cap').textContent=emb?'Sale el toro embolado. Las bolas arden: respeta la distancia y busca los cadafales.':t==='becerro'?'Sale el becerro: es su primera prueba. Fíjate en cómo embiste.':CL.plaza?`Sale ${a.name}. Concurso de anillas: los recortadores buscan ponerle anillas en los pitones.`:`Se abre el cajón y sale ${a.name}, de ${S.corro.name}.`;
  cencerro&&cencerro(.6);clInfo();tvLow()}
 function cMorf(a){const fake={id:a.id,born:a.born,enc:null,g:{tra:70},sex:a.sex,peso:a.peso};try{const m=morf(fake);if(a.sex==='H'){m.horn='lira';m.hl=Math.min(1.2,.9+cAge(a)*.04)}return m}catch(e){return undefined}}
 function embolar(b){const g=new THREE.Group();const fires=[];
@@ -265,7 +265,7 @@ function resTick(r,dt){const E=CL.env,a=r.a,g=a.g;r.t+=dt;r.tt+=dt;let cs=0,head
   case 'embiste':{const tg=r.tgt;if(!tg||tg.toss>0){r.mode='mira';r.t=0;break}const px=tg.x+(tg.vx||0)*.25,pz=tg.z+(tg.vz||0)*.25;const fy=Math.atan2(px-r.x,pz-r.z);r.yaw+=clamp(angD(r.yaw,fy),-turn*dt,turn*dt);
    r.v=Math.min(vmax,r.v+dt*7);cs=r.v>4.5?1.2:.9;head=.6;const d=Math.hypot(tg.x-r.x,tg.z-r.z);r.st.dist+=r.v*dt;if(r.v>5&&Math.random()<dt*5)dust(CL.plaza?CL.P.D:CL.D,r.x,0,r.z,.3);
    if(tg.safe){r.mode='remata';r.t=0;break}
-   if(d<.95&&tg.dodge<=0&&tg.jump<=0){clToss(tg);toss=1}
+   if(d<.95&&tg.dodge<=0&&tg.jump<=0){if(tg.me||!tg.tryT)clToss(tg);toss=1}
    if(r.t>3.2+g.res/30||(r.t>1&&r.v<1.2)){r.mode='mira';r.t=0;r.st.par++}break}
   case 'pasa':{r.v=Math.max(2,r.v-dt*2.5);cs=r.v>4?1.1:.7;head=.5;if(r.t>1.3){r.mode='mira';r.t=0}break}
   case 'remata':{r.v=Math.max(0,r.v-dt*12);head=.9;toss=Math.sin(r.t*8)>0?.7:0;if(r.t<.05){r.st.rem++;clCrowd(.7);try{bufido(.5)}catch(e){}}if(r.t>1.4){r.mode='mira';r.t=0}break}
@@ -281,7 +281,7 @@ function resTick(r,dt){const E=CL.env,a=r.a,g=a.g;r.t+=dt;r.tt+=dt;let cs=0,head
 function camCalle(dt){if(CL.cam==='fix')return;const c=W3.cam.position,me=CL.me,r=CL.res;let tx,ty,tz,lx,ly,lz;const k=Math.min(1,dt*3.5);
  if(CL.cam==='jug'&&!CL.spect){const dist=6.2*(W3.zoom||1),hgt=1.6+W3.pitch*5.5;tx=me.x+Math.sin(W3.yaw)*dist;tz=me.z+Math.cos(W3.yaw)*dist;ty=hgt;
   if(r&&r.mode==='embiste'&&r.tgt===me){lx=(me.x+r.x)/2;lz=(me.z+r.z)/2}else{lx=me.x-Math.sin(W3.yaw)*2;lz=me.z-Math.cos(W3.yaw)*2}ly=1.1}
- else if(CL.cam==='tv'){const f=r||me;let bx,bz;if(CL.plaza){const a=Math.atan2(f.x,f.z)+Math.PI*.8;bx=Math.sin(a)*(PR+8);bz=Math.cos(a)*(PR+8);ty=14}else if(inRc(CLRECT.plz,f.x,f.z,3)){bx=f.x*.35+10;bz=f.z*.35+13;ty=11.5}else if(Math.abs(f.z)<5&&Math.abs(f.x)>14){bx=f.x-Math.sign(f.x)*15;bz=0;ty=15}else{bx=0;bz=f.z-16;ty=16}tx=bx;tz=bz;lx=f.x;lz=f.z;ly=.6}
+ else if(CL.cam==='tv'){const f=r||me;let bx,bz;if(CL.plaza){const a=Math.atan2(f.x,f.z)+Math.PI*.8;bx=Math.sin(a)*(PR+8);bz=Math.cos(a)*(PR+8);ty=14}else if(inRc(CLRECT.plz,f.x,f.z,3)){bx=clamp(f.x*.3+8,-12,12);bz=clamp(f.z*.3+8.5,-9,10.4);ty=9.5}else if(Math.abs(f.z)<5&&Math.abs(f.x)>14){bx=f.x-Math.sign(f.x)*15;bz=0;ty=15}else{bx=0;bz=f.z-16;ty=16}tx=bx;tz=bz;lx=f.x;lz=f.z;ly=.6}
  else if(CL.cam==='res'&&r){tx=r.x-Math.sin(r.yaw)*7;tz=r.z-Math.cos(r.yaw)*7;ty=3.2;lx=r.x+Math.sin(r.yaw)*3;lz=r.z+Math.cos(r.yaw)*3;ly=1}
  else{const f=r||me;if(CL.plaza){const a=Math.atan2(f.x,f.z)+Math.PI;tx=Math.sin(a+.5)*(PR+6);tz=Math.cos(a+.5)*(PR+6);ty=9}else if(inRc(CLRECT.plz,f.x,f.z,2)){tx=8;tz=9.6;ty=4.2}else if(f.x>14){tx=f.x-11;tz=0;ty=5.2}else if(f.x<-14){tx=f.x+11;tz=0;ty=5.2}else{tx=0;tz=f.z-11;ty=5.2}lx=f.x;lz=f.z;ly=1}
  c.x+=(tx-c.x)*k;c.y+=(ty-c.y)*k;c.z+=(tz-c.z)*k;W3.look.set(lx,ly,lz);W3.cam.lookAt(W3.look)}
@@ -307,10 +307,8 @@ function calleDeco(sc,night){const G=geos(),red=M('#9e2a22',.75),wood=M('#7a2018
   const lf=M('#4f7a33',.9);for(let i=0;i<7;i++){const a=i/7*6.28;mesh(G.sph,i%2?lf:M('#5f8a3c',.9),2.1,1.5,2.1,Math.cos(a)*1.6,5.6+Math.sin(i*3)*.5,Math.sin(a)*1.6,tr)}mesh(G.sph,lf,2.6,1.9,2.6,0,6.6,0,tr);
   const n=12;for(let i=0;i<n;i++){const a0=i/n*6.28,a1=(i+1)/n*6.28;tal(c.x+Math.sin(a0)*c.r,c.z+Math.cos(a0)*c.r,c.x+Math.sin(a1)*c.r,c.z+Math.cos(a1)*c.r)}
   for(let i=0;i<9;i++){const a=R(0,6.28),d=R(.9,c.r-.3);CL.crowd.push([c.x+Math.sin(a)*d,0,c.z+Math.cos(a)*d,a+Math.PI,0])}}
- tal(-14,-4.6,-14,4.6);tal(14,-4.6,14,4.6);tal(-4,11,4,11);
  for(const [x0,x1,z] of [[-13.8,-8.2,-10.6],[8.2,13.8,-10.6]])tal(x0,z,x1,z);
- for(let i=0;i<10;i++){CL.crowd.push([R(-3.4,3.4),0,R(11.3,12.6),Math.PI,0])}
- for(const x of [-13.6,13.6])for(let i=0;i<8;i++)CL.crowd.push([x+(x>0?R(.3,1.2):-R(.3,1.2)),0,R(-3.6,3.6),x>0?-Math.PI/2:Math.PI/2,0])}
+}
 
 function clSpect(on){CL.spect=on;const b=$('#clsp');b.textContent=on?'Bajar a la calle':'Subir al cadafal';b.classList.toggle('oro',on);W3.root.classList.toggle('clspect',on);
  if(on){const r=CL.env.nearRef(CL.me.x,CL.me.z);CL.me.x=r.x;CL.me.z=r.z;CL.cam='tv'}else{const s0=CL.env.start;CL.me.x=s0.x;CL.me.z=s0.z;CL.cam='jug';$('#h3cap').textContent='Estás en la calle. Joystick para moverte, Citar para llamarla y el botón dorado cuando llegue.'}
