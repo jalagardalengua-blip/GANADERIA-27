@@ -42,7 +42,24 @@ const GNUEVAS=[
  {name:'Torrestrella',enc:'Domecq',pres:70,div:['#bf3a3f','#e6bb55'],loc:'Medina Sidonia, Cádiz',d:'Creada por Álvaro Domecq: jaboneros, berrendos y ensabanados de embestida dinámica.',pelos:['jabonero','berrendo en negro','ensabanado','berrendo en colorado','negro','colorado','melocotón']},
  {name:'Partido de Resina',enc:'Pablo Romero',pres:63,div:['#3a78b8','#f1ece0'],loc:'Aznalcázar, Sevilla',d:'El antiguo Pablo Romero: los «toros guapos», de imponente trapío y caja pechuda.'},
  {name:'Santiago Domecq',enc:'Domecq',pres:74,div:['#6b1d2b','#f1ece0'],loc:'Jerez de la Frontera, Cádiz',d:'Vacada en constante auge: casta exigente con entrega en la muleta.'},
- {name:'El Pilar',enc:'Domecq',pres:72,div:['#1f6b3a','#e6bb55'],loc:'Tamames, Salamanca',d:'Línea de Aldeanueva: profundidad y duración en sus embestidas.'}];
+ {name:'El Pilar',enc:'Domecq',pres:72,div:['#1f6b3a','#e6bb55'],loc:'Tamames, Salamanca',d:'Línea de Aldeanueva: profundidad y duración en sus embestidas.'},
+ {name:'Zalduendo',enc:'Domecq',pres:70,div:['#141414','#e6bb55'],d:'Encaste Domecq: toros de clase, muy presentes en las ferias de figuras.'},
+ {name:'Daniel Ruiz',enc:'Domecq',pres:68,div:['#1f6b3a','#141414'],loc:'Albacete',d:'Hierro albaceteño de origen Domecq, habitual en las ferias de Levante y La Mancha.'},
+ {name:'Domingo Hernández',enc:'Domecq',pres:76,div:['#2c4f9e','#e6bb55'],loc:'Salamanca',d:'De la misma familia que Garcigrande: nobleza y calidad para las figuras.'},
+ {name:'El Torero',enc:'Domecq',pres:70,div:['#bf3a3f','#f1ece0'],loc:'Cádiz',d:'Domecq de Salvador Domecq: toros encastados y con transmisión.'},
+ {name:'Salvador Domecq',enc:'Domecq',pres:69,div:['#7a1b2a','#e6bb55'],loc:'Cádiz',d:'Rama de la dinastía Domecq en el campo gaditano.'},
+ {name:'Pedraza de Yeltes',enc:'Domecq',pres:68,div:['#3a78b8','#141414'],loc:'Salamanca',d:'Toros serios y con motor, revelación en las ferias toristas.'},
+ {name:'Hermanos García Jiménez',enc:'Domecq',pres:66,div:['#e6bb55','#1f3f8a'],loc:'Salamanca',d:'Divisa salmantina de origen Domecq.'},
+ {name:'Montalvo',enc:'Domecq',pres:64,div:['#5b2a6e','#f1ece0'],loc:'Salamanca',d:'Ganadería salmantina de encaste Domecq.'},
+ {name:'Puerto de San Lorenzo',enc:'Atanasio',pres:66,div:['#141414','#2c4f9e'],loc:'Salamanca',d:'Atanasio Fernández: toros grandes y de embestida larga.'},
+ {name:'Valdefresno',enc:'Atanasio',pres:60,div:['#1f6b3a','#bf3a3f'],loc:'Salamanca',d:'Encaste Atanasio-Lisardo: casta y trapío.'},
+ {name:'Conde de la Corte',enc:'Atanasio',pres:56,div:['#6b1d2b','#e6bb55'],d:'Hierro histórico del que nace una de las grandes líneas del campo bravo.'},
+ {name:'José Escolar',enc:'Albaserrada',pres:62,div:['#3a3f4b','#bf3a3f'],d:'Albaserrada pura: cárdenos encastados para el aficionado torista.'},
+ {name:'Baltasar Ibán',enc:'Contreras',pres:60,div:['#2c4f9e','#f1ece0'],loc:'Madrid',d:'El gran referente del encaste Contreras.'},
+ {name:'Prieto de la Cal',enc:'Veragua',pres:52,div:['#e6bb55','#bf3a3f'],d:'Guardianes del encaste Veragua: jaboneros únicos en el campo bravo.',pelos:['jabonero','jabonero','albahío','melocotón','colorado']},
+ {name:'Murube',enc:'Murube',pres:58,div:['#1f6b3a','#f1ece0'],d:'Origen del encaste que lleva su nombre: nobleza y fijeza.'},
+ {name:'Fermín Bohórquez',enc:'Murube',pres:64,div:['#7a1b2a','#f1ece0'],loc:'Jerez de la Frontera, Cádiz',d:'Encaste Murube, referencia del toro de rejones.'},
+ {name:'Ana Romero',enc:'Santa Coloma',pres:58,div:['#d58fb0','#141414'],d:'Santa Coloma: toros finos y encastados.'}];
 for(const g of GANADERIAS)Object.assign(g,GINFO[g.name]||{});
 for(const g of GNUEVAS)if(!GANADERIAS.some(x=>x.name===g.name))GANADERIAS.push(g);
 const _startReal=startReal;
@@ -55,7 +72,14 @@ const TOREROS_REALES=[
  {n:'Luis Miguel Dominguín',t:'#1f4a32',e:'poderoso'},{n:'Antonio Ordóñez',t:'#5a2a6e',e:'artista'},{n:'Curro Romero',t:'#ece6da',e:'artista'},
  {n:'Santiago Martín «El Viti»',t:'#2f3b4a',e:'tecnico'},{n:'Paco Camino',t:'#7a4a1e',e:'tecnico'},{n:'Manuel Benítez «El Cordobés»',t:'#c43f78',e:'tremendista'},
  {n:'Paquirri',t:'#1f6b3a',e:'poderoso'},{n:'José Tomás',t:'#6b1d2b',e:'valiente'},{n:'Enrique Ponce',t:'#2c4f9e',e:'tecnico'},
- {n:'Morante de la Puebla',t:'#8a6a2a',e:'artista'},{n:'Julián López «El Juli»',t:'#3a3f4b',e:'poderoso'},{n:'José María Manzanares',t:'#e6e2d8',e:'artista'}];
+ {n:'Morante de la Puebla',t:'#8a6a2a',e:'artista'},{n:'Julián López «El Juli»',t:'#3a3f4b',e:'poderoso'},{n:'José María Manzanares',t:'#e6e2d8',e:'artista'},
+ {n:'Rafael «El Gallo»',t:'#6b1d2b',e:'artista'},{n:'Domingo Ortega',t:'#2b2b2b',e:'poderoso'},{n:'Pepe Luis Vázquez',t:'#e6e2d8',e:'artista'},{n:'Antonio Bienvenida',t:'#1d2f5e',e:'tecnico'},
+ {n:'Antoñete',t:'#2f3b4a',e:'artista'},{n:'Diego Puerta',t:'#7a1525',e:'valiente'},{n:'Rafael de Paula',t:'#ece6da',e:'artista'},{n:'Paco Ojeda',t:'#2b2b2b',e:'valiente'},
+ {n:'Espartaco',t:'#1f4a32',e:'poderoso'},{n:'Joselito (José Miguel Arroyo)',t:'#5a2a6e',e:'tecnico'},{n:'Finito de Córdoba',t:'#8a6a2a',e:'artista'},{n:'Vicente Barrera',t:'#2c4f9e',e:'tecnico'},
+ {n:'Francisco Rivera Ordóñez',t:'#3a3f4b',e:'valiente'},{n:'Sebastián Castella',t:'#1d2f5e',e:'valiente'},{n:'El Fandi',t:'#c43f78',e:'tremendista'},{n:'Miguel Ángel Perera',t:'#2b2b2b',e:'poderoso'},
+ {n:'Alejandro Talavante',t:'#7a4a1e',e:'artista'},{n:'Cayetano',t:'#7a1525',e:'artista'},{n:'Daniel Luque',t:'#1f6b3a',e:'tecnico'},{n:'Diego Urdiales',t:'#5a2a6e',e:'artista'},
+ {n:'Paco Ureña',t:'#6b1d2b',e:'valiente'},{n:'Emilio de Justo',t:'#2f3b4a',e:'valiente'},{n:'Andrés Roca Rey',t:'#1d2f5e',e:'poderoso'},{n:'Pablo Aguado',t:'#e6e2d8',e:'artista'},
+ {n:'Juan Ortega',t:'#8a6a2a',e:'artista'},{n:'Tomás Rufo',t:'#2c4f9e',e:'poderoso'},{n:'Borja Jiménez',t:'#7a1525',e:'valiente'},{n:'Román',t:'#1f4a32',e:'valiente'}];
 for(const t of TOREROS_REALES)if(!MATADORES.some(m=>m.n===t.n))MATADORES.push({...t,real:1});
 
 /* ---------- faenas del campo: calendario real de una ganadería brava ---------- */
