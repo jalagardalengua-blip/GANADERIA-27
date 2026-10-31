@@ -317,7 +317,7 @@ function celebrar(o){
  const pool=[...(o.tipo==='novillada'?NOVILLEROS:MATADORES)].sort(()=>Math.random()-.5).slice(0,3);
  const toros=[],hurt=new Set();
  o.toros.forEach((id,i)=>{const a=byId(id);if(!a)return;let mat=pool[i%3];if(hurt.has(mat.n))mat=pool.find(m=>!hurt.has(m.n))||SOBRE;
-  const t=lidiar(a,o,mat);if(t.cogida){hurt.add(mat.n);const s=pool.find(m=>!hurt.has(m.n))||SOBRE;t.sust={n:s.n,t:s.t,e:s.e};t.trof=0;if(t.res==='indulto')t.res='vuelta'}toros.push(t)});
+  const t=lidiar(a,o,mat);if(t.cogida){hurt.add(mat.n);const s=pool.find(m=>!hurt.has(m.n))||SOBRE;t.sust={n:s.n,t:s.t,e:s.e};t.trof=Math.min(t.trof,(typeof torPres==='function'?torPres(s.n):60)>=80?1:0)}toros.push(t)});
  let dp=0;for(const t of toros)dp+=RESPRES[t.res]*CATMUL[o.cat];
  const best=toros.reduce((m,t)=>t.score>m.score?t:m,toros[0]);
  let premio=null;
