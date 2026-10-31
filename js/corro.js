@@ -297,7 +297,7 @@ function corroBadge(n){const b=[...document.querySelectorAll('nav.tabs button')]
 const _renderInicio=renderInicio;
 renderInicio=function(el){_renderInicio(el);if(!S)return;const C=S.corro,d=document.createElement('section');d.className='sect';
  const hoy=C?C.of.filter(o=>o.st==='aceptada'&&o.abs===absNow()):[];
- d.innerHTML=`<button class="corroP" onclick="go('corro')"><span class="cpI" style="background-image:url(img/calle.jpg)"></span><span class="cpT"><small>Bous al carrer</small><b>${C?esc(C.name):'Ganadería de corro'}</b><span>${C?(hoy.length?`Este mes: ${hoy.map(o=>esc(o.pueblo)).join(', ')} · ¡míralo en directo!`:`${C.of.filter(o=>o.st==='nueva').length} contratos nuevos · prestigio ${Math.round(C.pres)}`):'Compra una casa de corro o funda la tuya'}</span></span>${ICO.chev}</button>`;
+ d.innerHTML=`<button class="corroP" onclick="go('corro')"><span class="cpI" style="background-image:url(img/calle.jpg)"></span><span class="cpT"><small>Ganadería de corro</small><b>${C?esc(C.name):'Bous al carrer'}</b><span>${C?(hoy.length?`Este mes: ${hoy.map(o=>esc(o.pueblo)).join(', ')} · ¡míralo en directo!`:`${C.of.filter(o=>o.st==='nueva').length} contratos nuevos · prestigio ${Math.round(C.pres)}`):'Compra una casa de corro o funda la tuya'}</span></span>${ICO.chev}</button>`;
  el.firstElementChild?el.firstElementChild.insertBefore(d,el.firstElementChild.children[1]||null):el.appendChild(d)};
 const _finTareas=finTareas;
 finTareas=function(rep){_finTareas(rep);try{corroMes(rep)}catch(e){console.error(e)}};
