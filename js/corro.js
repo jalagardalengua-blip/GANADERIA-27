@@ -29,12 +29,35 @@ const SEASON_W=[.35,.25,.45,.5,.75,.9,1.5,2.3,1.7,.9,.25,.15];
 /* ganaderías de corro de la Comunitat Valenciana (nombres reales; plantillas y cifras del juego, orientativas) */
 const CORRO_REAL=[
  {name:'Germán Vidal',pueblo:'Cabanes',l:'GV',div:['#1f6b3a','#f1ece0'],pres:84,n:[22,4,8,3],fam:['Koreana','Serena','Castilla','Peruana','Pajarita'],tor:['Avión','Fariseo'],d:'Tres generaciones de ganado bravo en Cabanes, desde 1914. Referente del bou al carrer en Castellón.'},
- {name:'Fernando Machancoses',pueblo:'Valencia',l:'FM',div:['#bf3a3f','#141414'],pres:80,n:[24,4,9,3],d:'Casa premiada por la Generalitat por su trayectoria en los festejos populares.'},
- {name:'Vicente Machancoses',pueblo:'Valencia',l:'VM',div:['#1f3f8a','#e6bb55'],pres:74,n:[18,3,7,3],d:'Ganadería de corro de la saga Machancoses.'},
+ {name:'Fernando Machancoses',pueblo:'Cheste',l:'FM',div:['#bf3a3f','#e6bb55'],pres:80,n:[24,4,9,3],tor:['Alcalde'],d:'Saga fundada en 1941 por Vicente Machancoses Aguado en la finca La Vinagra (Cheste). Hierro rojo y amarillo; premiada por la Generalitat.'},
+ {name:'Vicente Machancoses',pueblo:'Cheste',l:'VM',div:['#bf3a3f','#e6bb55'],pres:74,n:[18,3,7,3],d:'Rama de la saga Machancoses de Cheste, de vacas móviles, bravas y con sentido.'},
  {name:'Los Chatos',pueblo:'Torreblanca',l:'CH',div:['#141414','#e6bb55'],pres:76,n:[18,3,6,2],d:'Línea histórica de las vacas de corro valencianas.'},
  {name:'Gerardo Gamón',pueblo:'Comunitat Valenciana',l:'GG',div:['#5b2a6e','#f1ece0'],pres:66,n:[14,2,5,2],d:'Ganadería de corro habitual en las calles de Castellón.'},
  {name:'Miguel Parejo',pueblo:'Comunitat Valenciana',l:'MP',div:['#d9792b','#141414'],pres:60,n:[12,2,4,2],d:'Corro joven con vacas de mucho sentido.'},
- {name:'Peris',pueblo:'Valencia',l:'P',div:['#6b1d2b','#e6bb55'],pres:70,n:[16,3,6,2],d:'Fundada en 1890: la línea valenciana más influyente.'}
+ {name:'Peris',pueblo:'Valencia',l:'P',div:['#6b1d2b','#e6bb55'],pres:70,n:[16,3,6,2],d:'Fundada en 1890: la línea valenciana más influyente.'},
+ {name:'La Paloma',pueblo:'Xaló',l:'LP',div:['#f1ece0','#1f3f8a'],pres:79,n:[18,3,6,2],fam:['Morenita'],d:'Ganó las Nits de Concurs de Calp con la mejor vaca del concurso, Morenita.'},
+ {name:'Hermanos Cali',pueblo:'Moixent',l:'HC',div:['#1f6b3a','#e6bb55'],pres:70,n:[16,3,5,2],d:'Tercera en las Nits de Concurs de Calp; exhibiciones de toros en Enguera y La Romana.'},
+ {name:'Vicente Benavent',pueblo:'Comunitat Valenciana',l:'VB',div:['#2c4f9e','#f1ece0'],pres:73,n:[18,3,6,2],d:'Saga Benavent: segunda en las Nits de Concurs de Calp.'},
+ {name:'Hermanos Benavent',pueblo:'Comunitat Valenciana',l:'HB',div:['#2c4f9e','#bf3a3f'],pres:66,n:[14,2,5,2],d:'Otra rama de la familia Benavent, habitual en las fiestas de Viver.'},
+ {name:'Hermanos Asensi',pueblo:'Comunitat Valenciana',l:'HA',div:['#d9792b','#141414'],pres:66,n:[14,2,5,2],d:'Corro presente en los concursos de la Marina Alta.'},
+ {name:'La Templanza',pueblo:'Calp',l:'LT',div:['#5b2a6e','#e6bb55'],pres:62,n:[12,2,4,2],d:'Premio a la mejor suelta de tarde en las fiestas de Calp.'},
+ {name:'Hermanos Navarré',pueblo:'Comunitat Valenciana',l:'HN',div:['#141414','#f1ece0'],pres:62,n:[12,2,4,2],d:'Corro habitual en las calles de Nules.'},
+ {name:'Daniel Machancoses',pueblo:'Comunitat Valenciana',l:'DM',div:['#bf3a3f','#e6bb55'],pres:64,n:[14,2,5,2],d:'Otro hierro de la saga Machancoses.'},
+ {name:'Daniel Sánchez',pueblo:'Comunitat Valenciana',l:'DS',div:['#3a78b8','#e6bb55'],pres:58,n:[12,2,4,2],d:'Ganadería que compite en los concursos de vacas de la Marina.'},
+ {name:'Alberto Garrido',pueblo:'Comunitat Valenciana',l:'AG',div:['#2d6b4b','#f1ece0'],pres:56,n:[12,2,4,2],d:'Corro joven que se mide en los concursos de Calp.'},
+ {name:'El Saliner',pueblo:'Comunitat Valenciana',l:'ES',div:['#f1ece0','#3a78b8'],pres:58,n:[12,2,4,2],d:'Habitual en las fiestas de Puçol.'},
+ {name:'El Salero',pueblo:'Comunitat Valenciana',l:'SA',div:['#e6bb55','#bf3a3f'],pres:60,n:[12,2,4,2],d:'Corro de Enguera; famoso su desafío frente a La Paloma en La Romana.'},
+ {name:'Gregorio de Jesús',pueblo:'Comunitat Valenciana',l:'GJ',div:['#6b1d2b','#f1ece0'],pres:56,n:[12,2,4,2],d:'Sueltas de vaquillas en Enguera y La Romana.'},
+ {name:'La Espuela',pueblo:'Comunitat Valenciana',l:'LE',div:['#141414','#bf3a3f'],pres:60,n:[12,2,4,2],d:'Corro del interior de Castellón, habitual en Los Rosildos.'},
+ {name:'El Cid',pueblo:'Comunitat Valenciana',l:'EC',div:['#1f3f8a','#bf3a3f'],pres:56,n:[12,2,4,2],d:'Corro habitual en las fiestas de Viver.'},
+ {name:'Hermanos Infantes',pueblo:'Comunitat Valenciana',l:'HI',div:['#2d6b4b','#e6bb55'],pres:54,n:[10,2,4,2],d:'Sueltas en Nules y la Plana Baixa.'},
+ {name:'Madroñiz',pueblo:'Comunitat Valenciana',l:'MZ',div:['#8a2f2a','#e6bb55'],pres:54,n:[10,2,4,2],d:'Corro de la Plana, habitual en Nules.'},
+ {name:'Iván Meseguer',pueblo:'Comunitat Valenciana',l:'IM',div:['#3a3f4b','#e6bb55'],pres:52,n:[10,2,4,2],d:'Sale en las fiestas de Los Rosildos.'},
+ {name:'Teodoro García Gamón',pueblo:'Comunitat Valenciana',l:'TG',div:['#5b2a6e','#bf3a3f'],pres:56,n:[12,2,4,2],d:'Sueltas en Caudiel y el Alto Palancia.'},
+ {name:'Juan Aborrán',pueblo:'Comunitat Valenciana',l:'JA',div:['#d58fb0','#141414'],pres:52,n:[10,2,4,2],d:'Corro habitual en Massamagrell y l\'Horta Nord.'},
+ {name:'Fernando Mansilla',pueblo:'Comunitat Valenciana',l:'FS',div:['#2c4f9e','#e6bb55'],pres:54,n:[10,2,4,2],d:'Sale en las fiestas de Burriana.'},
+ {name:'Hermanos Navarro Morell',pueblo:'Comunitat Valenciana',l:'NM',div:['#1f6b3a','#bf3a3f'],pres:54,n:[10,2,4,2],d:'Sueltas en Burriana y la Plana.'},
+ {name:'Juan Faet',pueblo:'Castellón',l:'JF',div:['#bf3a3f','#1f6b3a'],pres:52,n:[10,2,4,2],d:'Corro de la capital de la Plana.'}
 ];
 const CNOMH=['Koreana','Serena','Castilla','Peruana','Pajarita','Chispa','Lunera','Morita','Gitanilla','Rubia','Pantera','Bruja','Centella','Paloma','Saeta','Tormenta','Golondrina','Canela','Valenciana','Ratita','Tómbola','Pulga','Avispa','Fiera','Perla','Rosalía','Cartuja','Montera','Faraona','Lagartija','Pólvora','Duquesa','Marquesa','Torera','Sultana','Bengala','Zíngara','Caramelo','Charrita','Mora','Molinera','Africana','Flamenca','Revoltosa','Rumbera'];
 const CNOMM=['Avión','Fariseo','Rayo','Ciclón','Barquero','Tabaquero','Cartucho','Volcán','Huracán','Bandido','Matacán','Petardo','Pirata','Comanche','Trueno','Cohete','Lucero','Marinero','Pregonero','Zorro','Carbonero','Torbellino'];
@@ -230,8 +253,8 @@ function renderCorro(el){const C=S.corro;
  if(!C){el.innerHTML=`<div class="stack" style="gap:1rem">
   <div class="fhero"><div class="img" style="background-image:url(img/calle.jpg)"></div><span class="season">Bous al carrer · Comunitat Valenciana</span></div>
   <div class="card goldline"><b style="font-family:var(--display);font-size:1.25rem">Ganadería de corro</b><p class="muted" style="margin:.3rem 0 0">Vacas y toros para las fiestas de los pueblos: tardes de vaquillas, bous embolats, capeas, encierros y concursos de recortadores. Las vacas de corro salen muchas veces: cada salida es una prueba, ganan fama… y sentido. Comparte caja, calendario y placita de tientas con tu ganadería de bravo.</p></div>
-  <section class="sect"><header><h2>Ganaderías de corro en venta</h2></header><div class="list">${CORRO_REAL.map((r,i)=>`<button class="gan" onclick="comprarCorro(${i})">${emblem({hierro:{l:r.l}},44)}
-   <span style="min-width:0"><b>${esc(r.name)}</b><br><small class="muted">${esc(r.pueblo)} · ${r.n[0]} vacas, ${r.n[1]} toros · ${eur(corroCostoReal(r))}</small><div class="pres"><i style="width:${r.pres}%"></i></div></span>${divisa(r.div)}</button>`).join('')}</div></section>
+  <section class="sect"><header><h2>Ganaderías de corro en venta</h2><span class="sp"></span><small class="muted">${CORRO_REAL.length} casas</small></header><div class="list">${CORRO_REAL.slice(0,CU.todas?99:8).map((r,i)=>`<button class="gan" onclick="comprarCorro(${i})">${emblem({hierro:{l:r.l}},44)}
+   <span style="min-width:0"><b>${esc(r.name)}</b><br><small class="muted">${esc(r.pueblo)} · ${r.n[0]} vacas, ${r.n[1]} toros · ${eur(corroCostoReal(r))}</small><div class="pres"><i style="width:${r.pres}%"></i></div></span>${divisa(r.div)}</button>`).join('')}</div>${CU.todas?'':`<button class="btn" style="width:100%;margin-top:.5rem" onclick="CU.todas=1;render()">Ver las ${CORRO_REAL.length} ganaderías de corro</button>`}</section>
   <section class="sect card goldline"><header><h2>Crea tu ganadería de corro</h2></header>
    <div class="field"><label class="lbl" for="nc-n">Nombre</label><input type="text" id="nc-n" maxlength="30" placeholder="Ej.: Ganadería El Templario" value="${esc(NEWC.name)}" oninput="NEWC.name=this.value"></div>
    <div class="two"><div class="field"><label class="lbl" for="nc-l">Letras del hierro</label><input type="text" id="nc-l" maxlength="2" value="${esc(NEWC.l)}" oninput="NEWC.l=this.value"></div>
