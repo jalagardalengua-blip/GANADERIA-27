@@ -272,14 +272,14 @@ function init3D(){
  $('#h3snd').onclick=auToggle;$('#h3fs').onclick=()=>{try{const d=document;if(d.fullscreenElement||d.webkitFullscreenElement){(d.exitFullscreen||d.webkitExitFullscreen).call(d)}else{const e=d.documentElement;const r=(e.requestFullscreen||e.webkitRequestFullscreen);if(r){const p=r.call(e);if(p&&p.catch)p.catch(()=>{});try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})}catch(e2){}}}}catch(e){}};
  $('#h3tasks').onclick=()=>{W3.tasksMin=!W3.tasksMin;W3.tasksKey=''};
  $('#h3adv').onclick=()=>{advance();if(W3.mode==='finca')rebuildFinca()};
- $('#h3exit').onclick=()=>{if(W3.mode==='tienta')ttExit();else if(W3.mode==='calle'&&typeof clAbandon==='function')clAbandon();else exit3D()};
+ $('#h3exit').onclick=()=>{if(W3.mode==='torero'&&typeof trExit==='function'){trExit();return}if(W3.mode==='tienta')ttExit();else if(W3.mode==='calle'&&typeof clAbandon==='function')clAbandon();else exit3D()};
  $('#pv').onclick=()=>{const v=['tv','tendido','callejon','toro'],n={tv:'TV',tendido:'tendido',callejon:'callejón',toro:'junto al toro'};CP.view=v[(v.indexOf(CP.view)+1)%4];CP.cut=true;$('#pv').textContent='Cámara: '+n[CP.view]};
  $('#ps').onclick=()=>{CP.spd=CP.spd===1?2:CP.spd===2?4:1;$('#ps').textContent='×'+CP.spd};
  $('#pn').onclick=()=>cpNext();$('#px').onclick=exitPlaza;$('#psal').onclick=saludar;
  $('#ttcita').onclick=ttCitar;$('#tttemp').addEventListener('pointerdown',e=>{e.preventDefault();ttTemplar()});$('#ttend').onclick=ttEndVaca;
  let last=performance.now();
  const loop=now=>{requestAnimationFrame(loop);if(!W3.on)return;const dt=Math.min(.05,(now-last)/1000);last=now;
-  if(W3.mode==='finca')fincaTick(dt);else if(W3.mode==='plaza')plazaTick(dt);else if(W3.mode==='tienta')tientaTick(dt);else if(W3.mode==='calle'&&typeof calleTick==='function')calleTick(dt);
+  if(W3.mode==='finca')fincaTick(dt);else if(W3.mode==='plaza')plazaTick(dt);else if(W3.mode==='tienta')tientaTick(dt);else if(W3.mode==='calle'&&typeof calleTick==='function')calleTick(dt);else if(W3.mode==='torero'&&typeof toreroTick==='function')toreroTick(dt);
   if(W3.holding&&W3.act&&W3.act.hold){W3.hold+=dt;const p=Math.min(1,W3.hold/W3.act.dur);doBtn.style.backgroundImage=`linear-gradient(90deg,rgba(191,58,63,.85) ${p*100}%,transparent ${p*100}%)`;if(p>=1){const f=W3.act.fn;W3.holding=false;W3.hold=0;doBtn.style.backgroundImage='';f()}}
   if(W3.scene)R3.render(W3.scene,W3.cam)};
  requestAnimationFrame(loop)}
