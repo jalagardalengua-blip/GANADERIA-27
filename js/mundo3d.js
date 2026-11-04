@@ -241,7 +241,7 @@ function init3D(){
  <div id="joy" aria-hidden="true"><div id="knob"></div></div>
  <div class="h3act"><button class="btn" id="h3do2" hidden></button><button class="btn" id="h3run">Correr</button><button class="btn oro" id="h3do" hidden></button></div>
  <div id="h3tt" class="h3plaza" hidden><span id="ttinfo" class="h3ttinfo"></span><button class="btn sm" id="ttend">Terminar con esta</button><button class="btn pri" id="ttcita">Citar</button><button class="btn oro" id="tttemp">¡Templar!</button></div>
- <div id="h3plaza" class="h3plaza" hidden><button class="btn sm" id="pv">Cámara: TV</button><button class="btn sm" id="ps">×1</button><button class="btn sm" id="pn">Siguiente toro</button><button class="btn sm oro" id="psal" hidden>Saludar desde el tercio</button><button class="btn sm" id="px">Salir de la plaza</button></div>
+ <div id="h3plaza" class="h3plaza" hidden><button class="btn sm" id="pv">Cámara: general</button><button class="btn sm" id="ps">×1</button><button class="btn sm" id="pn">Siguiente toro</button><button class="btn sm oro" id="psal" hidden>Saludar desde el tercio</button><button class="btn sm" id="px">Salir de la plaza</button></div>
  <div id="h3ole" class="h3ole"></div>
  <div id="h3cap" class="h3cap" hidden></div><div id="h3dim" class="h3dim" hidden></div><div id="h3help" class="h3help"></div>`;
  document.body.appendChild(d);W3.root=d;
@@ -272,14 +272,14 @@ function init3D(){
  $('#h3snd').onclick=auToggle;$('#h3fs').onclick=()=>{try{const d=document;if(d.fullscreenElement||d.webkitFullscreenElement){(d.exitFullscreen||d.webkitExitFullscreen).call(d)}else{const e=d.documentElement;const r=(e.requestFullscreen||e.webkitRequestFullscreen);if(r){const p=r.call(e);if(p&&p.catch)p.catch(()=>{});try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})}catch(e2){}}}}catch(e){}};
  $('#h3tasks').onclick=()=>{W3.tasksMin=!W3.tasksMin;W3.tasksKey=''};
  $('#h3adv').onclick=()=>{advance();if(W3.mode==='finca')rebuildFinca()};
- $('#h3exit').onclick=()=>{if(W3.mode==='tienta')ttExit();else if(W3.mode==='calle'&&typeof clAbandon==='function')clAbandon();else exit3D()};
- $('#pv').onclick=()=>{const v=['tv','tendido','callejon','toro'],n={tv:'TV',tendido:'tendido',callejon:'callejón',toro:'junto al toro'};CP.view=v[(v.indexOf(CP.view)+1)%4];CP.cut=true;$('#pv').textContent='Cámara: '+n[CP.view]};
+ $('#h3exit').onclick=()=>{if(W3.mode==='torero'&&typeof trExit==='function'){trExit();return}if(W3.mode==='tienta')ttExit();else if(W3.mode==='calle'&&typeof clAbandon==='function')clAbandon();else exit3D()};
+ $('#pv').onclick=()=>{const v=['tv','tendido','callejon','toro'],n={tv:'general',tendido:'tendido',callejon:'callejón',toro:'junto al toro'};CP.view=v[(v.indexOf(CP.view)+1)%4];CP.cut=true;$('#pv').textContent='Cámara: '+n[CP.view]};
  $('#ps').onclick=()=>{CP.spd=CP.spd===1?2:CP.spd===2?4:1;$('#ps').textContent='×'+CP.spd};
  $('#pn').onclick=()=>cpNext();$('#px').onclick=exitPlaza;$('#psal').onclick=saludar;
  $('#ttcita').onclick=ttCitar;$('#tttemp').addEventListener('pointerdown',e=>{e.preventDefault();ttTemplar()});$('#ttend').onclick=ttEndVaca;
  let last=performance.now();
- const loop=now=>{requestAnimationFrame(loop);if(!W3.on)return;const dt=Math.min(.05,(now-last)/1000);last=now;
-  if(W3.mode==='finca')fincaTick(dt);else if(W3.mode==='plaza')plazaTick(dt);else if(W3.mode==='tienta')tientaTick(dt);else if(W3.mode==='calle'&&typeof calleTick==='function')calleTick(dt);
+ const loop=now=>{requestAnimationFrame(loop);if(!W3.on)return;const dt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;
+  if(W3.mode==='finca')fincaTick(dt);else if(W3.mode==='plaza')plazaTick(dt);else if(W3.mode==='tienta')tientaTick(dt);else if(W3.mode==='calle'&&typeof calleTick==='function')calleTick(dt);else if(W3.mode==='torero'&&typeof toreroTick==='function')toreroTick(dt);
   if(W3.holding&&W3.act&&W3.act.hold){W3.hold+=dt;const p=Math.min(1,W3.hold/W3.act.dur);doBtn.style.backgroundImage=`linear-gradient(90deg,rgba(191,58,63,.85) ${p*100}%,transparent ${p*100}%)`;if(p>=1){const f=W3.act.fn;W3.holding=false;W3.hold=0;doBtn.style.backgroundImage='';f()}}
   if(W3.scene)R3.render(W3.scene,W3.cam)};
  requestAnimationFrame(loop)}
@@ -900,7 +900,7 @@ function enterPlaza(id){
  const sword=makeEstoque();
  CP={r,i:-1,spd:1,view:'tv',ban,pe,hor,me,cab,team,sword,pas:rows,actors,bull:null,saludo:false,exc:0,cut:true};
  W3.yaw=-.4;W3.pitch=.35;W3.cam.fov=46;W3.cam.updateProjectionMatrix();
- $('#pv').textContent='Cámara: TV';$('#ps').textContent='×1';
+ $('#pv').textContent='Cámara: general';$('#ps').textContent='×1';
  cpNext();CP.paused=true;const dm=$('#h3dim');dm.hidden=false;dm.style.opacity=1;dm.dataset.k='cartel';dm.innerHTML=cartelHTML(CP)}
 function cartelHTML(C){const r=C.r,mats=[];for(const t of r.toros){if(!mats.some(m=>m.n===t.mat))mats.push({n:t.mat,e:t.estilo})}
  return `<div class="cartel"><span class="lbl">${esc(r.feria)} · ${r.cat===1?'Plaza de primera':'Festejo'}</span><h2>${esc(r.plaza)}</h2><div class="cm">${mats.slice(0,3).map(m=>`<div class="mt"><span class="mr">${matRating(m.n)}</span><b>${esc(m.n)}</b><small>${ESTILO[m.e]||''}</small></div>`).join('')}</div>
