@@ -301,11 +301,14 @@ function trCam(dt){const C=TR,cam=W3.cam;if(!C||!C.b)return;const b=C.b,T=C.T;le
   else{const dx=b.x-T.x,dz=b.z-T.z,d=Math.hypot(dx,dz)||1,qx=-dz/d,qz=dx/d,sg=s==='low'?1:-1;p=[tv.x+qx*7*sg,1.4,tv.z+qz*7*sg];const r=Math.hypot(p[0],p[2]);if(r>PR-1){p[0]*=(PR-1)/r;p[2]*=(PR-1)/r}l=[tv.x,1.05,tv.z]}}
  if(C.cut){cam.position.set(p[0],p[1],p[2]);W3.look.set(l[0],l[1],l[2]);C.cut=0}else{cam.position.x+=(p[0]-cam.position.x)*k;cam.position.y+=(p[1]-cam.position.y)*k;cam.position.z+=(p[2]-cam.position.z)*k;W3.look.x+=(l[0]-W3.look.x)*k;W3.look.y+=(l[1]-W3.look.y)*k;W3.look.z+=(l[2]-W3.look.z)*k}
  cam.lookAt(W3.look)}
-/* menú principal: entrada al modo torero */
+/* menú principal: entrada al modo torero (bloqueado hasta terminarlo al completo) */
+const TR_LOCK=true;
+const TR_CAND='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="#e6bb55" d="M7 10V7a5 5 0 0 1 10 0v3h1.2c.7 0 1.3.6 1.3 1.3v8.4c0 .7-.6 1.3-1.3 1.3H5.8c-.7 0-1.3-.6-1.3-1.3v-8.4c0-.7.6-1.3 1.3-1.3H7zm2 0h6V7a3 3 0 0 0-6 0v3zm3 3.2a1.6 1.6 0 0 0-.8 3v1.8h1.6v-1.8a1.6 1.6 0 0 0-.8-3z"/></svg>';
+function trBloq(){try{uiSnd&&uiSnd('cap')}catch(e){}toast('Modo torero bloqueado: lo estamos terminando. Muy pronto podrás vestirte de luces.')}
 const _startScreenT=startScreen;
-startScreen=function(){if(MENU.v==='torero')return toreroScreen();let h=_startScreenT();
- if(MENU.v==='main')h=h.replace(`<button class="mItem" onclick="menuGo('modos')">`,`<button class="mItem trItem" onclick="menuGo('torero')"><b>Modo torero</b><small>${TC?esc(TC.name)+' · '+tcRango()[1]+' · '+TC.orejas+' orejas':'Vístete de luces: capote, muleta y espada'}</small><span class="mArr">${ICO.chev}</span></button>\n   <button class="mItem" onclick="menuGo('modos')">`);
- if(MENU.v==='modos')h=h.replace(`<div class="mMode"><i style="background-image:url(img/palco.jpg)">`,`<div class="mMode"><i style="background-image:url(img/plaza-2.jpg)"></i><div><b>Modo torero</b><p>Sé tú el matador: recibe con el capote, liga series de muleta con temple, entra a matar y sal a hombros. Carrera de novillero a figura.</p></div></div><div class="mMode"><i style="background-image:url(img/palco.jpg)">`);
+startScreen=function(){if(MENU.v==='torero'&&!TR_LOCK)return toreroScreen();if(MENU.v==='torero')MENU.v='main';let h=_startScreenT();
+ if(MENU.v==='main')h=h.replace(`<button class="mItem" onclick="menuGo('modos')">`,`<button class="mItem trItem trLock" aria-disabled="true" onclick="trBloq()"><b>Modo torero</b><small>Próximamente · en desarrollo</small><span class="mArr trCand">${TR_CAND}</span></button>\n   <button class="mItem" onclick="menuGo('modos')">`);
+ if(MENU.v==='modos')h=h.replace(`<div class="mMode"><i style="background-image:url(img/palco.jpg)">`,`<div class="mMode"><i style="background-image:url(img/plaza-2.jpg)"></i><div><b>Modo torero · próximamente</b><p>Sé tú el matador: recibe con el capote, liga series de muleta con temple, entra a matar y sal a hombros. Carrera de novillero a figura.</p></div></div><div class="mMode"><i style="background-image:url(img/palco.jpg)">`);
  return h};
 /* capote y muleta con caída real: el paño se curva hacia delante y recoge la luz */
 const _clothTickT=clothTick;

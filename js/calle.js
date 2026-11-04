@@ -159,7 +159,7 @@ function calleHUD(on){let h=$('#h3calle');if(!h){h=document.createElement('div')
   <div class="clT"><span id="clres" class="clres"></span><span id="clpts" class="clpts"></span></div>
   <div class="clB"><button class="btn sm" id="clcam">Cámara</button><button class="btn sm oro" id="clsp">Bajar a la calle</button><button class="btn sm" id="clnx">Siguiente res</button></div>
   <div class="clA"><button class="btn" id="clrun">Correr</button><button class="btn" id="clcit">Citar</button><button class="btn oro" id="clq">¡Quiebro!</button></div>`;W3.root.appendChild(h);
-  $('#clcam').onclick=()=>{const v=['tv','jug','cad','res'],n={tv:'TV',jug:'recortador',cad:'cadafal',res:'la res'};CL.cam=v[(v.indexOf(CL.cam)+1)%4];$('#clcam').textContent='Cámara: '+n[CL.cam]};
+  $('#clcam').onclick=()=>{const v=['tv','jug','cad','res'],n={tv:'general',jug:'recortador',cad:'cadafal',res:'la res'};CL.cam=v[(v.indexOf(CL.cam)+1)%4];$('#clcam').textContent='Cámara: '+n[CL.cam]};
   $('#clsp').onclick=()=>clSpect(!CL.spect);
   $('#clnx').onclick=()=>{if(CL&&CL.res&&CL.res.mode!=='recogida'){CL.res.mode='recogida';CL.res.t=0}};
   $('#clrun').onclick=()=>{W3.run=!W3.run;$('#clrun').classList.toggle('oro',W3.run)};
@@ -312,7 +312,7 @@ function calleDeco(sc,night){const G=geos(),red=M('#9e2a22',.75),wood=M('#7a2018
 
 function clSpect(on){CL.spect=on;const b=$('#clsp');b.textContent=on?'Bajar a la calle':'Subir al cadafal';b.classList.toggle('oro',on);W3.root.classList.toggle('clspect',on);
  if(on){const r=CL.env.nearRef(CL.me.x,CL.me.z);CL.me.x=r.x;CL.me.z=r.z;CL.cam='tv'}else{const s0=CL.env.start;CL.me.x=s0.x;CL.me.z=s0.z;CL.cam='jug';$('#h3cap').textContent='Estás en la calle. Joystick para moverte, Citar para llamarla y el botón dorado cuando llegue.'}
- $('#clcam').textContent='Cámara: '+({tv:'TV',jug:'recortador',cad:'cadafal',res:'la res'}[CL.cam])}
+ $('#clcam').textContent='Cámara: '+({tv:'general',jug:'recortador',cad:'cadafal',res:'la res'}[CL.cam])}
 function tvLow(){const r=CL&&CL.res;const el=$('#tvLow');if(!el)return;if(!r){el.innerHTML='';return}const a=r.a,t=cTipo(a);
  el.innerHTML=`<span class="tvH">${hierroSVG({l:S.corro.l,a:'none'},40,'#fff')}</span><span class="tvD"><b>Nº ${a.num??'—'} &nbsp;${esc(a.name.toUpperCase())}</b><small>${TIPOTXT[t]} · ${a.pelo}</small><small>Peso: ${a.peso} kg · Edad: ${cAge(a)} ${cAge(a)===1?'año':'años'}</small></span>`;
  $('#tvGan').textContent='GANADERÍA: '+S.corro.name.toUpperCase();$('#tvTit').textContent=CL.plaza?'CONCURSO DE RECORTADORES':CL.o.tipo==='embolado'?'BOU EMBOLAT':CL.o.tipo==='capea'?'CAPEA':'BOUS AL CARRER';const tot=CL.an.map(cById).filter(x=>x&&x.tipo!=='cabestro').length;$('#tvN').textContent=`RESES: ${Math.min(tot,CL.i+1)}/${tot}`}

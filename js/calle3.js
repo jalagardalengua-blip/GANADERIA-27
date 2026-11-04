@@ -3,10 +3,10 @@
 const CLDUR={vaca:50,toro:60,becerro:40,embolado:65};
 const _irCalle3=irCalle;
 irCalle=function(id){_irCalle3(id);if(!CL)return;CL.spd=1;CL.her=[];CL.spect=true;W3.root.classList.add('clspect');
- const h=$('#h3calle');if(h&&!h.__v3){h.__v3=1;const B=h.querySelector('.clB');B.innerHTML=`<button class="btn sm" id="clcam">Cámara: TV</button><button class="btn sm" id="clspd">×1</button>`;
-  $('#clcam').onclick=()=>{const v=['tv','cad','res'],n={tv:'TV',cad:'cadafal',res:'la res'};CL.cam=v[(v.indexOf(CL.cam)+1)%3];$('#clcam').textContent='Cámara: '+n[CL.cam]};
+ const h=$('#h3calle');if(h&&!h.__v3){h.__v3=1;const B=h.querySelector('.clB');B.innerHTML=`<button class="btn sm" id="clcam">Cámara: general</button><button class="btn sm" id="clspd">×1</button>`;
+  $('#clcam').onclick=()=>{const v=['tv','cad','res'],n={tv:'general',cad:'cadafal',res:'la res'};CL.cam=v[(v.indexOf(CL.cam)+1)%3];$('#clcam').textContent='Cámara: '+n[CL.cam]};
   $('#clspd').onclick=()=>{CL.spd=CL.spd===1?2:CL.spd===2?4:1;$('#clspd').textContent='×'+CL.spd}}
- $('#clcam').textContent='Cámara: TV';$('#clspd').textContent='×1';CL.cam='tv';durRes()};
+ $('#clcam').textContent='Cámara: general';$('#clspd').textContent='×1';CL.cam='tv';durRes()};
 clSpect=function(){if(!CL)return;CL.spect=true;W3.root.classList.add('clspect');const r=CL.env.nearRef(CL.me.x,CL.me.z);CL.me.x=r.x;CL.me.z=r.z;CL.cam=CL.cam==='jug'?'tv':CL.cam};
 function durRes(){const r=CL&&CL.res;if(!r||r.durSet)return;r.durSet=1;const t=cTipo(r.a);r.dur=CL.o.tipo==='embolado'?CLDUR.embolado:CLDUR[t]||50;CL.lowT=CL.t}
 const _calleNext3=calleNext;calleNext=function(){_calleNext3.apply(this,arguments);if(CL&&CL.res)durRes()};
