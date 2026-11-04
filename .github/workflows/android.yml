@@ -87,8 +87,12 @@ jobs:
         run: |
           chmod +x gradlew
           BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          # quita espacios, saltos de línea y caracteres invisibles que se cuelan al pegar desde el móvil
+          limpia() { printf '%s' "$1" | LC_ALL=C tr -cd '[:graph:]'; }
+          KS=$(limpia "$KS"); export KS_PASS=$(limpia "$KS_PASS"); KEY_ALIAS=$(limpia "$KEY_ALIAS"); KEY_PASS=$(limpia "$KEY_PASS")
           if [ -n "$KS" ]; then
             export KEY_PASS="${KEY_PASS:-$KS_PASS}"
+            echo "Clave: ${#KS} caracteres; contraseña: ${#KS_PASS} caracteres; alias: $KEY_ALIAS"
             ./gradlew --no-daemon assembleRelease
             echo "$KS" | base64 -d > firma.jks
             "$BT/zipalign" -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk alineado.apk
