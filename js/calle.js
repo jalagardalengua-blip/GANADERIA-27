@@ -145,7 +145,7 @@ function irCalle(id){const C=S.corro,o=C.of.find(x=>x.id===id);if(!o||o.st!=='ac
  const me=makePerson({jacket:'#f4f4f4',pants:'#1f232b',shirt:null,belt:C.div[0],legs:'#1f232b',boots:'#e9e9e9',hair:'#2a1c12'});add(me.root);
  CL.me={m:me,x:CL.env.start.x,z:CL.env.start.z,yaw:Math.PI,v:0,vx:0,vz:0,toss:0,safe:false,dodge:0,me:1,name:'Tú',cite:0,jump:0,anim:0};
  CL.npc=[];const pn=pick(RECOR_N);const used=new Set();for(let i=0;i<(plaza?3:6);i++){let nm;do nm=pick(RECOR_N);while(used.has(nm));used.add(nm);
-  const col=pick(['#2b5aa0','#1f6b3a','#bf3a3f','#e6bb55','#f4f4f4','#5b2a6e','#d9792b']);const p=makePerson({jacket:col,pants:'#20242c',belt:'#141414',boots:'#ececec',hair:pick(['#231812','#3b2a1c','#151010'])});add(p.root);
+  const col=pick(['#2b5aa0','#1f6b3a','#bf3a3f','#e6bb55','#f4f4f4','#5b2a6e','#d9792b']);const p=makePerson({gl:1,jacket:col,mangas:Math.random()<.6?false:undefined,pants:pick(['#2c3e5c','#20242c','#3a4a6a','#4a4238']),belt:'#141414',boots:'#ececec',hair:pick(['#231812','#3b2a1c','#151010']),panu:Math.random()<.3?pick(['#c42a2a','#1f6b3a','#2b5aa0']):undefined});add(p.root);
   const s=CL.env.rand();CL.npc.push({m:p,x:s.x,z:s.z,yaw:R(0,6),v:0,toss:0,safe:false,dodge:0,name:nm,sk:R(.45,.9),st:'idle',t:R(0,3),cite:0,jump:0,anim:0})}
  CL.cab=[0,1].map(i=>{const b=makeBull({pelo:i?'berrendo en colorado':'berrendo en negro',kind:'cabestro'});b.root.visible=false;add(b.root);return {b,x:0,z:0,yaw:0}});
  CL.ppl=[CL.me,...CL.npc];

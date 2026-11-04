@@ -72,7 +72,7 @@ rebuildFinca=function(){_rebuildF.apply(this,arguments);if(W3.mode!=='finca'||!W
   for(let i=0;i<3;i++)mesh(G.box,M('#1d1a16'),.6,.9,.1,0,3+i*2.3,1.62,g,true);col.push({t:'box',x0:x-1.7,x1:x+1.7,z0:z-1.7,z1:z+1.7});
   acts.push({x,z:z+2.6,r:2.4,l:'Subir al mirador',cond:()=>!W3.ride,fn:()=>{cine(x,z,9,40,10,true);toast('Desde lo alto de la torre se ve toda tu dehesa')}})}
  // personal trabajando por la finca
- const ws=[];const add=(st,x,z)=>{const p=makePerson(st);p.root.position.set(x,0,z);sc.add(p.root);ws.push({p,x,z,hx:x,hz:z,t:R(0,3),tx:x,tz:z})};
+ const ws=[];const add=(st,x,z)=>{const p=makePerson(Object.assign({gl:1},st));p.root.position.set(x,0,z);sc.add(p.root);ws.push({p,x,z,hx:x,hz:z,t:R(0,3),tx:x,tz:z})};
  for(let i=0;i<stf('vaquero');i++)add({jacket:'#6b4a2a',pants:'#3a3027',hat:'campero',hatc:'#2a1d14'},R(10,24),R(-4,8));
  if(stf('veter'))add({jacket:'#e9e6df',pants:'#2b3a4a',hat:null},-8,25);if(stf('mayoral'))add({jacket:'#3a3027',pants:'#2a2420',hat:'campero',hatc:'#111'},-12,14);
  if(stf('guarda'))add({jacket:'#3e5a3a',pants:'#2a2a2a',hat:'campero',hatc:'#2e3b2a'},30,-6);if(stf('conocedor'))add({jacket:'#5a4a3a',pants:'#2a2420',hat:'campero',hatc:'#3b2c22'},-26,30);if(stf('representante'))add({jacket:'#1d2433',pants:'#1d2433',shirt:'#f4f0e6'},2,10);
