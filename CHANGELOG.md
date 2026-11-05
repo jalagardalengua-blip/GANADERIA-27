@@ -1,5 +1,11 @@
 # Cambios
 
+## Interfaz profesional
+- Cabecera cinematográfica en cada pantalla con sus datos clave en vivo.
+- Inicio con hub de grandes accesos ilustrados (Finca 3D, Ganadería, Ofertas, Mercado, Tareas, Bous al carrer).
+- Cifras con tipografía deportiva, transiciones al cambiar de pestaña y brillo en los accesos.
+- Imágenes confirmadas como propias del propietario (generadas con IA).
+
 ## Fases 4 a 12
 - Finca: paredes de piedra seca, charcas con juncos, abrevaderos, manga y mueco; inspección de instalaciones.
 - Ganadería: árbol genealógico, buscador, orden y comparador.

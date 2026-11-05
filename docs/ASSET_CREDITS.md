@@ -9,6 +9,6 @@
 | Árbol, hierbas, flores, rocas | `modelos/natura.gltf.json` | Quaternius, *Stylized Nature MegaKit* | CC0 1.0 | Texturas reducidas a 256 px |
 | Texturas de tierra y asfalto | `img/tex/` | Quaternius, *Downtown City MegaKit* | CC0 1.0 | Reducidas, albero teñido |
 | Fuentes Barlow, Cinzel, IBM Plex Mono | Google Fonts | sus autores | SIL OFL 1.1 | — |
-| Iconos de la barra inferior y emblema | `img/nav/`, `img/nav-toro.png` | recortados de las referencias de diseño del propietario | **por confirmar** (R-10) | Recorte y transparencia |
-| Fotografías de portada y toros | `img/*.jpg` | **origen no documentado** | **por confirmar** (R-09) | — |
+| Iconos de la barra inferior y emblema | `img/nav/`, `img/nav-toro.png` | propietario (imágenes propias generadas con IA) | propiedad del propietario | Recorte y transparencia |
+| Fotografías de portada y toros | `img/*.jpg` | propietario (imágenes propias generadas con IA) | propiedad del propietario | — |
 | Música y sonidos | `js/musica.js`, `js/sonido.js` | sintetizados en el propio juego | propios | — |

@@ -93,7 +93,7 @@ Leyenda: ✅ hecho y verificado · 🟡 parcial · ⏳ pendiente · ⛔ bloquead
 | Tarea | Estado |
 |---|---|
 | `LICENSES.md`, README de desarrollo, workflow vacío eliminado | ✅ |
-| Origen de fotos e iconos (R-09, R-10) | ⏳ pendiente del propietario |
+| Origen de fotos e iconos (R-09, R-10) | ✅ imágenes propias del propietario generadas con IA |
 
 ## Fase 12 · Online opcional
 | Tarea | Estado |
