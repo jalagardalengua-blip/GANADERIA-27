@@ -1,5 +1,8 @@
 # Cambios
 
+## Fase 4 (parcial) · clima
+- El tiempo de la dehesa cambia cada semana según la estación: sol, nubes, lluvia o niebla por la mañana, con indicador en la finca.
+
 ## Fase 2 · panel de mando y accesibilidad
 - Inicio con avisos (lo urgente en rojo), agenda de festejos y gráfico de cuentas.
 - Ajustes → Accesibilidad: texto grande o muy grande y modo «reducir movimiento».

@@ -37,7 +37,18 @@ Leyenda: ✅ hecho y verificado · 🟡 parcial · ⏳ pendiente · ⛔ bloquead
 | Tema visual de gala unificado | ✅ | hecho antes de la hoja de ruta |
 | Módulos ES / separación completa de capas | ⏳ | aplazado (ADR 001) |
 
-Fases 3–12: ⏳ (ver PDF).
+## Fase 3 · Animales y contenido 3D
+⛔ Bloqueada a la espera del modelo de toro (GLB de Tripo o glTF de Sketchfab con licencia comprobada). Hecho de la fase 1: liberación de esqueletos y mezcladores al salir de escena.
+
+## Fase 4 · Finca dinámica
+| Tarea | Estado | Evidencia |
+|---|---|---|
+| Clima visual por semanas y estación (sol, nubes, lluvia, niebla matinal) | ✅ | `js/clima.js`, indicador en el HUD |
+| Hierba con color de estación | ✅ | `js/texturas.js` |
+| Día y noche | ✅ | existente |
+| Recintos inspirados en ganaderías reales | ⏳ | siguiente |
+
+Fases 5–12: ⏳ (ver PDF).
 
 ## Peticiones del propietario en cola
 - Toro de Tripo3D (enlace del 5 nov): pendiente de que el propietario exporte el GLB y confirme la licencia de su plan.
