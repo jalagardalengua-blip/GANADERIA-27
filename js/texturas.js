@@ -26,7 +26,7 @@ rebuildFinca=function(){_rebuildTx.apply(this,arguments);if(W3.mode!=='finca'||!
   if(!TXR.nat){txrNatLoad();return}
   // encinas: las cercanas pasan a ser árboles de verdad
   let trunk=null,crown=null;sc.traverse(o=>{if(o.isInstancedMesh){const t=o.geometry.type;if(t==='CylinderGeometry'&&o.geometry.parameters.radiusTop===.28&&!trunk)trunk=o;if(t==='IcosahedronGeometry'&&!crown)crown=o}});
-  const enc=[];if(trunk&&crown){const m=new THREE.Matrix4(),p=new THREE.Vector3(),qq=new THREE.Quaternion(),s=new THREE.Vector3(),Z=new THREE.Matrix4().makeScale(0,0,0);const lim=q==='alta'?70:40;
+  const enc=[];if(trunk&&crown){const m=new THREE.Matrix4(),p=new THREE.Vector3(),qq=new THREE.Quaternion(),s=new THREE.Vector3(),Z=new THREE.Matrix4().makeScale(0,0,0);const lim=q==='alta'?26:12;
    const idx=[];for(let i=0;i<trunk.count;i++){trunk.getMatrixAt(i,m);m.decompose(p,qq,s);idx.push([Math.hypot(p.x,p.z-10),i,p.x,p.y-1.2*s.x,p.z,s.x])}idx.sort((a,b)=>a[0]-b[0]);
    for(const [d,i,x,y,z,sc2] of idx.slice(0,lim)){if(d>230)break;trunk.setMatrixAt(i,Z);crown.setMatrixAt(i*2,Z);crown.setMatrixAt(i*2+1,Z);enc.push({x,y:y-.15,z,h:6.2+sc2*2.6,r:sc2*9,sx:1.15+((i*37)%10)/40})}
    trunk.instanceMatrix.needsUpdate=true;crown.instanceMatrix.needsUpdate=true}
@@ -34,6 +34,6 @@ rebuildFinca=function(){_rebuildTx.apply(this,arguments);if(W3.mode!=='finca'||!
   const rn=mulberry(((S&&S.g&&S.g.name)||'x').length*31+7),blocked=(x,z)=>(x>-44&&x<42&&z>-50&&z<68)||Math.abs(x)<7&&z>8;
   const scat=(n,R0,R1,hm,hv)=>{const o=[];let t=0;while(o.length<n&&t++<n*8){const a=rn()*Math.PI*2,r=R0+rn()*(R1-R0),x=Math.cos(a)*r,z=10+Math.sin(a)*r;if(blocked(x,z))continue;o.push({x,y:gH(x,z)-.05,z,h:hm+rn()*hv,r:rn()*6.3,sx:.8+rn()*.5})}return o};
   const grp=new THREE.Group();grp.name='natura';
-  [...txrInst('CommonTree_3',enc,q==='alta'),...txrInst('Bush_Common',scat(q==='alta'?90:50,38,190,1.1,1.2),q==='alta'),...txrInst('Rock_Medium_1',scat(46,40,180,.5,.9),false),...txrInst('Rock_Big_1',scat(14,60,200,1.2,1.6),true),...txrInst('Grass_Common_Tall',scat(q==='alta'?200:100,34,150,.45,.4),false)].forEach(m=>grp.add(m));
+  [...txrInst('CommonTree_3',enc,false),...txrInst('Bush_Common',scat(q==='alta'?40:20,38,190,1.1,1.2),q==='alta'),...txrInst('Rock_Medium_1',scat(q==='alta'?30:16,40,180,.5,.9),false),...txrInst('Rock_Big_1',scat(q==='alta'?8:4,60,200,1.2,1.6),true),...txrInst('Grass_Common_Tall',scat(q==='alta'?60:0,34,150,.45,.4),false)].forEach(m=>grp.add(m));
   sc.add(grp)}catch(e){console.warn('natura',e)}};
 try{setTimeout(txrNatLoad,1500)}catch(e){}
