@@ -88,5 +88,5 @@ if(typeof calleTick==='function'){const _ctM=calleTick;
   return _ctM(dt)}}
 
 /* créditos */
-const MOD_CRED='Modelos 3D animados: Quaternius (CC0) · Universal Animation Library y Farm Animals';
+const MOD_CRED='Modelos 3D animados: Quaternius (CC0) · Universal Animation Library, Farm Animals y Ultimate Animated Animals';
 try{if(document.readyState!=='loading')modLoad();else document.addEventListener('DOMContentLoaded',modLoad)}catch(e){MOD.err=e}
