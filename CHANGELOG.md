@@ -1,5 +1,14 @@
 # Cambios
 
+## Fases 4 a 12
+- Finca: paredes de piedra seca, charcas con juncos, abrevaderos, manga y mueco; inspección de instalaciones.
+- Ganadería: árbol genealógico, buscador, orden y comparador.
+- Libro de cuentas mensual exportable a CSV.
+- Cada pueblo de bous al carrer con su propio callejero y colores de su comarca.
+- Calidad gráfica automática y resolución dinámica; contador de FPS opcional.
+- Compartir el resultado de una corrida.
+- LICENSES.md y README de desarrollo.
+
 ## Fase 4 (parcial) · clima
 - El tiempo de la dehesa cambia cada semana según la estación: sol, nubes, lluvia o niebla por la mañana, con indicador en la finca.
 
