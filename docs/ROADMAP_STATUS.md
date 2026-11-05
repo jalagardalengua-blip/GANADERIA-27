@@ -26,7 +26,18 @@ Leyenda: ✅ hecho y verificado · 🟡 parcial · ⏳ pendiente · ⛔ bloquead
 | Precaché sin duplicados (−1,7 MB) | R-06 | ✅ | `sw.js` |
 | Prueba de regresión de la corrida arreglada | — | ✅ | `regresion.js`: 0 errores, corrida y juicio OK |
 
-Fases 2–12: ⏳ (ver PDF).
+## Fase 2 · Arquitectura y sistema visual
+| Tarea | Estado | Evidencia |
+|---|---|---|
+| Bus de eventos (`SAVE_COMPLETED`, `MONTH_CLOSED`, `EVENT_COMPLETED`) | ✅ | `tests/e2e/fase2.js`, ADR 001 |
+| Inicio: centro de avisos con acceso directo | ✅ | 10 tipos de aviso (corridas por ver, ofertas que caducan, reseñas incompletas, lesionados, capacidad, liquidez, semental, herradero, confianza, corro) |
+| Inicio: agenda de próximos festejos | ✅ | enlazada con el calendario |
+| Inicio: resumen económico de los últimos meses | ✅ | gráfico ingresos/gastos y saldo neto |
+| Accesibilidad: tamaño de texto y reducir movimiento | ✅ | Ajustes → Accesibilidad |
+| Tema visual de gala unificado | ✅ | hecho antes de la hoja de ruta |
+| Módulos ES / separación completa de capas | ⏳ | aplazado (ADR 001) |
+
+Fases 3–12: ⏳ (ver PDF).
 
 ## Peticiones del propietario en cola
 - Toro de Tripo3D (enlace del 5 nov): pendiente de que el propietario exporte el GLB y confirme la licencia de su plan.

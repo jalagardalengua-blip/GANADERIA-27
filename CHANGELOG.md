@@ -1,5 +1,10 @@
 # Cambios
 
+## Fase 2 · panel de mando y accesibilidad
+- Inicio con avisos (lo urgente en rojo), agenda de festejos y gráfico de cuentas.
+- Ajustes → Accesibilidad: texto grande o muy grande y modo «reducir movimiento».
+- Bus de eventos interno para que las funciones nuevas no se pisen.
+
 ## Fase 1 · estabilidad y guardado (rama `desarrollo`)
 - El 3D ya no depende de internet: three.js va dentro del juego.
 - Se acabó la fuga de memoria al entrar y salir de la finca, la plaza o la calle.
