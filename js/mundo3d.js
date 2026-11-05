@@ -334,7 +334,7 @@ function rebuildFinca(){
  if(W3.mode!=='finca')return;
  const sc=new THREE.Scene();const m=S.month;
  const skyC=m>=11||m<=1?'#a9c3d6':m>=5&&m<=7?'#9fc4e3':'#92bde0';sc.background=new THREE.Color(skyC);sc.fog=new THREE.Fog(skyC,90,260);W3.skyDay=new THREE.Color(skyC);
- W3.rainOn=mulberry(S.year*13+m*7)()<([0,1,2,3,9,10,11].includes(m)?.45:.06);
+ W3.rainOn=climaSem()==='lluvia'||mulberry(S.year*13+m*7)()<0&&([0,1,2,3,9,10,11].includes(m)?.45:.06);
  const hemi=new THREE.HemisphereLight('#dce9f5','#6b5a3a',.75);sc.add(hemi);W3.hemi=hemi;
  const sun=new THREE.DirectionalLight('#fff0d4',1.15);sun.position.set(40,70,25);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
  Object.assign(sun.shadow.camera,{left:-40,right:40,top:40,bottom:-40,near:1,far:200});sun.shadow.bias=-.0006;sc.add(sun);sc.add(sun.target);W3.sun=sun;

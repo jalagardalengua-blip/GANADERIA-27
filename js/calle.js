@@ -50,8 +50,8 @@ function buildCalle(night){
  const ga=groundTex(false);ga.repeat.set(28,17);const gnd=new THREE.Mesh(new THREE.PlaneGeometry(200,120),new THREE.MeshStandardMaterial({map:ga,roughness:.95}));gnd.rotation.x=-Math.PI/2;gnd.receiveShadow=true;sc.add(gnd);
  const gs=groundTex(true);gs.repeat.set(4,3);const ar=new THREE.Mesh(new THREE.PlaneGeometry(28,22),new THREE.MeshStandardMaterial({map:gs,roughness:1}));ar.rotation.x=-Math.PI/2;ar.position.y=.02;ar.receiveShadow=true;sc.add(ar);
  const curb=M('#a7a49c',.9);for(const s of [-1,1]){mesh(G.box,curb,48,.14,.5,38,.07,s*3.75,sc,true);mesh(G.box,curb,48,.14,.5,-38,.07,s*3.75,sc,true);mesh(G.box,curb,.5,.14,31,s*3.25,.07,26.5,sc,true)}
- const r=mulberry(night?21:12);let hs=0;
- const house=(x0,x1,line,axis,face)=>{let p=x0;while(p<x1-1){let w=Math.min(x1-p,R(5,8.5));if(x1-p-w<3)w=x1-p;const fl=RI(2,3),h=fl*3.2+.6,col=FACOL[Math.floor(r()*FACOL.length)],nw=Math.max(1,Math.round(w/2.6)),seed=hs++;
+ const r=mulberry((night?21:12)+(typeof locSeed==='function'?locSeed():0));let hs=0;const PAL=typeof locPal==='function'?locPal():FACOL;
+ const house=(x0,x1,line,axis,face)=>{let p=x0;while(p<x1-1){let w=Math.min(x1-p,R(5,8.5));if(x1-p-w<3)w=x1-p;const fl=RI(2,3),h=fl*3.2+.6,col=PAL[Math.floor(r()*PAL.length)],nw=Math.max(1,Math.round(w/2.6)),seed=hs++;
   const tex=facadeTex(col,fl,nw,seed),wm=M(col,.92),fm=new THREE.MeshStandardMaterial({map:tex,roughness:.88});const d=7;
   const mats=axis==='x'?[wm,wm,M('#8f4a2e',.9),wm,face>0?fm:wm,face<0?fm:wm]:[face>0?fm:wm,face<0?fm:wm,M('#8f4a2e',.9),wm,wm,wm];
   const cx=p+w/2,b=new THREE.Mesh(G.box,mats);if(axis==='x'){b.scale.set(w,h,d);b.position.set(cx,h/2,line-face*d/2)}else{b.scale.set(d,h,w);b.position.set(line-face*d/2,h/2,cx)}b.castShadow=true;b.receiveShadow=true;sc.add(b);

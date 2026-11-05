@@ -26,6 +26,13 @@ En Android, menú ⋮ → «Instalar aplicación»; en iPhone, Compartir → «A
 
 Descarga la app o abre la web (arriba). En el ordenador también puedes abrir `index.html` en un navegador moderno. La partida se guarda en el propio dispositivo.
 
+## Para desarrollar
+
+- Sin compilador ni dependencias: son scripts clásicos que carga `index.html` en orden. Sirve la carpeta con `python3 -m http.server 8765` y abre `http://localhost:8765/`.
+- Pruebas (Playwright): `node tests/e2e/regresion.js`, `fase1.js`, `fase2.js`, `fase5y6.js`, `corrida.js`, `auditoria.js`.
+- Documentación técnica en `docs/`: inventario, esquema de partida, línea base de calidad, riesgos, decisiones y estado de la hoja de ruta. Cambios en `CHANGELOG.md`; licencias en `LICENSES.md`.
+- Flujo de trabajo: los cambios se hacen en la rama `desarrollo` y solo se unen a `main` (que publica la web y el APK) con la aprobación del propietario.
+
 ## Cómo se publica
 
 - **Web:** cada cambio en la rama `main` se publica solo en GitHub Pages (`.github/workflows/pages.yml`).

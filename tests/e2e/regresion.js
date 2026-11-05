@@ -36,7 +36,7 @@ await step('tienta H',()=>{const c=campo().filter(a=>a.sex==='H'&&!a.tentado&&!a
 await step('tienta juego',()=>{let g=0,n=0;while(TT&&g<40000){g++;if(TT.phase==='espera')ttCitar();if(TT.phase==='arranca'){const d=Math.hypot(TT.cp.x-TT.cx,TT.cp.z-TT.cz);if(d<2.5)ttTemplar()}if(TT&&TT.phase==='fin'){n++;ttDecide(n%2)}if(TT)tientaTick(1/30)}return {n,mode:W3.mode}});
 // plaza
 await step('corrida',()=>{exit3D();const o={id:9501,plaza:'Las Ventas (Madrid)',feria:'San Isidro',cat:1,tipo:'corrida',abs:absNow(),n:6,precio:12000,st:'aceptada'};o.toros=campo().filter(a=>lidiable(a)&&ageY(a)>=3).slice(0,6).map(a=>a.id);if(o.toros.length<6)o.toros=campo().filter(a=>a.sex==='M'&&ageY(a)>=3).slice(0,6).map(a=>a.id);o.n=o.toros.length;S.offers.push(o);if(o.toros.length<2)return 'pocos toros '+o.toros.length;const r=celebrar(o);show3D();enterPlaza(r.id);cartelGo();return CP&&CP.paused});
-await step('corrida play',()=>{let f=0;const v=['tv','tendido','callejon','toro'];while(CP&&!CP.done&&f<200000){if(f%400===0)CP.view=v[(f/400)%4];plazaTick(1/15);f++}return {f,done:CP&&CP.done}});
+await step('corrida play',()=>{let f=0;const v=['tv','tendido','callejon','toro'];while(CP&&!CP.done&&f<450000){if(f%400===0)CP.view=v[(f/400)%4];plazaTick(1/15);f++}return {f,done:CP&&CP.done}});
 await step('juicio',()=>{const r=CP.r;return r.toros.map(t=>[t.name,t.nota,t.res,t.trof,t.mat,t.trp,!!t.cogida,(t.juicio||'').slice(0,60)])});
 await p.screenshot({path:'docs/qa/capturas/regresion-final.png'});
 await step('salir plaza',()=>{exitPlaza();return W3.mode});
@@ -45,7 +45,7 @@ for(const tipo of ['vaquillas','embolado','capea','concurso','encierro','corda',
  await step('calle '+tipo,tipo=>{if(W3.mode==='calle')salirCalle();const C=S.corro;if(tipo==='cerril'&&!C.an.some(a=>a.cerril)){C.mkt=null;corroMkt();cComprar('c',0)}
   const o={id:7000+Math.floor(Math.random()*1000),pueblo:'Burriana',prov:'Castellón',tam:3,fiesta:'Misericòrdia',tipo,abs:absNow(),pago:3500,st:'aceptada',night:tipo==='embolado'};C.of.push(o);
   for(const a of C.an){a.salMes=0;a.lesion=0;a.salud=90}irCalle(o.id);return CL?{n:CL.an.length,plaza:CL.plaza}:'no CL'},tipo);
- await step('calle play '+tipo,()=>{if(!CL)return 'skip';clSpect(false);let f=0;while(CL&&!CL.done&&f<20000){const me=CL.me,r=CL.res;if(r){const w=clWindow(me);if(w&&(w.charge&&w.d<2.6&&w.d>1.6||CL.plaza&&!w.charge&&w.d<2.3&&w.d>1.1&&w.front>.75))clAccion('q');const d=Math.hypot(r.x-me.x,r.z-me.z);if(d>6&&r.mode!=='embiste'){W3.yaw=Math.atan2(-(r.x-me.x)/d,-(r.z-me.z)/d);W3.jy=.6}else W3.jy=0}calleTick(1/30);f++}return {f,done:CL&&CL.done,pts:CL&&CL.pts}});
+ await step('calle play '+tipo,()=>{if(!CL)return 'skip';clSpect(false);let f=0;while(CL&&!CL.done&&f<45000){const me=CL.me,r=CL.res;if(r){const w=clWindow(me);if(w&&(w.charge&&w.d<2.6&&w.d>1.6||CL.plaza&&!w.charge&&w.d<2.3&&w.d>1.1&&w.front>.75))clAccion('q');const d=Math.hypot(r.x-me.x,r.z-me.z);if(d>6&&r.mode!=='embiste'){W3.yaw=Math.atan2(-(r.x-me.x)/d,-(r.z-me.z)/d);W3.jy=.6}else W3.jy=0}calleTick(1/30);f++}return {f,done:CL&&CL.done,pts:CL&&CL.pts}});
  await step('calle fin '+tipo,()=>{if(CL)salirCalle();return S.corro.hist[0]&&[S.corro.hist[0].tipo,S.corro.hist[0].media]});
 }
 await step('tienta corro',()=>{const v=S.corro.an.filter(a=>a.sex==='H'&&cAgeM(a)>=18);v.forEach(a=>a.tentado=false);corroTienta(v.slice(0,2).map(a=>a.id));return TT&&TT.corro});
