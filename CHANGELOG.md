@@ -1,5 +1,9 @@
 # Cambios
 
+## Personas realistas
+- Recortadores y personal de la finca con cuerpo humano real, cara, ojos, cejas y pelo (Quaternius, CC0), con ropa de colores por zonas, cuatro tonos de piel y dos peinados.
+- Toros y vacas animados (PR #21).
+
 ## Interfaz profesional
 - Cabecera cinematográfica en cada pantalla con sus datos clave en vivo.
 - Inicio con hub de grandes accesos ilustrados (Finca 3D, Ganadería, Ofertas, Mercado, Tareas, Bous al carrer).
