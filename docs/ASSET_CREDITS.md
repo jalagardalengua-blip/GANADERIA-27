@@ -5,6 +5,7 @@
 | three.js r128 | cdnjs | three.js authors | MIT | — |
 | GLTFLoader, SkeletonUtils | `js/libs/` | three.js authors | MIT | — |
 | Persona animada | `modelos/persona.*` | Quaternius, *Universal Animation Library* | CC0 1.0 | Recorte de animaciones y huesos de dedos, coloreado por zonas |
+| Personas realistas (cuerpo, cara, ojos, cejas, peinados) | `modelos/persona2.gltf.json` | Quaternius, *Universal Base Characters* (vía espejo verificado por SHA-256 WaviestSun/atelier-packs) | CC0 1.0 | Ropa por zonas, texturas a 512 px, animaciones de la UAL |
 | Caballo animado | `modelos/caballo.*` | Quaternius, *Farm Animals* | CC0 1.0 | Sombreado suave, recoloreado |
 | Toro y vaca animados | `modelos/toro.glb`, `modelos/vaca.glb` | Quaternius, *Ultimate Animated Animals* (vía [danwahl/animasim](https://github.com/danwahl/animasim)) | CC0 1.0 | 10 animaciones, pistas constantes eliminadas; la vaca usa las animaciones del toro; cuernos originales ocultos y sustituidos por los procedurales; pelo pintado por vértice |
 | Árbol, hierbas, flores, rocas | `modelos/natura.gltf.json` | Quaternius, *Stylized Nature MegaKit* | CC0 1.0 | Texturas reducidas a 256 px |

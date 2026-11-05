@@ -8,7 +8,7 @@ function modLoad(){if(!THREE.GLTFLoader||!THREE.SkeletonUtils){MOD.err='sin carg
  const L=new THREE.GLTFLoader();let n=0;const fin=()=>{if(++n<2)return;try{if(W3&&W3.mode==='finca'&&!W3.ride&&S)rebuildFinca()}catch(e){}};
  /* .glb en la web; si el servidor no lo sirve, la misma escena en glTF incrustado (.gltf.json) */
  const ld=(n,ok)=>L.load(MOD_BASE+'modelos/'+n+'.glb',ok,undefined,()=>L.load(MOD_BASE+'modelos/'+n+'.gltf.json',ok,undefined,e=>{MOD.err=e;fin()}));
- ld('persona',g=>{MOD.per=g;modRegions();fin()});ld('caballo',g=>{MOD.hor=g;fin()})}
+ ld('persona',g=>{MOD.per=g;modRegions();fin()});L.load(MOD_BASE+'modelos/persona2.gltf.json',g=>{MOD.per2=g},undefined,()=>{});ld('caballo',g=>{MOD.hor=g;fin()})}
 /* zonas del cuerpo por vértice (pose de referencia en T) */
 const ZN={piel:0,pelo:1,cam:2,manga:3,cinto:4,pant:5,bota:6};
 function modRegions(){MOD.reg=new Map();MOD.per.scene.traverse(o=>{if(!o.isSkinnedMesh)return;const p=o.geometry.attributes.position,z=new Uint8Array(p.count);
@@ -22,16 +22,27 @@ const MODH={};
 function modHat(kind,col){const G=geos(),g=new THREE.Group();if(kind==='campero'){mesh(G.cyl,M(col||'#3b2c22',.8),.34,.02,.34,0,0,0,g);mesh(G.cyl,M(col||'#3b2c22',.8),.14,.13,.14,0,.06,0,g);mesh(G.cyl,M('#151010'),.142,.03,.142,0,.01,0,g,true)}
  else if(kind==='gorra'){mesh(G.sph,M(col||'#c42a2a',.8),.13,.08,.14,0,0,-.01,g);mesh(G.box,M(col||'#c42a2a',.8),.2,.015,.12,0,-.03,.14,g,true)}
  else if(kind==='panuelo'){mesh(G.sph,M(col||'#c42a2a',.8),.125,.07,.135,0,-.01,-.01,g,true)}return g}
-function makePersonGL(st){const src=MOD.per;const sc=THREE.SkeletonUtils.clone(src.scene);const pal=modPalette(st);
+const PIEL_T=[[3.6,3.4,3.25],[3.1,2.85,2.65],[2.6,2.3,2.05],[2,1.7,1.45]];
+function vestirReal(sc,st,pal){const hp=st.hat==='campero'||st.gorra||st.panu?'Pelo_Rapado':(st.pelo||(Math.random()<.35?'Pelo_Rapado':'Pelo_Raya'));
+ const hx='#'+pal[1].getHexString(),tint=PIEL_T[Math.floor(Math.random()*PIEL_T.length)],col=k=>'#'+pal[k].getHexString();let piel=null;
+ const Z={Z_cam:col(2),Z_manga:col(3),Z_cinto:col(4),Z_pant:col(5),Z_bota:col(6)};
+ sc.traverse(o=>{if(!o.isSkinnedMesh)return;o.castShadow=true;o.receiveShadow=false;o.frustumCulled=false;const n=o.material&&o.material.name;
+  if(n==='Z_piel'){if(!piel){piel=o.material.clone();piel.color.setRGB(...tint);piel.userData.lin=1;piel.normalMap=null;piel.needsUpdate=true}o.material=piel}
+  else if(n==='Z_manga'&&st.mangas===false)o.userData.mangaPiel=1;
+  else if(Z[n]){o.material=o.material.clone();o.material.color.set(Z[n]);o.material.roughness=n==='Z_bota'?.5:.85}
+  else if(/^Pelo_/.test(o.name)){o.visible=o.name===hp;if(o.visible){o.material=o.material.clone();o.material.color.set(hx)}}
+  else if(o.name==='Cejas'){o.material=o.material.clone();o.material.color.set(hx)}});
+ sc.traverse(o=>{if(o.userData&&o.userData.mangaPiel&&piel)o.material=piel})}
+function makePersonGL(st){const real=!!MOD.per2;const src=real?{scene:MOD.per2.scene,animations:MOD.per2.animations.length?MOD.per2.animations:MOD.per.animations}:MOD.per;const sc=THREE.SkeletonUtils.clone(src.scene);const pal=modPalette(st);
  const mat=new THREE.MeshStandardMaterial({vertexColors:true,skinning:true,roughness:.78,metalness:0});
  let headBone=null;
- sc.traverse(o=>{if(o.isBone&&o.name==='Head')headBone=o;if(!o.isSkinnedMesh)return;const z=MOD.reg.get(o.name);const g=o.geometry.clone();g.userData={};const n=g.attributes.position.count,a=new Float32Array(n*3);
+ sc.traverse(o=>{if(o.isBone&&o.name==='Head')headBone=o});if(real)vestirReal(sc,st,pal);else sc.traverse(o=>{if(!o.isSkinnedMesh)return;const z=MOD.reg.get(o.name);const g=o.geometry.clone();g.userData={};const n=g.attributes.position.count,a=new Float32Array(n*3);
   for(let i=0;i<n;i++){const k=pal[z?z[i]:2];a[i*3]=k.r;a[i*3+1]=k.g;a[i*3+2]=k.b}g.setAttribute('color',new THREE.BufferAttribute(a,3));o.geometry=g;o.material=mat;o.castShadow=true;o.receiveShadow=false;o.frustumCulled=false});
  const root=new THREE.Group(),b=new THREE.Group();root.add(b);b.add(sc);
  /* sombrero / gorra / pañuelo anclado al hueso de la cabeza */
  const head=new THREE.Group(),hat=new THREE.Group();head.add(hat);
  if(headBone){sc.updateMatrixWorld(true);const want=new THREE.Matrix4().makeTranslation(0,1.79,0.0);const inv=new THREE.Matrix4().copy(headBone.matrixWorld).invert();head.applyMatrix4(inv.multiply(want));headBone.add(head)}
- {const G=geos(),hairM=M('#'+pal[1].getHexString(),.85);for(const s of [1,-1]){mesh(G.sph,M('#f4efe6',.3),.016,.011,.008,s*.036,-.09,.104,head,true);mesh(G.sph,M('#2a1d14',.25),.008,.008,.005,s*.036,-.09,.111,head,true);mesh(G.box,hairM,.03,.007,.01,s*.037,-.066,.108,head,true).rotation.z=s*-.15}
+ if(!real){const G=geos(),hairM=M('#'+pal[1].getHexString(),.85);for(const s of [1,-1]){mesh(G.sph,M('#f4efe6',.3),.016,.011,.008,s*.036,-.09,.104,head,true);mesh(G.sph,M('#2a1d14',.25),.008,.008,.005,s*.036,-.09,.111,head,true);mesh(G.box,hairM,.03,.007,.01,s*.037,-.066,.108,head,true).rotation.z=s*-.15}
   mesh(G.sph,M('#'+pal[0].getHexString(),.6),.014,.022,.02,0,-.115,.116,head,true);mesh(G.box,M('#8a4a3e',.6),.03,.005,.006,0,-.15,.104,head,true)}
  const hk=st.hat==='campero'?'campero':st.gorra?'gorra':st.panu?'panuelo':null;if(hk==='campero'){hat.position.y=-.025;hat.scale.setScalar(.92)}if(hk)hat.add(modHat(hk,hk==='campero'?st.hatc:hk==='gorra'?st.gorra:st.panu));
  /* huesos de mentira para que el código antiguo (brazos, piernas) siga funcionando sin romper nada */
@@ -88,5 +99,5 @@ if(typeof calleTick==='function'){const _ctM=calleTick;
   return _ctM(dt)}}
 
 /* créditos */
-const MOD_CRED='Modelos 3D animados: Quaternius (CC0) · Universal Animation Library, Farm Animals y Ultimate Animated Animals';
+const MOD_CRED='Modelos 3D animados: Quaternius (CC0) · Universal Base Characters, Universal Animation Library, Farm Animals y Ultimate Animated Animals';
 try{if(document.readyState!=='loading')modLoad();else document.addEventListener('DOMContentLoaded',modLoad)}catch(e){MOD.err=e}
