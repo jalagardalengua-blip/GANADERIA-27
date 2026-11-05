@@ -1,5 +1,12 @@
 # Cambios
 
+## Fase 1 · estabilidad y guardado (rama `desarrollo`)
+- El 3D ya no depende de internet: three.js va dentro del juego.
+- Se acabó la fuga de memoria al entrar y salir de la finca, la plaza o la calle.
+- Guardado con comprobación, copia de seguridad automática y recuperación si la partida se daña.
+- Ajustes → Partidas: 3 ranuras, exportar e importar la partida, registro de errores y borrar todos los datos.
+- El juego se pausa (3D, música y sonido) al bloquear el móvil o cambiar de app.
+
 ## Fase 0 · auditoría (5 nov 2026, rama `fase-0-auditoria`)
 - Sin cambios en el juego.
 - Documentación: inventario, esquema de partida, línea base de calidad, riesgos, créditos y estado de la hoja de ruta.

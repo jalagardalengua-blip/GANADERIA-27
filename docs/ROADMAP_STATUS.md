@@ -14,14 +14,17 @@ Leyenda: ✅ hecho y verificado · 🟡 parcial · ⏳ pendiente · ⛔ bloquead
 | AUD-007 | Regresión inicial | ✅ | `tests/e2e/*.js`, `docs/qa/partida-referencia.json`, `docs/qa/capturas/` |
 | AUD-008 | Riesgos | ✅ | `docs/RISKS.md` |
 
-## Fase 1 · Estabilidad y guardado (siguiente, pendiente de aprobación)
-| Tarea | Origen | Estado |
-|---|---|---|
-| three.js local y en la precaché | R-01 | ⏳ |
-| Liberar geometrías/texturas al salir de escenas | R-02 | ⏳ |
-| Copia de seguridad, 3 ranuras + autoguardado, exportar/importar JSON, validación | R-03 | ⏳ |
-| Pausar 3D y audio en segundo plano | R-04 | ⏳ |
-| Registrar errores en lugar de silenciarlos | R-07 | ⏳ |
+## Fase 1 · Estabilidad y guardado (rama `desarrollo`)
+| Tarea | Origen | Estado | Evidencia (`tests/e2e/fase1.js`) |
+|---|---|---|---|
+| three.js local y en la precaché | R-01 | ✅ | 3D carga con cdnjs bloqueado |
+| Liberar geometrías, materiales, texturas, sombras y esqueletos al cambiar de escena | R-02 | ✅ | finca ×10: texturas 48 → 48 (antes 58 → 339) |
+| Guardado verificado, copia de seguridad automática, recuperación de partida dañada | R-03 | ✅ | JSON roto → se recupera la copia y se conserva la dañada |
+| 3 ranuras manuales, exportar/importar con suma de control y validación | R-03 | ✅ | manipulado o ajeno → rechazado |
+| Pausar 3D, música y audio en segundo plano | R-04 | ✅ | `visibilitychange` |
+| Registro de errores visible en Ajustes | R-07 | 🟡 | errores no capturados registrados; los `catch` vacíos existentes siguen |
+| Precaché sin duplicados (−1,7 MB) | R-06 | ✅ | `sw.js` |
+| Prueba de regresión de la corrida arreglada | — | ✅ | `regresion.js`: 0 errores, corrida y juicio OK |
 
 Fases 2–12: ⏳ (ver PDF).
 

@@ -970,3 +970,10 @@ body.calBusy .capWipe,body.calBusy #newsT{display:none !important}
 .sbar .it,.sbar .it b,.sbar .it .s,.sbar .it .l{overflow:visible !important;text-overflow:clip !important}
 @media (max-width:420px){.sbar button.go .goS{display:none}.sbar button.go{min-width:0 !important;padding-left:.75rem !important;padding-right:22px !important}.sbar .it{font-size:.72rem !important;padding:0 .2rem !important}}
 @media (max-width:379px){.sbar .st{padding:.3rem .3rem !important}.sbar .it svg{display:none}.sbar .it{font-size:.7rem !important}}
+/* partidas: ranuras, exportar, importar */
+.svSect{display:flex;flex-direction:column;gap:12px}
+.svSlots{display:grid;gap:8px}
+.svSlot{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 10px;padding:10px 12px;border-radius:12px;border:1px solid rgba(230,187,85,.3);background:rgba(0,0,0,.3)}
+.svSlot b{font-family:Cinzel,serif;color:#f6d98c}.svSlot small{grid-column:1;line-height:1.3}.svSlot .svB{grid-column:2;grid-row:1/span 2}
+.svB{display:flex;gap:6px;flex-wrap:wrap}.svB .btn{flex:1 1 auto}
+.svErr{font-size:.78rem}.svErr small{display:block;margin:.25rem 0;color:#e3b0a8;word-break:break-word}.svErr summary{cursor:pointer;color:#e6bb55}
