@@ -904,3 +904,11 @@ nav.tabs.gala button{overflow:visible}
 .sheet .x,.sheet button[aria-label="Cerrar"]{border:1px solid rgba(230,187,85,.5)}
 input,select,textarea{border:1px solid rgba(230,187,85,.4) !important;background:rgba(0,0,0,.45) !important;color:#f3e6c4 !important;border-radius:10px !important}
 input:focus,select:focus,textarea:focus{outline:2px solid #e6bb55 !important;outline-offset:1px}
+/* menú principal a juego con la barra de gala */
+.mItem{border:1.5px solid transparent !important;background:var(--weave) padding-box,linear-gradient(100deg,rgba(24,20,24,.94),rgba(8,7,10,.9)) padding-box,var(--frame) border-box !important;box-shadow:0 0 0 1px #000,0 10px 24px -12px #000 !important;clip-path:none !important;border-radius:14px !important}
+.mItem b{font-family:Cinzel,'Times New Roman',serif !important;font-style:normal !important;letter-spacing:.05em !important}
+.mItem.prim{background:linear-gradient(180deg,#fff4cf,#f0cf78 20%,#d6a542 55%,#a8771f 85%) padding-box,var(--frame) border-box !important}
+.mItem.prim b,.mItem.prim small{color:#2a1a06 !important}
+.mItem.trLock{background:linear-gradient(100deg,rgba(110,14,26,.92),rgba(40,6,12,.9)) padding-box,var(--frame) border-box !important}
+.mTop b,.mPanel h2{font-family:Cinzel,'Times New Roman',serif !important;font-style:normal !important}
+.mFoot{font-family:Cinzel,serif;letter-spacing:.14em}

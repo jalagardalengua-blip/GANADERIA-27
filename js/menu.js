@@ -55,4 +55,6 @@ function menuFx(){const cv=$('#mFx');if(!cv){MFX=null;return}if(MFX&&MFX.cv===cv
   for(const p of P){p.y-=p.v/60;p.a+=.01;if(p.y<-.02){p.y=1.02;p.x=Math.random()}const x=(p.x+Math.sin(p.a)*.02)*W,y=p.y*H,al=.25+.45*Math.abs(Math.sin(p.a*2));c.beginPath();c.fillStyle=p.g?`rgba(240,200,110,${al})`:`rgba(255,240,220,${al*.6})`;c.arc(x,y,p.r,0,7);c.fill()}
   requestAnimationFrame(loop)};requestAnimationFrame(loop)}
 const _renderM=render;render=function(){_renderM();if(!S)menuFx()};
-if(!S){render()}
+/* al abrir el juego siempre se entra por la portada; la partida guardada se continúa desde «Continuar carrera» */
+if(S){S=null;MENU.v='press';UI.casa='bravo'}
+render()
