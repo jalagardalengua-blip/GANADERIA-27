@@ -27,6 +27,28 @@ function torInfo(key){if(TOR.info[key])return TOR.info[key];
  const L=zMax-zMin,zc=z=>zMin+L*z;   // z relativo: 0 = rabo, 1 = morro
  const I={L,zMin,zMax,horn,back,cruz:zc(.47),band:zc(.54),div:zc(.57),top:back(zc(.47))};TOR.info[key]=I;return I}
 
+/* malla base de cada parte: superficie suavizada (sin facetas) y hechuras de toro de lidia esculpidas en la pose de reposo:
+   morrillo alto sobre el cuello y la cruz, pecho hondo con papada, cuerpo más redondo y cara más corta y ancha. */
+TOR.base=new Map();
+const TOR_LUZ=.58;   // el pelo del modelo se ve bajo la luz fuerte de la plaza: se ajusta a la luminosidad del toro procedural
+function torMalla(key,o,nm){const k=key+'|'+nm;if(TOR.base.has(k))return TOR.base.get(k);let g=o.geometry.clone();
+ try{if(THREE.BufferGeometryUtils){g.deleteAttribute('normal');if(g.attributes.uv)g.deleteAttribute('uv');if(g.attributes.uv2)g.deleteAttribute('uv2');g=THREE.BufferGeometryUtils.mergeVertices(g,1e-4)}}catch(e){g=o.geometry.clone()}
+ if(key==='bull'&&/^(Main|Main_Light|Muzzle)$/.test(nm)){const I=torInfo(key),p=g.attributes.position,v=new THREE.Vector3(),M4=o.matrixWorld,inv=new THREE.Matrix4().copy(M4).invert();
+  const bump=(t,c,w)=>{const d=(t-c)/w;return d*d<1?(1-d*d)*(1-d*d):0};
+  for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i).applyMatrix4(M4);const zr=(v.z-I.zMin)/I.L,yn=v.y/I.top,ax=Math.abs(v.x);
+   // morrillo: abultamiento sobre el cuello y la cruz
+   const mo=bump(zr,.66,.16)*Math.max(0,(yn-.62)/.38);v.y+=mo*.13*I.top;v.x*=1+mo*.18;
+   // pecho hondo y papada
+   const pe=bump(zr,.72,.14)*Math.max(0,(.62-yn)/.62);v.y-=pe*.09*I.top;v.z+=pe*.03*I.L;
+   // cuerpo más redondo y lomo recto
+   const cu=bump(zr,.45,.3)*(yn>.3?1:0);v.x*=1+cu*.1;
+   // cuartos traseros algo más recogidos (toro de lidia, no de carne)
+   const cq=bump(zr,.14,.14)*(yn>.45?1:0);v.x*=1-cq*.06;
+   // cabeza: cara más corta y testuz ancha
+   if(zr>.86){const t=(zr-.86)/.14;v.z-=t*t*.05*I.L;v.x*=1+t*.08}
+   v.applyMatrix4(inv);p.setXYZ(i,v.x,v.y,v.z)}}
+ g.computeVertexNormals();TOR.base.set(k,g);return g}
+
 /* pelo por vértice: degradado del lomo al vientre, salpicado, manchas de berrendo y señas */
 function torColors(key,spec,m){const ck=key+'|'+(spec.pelo||'negro')+'|'+(spec.kind||'toro')+'|'+(m.bragado?1:0)+(m.lucero?1:0)+(m.calcetero?1:0)+(m.rabicano?1:0);
  if(TOR.geo.has(ck))return TOR.geo.get(ck);
@@ -35,20 +57,20 @@ function torColors(key,spec,m){const ck=key+'|'+(spec.pelo||'negro')+'|'+(spec.k
  if(pat===2)for(let i=0;i<7;i++)blobs.push({x:(r()-.5)*.7,y:I.top*(.45+r()*.5),z:I.zMin+I.L*(.12+r()*.62),rx:.18+r()*.2,ry:.16+r()*.16,rz:.22+r()*.3});
  const out={},v=new THREE.Vector3(),c=new THREE.Color(),sc=TOR[key].scene;sc.updateMatrixWorld(true);
  sc.traverse(o=>{if(!o.isSkinnedMesh)return;const nm=o.material.name;if(!/^(Main|Main_Light|Muzzle|Hooves)$/.test(nm))return;
-  const g=o.geometry.clone(),p=g.attributes.position,n=p.count,a=new Float32Array(n*3);
+  const g=torMalla(key,o,nm).clone(),p=g.attributes.position,n=p.count,a=new Float32Array(n*3);
   for(let i=0;i<n;i++){v.fromBufferAttribute(p,i).applyMatrix4(o.matrixWorld);const x=v.x,y=v.y,z=v.z,zr=(z-I.zMin)/I.L,yn=y/I.top;
    if(nm==='Hooves')c.set('#15100c');
    else if(nm==='Muzzle')c.set(cow&&zr<.9?'#c99a8c':'#120d0a');
    else{
     if(yn>.8)c.copy(cB).lerp(cH,Math.min(1,(yn-.8)/.25)*.7);else if(yn<.55)c.copy(cB).lerp(cD,Math.min(1,(.55-yn)/.35));else c.copy(cB);
-    if(nm==='Main_Light')c.lerp(cH,.22);
-    if(pat===1&&r()<.33)c.lerp(cW,.35);
+    if(nm==='Main_Light')c.lerp(cH,.12);
+    if(pat===1){const q=r();if(q<.16)c.lerp(cW,.16);else if(q<.55)c.lerp(cD,.45)}
     for(const b of blobs){const d=((x-b.x)/b.rx)**2+((y-b.y)/b.ry)**2+((z-b.z)/b.rz)**2;if(d<1){c.copy(cW);break}}
     if(m.bragado&&yn<.62&&zr>.25&&zr<.7&&Math.abs(x)<.3)c.copy(cW);
     if(m.calcetero&&y<.34&&zr<.95)c.copy(cW);
     if(m.lucero&&zr>.9&&y>I.horn.y-.1&&Math.abs(x)<.06)c.copy(cW);
     if(m.rabicano&&zr<.06&&y<I.top*.62)c.copy(cW);
-    const k=.94+r()*.1;c.r*=k;c.g*=k;c.b*=k}
+    const k=(.94+r()*.1)*TOR_LUZ;c.r*=k;c.g*=k;c.b*=k}
    a[i*3]=c.r;a[i*3+1]=c.g;a[i*3+2]=c.b}
   g.setAttribute('color',new THREE.BufferAttribute(a,3));
   g.computeBoundingBox();g.boundingSphere=new THREE.Sphere();g.boundingBox.getBoundingSphere(g.boundingSphere);g.boundingSphere.radius*=1.7;
@@ -64,7 +86,7 @@ function makeBullGL(spec){
  const G=geos(),kind=spec.kind||'toro',cow=kind==='vaca'||kind==='becerro',calf=kind==='becerro',cab=kind==='cabestro',KD=TOR_KIND[kind]||TOR_KIND.toro;
  const m=spec.m||{len:1,alt:1,morr:cow?.25:.9,leg:1,girth:1,papada:1,horn:cab?'cab':cow?'lira':'veleto',hl:calf?.25:cab?1.25:1,ht:cow?.03:.05,hc:'#e2d6bc'};
  const key=KD.m,src=TOR[key],I=torInfo(key),geo=torColors(key,spec,m);
- if(!TOR.mat)TOR.mat=new THREE.MeshStandardMaterial({vertexColors:true,skinning:true,roughness:.55,metalness:0});
+ if(!TOR.mat)TOR.mat=new THREE.MeshStandardMaterial({vertexColors:true,skinning:true,roughness:.58,metalness:0});
  const sc=THREE.SkeletonUtils.clone(src.scene);const bones={};
  sc.traverse(o=>{if(o.isBone)bones[o.name]=o;if(!o.isSkinnedMesh)return;const nm=o.material.name;
   if(nm==='Horns'){o.visible=false;return}
