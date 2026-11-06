@@ -1,5 +1,10 @@
 # Cambios
 
+## Toro mejorado
+- Superficie suavizada: se acabaron las facetas del modelo.
+- Hechuras de toro de lidia esculpidas: morrillo alto, pecho hondo con papada, cuerpo más redondo y cara más corta.
+- Pelo con la luminosidad correcta bajo la luz de la plaza (el cárdeno ya no sale blanco) y menos brillo.
+
 ## Personas realistas
 - Recortadores y personal de la finca con cuerpo humano real, cara, ojos, cejas y pelo (Quaternius, CC0), con ropa de colores por zonas, cuatro tonos de piel y dos peinados.
 - Toros y vacas animados (PR #21).
