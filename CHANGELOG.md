@@ -54,3 +54,8 @@ Calendario por semanas al estilo FIFA, barra de gala y pantallas a juego, sonido
 - Pasto alto que se mece con el viento alrededor del jugador, con el color de cada estación.
 - Suelo de dehesa con manchas de hierba verde, pasto seco y calvas de tierra.
 - Solares sin construir con estacas, cuerda y cartel de madera.
+
+## Pulido visual
+- Vitrina 3D en la ficha: el animal real girando sobre albero, se puede arrastrar.
+- Cartel de toros clásico al entrar en la plaza (papel crema, hierro, divisa, terna y reseña).
+- Público de la plaza con siluetas de persona sentada, pelo y tonos de piel variados.
