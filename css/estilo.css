@@ -1054,3 +1054,28 @@ html.calma .pgH>i,html.calma .hubT::after{animation:none}
 /* divisa real en la tarjeta de ganadería */
 .mDivT{display:flex;align-items:center;gap:8px;margin:.35rem 0 .1rem;font-size:.82rem;color:var(--oro,#d8b25a);letter-spacing:.02em}
 .mDivT .div i{width:6px;height:16px;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+/* ---------- vitrina 3D de la ficha ---------- */
+.ring-wrap.vt3d{position:relative;padding:0;overflow:hidden;background:radial-gradient(120% 90% at 50% 30%,#3a2b1c 0%,#1a130c 60%,#0d0a07 100%)!important;border:1px solid rgba(230,187,85,.35);box-shadow:inset 0 -30px 60px rgba(0,0,0,.45)}
+.ring-wrap.vt3d .vtCv{display:block;touch-action:pan-y;cursor:grab}
+.ring-wrap.vt3d .vtHint{position:absolute;right:10px;bottom:8px;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(240,225,190,.65);pointer-events:none}
+/* ---------- cartel de toros clásico ---------- */
+.cartelP{width:min(820px,100%);display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:12px;align-items:stretch;text-align:center;max-height:calc(100dvh - 24px)}
+.cpPapel{position:relative;padding:14px 16px 12px;border-radius:6px;color:#1a1410;background:
+ radial-gradient(140% 100% at 50% 0%,#fbf3dc 0%,#f0e2bd 55%,#e2cf9f 100%);box-shadow:0 18px 40px rgba(0,0,0,.55),inset 0 0 0 3px #f7ecd0,inset 0 0 0 5px #9e1b22,inset 0 0 0 7px #f7ecd0,inset 0 0 0 8px #1a1410;display:flex;flex-direction:column;gap:3px;justify-content:center;overflow:hidden}
+.cpPapel::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(120,90,40,.035) 0 2px,transparent 2px 4px);mix-blend-mode:multiply}
+.cpEmp{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:#6b5636;font-weight:700}
+.cpPapel h2{font-family:var(--serif,Georgia,serif);font-weight:900;font-size:clamp(1.25rem,4.4vw,1.9rem);line-height:1.02;color:#9e1b22;text-transform:uppercase;letter-spacing:.02em;margin:0}
+.cpFer{margin:0;font-size:.78rem;font-weight:700;color:#1a1410;letter-spacing:.06em;text-transform:uppercase}
+.cpGran{margin:2px 0 0;font-family:var(--serif,Georgia,serif);font-style:italic;font-weight:700;font-size:clamp(1rem,3.2vw,1.3rem);color:#1a1410;border-top:1px solid rgba(26,20,16,.35);border-bottom:1px solid rgba(26,20,16,.35);padding:2px 0}
+.cpGan{display:flex;align-items:center;justify-content:center;gap:10px;margin:3px 0;text-align:left}
+.cpGan small{display:block;font-size:.68rem;color:#5a4a33;line-height:1.1}.cpGan b{display:block;font-family:var(--serif,Georgia,serif);font-weight:900;font-size:clamp(1rem,3.4vw,1.35rem);line-height:1.05;color:#9e1b22;text-transform:uppercase}
+.cpHi{flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;border:2px solid #1a1410;background:#f7ecd0}
+.cpDv{display:flex;align-items:center;gap:6px;margin-top:2px}.cpDv i{font-size:.66rem;font-style:italic;color:#5a4a33}.cpDv .div i{width:7px;height:14px;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+.cpPara{margin:2px 0 0;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:#6b5636;font-weight:700}
+.cpMat{display:flex;flex-direction:column;gap:1px}.cpMat b{font-family:var(--serif,Georgia,serif);font-weight:900;font-size:clamp(.95rem,3.1vw,1.2rem);text-transform:uppercase;line-height:1.1}.cpMat small{display:block;font-size:.64rem;color:#6b5636}
+.cpDer{display:flex;flex-direction:column;gap:8px;min-width:0;text-align:left}
+.cpTor{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cpTor>div{display:grid;grid-template-columns:auto 1fr;gap:0 .5rem;padding:6px 9px;border-radius:8px;background:linear-gradient(180deg,rgba(27,24,16,.92),rgba(13,12,9,.92));border:1px solid rgba(230,187,85,.3);min-width:0}
+.cpTor b{grid-row:1/3;font-family:var(--display);font-size:1.15rem;color:var(--oro)}.cpTor span{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.88rem}.cpTor small{color:var(--muted);font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cpDer .btn{margin-top:auto}
+@media (max-width:620px){.cartelP{grid-template-columns:1fr;overflow:auto}}

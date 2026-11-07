@@ -58,6 +58,7 @@
 <script src="js/economia.js"></script>
 <script src="js/rendimiento.js"></script>
 <script src="js/uipro.js"></script>
+<script src="js/pulido.js"></script>
 <script>try{render()}catch(e){}document.getElementById('app').classList.add('ready')</script>
 <script>
 if('serviceWorker' in navigator&&location.protocol==='https:'&&!window.Capacitor){let rec=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(rec){rec=false;location.reload()}});window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{r.update();setInterval(()=>r.update(),30*60*1000)}).catch(()=>{})})}
