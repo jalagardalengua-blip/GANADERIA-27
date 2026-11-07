@@ -106,7 +106,7 @@ function makeBullGL(spec){
  /* lomo: divisa y banderillas */
  const spine=bones.Torso3||bones.Torso2||bones.Body;
  const bg=torAnchor(spine,b,new THREE.Vector3(0,I.back(I.band)*sy-.04,I.band*sz),1);
- if(spec.div){const dv=torAnchor(spine,b,new THREE.Vector3(0,I.back(I.div)*sy,I.div*sz),1);spec.div.forEach((c,i)=>{const r=new THREE.Mesh(new THREE.PlaneGeometry(.07,.42),M(c,.7,0,THREE.DoubleSide));r.position.set((i?.05:-.05),-.12,0);r.rotation.set(.3,0,(i?-.35:.35));dv.add(r)});mesh(G.sph,M(spec.div[0],.6),.06,.06,.06,0,.02,0,dv,true)}
+ if(spec.div){const dv=torAnchor(spine,b,new THREE.Vector3(0,I.back(I.div)*sy,I.div*sz),1);{const dl=spec.div,nn=Math.max(2,dl.length);for(let i=0;i<nn;i++){const k=i-(nn-1)/2;const r=new THREE.Mesh(new THREE.PlaneGeometry(.07,.42),M(dl[i%dl.length],.7,0,THREE.DoubleSide));r.position.set(k*.07,-.12,0);r.rotation.set(.3,0,-k*.5);dv.add(r)}};mesh(G.sph,M(spec.div[0],.6),.06,.06,.06,0,.02,0,dv,true)}
  const cols=['#bf3a3f','#e6bb55','#1f6b3a','#3a78b8','#f1ece0','#5b2a6e'];
  for(let i=0;i<6;i++){const s=new THREE.Group();s.position.set((i%2?.12:-.12),0,(Math.floor(i/2)-1)*.18);s.rotation.set(-.5,0,(i%2?-.3:.3));
   mesh(G.cyl,M('#efe6d2'),.018,.75,.018,0,.37,0,s,true);for(let j=0;j<3;j++)mesh(G.box,M(cols[(i+j)%6],.6),.07,.12,.07,0,.5+j*.12,0,s,true);s.visible=false;bg.add(s)}

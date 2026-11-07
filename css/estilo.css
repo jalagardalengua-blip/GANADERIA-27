@@ -1051,3 +1051,6 @@ body.casaC .pgH::after{background:repeating-linear-gradient(90deg,#c0262d 0 14px
 html.calma .pgH>i,html.calma .hubT::after{animation:none}
 @media (max-width:380px){.hubT{min-height:104px}.hubX b{font-size:1.25rem}.hubT.big .hubX b{font-size:1.8rem}}
 .hub .hubT:nth-child(6):last-child{grid-column:1/-1;min-height:120px}
+/* divisa real en la tarjeta de ganadería */
+.mDivT{display:flex;align-items:center;gap:8px;margin:.35rem 0 .1rem;font-size:.82rem;color:var(--oro,#d8b25a);letter-spacing:.02em}
+.mDivT .div i{width:6px;height:16px;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
