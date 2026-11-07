@@ -46,3 +46,9 @@
 
 ## Hasta el 5 nov 2026 (publicado)
 Calendario por semanas al estilo FIFA, barra de gala y pantallas a juego, sonido de plaza sin zumbidos, modelos animados CC0, ganadería de corro y bous al carrer, finca 3D con obras y personal, música de banda.
+
+## Finca 3D más real
+- Vaquero y mayoral con cuerpo humano realista; herramientas en las manos y piernas abiertas a caballo.
+- Pasto alto que se mece con el viento alrededor del jugador, con el color de cada estación.
+- Suelo de dehesa con manchas de hierba verde, pasto seco y calvas de tierra.
+- Solares sin construir con estacas, cuerda y cartel de madera.

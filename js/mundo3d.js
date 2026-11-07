@@ -436,8 +436,7 @@ function rebuildFinca(){
  col.push({t:'circ',x:-15.5,z:-13,r:.9});
  for(const k of Object.keys(EDIF))if(mej(k))edificio(sc,k,col);
  for(const [k,d] of Object.entries(MEJ)){if(mej(k)||(d.req&&!mej(d.req)))continue;const [x,z]=d.pos;const g=new THREE.Group();g.position.set(x,gH(x,z),z);sc.add(g);
-  mesh(G.box,M('#5a3d26'),.12,1.6,.12,0,.8,0,g);mesh(G.box,M('#e0962f',.7),1.4,.8,.08,0,1.5,0,g);
-  for(let i=0;i<6;i++){const a=i/6*Math.PI*2;mesh(G.cyl,M('#e0962f'),.05,.6,.05,Math.cos(a)*1.6,.3,Math.sin(a)*1.6,g,true)}
+  solarMarca(g,d.n,G);
   acts.push({x,z,r:2.6,l:`Solar: ${d.n}`,cond:()=>!W3.ride,fn:()=>construir(k)})}
  const tp=[];const rt=mulberry(S.g.name.length*13+3);
  const blocked=(x,z)=>(x>-42&&x<40&&z>-48&&z<66)||Math.abs(x)<6&&z>10;
@@ -696,6 +695,15 @@ function construir(k,now){const d=MEJ[k],lv=mejLv(k);if(lv>=d.max)return;if(d.re
   <button class="btn pri adv" ${S.money<c?'disabled':''} onclick="construir('${k}',true)">${lv?'Mejorar':'Construir'}</button></div>`);return}
  if(S.money<c)return;S.money-=c;S.mej[k]=lv+1;S.xp=(S.xp||0)+20;log(`Obra terminada: ${d.n}${d.max>1?' (nivel '+(lv+1)+')':''}.`);save();closeModal();if(W3.mode==='finca')rebuildFinca();render();toast(`${d.n}: ${lv?'mejorada':'terminada'}`)}
 const EDIF={fabrica:{w:10,d:8,h:6,wall:'#b9b2a6',roof:'#6e7478',silo:1},clinica:{w:7,d:5,h:3.2,wall:'#f4f2ec',roof:'#2b5aa0',cruz:1},cuadra:{w:8,d:4,h:3,wall:'#d9cbae',roof:'#a4532f',boxes:1},pozo:{torre:1},hospederia:{w:10,d:6,h:4.6,wall:'#f2ede2',roof:'#a4532f'},museo:{w:9,d:6,h:4.2,wall:'#e9dcc5',roof:'#7a1d22',cols:1},oficina:{w:6,d:5,h:3.4,wall:'#e6e2d8',roof:'#3a3f4b'},escuela:{ruedo:1},finca:{letrero:1}};
+/* solar sin construir: estacas de madera con cuerda, tierra removida y un cartel de madera con el nombre */
+function solarMarca(g,n,G){const wd=M('#6b4a2e',.85),S2=1.7;const pt=new THREE.Mesh(new THREE.CircleGeometry(2.1,20),M('#9a7b55',.98));pt.rotation.x=-Math.PI/2;pt.position.y=.02;pt.receiveShadow=true;g.add(pt);
+ for(const [sx,sz] of [[-1,-1],[1,-1],[1,1],[-1,1]])mesh(G.box,wd,.07,.55,.07,sx*S2,.27,sz*S2,g,true);
+ for(const [x,z,w,dd] of [[0,-S2,S2*2,.015],[0,S2,S2*2,.015],[-S2,0,.015,S2*2],[S2,0,.015,S2*2]])mesh(G.box,M('#efe9d8',.9),w,.015,dd,x,.42,z,g,true);
+ mesh(G.box,wd,.1,1.5,.1,-.5,.75,S2+.25,g,true);mesh(G.box,wd,.1,1.5,.1,.5,.75,S2+.25,g,true);
+ const cv=document.createElement('canvas');cv.width=256;cv.height=128;const c=cv.getContext('2d');const gr=c.createLinearGradient(0,0,0,128);gr.addColorStop(0,'#8a6440');gr.addColorStop(1,'#6a4a2e');c.fillStyle=gr;c.fillRect(0,0,256,128);
+ c.strokeStyle='rgba(40,25,12,.5)';for(let y=10;y<128;y+=18){c.beginPath();c.moveTo(0,y);c.bezierCurveTo(80,y+4,170,y-4,256,y+2);c.stroke()}c.strokeStyle='#3a2616';c.lineWidth=6;c.strokeRect(3,3,250,122);
+ c.fillStyle='#f1e7cf';c.textAlign='center';c.font='bold 22px Georgia, serif';c.fillText('SOLAR',128,40);c.font='19px Georgia, serif';const w=n.length>22?n.slice(0,21)+'…':n;c.fillText(w,128,76);c.font='italic 15px Georgia, serif';c.fillStyle='#e6bb55';c.fillText('se puede construir',128,104);
+ const tx=new THREE.CanvasTexture(cv);tx.encoding=THREE.sRGBEncoding;const sg=new THREE.Mesh(new THREE.BoxGeometry(1.3,.65,.05),[wd,wd,wd,wd,new THREE.MeshStandardMaterial({map:tx,roughness:.85}),wd]);sg.position.set(0,1.25,S2+.25);sg.castShadow=true;g.add(sg)}
 function edificio(sc,k,col){const G=geos(),e=EDIF[k],d=MEJ[k],[x,z]=d.pos,lv=mejLv(k),g=new THREE.Group();g.position.set(x,gH(x,z),z);sc.add(g);
  const sign=(txt,y,zz)=>{const cv=document.createElement('canvas');cv.width=512;cv.height=96;const c=cv.getContext('2d');c.fillStyle='#1d1710';c.fillRect(0,0,512,96);c.strokeStyle='#e6bb55';c.lineWidth=6;c.strokeRect(6,6,500,84);c.fillStyle='#e6bb55';c.font='42px "Cinzel", Georgia, serif';c.textAlign='center';c.textBaseline='middle';c.fillText(txt.toUpperCase().slice(0,24),256,50);
   const m=new THREE.Mesh(new THREE.PlaneGeometry(3.2,.6),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv)}));m.position.set(0,y,zz);g.add(m)};
