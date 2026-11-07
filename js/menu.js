@@ -19,9 +19,9 @@ startScreen=function(){const sv=load();const v=MENU.v;
  if(v==='hist'){const i=MENU.i;
   return `<div class="menu mSel">${menuBg()}<div class="mTop"><button class="mBack" onclick="menuGo('main')">${ICO.chev}<span>Volver</span></button><b>Elige tu ganadería</b><span class="mCnt">${i+1} / ${GANADERIAS.length}</span></div>
   <div class="mCar" id="mCar" onscroll="menuScroll(this)">${GANADERIAS.map((g,k)=>{const e=ENC[g.enc]||ENC.Domecq;const bar=(n,v)=>`<div class="mSt"><span>${n}</span><i><u style="width:${v}%"></u></i><b>${v}</b></div>`;
-   return `<article class="mCard"><div class="mPh" style="background-image:url(${encImg(g,k)})"></div><div class="mDiv" style="background:linear-gradient(90deg,${g.div[0]} 0 50%,${g.div[1]} 50% 100%)"></div>
+   return `<article class="mCard"><div class="mPh" style="background-image:url(${encImg(g,k)})"></div><div class="mDiv" style="background:linear-gradient(90deg,${g.div.map((c,i,a)=>`${c} ${i/a.length*100}% ${(i+1)/a.length*100}%`).join(',')})"></div>
     <div class="mCt"><div class="mHd">${emblem({hierro:{l:g.name[0]}},52)}<div class="mVal"><b>${g.pres}</b><small>VAL</small></div></div>
-    <h2>${esc(g.name)}</h2><div class="mLoc">${esc(g.loc||'España')}</div><div class="mStars">${estrellas(g.pres)}<span class="mEnc">Encaste ${esc(g.enc)}</span></div>
+    <h2>${esc(g.name)}</h2><div class="mLoc">${esc(g.loc||'España')}</div><div class="mStars">${estrellas(g.pres)}<span class="mEnc">Encaste ${esc(g.enc)}</span></div>${g.divT?`<div class="mDivT">${divisa(g.div)}<span>Divisa ${esc(g.divT)}</span></div>`:''}
     <p>${esc(g.d||e.d)}</p><div class="mStats">${bar('Bravura',e.bra)}${bar('Nobleza',e.nob)}${bar('Fuerza',e.fue)}${bar('Casta',e.cas)}</div>
     <button class="btn oro adv" onclick="menuElegir(${k})">Dirigir ${esc(g.name)}${ICO.chev}</button></div></article>`}).join('')}</div>
   <div class="mDots">${GANADERIAS.map((g,k)=>`<i class="${k===i?'on':''}"></i>`).join('')}</div>

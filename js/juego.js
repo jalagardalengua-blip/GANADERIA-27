@@ -543,7 +543,7 @@ function hierroSVG(h,sz,col){
  if(h.a==='media')ad=`<path d="M10 40 A20 20 0 0 0 50 40" fill="none" stroke="${col}" stroke-width="3.5" stroke-linecap="round"/>`;
  return `<svg class="hierro" width="${sz}" height="${sz}" viewBox="0 0 60 60" aria-hidden="true">${ad}<text x="30" y="${h.a==='media'?34:40}" text-anchor="middle" font-family="Cinzel, Georgia, serif" font-weight="700" font-size="${L.length>1?22:28}" fill="${col}">${L}</text></svg>`;
 }
-const divisa=d=>`<span class="div" aria-hidden="true"><i style="background:${d[0]}"></i><i style="background:${d[1]}"></i></span>`;
+const divisa=d=>`<span class="div" aria-hidden="true">${(d&&d.length?d:['#333','#999']).map(c=>`<i style="background:${c}"></i>`).join('')}</span>`;
 function subtitulo(){return S.g.real?`Ganadería · encaste ${S.g.enc}`:`Ganadería fundada en ${S.g.fund||2027}`}
 function nivel(){const st=S.stats||{};const xp=Math.round((S.xp||0)+S.pres*6+(st.corridas||0)*25+(st.indultos||0)*150+(st.vueltas||0)*40);return {n:1+Math.floor(xp/100),p:xp%100}}
 const FAMP={negro:'negro',burraco:'negro',entrepelado:'negro','cárdeno':'cardeno',salinero:'cardeno',colorado:'colorado','castaño':'castano',jabonero:'jabonero'};

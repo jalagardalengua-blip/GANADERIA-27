@@ -140,7 +140,7 @@ function makeBull(spec){
   mesh(G.box,dk,.12*lt,.08,.16*lt,0,-.45*sy-.02,.02,kn);legs.push({hip,kn,f})}
  const tp=new THREE.Group();tp.position.set(0,topY(-.93)-.04,-1.2*P.L);b.add(tp);const tl=new THREE.Mesh(G.tail,mat);tl.scale.set(1,P.A*(calf?.7:1),1);tl.castShadow=true;tp.add(tl);
  mesh(G.sph,m.rabicano?wh:dk,.06,.16,.06,0,-.98*P.A*(calf?.7:1),0,tp);
- if(spec.div){const dv=new THREE.Group();dv.position.set(0,topY(.5),.5*P.L);b.add(dv);spec.div.forEach((c,i)=>{const r=new THREE.Mesh(new THREE.PlaneGeometry(.07,.42),M(c,.7,0,THREE.DoubleSide));r.position.set((i?.05:-.05),-.12,0);r.rotation.set(.3,0,(i?-.35:.35));dv.add(r)});mesh(G.sph,M(spec.div[0],.6),.06,.06,.06,0,.02,0,dv,true)}
+ if(spec.div){const dv=new THREE.Group();dv.position.set(0,topY(.5),.5*P.L);b.add(dv);{const dl=spec.div,nn=Math.max(2,dl.length);for(let i=0;i<nn;i++){const k=i-(nn-1)/2;const r=new THREE.Mesh(new THREE.PlaneGeometry(.07,.42),M(dl[i%dl.length],.7,0,THREE.DoubleSide));r.position.set(k*.07,-.12,0);r.rotation.set(.3,0,-k*.5);dv.add(r)}};mesh(G.sph,M(spec.div[0],.6),.06,.06,.06,0,.02,0,dv,true)}
  const bg=new THREE.Group();bg.position.set(0,topY(.42)-.04,.42*P.L);b.add(bg);
  const cols=['#bf3a3f','#e6bb55','#1f6b3a','#3a78b8','#f1ece0','#5b2a6e'];
  for(let i=0;i<6;i++){const s=new THREE.Group();s.position.set((i%2?.12:-.12),0,(Math.floor(i/2)-1)*.18);s.rotation.set(-.5,0,(i%2?-.3:.3));
