@@ -2,6 +2,17 @@
 
 Modo carrera de ganadero de bravo para el navegador y el móvil. Eliges una ganadería histórica o fundas la tuya, y la llevas mes a mes: cría, alimentación, tientas, herradero, reseñas para las ferias, ventas y corridas en una plaza 3D.
 
+## Descargar
+
+**Android:** [📲 Descargar la app (APK)](https://github.com/jalagardalengua-blip/GANADERIA-27/releases/latest/download/HierroYDivisa.apk)
+
+1. Abre el enlace desde el móvil y descarga `HierroYDivisa.apk`.
+2. Ábrelo. Si Android lo pide, permite que el navegador instale apps.
+3. Pulsa «Instalar». Las versiones nuevas se instalan encima sin perder la partida.
+
+**Sin instalar nada:** juega en el navegador en [jalagardalengua-blip.github.io/GANADERIA-27](https://jalagardalengua-blip.github.io/GANADERIA-27/).
+En Android, menú ⋮ → «Instalar aplicación»; en iPhone, Compartir → «Añadir a pantalla de inicio».
+
 ## Qué incluye
 
 - **Modo carrera**: escalafón ganadero contra nueve rivales, confianza de la propiedad, retos del mes con premios, valoración tipo carta en cada toro, vitrina de trofeos y buzón de noticias.
@@ -13,15 +24,30 @@ Modo carrera de ganadero de bravo para el navegador y el móvil. Eliges una gana
 
 ## Cómo jugar
 
-Abre `index.html` en un navegador moderno. La partida se guarda en el propio navegador.
+Descarga la app o abre la web (arriba). En el ordenador también puedes abrir `index.html` en un navegador moderno. La partida se guarda en el propio dispositivo.
 
-Para jugar desde el móvil como una app:
+## Para desarrollar
 
-1. En GitHub, ve a **Settings → Pages**, elige la rama `main` y la carpeta `/ (root)`, y guarda.
-2. Abre en el móvil la dirección que te da GitHub Pages.
-3. iPhone: Compartir → «Añadir a pantalla de inicio». Android: menú ⋮ → «Instalar aplicación».
+- Sin compilador ni dependencias: son scripts clásicos que carga `index.html` en orden. Sirve la carpeta con `python3 -m http.server 8765` y abre `http://localhost:8765/`.
+- Pruebas (Playwright): `node tests/e2e/regresion.js`, `fase1.js`, `fase2.js`, `fase5y6.js`, `corrida.js`, `auditoria.js`.
+- Documentación técnica en `docs/`: inventario, esquema de partida, línea base de calidad, riesgos, decisiones y estado de la hoja de ruta. Cambios en `CHANGELOG.md`; licencias en `LICENSES.md`.
+- Flujo de trabajo: los cambios se hacen en la rama `desarrollo` y solo se unen a `main` (que publica la web y el APK) con la aprobación del propietario.
 
-La primera carga necesita conexión (motor 3D y tipografías). Después funciona sin conexión.
+## Cómo se publica
+
+- **Web:** cada cambio en la rama `main` se publica solo en GitHub Pages (`.github/workflows/pages.yml`).
+- **App Android:** cada cambio en `main` compila un APK nuevo con Capacitor y lo sube a [Releases](https://github.com/jalagardalengua-blip/GANADERIA-27/releases) (`.github/workflows/android.yml`).
+
+Para que las actualizaciones del APK se instalen encima, el APK debe firmarse siempre con la misma clave. Guárdala en **Settings → Secrets and variables → Actions** con estos nombres:
+
+| Secreto | Contenido |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | el archivo `.jks` en base64 |
+| `ANDROID_KEYSTORE_PASSWORD` | contraseña del almacén |
+| `ANDROID_KEY_ALIAS` | alias de la clave |
+| `ANDROID_KEY_PASSWORD` | contraseña de la clave (si es distinta) |
+
+Sin esos secretos el APK se firma con una clave de depuración y, para actualizar, hay que desinstalar la versión anterior.
 
 ## Estructura
 
@@ -30,6 +56,7 @@ index.html            página principal
 css/estilo.css        interfaz
 js/juego.js           lógica de la ganadería y pantallas
 js/mundo3d.js         finca, tienta y plaza en 3D (three.js)
+js/libs/              three.js y cargadores 3D (incluidos, sin depender de internet)
 img/                  fotografías y retratos
 manifest.webmanifest  instalación como app
 sw.js                 caché sin conexión
