@@ -84,3 +84,7 @@ Calendario por semanas al estilo FIFA, barra de gala y pantallas a juego, sonido
 
 ## Corrida en directo realista
 - Ver en directo abre la plaza realista. La faena se compone con la bravura, nobleza, casta, fuerza, encaste y pelo del toro y el estilo del matador; la presidencia saca los pañuelos según el resultado del juego (orejas, vuelta, indulto, silencio, pitos, devuelto). Botón “Vista clásica” para la plaza de antes.
+
+## Estocada y corridas distintas
+- Suerte suprema animada: perfilarse, entrar a matar, pinchazos, media o entera, descabellos, avisos con clarín, toro que se amorcilla y cae; indulto con simulacro y vuelta a toriles.
+- Cada corrida distinta: luz (tarde, ocaso, noche) según orden y feria, albero y barrera por plaza, entrada de público según categoría, repertorio por estilo del matador (delantal, tafallera, revolera, manoletina, molinete, trincherazo, firma).

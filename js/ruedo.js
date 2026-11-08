@@ -6,7 +6,7 @@
    "Vista clásica" vuelve a la plaza 3D de siempre. */
 const RD={on:false,r:null,i:0,el:null,fr:null};
 function ruedoDatos(r,i){const t=r.toros[i];if(!t)return null;
- return {id:r.id*10+i,seed:r.id*97+i*13+7,i:i+1,ultimo:i>=r.toros.length-1,plaza:r.plaza,feria:r.feria,gan:S.g.name,div:t.div||S.g.div,
+ return {id:r.id*10+i,cid:r.id,cat:r.cat,seed:r.id*97+i*13+7,i:i+1,ultimo:i>=r.toros.length-1,plaza:r.plaza,feria:r.feria,gan:S.g.name,div:t.div||S.g.div,
   name:t.name,num:t.num,peso:t.peso,pelo:t.pelo,enc:t.enc,mat:t.mat,traje:t.traje,estilo:t.estilo,B:t.B,N:t.N,C:t.C,F:t.F,score:t.score,
   res:t.res,trof:t.trof||0,ent:t.ent,esto:t.esto,desc:t.desc,avisos:t.avisos,rajado:!!t.rajado,fell:!!t.fell,pases:t.pases,
   cogida:t.cogida?{parte:t.cogida.parte}:null,sust:t.sust?{n:t.sust.n}:null}}
