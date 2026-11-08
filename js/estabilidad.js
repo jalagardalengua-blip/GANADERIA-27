@@ -60,8 +60,8 @@ function partidasHTML(){const sv=load();const fecha=s=>{try{return new Date(s).t
   <small class="muted">Copia de seguridad automática: ${localStorage.getItem(BAK)?'sí':'aún no'}. Exportar guarda un archivo con suma de control que puedes importar en otro dispositivo.</small>
   ${errs.length?`<details class="svErr"><summary>Registro de errores (${errs.length})</summary>${errs.slice(0,10).map(e=>`<small>${fecha(e.t)} · ${esc(e.m)} ${esc(e.s)}</small>`).join('')}<button class="btn sm" onclick="localStorage.removeItem('${ERRK}');render()">Vaciar</button></details>`:''}
   <button class="btn" onclick="borrarTodo()">Borrar todos los datos</button></section>`}
-const _startScreenSv=startScreen;
-startScreen=function(){let h=_startScreenSv.apply(this,arguments);if(MENU.v==='ajustes'){const i=h.indexOf('<section class="sect card"><header><h2>Créditos');if(i>0)h=h.slice(0,i)+partidasHTML()+h.slice(i);else h=h.replace(/<\/div><\/div>$/,partidasHTML()+'</div></div>')}return h};
+
+envolver('startScreen','estabilidad',_startScreenSv=>function(){let h=_startScreenSv.apply(this,arguments);if(MENU.v==='ajustes'){const i=h.indexOf('<section class="sect card"><header><h2>Créditos');if(i>0)h=h.slice(0,i)+partidasHTML()+h.slice(i);else h=h.replace(/<\/div><\/div>$/,partidasHTML()+'</div></div>')}return h},{segura:true});
 /* ---------- memoria 3D: liberar la escena anterior ---------- */
 function protegidos(){const P=new Set();try{for(const k in MC)P.add(MC[k])}catch(e){}try{const g=geos();for(const k in g)P.add(g[k])}catch(e){}try{if(typeof GX!=='undefined'&&GX.g)for(const k in GX.g)P.add(GX.g[k])}catch(e){}
  try{if(typeof TXR!=='undefined')for(const k in TXR.c)P.add(TXR.c[k])}catch(e){}return P}

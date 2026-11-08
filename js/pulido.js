@@ -23,18 +23,18 @@ function vtMostrar(a){const cv=$('#fcv');if(!cv||!vtInit())return;const wrap=cv.
  if(!wrap.querySelector('.vtHint')){const h=document.createElement('small');h.className='vtHint';h.textContent='Arrastra para girar';wrap.appendChild(h)}
  const loop=now=>{if(!el.isConnected||VT.B!==B)return;const dt=Math.min(.05,(now-t0)/1000);t0=now;if(!drag)yaw+=vel*dt;
   try{animBull(B,dt,{speed:0,head:.3})}catch(e){}const d=L*1.75+1.3;VT.cam.position.set(Math.sin(yaw)*d,H*.62+.35,Math.cos(yaw)*d);VT.cam.lookAt(0,H*.48,0);R.render(VT.sc,VT.cam);requestAnimationFrame(loop)};requestAnimationFrame(loop)}
-const _openFichaVT=openFicha;
-openFicha=function(id){const r=_openFichaVT.apply(this,arguments);try{const a=byId(id);if(a)vtMostrar(a)}catch(e){try{errLog('vitrina: '+e.message,'pulido')}catch(e2){}}return r};
+
+envolver('openFicha','pulido',_openFichaVT=>function(id){const r=_openFichaVT.apply(this,arguments);try{const a=byId(id);if(a)vtMostrar(a)}catch(e){try{errLog('vitrina: '+e.message,'pulido')}catch(e2){}}return r});
 /* ---------- cartel de toros clásico ---------- */
-const _cartelHTMLP=cartelHTML;
-cartelHTML=function(C){try{const r=C.r,mats=[];for(const t of r.toros){if(!mats.some(m=>m.n===t.mat))mats.push({n:t.mat,e:t.estilo})}
+
+envolver('cartelHTML','pulido',_cartelHTMLP=>function(C){try{const r=C.r,mats=[];for(const t of r.toros){if(!mats.some(m=>m.n===t.mat))mats.push({n:t.mat,e:t.estilo})}
  const n=r.toros.length,g=S.g||{},fecha=`${MESES[S.month]} de ${S.year}`;const num=['','Un','Dos','Tres','Cuatro','Cinco','Seis','Siete','Ocho'][n]||n;
  return `<div class="cartelP"><div class="cpPapel"><small class="cpEmp">${r.cat===1?'Plaza de toros de primera':'Plaza de toros'}</small><h2>${esc(r.plaza)}</h2>
   <p class="cpFer">${esc(r.feria)} · ${fecha}</p><p class="cpGran">Gran corrida de toros</p>
   <div class="cpGan"><span class="cpHi">${hierroSVG(g.hierro||{l:'?'},38,'#1a1410')}</span><div><small>${num} ${n===1?'hermoso toro':'hermosos toros'} de la ganadería de</small><b>${esc(g.name||'')}</b><span class="cpDv">${divisa(g.div)}<i>con divisa</i></span></div></div>
   <p class="cpPara">para los matadores</p><div class="cpMat">${mats.slice(0,3).map(m=>`<div><b>${esc(m.n)}</b><small>${matRating(m.n)} · ${ESTILO[m.e]||''}</small></div>`).join('')}</div></div>
   <div class="cpDer"><span class="lbl">Reseña de la corrida</span><div class="cpTor">${r.toros.map((t,i)=>`<div><b>${i+1}º</b><span>${esc(t.name)}${t.num!=null?' · nº '+t.num:''}</span><small>${t.peso} kg · ${t.pelo}</small></div>`).join('')}</div>
-  <button class="btn oro adv" onclick="cartelGo()">Empezar el festejo</button></div></div>`}catch(e){return _cartelHTMLP.apply(this,arguments)}};
+  <button class="btn oro adv" onclick="cartelGo()">Empezar el festejo</button></div></div>`}catch(e){return _cartelHTMLP.apply(this,arguments)}});
 /* ---------- público de la plaza con siluetas de persona sentada ---------- */
 function pubGeoCuerpo(){const U=THREE.BufferGeometryUtils,parts=[];const add=(g,k)=>{g=g.index?g.toNonIndexed():g;const n=g.attributes.position.count,c=new Float32Array(n*3).fill(k);g.setAttribute('color',new THREE.BufferAttribute(c,3));if(g.attributes.uv)g.deleteAttribute('uv');parts.push(g)};
  const t=new THREE.CylinderGeometry(.19,.155,.42,10);t.scale(1.15,1,.72);t.translate(0,.06,0);add(t,1);
@@ -45,11 +45,11 @@ function pubGeoCuerpo(){const U=THREE.BufferGeometryUtils,parts=[];const add=(g,
 function pubGeoCabeza(){const g=new THREE.SphereGeometry(.115,12,9).toNonIndexed();g.scale(.92,1.05,.98);const p=g.attributes.position,c=new Float32Array(p.count*3);
  for(let i=0;i<p.count;i++){const y=p.getY(i),z=p.getZ(i);const pelo=y>.035||(z<-.02&&y>-.05);const k=pelo?[.26,.2,.17]:[1,1,1];c.set(k,i*3)}
  g.setAttribute('color',new THREE.BufferAttribute(c,3));g.deleteAttribute('uv');g.computeVertexNormals();return g}
-const _buildPlazaP=buildPlaza;
-buildPlaza=function(){const P=_buildPlazaP.apply(this,arguments);try{if(P&&!P.pubOk&&P.body&&P.heads){P.pubOk=1;
+
+envolver('buildPlaza','pulido',_buildPlazaP=>function(){const P=_buildPlazaP.apply(this,arguments);try{if(P&&!P.pubOk&&P.body&&P.heads){P.pubOk=1;
  P.body.geometry.dispose();P.body.geometry=pubGeoCuerpo();P.body.material.vertexColors=true;P.body.material.needsUpdate=true;
  P.heads.geometry.dispose();P.heads.geometry=pubGeoCabeza();P.heads.material=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.75});
- const piel=['#e7bd98','#d6a37d','#c08a63','#a5734f','#f0caa6','#8c5f40'].map(c=>new THREE.Color(c));const r=mulberry(5);for(let i=0;i<P.heads.count;i++)P.heads.setColorAt(i,piel[Math.floor(r()*piel.length)]);P.heads.instanceColor.needsUpdate=true}}catch(e){try{errLog('público: '+e.message,'pulido')}catch(e2){}}return P};
+ const piel=['#e7bd98','#d6a37d','#c08a63','#a5734f','#f0caa6','#8c5f40'].map(c=>new THREE.Color(c));const r=mulberry(5);for(let i=0;i<P.heads.count;i++)P.heads.setColorAt(i,piel[Math.floor(r()*piel.length)]);P.heads.instanceColor.needsUpdate=true}}catch(e){try{errLog('público: '+e.message,'pulido')}catch(e2){}}return P});
 /* ---------- imagen propia para cada ganadería al elegirla ----------
    Cada ganadería recibe una foto distinta (ninguna se repite) del pelo que más la caracteriza. */
 const PELO_GAN={'Miura':'cardeno','Victorino Martín':'cardeno','Adolfo Martín':'cardeno','La Quinta':'cardeno','Partido de Resina':'cardeno','José Escolar':'cardeno','Ana Romero':'cardeno',
@@ -58,5 +58,5 @@ const PELO_GAN={'Miura':'cardeno','Victorino Martín':'cardeno','Adolfo Martín'
  'Victoriano del Río':'castano','Alcurrucén':'castano','Daniel Ruiz':'castano','Salvador Domecq':'castano','Pedraza de Yeltes':'castano','Valdefresno':'castano','Baltasar Ibán':'castano'};
 const IMG_GAN=(()=>{const usado={cardeno:0,jabonero:0,colorado:0,castano:0,negro:0},m={},orden=['negro','castano','colorado','jabonero','cardeno'];
  for(const g of GANADERIAS){const pref=PELO_GAN[g.name]||'negro';const lista=[pref,...orden.filter(x=>x!==pref)];const c=lista.find(x=>usado[x]<8);if(!c)continue;m[g.name]=`img/toro-${c}-${usado[c]++}.jpg`}return m})();
-const _encImgP=encImg;
-encImg=function(g,i){return (g&&IMG_GAN[g.name])||_encImgP.apply(this,arguments)};
+
+envolver('encImg','pulido',_encImgP=>function(g,i){return (g&&IMG_GAN[g.name])||_encImgP.apply(this,arguments)});

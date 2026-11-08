@@ -43,7 +43,7 @@ function divReal(n){const d=DIVISAS[n];return d?d.c.map(k=>DCOL[k]):null}
 for(const g of GANADERIAS){const d=DIVISAS[g.name];if(!d)continue;g.div=divReal(g.name);g.divT=d.t;if(d.loc)g.loc=d.loc}
 /* partidas ya empezadas: rivales y ganadería propia real con la divisa correcta */
 function divFix(s){if(!s)return;try{for(const r of s.rivals||[]){const d=divReal(r.name);if(d)r.div=d}if(s.g&&s.g.real){const d=divReal(s.g.name);if(d)s.g.div=d}}catch(e){}}
-{const _load=load;load=function(){const s=_load.apply(this,arguments);divFix(s);return s}}
+{envolver('load','divisas',_load=>function(){const s=_load.apply(this,arguments);divFix(s);return s},{segura:true});}
 /* el nombre de los colores, visible al elegir ganadería y en el perfil */
-const _startScreenDv=startScreen;
-startScreen=function(){let h=_startScreenDv.apply(this,arguments);try{for(const g of GANADERIAS){if(!g.divT)continue;const k=`<b>${esc(g.name)}</b><br><small class="muted">Encaste ${g.enc}`;if(h.includes(k))h=h.replace(k,`${k} · divisa ${g.divT}`)}}catch(e){}return h};
+
+envolver('startScreen','divisas',_startScreenDv=>function(){let h=_startScreenDv.apply(this,arguments);try{for(const g of GANADERIAS){if(!g.divT)continue;const k=`<b>${esc(g.name)}</b><br><small class="muted">Encaste ${g.enc}`;if(h.includes(k))h=h.replace(k,`${k} · divisa ${g.divT}`)}}catch(e){}return h},{segura:true});

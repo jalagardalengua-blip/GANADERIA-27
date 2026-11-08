@@ -13,15 +13,15 @@ Object.assign(ENCMORF,{'Pablo Romero':[1.06,1.02,1.12,1.0],Murube:[.98,.97,.9,.9
 Object.assign(PELO,{'berrendo en negro':['#ece6da','#171310',5],'berrendo en colorado':['#ece6da','#74351c',5],ensabanado:['#eee8dc','#faf6ee',0],sardo:['#6b3a22','#171310',6],chorreado:['#3a2416','#130e0b',7],
  'melocotón':['#d6b088','#ead0ad',0],tostado:['#3a2214','#5a3622',0],'albahío':['#e2d1ad','#f2e6cc',0],'cárdeno claro':['#7f8287','#b2b4b8',1],'negro mulato':['#1d1712','#4a3426',0]});
 Object.assign(FAMP,{'berrendo en negro':'negro','berrendo en colorado':'colorado',ensabanado:'jabonero',sardo:'colorado',chorreado:'castano','melocotón':'jabonero',tostado:'castano','albahío':'jabonero','cárdeno claro':'cardeno','negro mulato':'negro'});
-const _peloMat=peloMat;
-peloMat=function(pelo){const d=PELO[pelo];if(!d||d[2]<5||PT[pelo])return _peloMat(pelo);
+
+envolver('peloMat','extras',_peloMat=>function(pelo){const d=PELO[pelo];if(!d||d[2]<5||PT[pelo])return _peloMat(pelo);
  const [base,hi,pat]=d,cv=document.createElement('canvas');cv.width=256;cv.height=128;const c=cv.getContext('2d'),r=mulberry(pelo.length*29);
  c.fillStyle=base;c.fillRect(0,0,256,128);
  if(pat===5){c.fillStyle=hi;for(let i=0;i<9;i++){c.beginPath();c.ellipse(r()*256,10+r()*70,14+r()*34,10+r()*26,r()*3,0,7);c.fill()}c.fillRect(0,0,256,14)}
  if(pat===6){for(let i=0;i<2600;i++){const k=r();c.fillStyle=k<.4?'#171310':k<.7?'#efe6d6':'#8a4a26';c.globalAlpha=.55;c.fillRect(r()*256,r()*128,2+r()*4,2+r()*3)}c.globalAlpha=1}
  if(pat===7){c.fillStyle=hi;for(let x=0;x<256;x+=6+r()*8){c.globalAlpha=.55+r()*.3;c.fillRect(x,0,2+r()*3,128)}c.globalAlpha=1}
  for(let i=0;i<1600;i++){c.fillStyle=`rgba(${r()<.5?'255,255,255':'0,0,0'},${.03+r()*.05})`;c.fillRect(r()*256,r()*128,1+r()*3,1)}
- PT[pelo]=new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(cv),roughness:.62});return PT[pelo]};
+ PT[pelo]=new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(cv),roughness:.62});return PT[pelo]});
 
 /* ---------- las 15 ganaderías históricas ---------- */
 const GINFO={
@@ -62,9 +62,9 @@ const GNUEVAS=[
  {name:'Ana Romero',enc:'Santa Coloma',pres:58,div:['#d58fb0','#141414'],d:'Santa Coloma: toros finos y encastados.'}];
 for(const g of GANADERIAS)Object.assign(g,GINFO[g.name]||{});
 for(const g of GNUEVAS)if(!GANADERIAS.some(x=>x.name===g.name))GANADERIAS.push(g);
-const _startReal=startReal;
-startReal=function(i){const g=GANADERIAS[i];_startReal(i);if(!S)return;if(g.loc)S.g.prov=g.loc.split(',').pop().trim();
- if(g.pelos)for(const a of S.animals)if(Math.random()<.75)a.pelo=pick(g.pelos);save();render()};
+
+envolver('startReal','extras',_startReal=>function(i){const g=GANADERIAS[i];_startReal(i);if(!S)return;if(g.loc)S.g.prov=g.loc.split(',').pop().trim();
+ if(g.pelos)for(const a of S.animals)if(Math.random()<.75)a.pelo=pick(g.pelos);save();render()});
 
 /* ---------- toreros ---------- */
 const TOREROS_REALES=[
@@ -106,20 +106,20 @@ function faenasMes(rep){for(const f of FAENAS){if(!f.m.includes(S.month)||fDone(
   const doneAny=f.m.some(m=>S.fae&&S.fae[`${S.year}-${m}`]&&S.fae[`${S.year}-${m}`][f.id]);if(doneAny)continue;
   const p=f.pen||{};if(p.money){S.money-=p.money;rep.cost+=p.money}if(p.pres)S.pres=clamp(S.pres-p.pres,0,100);if(p.salud)for(const a of campo())if(Math.random()<.4)a.salud=clamp(a.salud-p.salud,5,100);rep.lines.push(f.mal)}
  if([0,1,2].includes(S.month)&&S.f_siembra===S.year-1||[10,11,0,1].includes(S.month)&&(S.f_heno===S.year||S.f_heno===S.year-1&&S.month<=1)){const v=Math.round(campo().length*FEED[S.feed].c*.09);if(v>0){S.money+=v;rep.inc+=v;rep.lines.push(`Heno y forraje propios: ahorras ${eur(v)} de pienso.`)}}}
-const _finTareas2=finTareas;finTareas=function(rep){_finTareas2(rep);try{faenasMes(rep)}catch(e){console.error(e)}};
-const _priceFor=priceFor;priceFor=function(c,t){return r100(_priceFor(c,t)*(S&&S.f_fundas===S.year?1.03:1))};
-const _listaTareas=listaTareas;
-listaTareas=function(){const T=_listaTareas();for(const f of fActivas()){if(fDone(f.id))continue;T.push({t:f.t,p:`faenaYo('${f.id}')`,pl:'Hacerlo yo',d:f.c?`fHacer('${f.id}',1)`:null,dl:`Mayoral · ${eur(f.c)}`})}return T};
-const _tareas3=tareas;
-tareas=function(){const L=_tareas3();for(const f of fActivas())L.push({t:f.t,d:fDone(f.id)});return L};
-const _rebuild=rebuildFinca;
-rebuildFinca=function(){_rebuild.apply(this,arguments);if(W3.mode!=='finca'||!W3.scene||!W3.acts)return;const G=geos();
+envolver('finTareas','extras',_finTareas2=>function(rep){_finTareas2(rep);try{faenasMes(rep)}catch(e){console.error(e)}});
+envolver('priceFor','extras',_priceFor=>function(c,t){return r100(_priceFor(c,t)*(S&&S.f_fundas===S.year?1.03:1))});
+
+envolver('listaTareas','extras',_listaTareas=>function(){const T=_listaTareas();for(const f of fActivas()){if(fDone(f.id))continue;T.push({t:f.t,p:`faenaYo('${f.id}')`,pl:'Hacerlo yo',d:f.c?`fHacer('${f.id}',1)`:null,dl:`Mayoral · ${eur(f.c)}`})}return T});
+
+envolver('tareas','extras',_tareas3=>function(){const L=_tareas3();for(const f of fActivas())L.push({t:f.t,d:fDone(f.id)});return L});
+
+envolver('rebuildFinca','extras',_rebuild=>function(){_rebuild.apply(this,arguments);if(W3.mode!=='finca'||!W3.scene||!W3.acts)return;const G=geos();
  for(const f of fActivas()){if(fDone(f.id))continue;const [x,z]=f.sp;const g=new THREE.Group();g.position.set(x,gH(x,z),z);W3.scene.add(g);
   mesh(G.cyl,M('#e6bb55',.35,.5),.06,2.4,.06,0,1.2,0,g,true);const fl=mesh(G.box,new THREE.MeshStandardMaterial({color:'#e6bb55',emissive:'#7a5a10',emissiveIntensity:.6}),.7,.42,.03,.36,2.2,0,g,true);
-  W3.acts.push({x,z,r:3.6,l:f.n,hold:true,dur:f.dur,cond:()=>!fDone(f.id)&&(!f.ride||W3.ride),fn:()=>fHacer(f.id,false)})}};
+  W3.acts.push({x,z,r:3.6,l:f.n,hold:true,dur:f.dur,cond:()=>!fDone(f.id)&&(!f.ride||W3.ride),fn:()=>fHacer(f.id,false)})}},{segura:true});
 
-const _render2=render;
-render=function(){_render2();if(S)return;const bs=[...document.querySelectorAll('.gan')];bs.forEach((b,i)=>{const g=GANADERIAS[i];if(!g||!g.loc||b.dataset.x)return;b.dataset.x=1;const sm=b.querySelector('small');if(sm)sm.insertAdjacentHTML('afterend',`<small class="gloc">${esc(g.loc)}</small>`);if(g.d)b.title=g.d})};
+
+envolver('render','extras',_render2=>function(){_render2();if(S)return;const bs=[...document.querySelectorAll('.gan')];bs.forEach((b,i)=>{const g=GANADERIAS[i];if(!g||!g.loc||b.dataset.x)return;b.dataset.x=1;const sm=b.querySelector('small');if(sm)sm.insertAdjacentHTML('afterend',`<small class="gloc">${esc(g.loc)}</small>`);if(g.d)b.title=g.d})},{segura:true});
 
 /* ---------- arranque: refresca la interfaz con las ampliaciones ---------- */
 (function(){try{if(S&&S.corro&&!S.corro.mkt)corroMkt()}catch(e){}render()})();

@@ -1,5 +1,17 @@
 # Cambios
 
+## Auditoría: fallos corregidos
+- **Bancarrota definitiva**: al bajar de −90.000 € (o si la propiedad te pierde la confianza) la ventana ya no se puede cerrar, la partida queda marcada, no se puede avanzar y al recargar vuelve a salir. «Empezar otra carrera» borra también la copia automática (las ranuras guardadas a mano se conservan).
+- **Equilibrio**:
+  - Personal proporcional al tamaño de la camada (1.200 € + 18 €/cabeza en vez de 2.500 € + 10 €/cabeza).
+  - Finca saturada: castigo de salud proporcional al exceso, menos partos y pastos arrendados (35 €/cabeza de más). La tienta solo preselecciona las vacas que caben.
+  - Hierros nuevos: 240.000 € y algo más de ganado al empezar, más ofertas de plazas de tercera y pueblos, mejores precios en segunda y tercera, prestigio por darse a conocer en plazas pequeñas y un suelo de prestigio de 8.
+- Las corridas ya lidiadas salen de la lista de ofertas pasado un año (siguen en el historial).
+- `persona2` en formato GLB (más ligero de descargar); el APK ya no incluye modelos de respaldo, documentación ni pruebas.
+- Cabecera: en móviles estrechos el nombre y el subtítulo de la ganadería pasan a dos líneas en vez de cortarse.
+- Corrida en directo: la pantalla completa solo se pide al tocar (antes salía un error en la consola) y ya no se marcan para subir a la gráfica texturas que aún no han cargado.
+- Código: las 123 ampliaciones de funciones del núcleo pasan por `envolver()` (registro en `GANCHOS`, errores aislados y anotados); `esc()` escapa el apóstrofo y `jsq()` protege textos dentro de `onclick`.
+
 ## Toro mejorado
 - Superficie suavizada: se acabaron las facetas del modelo.
 - Hechuras de toro de lidia esculpidas: morrillo alto, pecho hondo con papada, cuerpo más redondo y cara más corta.

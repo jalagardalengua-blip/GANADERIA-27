@@ -210,13 +210,13 @@ function corroTienta(ids){if(!mej('placita')){toast('Necesitas la placita de tie
  hor.root.position.set(C.x+4.6,0,C.z+2);hor.root.rotation.y=-2.2;W3.scene.add(hor.root);
  const mul=makeMuleta();W3.pl.arms[0].hand.add(mul);mul.visible=false;
  TT={q,C,hor,mul,cow:null,sex:'H',corro:true};W3.F.carry=null;setCarry();ttNext()}
-const _ttDecide=ttDecide;
-ttDecide=function(ok){if(!TT||!TT.corro)return _ttDecide(ok);const a=TT.a;
+
+envolver('ttDecide','corro',_ttDecide=>function(ok){if(!TT||!TT.corro)return _ttDecide(ok);const a=TT.a;
  if(ok){a.tentado=true;a.fama=Math.max(a.fama,Math.round((a.nota-50)/2));log(`Corro: ${a.name} aprobada en tienta (${a.nota}).`)}
  else{const p=Math.round(a.peso*1.1);S.money+=p;S.corro.an=S.corro.an.filter(x=>x.id!==a.id);log(`Corro: ${a.name} desechada.`)}
- save();$('#h3dim').hidden=true;TT.a=null;ttNext()};
-const _ttCalc=ttCalc;
-ttCalc=function(a,T){_ttCalc(a,T);if(T&&T.corro){a.g.sen=Math.round(clamp(a.g.sen+2,0,99))}};
+ save();$('#h3dim').hidden=true;TT.a=null;ttNext()});
+
+envolver('ttCalc','corro',_ttCalc=>function(a,T){_ttCalc(a,T);if(T&&T.corro){a.g.sen=Math.round(clamp(a.g.sen+2,0,99))}});
 
 /* ===================== PANTALLA DEL CORRO ===================== */
 function corroCard(a){const t=cTipo(a),l=Math.round(corroLuc(a)),q=clamp(Math.round(l*.7+a.fama*.3),20,99);
@@ -290,16 +290,16 @@ function renderCorro(el){const C=S.corro;
 
 /* ---------- integración con el juego existente ---------- */
 TABS.splice(3,0,['corro','Corro','vaca']);
-const _render=render;
-render=function(){if(S&&UI.tab==='corro'){UI.tab='inicio';_render();UI.tab='corro';document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-current',String((b.getAttribute('onclick')||'').includes("'corro'"))));const sc=$('#scr');if(sc)renderCorro(sc);const nb=S.corro?S.corro.of.filter(o=>o.st==='nueva'||(o.st==='aceptada'&&o.abs===absNow())).length:0;corroBadge(nb);return}
- _render();if(S){const nb=S.corro?S.corro.of.filter(o=>o.st==='aceptada'&&o.abs===absNow()).length:0;corroBadge(nb)}};
+
+envolver('render','corro',_render=>function(){if(S&&UI.tab==='corro'){UI.tab='inicio';_render();UI.tab='corro';document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-current',String((b.getAttribute('onclick')||'').includes("'corro'"))));const sc=$('#scr');if(sc)renderCorro(sc);const nb=S.corro?S.corro.of.filter(o=>o.st==='nueva'||(o.st==='aceptada'&&o.abs===absNow())).length:0;corroBadge(nb);return}
+ _render();if(S){const nb=S.corro?S.corro.of.filter(o=>o.st==='aceptada'&&o.abs===absNow()).length:0;corroBadge(nb)}},{segura:true});
 function corroBadge(n){const b=[...document.querySelectorAll('nav.tabs button')].find(b=>(b.getAttribute('onclick')||'').includes("'corro'"));if(!b)return;let s=b.querySelector('.bdg');if(n){if(!s){s=document.createElement('span');s.className='bdg';b.appendChild(s)}s.textContent=n}else if(s)s.remove()}
-const _renderInicio=renderInicio;
-renderInicio=function(el){_renderInicio(el);if(!S)return;const C=S.corro,d=document.createElement('section');d.className='sect';
+
+envolver('renderInicio','corro',_renderInicio=>function(el){_renderInicio(el);if(!S)return;const C=S.corro,d=document.createElement('section');d.className='sect';
  const hoy=C?C.of.filter(o=>o.st==='aceptada'&&o.abs===absNow()):[];
  d.innerHTML=`<button class="corroP" onclick="go('corro')"><span class="cpI" style="background-image:url(img/calle.jpg)"></span><span class="cpT"><small>Ganadería de corro</small><b>${C?esc(C.name):'Bous al carrer'}</b><span>${C?(hoy.length?`Este mes: ${hoy.map(o=>esc(o.pueblo)).join(', ')} · ¡míralo en directo!`:`${C.of.filter(o=>o.st==='nueva').length} contratos nuevos · prestigio ${Math.round(C.pres)}`):'Compra una casa de corro o funda la tuya'}</span></span>${ICO.chev}</button>`;
- el.firstElementChild?el.firstElementChild.insertBefore(d,el.firstElementChild.children[1]||null):el.appendChild(d)};
-const _finTareas=finTareas;
-finTareas=function(rep){_finTareas(rep);try{corroMes(rep)}catch(e){console.error(e)}};
-const _patrimonio=patrimonio;
-patrimonio=function(){let v=_patrimonio();if(S&&S.corro)v+=S.corro.an.reduce((s,a)=>s+cPrecio(a),0)+Object.entries(S.corro.inv||{}).reduce((s,[k,l])=>s+CORRO_INV[k].c.slice(0,l).reduce((x,y)=>x+y,0)*.7,0);return Math.round(v)};
+ el.firstElementChild?el.firstElementChild.insertBefore(d,el.firstElementChild.children[1]||null):el.appendChild(d)});
+
+envolver('finTareas','corro',_finTareas=>function(rep){_finTareas(rep);try{corroMes(rep)}catch(e){console.error(e)}});
+
+envolver('patrimonio','corro',_patrimonio=>function(){let v=_patrimonio();if(S&&S.corro)v+=S.corro.an.reduce((s,a)=>s+cPrecio(a),0)+Object.entries(S.corro.inv||{}).reduce((s,[k,l])=>s+CORRO_INV[k].c.slice(0,l).reduce((x,y)=>x+y,0)*.7,0);return Math.round(v)});

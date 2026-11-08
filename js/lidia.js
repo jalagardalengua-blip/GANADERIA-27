@@ -64,8 +64,8 @@ function juzgar(t,o){if(t.res==='devuelto'){t.nota=0;t.juicio='Devuelto a los co
  t.juicio=f.join('; ')+'.'}
 
 /* ---------- lidia con torero, prestigio y juicio ---------- */
-const _lidiar=lidiar;
-lidiar=function(a,o,mat){const t=_lidiar(a,o,mat);const rt=torPres(mat.n);t.trp=Math.round(rt);
+
+envolver('lidiar','lidia',_lidiar=>function(a,o,mat){const t=_lidiar(a,o,mat);const rt=torPres(mat.n);t.trp=Math.round(rt);
  if(t.res!=='devuelto'){
   if(t.cogida&&Math.random()<clamp((rt-72)/70,0,.35)&&t.estilo!=='valiente'&&t.estilo!=='tremendista')delete t.cogida;
   const tor=(rt-76)/10;if(!t.avisos&&(t.ent||1)<=2){if(tor>0&&t.trof<2&&Math.random()<tor*.32)t.trof++;if(tor<0&&t.trof>0&&Math.random()<-tor*.4)t.trof--}
@@ -74,38 +74,38 @@ lidiar=function(a,o,mat){const t=_lidiar(a,o,mat);const rt=torPres(mat.n);t.trp=
   t.score=Math.max(t.score*0.4+t.nota*6,0);
   t.car=t.B>82?'Se arranca de largo, con fijeza':t.B<60?'Sale suelto y escarba':t.N>78?'Humilla desde el primer capotazo':t.C>80?'Mira y mide: encastado':t.F<50?'Justo de fuerzas, flojea':'Sale con son';
  }else juzgar(t,o);
- return t};
+ return t});
 nota10=function(t){return t.res==='devuelto'?'—':(t.nota!=null?t.nota:clamp((t.score||60)/10,0,10)).toFixed(1)};
 
 /* ---------- prestigio de los toreros a lo largo de tu carrera ---------- */
-const _celebrar=celebrar;
-celebrar=function(o){const r=_celebrar(o);S.tor=S.tor||{};
+
+envolver('celebrar','lidia',_celebrar=>function(o){const r=_celebrar(o);S.tor=S.tor||{};
  for(const t of r.toros){const who=t.cogida&&t.sust?[t.mat,t.sust.n]:[t.mat];for(const n of who){const T=S.tor[n]=S.tor[n]||{pres:torBase(n),f:0,ore:0,cog:0,ind:0,pu:0};}
   const T=S.tor[t.mat];T.f++;if(t.cogida){T.cog++;T.pres=clamp(T.pres-.4,30,99)}
   const kill=t.cogida&&t.sust?S.tor[t.sust.n]:T;kill.ore+=t.trof||0;if(t.res==='indulto')kill.ind++;
   kill.pres=clamp(kill.pres+(t.trof||0)*.6*(o.cat===1?1.4:1)-(t.avisos?.4:0)+(t.res==='indulto'?2:0)-(t.trof===0&&t.nota>=7.5?.3:0),30,99);
   if(o.cat===1&&t.trof>=2)kill.pu++}
  const bn=r.toros.filter(t=>t.nota!=null);if(bn.length){const m=bn.reduce((s,t)=>s+t.nota,0)/bn.length;r.notaMedia=Math.round(m*10)/10;const extra=Math.round((m-6.5)*.35*CATMUL[o.cat]*10)/10;S.pres=clamp(S.pres+extra,0,100);r.dp=Math.round((r.dp+extra)*10)/10}
- return r};
+ return r});
 /* escalafón de matadores en la pestaña de ofertas */
-const _renderOfertasL=renderOfertas;
-renderOfertas=function(el){_renderOfertasL(el);const L=MATADORES.map(m=>({n:m.n,e:m.e,p:torPres(m.n),s:S.tor&&S.tor[m.n]})).sort((a,b)=>b.p-a.p).slice(0,20);
+
+envolver('renderOfertas','lidia',_renderOfertasL=>function(el){_renderOfertasL(el);const L=MATADORES.map(m=>({n:m.n,e:m.e,p:torPres(m.n),s:S.tor&&S.tor[m.n]})).sort((a,b)=>b.p-a.p).slice(0,20);
  const d=document.createElement('section');d.className='sect';d.innerHTML=`<header><h2>Escalafón de matadores</h2><span class="sp"></span><small class="muted">prestigio en tu carrera</small></header><div class="tw"><table class="t"><tr><th>#</th><th>Matador</th><th>Pres.</th><th>Or.</th></tr>${L.map((m,i)=>`<tr><td>${i+1}</td><td><b>${esc(m.n)}</b><br><small class="muted">${ESTILO[(torSello(m.n)||{}).st||m.e]||''}</small></td><td class="num"><b>${Math.round(m.p)}</b></td><td class="num">${m.s?m.s.ore:0}</td></tr>`).join('')}</table></div>`;
- (el.firstElementChild||el).appendChild(d)};
+ (el.firstElementChild||el).appendChild(d)});
 
 /* ---------- sello de cada torero en la plaza 3D ---------- */
 let LID={mat:null,sust:null};
-const _buildGuion=buildGuion;buildGuion=function(t,first,C){LID={mat:t.mat,sust:t.sust?t.sust.n:null,t};return _buildGuion(t,first,C)};
+envolver('buildGuion','lidia',_buildGuion=>function(t,first,C){LID={mat:t.mat,sust:t.sust?t.sust.n:null,t};return _buildGuion(t,first,C)});
 const selloP=(P,s)=>s&&s.tempo?{...P,gal:P.gal/s.tempo}:P;
-const _actCapote=actCapote;actCapote=function(P,n,chic,mat,cut){const s=torSello(mat);const o=_actCapote(selloP(P,s),n,chic,mat,cut);if(s&&s.cap)o.cap=`${mat} recibe con el capote: ${s.cap}${P.corto?'. El toro se queda corto y obliga a enmendarse.':P.rec>.7?', con el toro humillado.':'.'}`;return o};
-const _actSerie=actSerie;actSerie=function(P,tipo,np,who,st,coger,cae,music){const n=who==='s2'?LID.sust:LID.mat,s=torSello(n);let tp=tipo,extra=null;
+envolver('actCapote','lidia',_actCapote=>function(P,n,chic,mat,cut){const s=torSello(mat);const o=_actCapote(selloP(P,s),n,chic,mat,cut);if(s&&s.cap)o.cap=`${mat} recibe con el capote: ${s.cap}${P.corto?'. El toro se queda corto y obliga a enmendarse.':P.rec>.7?', con el toro humillado.':'.'}`;return o});
+envolver('actSerie','lidia',_actSerie=>function(P,tipo,np,who,st,coger,cae,music){const n=who==='s2'?LID.sust:LID.mat,s=torSello(n);let tp=tipo,extra=null;
  if(s&&s.tipos&&tipo!=='tablas'){const k=(LID.k=(LID.k||0)+1);tp=s.tipos[k%s.tipos.length]}
  if(tp==='poncinas'){tp='rodillas';extra='Poncinas, con la rodilla flexionada'}if(tp==='cambiados'){tp='circulares';extra='Cambiado por la espalda y ligazón'}
- const o=_actSerie(selloP(P,s),tp,np,who,(s&&s.st)||st,coger,cae,music);if(extra)o.cap=o.cap.replace(/^[^.:]+/,extra);if(s&&s.tempo>=1.25&&!P.corto)o.cap+=' Temple de seda: el toro va a cámara lenta.';return o};
-const _actRemate=actRemate;actRemate=function(P,who,st,last){const n=who==='s2'?LID.sust:LID.mat,s=torSello(n);const o=_actRemate(P,who,(s&&s.st)||st,last);if(s&&s.rem)o.cap=s.rem;return o};
-const _actBand=actBanderillas;actBanderillas=function(P){const o=_actBand(P);const s=torSello(LID.mat);if(s&&s.band)o.cap=`${LID.mat} coge los palos y banderillea él mismo: al cuarteo, de poder a poder y al violín. ¡La plaza, en pie!`;return o};
-const _actEst=actEstocada;actEstocada=function(t,killer,kname){const o=_actEst(t,killer,kname);const s=torSello(kname);if(s&&s.est)o.cap=`${kname} entra a matar recibiendo, sin moverse: ${o.cap}`;return o};
-const _actSalida=actSalida;actSalida=function(t,P,desc,x){const o=_actSalida(t,P,desc,x);if(t.car)o.cap=`${o.cap} ${t.car}.`;return o};
+ const o=_actSerie(selloP(P,s),tp,np,who,(s&&s.st)||st,coger,cae,music);if(extra)o.cap=o.cap.replace(/^[^.:]+/,extra);if(s&&s.tempo>=1.25&&!P.corto)o.cap+=' Temple de seda: el toro va a cámara lenta.';return o});
+envolver('actRemate','lidia',_actRemate=>function(P,who,st,last){const n=who==='s2'?LID.sust:LID.mat,s=torSello(n);const o=_actRemate(P,who,(s&&s.st)||st,last);if(s&&s.rem)o.cap=s.rem;return o});
+envolver('actBanderillas','lidia',_actBand=>function(P){const o=_actBand(P);const s=torSello(LID.mat);if(s&&s.band)o.cap=`${LID.mat} coge los palos y banderillea él mismo: al cuarteo, de poder a poder y al violín. ¡La plaza, en pie!`;return o});
+envolver('actEstocada','lidia',_actEst=>function(t,killer,kname){const o=_actEst(t,killer,kname);const s=torSello(kname);if(s&&s.est)o.cap=`${kname} entra a matar recibiendo, sin moverse: ${o.cap}`;return o});
+envolver('actSalida','lidia',_actSalida=>function(t,P,desc,x){const o=_actSalida(t,P,desc,x);if(t.car)o.cap=`${o.cap} ${t.car}.`;return o});
 /* juicio en el resumen final de la plaza */
-const _cpEnd=cpEnd;cpEnd=function(){_cpEnd();const r=CP&&CP.r;const box=$('#h3dim .cartel');if(!r||!box)return;const d=document.createElement('div');d.className='juicio';
- d.innerHTML=`<span class="lbl">Juicio de los toros${r.notaMedia!=null?` · media ${r.notaMedia}`:''}</span>${r.toros.map(t=>`<div><b>${esc(t.name)} · ${nota10(t)}</b><small>${esc(t.juicio||'')}</small></div>`).join('')}`;box.insertBefore(d,box.querySelector('button'))};
+envolver('cpEnd','lidia',_cpEnd=>function(){_cpEnd();const r=CP&&CP.r;const box=$('#h3dim .cartel');if(!r||!box)return;const d=document.createElement('div');d.className='juicio';
+ d.innerHTML=`<span class="lbl">Juicio de los toros${r.notaMedia!=null?` · media ${r.notaMedia}`:''}</span>${r.toros.map(t=>`<div><b>${esc(t.name)} · ${nota10(t)}</b><small>${esc(t.juicio||'')}</small></div>`).join('')}`;box.insertBefore(d,box.querySelector('button'))});

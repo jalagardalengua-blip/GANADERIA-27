@@ -27,16 +27,16 @@ function cmpVer(){const L=GEN.cmp.map(byId).filter(Boolean);const k=a=>a.known||
   ${['bra','nob','fue','cas'].map(g=>fila({bra:'Bravura',nob:'Nobleza',fue:'Fuerza',cas:'Casta'}[g],a=>{const r=a.rev&&a.rev[g];return r!=null?r:'?'})).join('')}
   ${fila('Hijos lidiados',a=>(a.hijos||[]).length)}</table></div><div class="row" style="gap:8px;margin-top:10px"><button class="btn" onclick="GEN.cmp=[];closeModal()">Vaciar comparador</button></div>`)}
 /* ficha: botones de reata y comparar */
-const _openFichaG=openFicha;
-openFicha=function(id){const r=_openFichaG.apply(this,arguments);try{const sh=$('#ov .sheet')||$('#ov');if(sh&&!sh.querySelector('.gnBtns')){const d=document.createElement('div');d.className='gnBtns row';d.innerHTML=`<button class="btn" onclick="arbol(${id})">Árbol genealógico</button><button class="btn" onclick="cmpAdd(${id})">Comparar</button>`;(sh.querySelector('.stack')||sh).appendChild(d)}}catch(e){}return r};
+
+envolver('openFicha','genetica',_openFichaG=>function(id){const r=_openFichaG.apply(this,arguments);try{const sh=$('#ov .sheet')||$('#ov');if(sh&&!sh.querySelector('.gnBtns')){const d=document.createElement('div');d.className='gnBtns row';d.innerHTML=`<button class="btn" onclick="arbol(${id})">Árbol genealógico</button><button class="btn" onclick="cmpAdd(${id})">Comparar</button>`;(sh.querySelector('.stack')||sh).appendChild(d)}}catch(e){}return r});
 /* ganadería: buscar y ordenar */
 UI.q=UI.q||'';UI.ord=UI.ord||'cal';
-const _renderCamadaG=renderCamada;
-renderCamada=function(el){_renderCamadaG.apply(this,arguments);try{const st=el.querySelector('.stack')||el,lst=el.querySelector('.alist');if(!lst)return;
+
+envolver('renderCamada','genetica',_renderCamadaG=>function(el){_renderCamadaG.apply(this,arguments);try{const st=el.querySelector('.stack')||el,lst=el.querySelector('.alist');if(!lst)return;
  const bar=document.createElement('div');bar.className='gnBar';bar.innerHTML=`<input id="gnQ" type="search" placeholder="Buscar nombre, número, pelo o encaste" value="${esc(UI.q)}" aria-label="Buscar en la ganadería"><select id="gnO" aria-label="Ordenar">${[['cal','Calidad'],['peso','Peso'],['edad','Edad'],['nom','Nombre'],['num','Número']].map(([k,n])=>`<option value="${k}" ${UI.ord===k?'selected':''}>${n}</option>`).join('')}</select>`;
  const lg=st.querySelector('.legend');(lg||lst).before(bar);
  const rows=[...lst.children].map(r=>{const m=(r.getAttribute('onclick')||r.innerHTML).match(/openFicha\((\d+)\)/);const a=m&&byId(+m[1]);return {r,a,t:a?`${a.name} ${a.num} ${a.pelo} ${a.enc}`.toLowerCase():r.textContent.toLowerCase()}});
  const apply=()=>{const q=UI.q.trim().toLowerCase();const o=UI.ord;const cmp={peso:(x,y)=>y.a.peso-x.a.peso,edad:(x,y)=>x.a.born-y.a.born,nom:(x,y)=>x.a.name.localeCompare(y.a.name),num:(x,y)=>(x.a.num||0)-(y.a.num||0)}[o];
   const vis=rows.filter(x=>!q||x.t.includes(q));if(cmp)vis.filter(x=>x.a).sort(cmp).forEach(x=>lst.appendChild(x.r));rows.forEach(x=>x.r.style.display=vis.includes(x)?'':'none');
   let e=el.querySelector('.gnNone');if(!vis.length){if(!e){e=document.createElement('div');e.className='card muted gnNone';e.textContent='Ningún animal coincide con la búsqueda.';lst.after(e)}}else if(e)e.remove()};
- bar.querySelector('#gnQ').oninput=e=>{UI.q=e.target.value;apply()};bar.querySelector('#gnO').onchange=e=>{UI.ord=e.target.value;apply()};apply()}catch(e){try{errLog('buscar: '+e.message,'genetica')}catch(e2){}}};
+ bar.querySelector('#gnQ').oninput=e=>{UI.q=e.target.value;apply()};bar.querySelector('#gnO').onchange=e=>{UI.ord=e.target.value;apply()};apply()}catch(e){try{errLog('buscar: '+e.message,'genetica')}catch(e2){}}});

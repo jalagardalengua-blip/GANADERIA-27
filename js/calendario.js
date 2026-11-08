@@ -17,11 +17,11 @@ function calEventos(abs){const out=[];if(!S)return out;
  return out.sort((a,b)=>a.d-b.d)}
 function calPend(){const abs=absNow(),d=calDay();return calEventos(abs).filter(e=>(e.k==='corrida'||e.k==='corro')&&!e.done&&e.d===d)}
 /* avanzar n días; se para en un día de festejo propio */
-function calPaso(){const dm=dimOf(S.month,S.year);if(S.day>=dm){S.day=1;try{CALS.inMonth=true;advance()}finally{CALS.inMonth=false}if(!S)return 'fin'}else S.day++;
+function calPaso(){if(S.quiebra)return 'fin';const dm=dimOf(S.month,S.year);if(S.day>=dm){S.day=1;try{CALS.inMonth=true;advance()}finally{CALS.inMonth=false}if(!S||S.quiebra)return 'fin'}else S.day++;
  save();return calPend().length?'evento':null}
-function calAvanzar(n,silent){if(!S||CALS.busy)return;const d0=calDay(),m0=S.month,y0=S.year;let r=null;
+function calAvanzar(n,silent){if(!S||CALS.busy)return;if(S.quiebra)return gameOver();const d0=calDay(),m0=S.month,y0=S.year;let r=null;
  for(let i=0;i<n;i++){r=calPaso();if(r)break}
- if(!S)return;render();
+ if(!S)return;render();if(S.quiebra)return gameOver();
  if(r==='evento')return calEventoHoy();
  if(!silent&&S.month===m0&&S.year===y0)toast(`${calFecha(d0,m0,y0)} → ${calFecha(S.day,S.month,S.year)}`)}
 function calSemana(){calAvanzar(7)}
@@ -67,16 +67,16 @@ function calPintar(){const v=CALS.view,y=Math.floor(v/12),m=v%12,dm=dimOf(m,y),h
  const ex=$('#ov');if(ex&&ex.querySelector('.calW')){ex.querySelector('.calW').outerHTML=body;return}modal('Calendario',body)}
 function calSel(a,d){CALS.sel=[a,d];calPintar()}
 /* el mes de siempre: al cerrarlo, el día vuelve a 1 */
-const _advanceCal=advance;
-advance=function(){const r=_advanceCal.apply(this,arguments);if(S&&!CALS.inMonth)S.day=1;return r};
+
+envolver('advance','calendario',_advanceCal=>function(){const r=_advanceCal.apply(this,arguments);if(S&&!CALS.inMonth)S.day=1;return r});
 /* barra de estado: fecha con día, avanzar una semana y botón de calendario */
-const _renderCal=render;
-render=function(){_renderCal.apply(this,arguments);if(!S)return;try{const sb=$('.sbar');if(!sb)return;const d=calDay();
+
+envolver('render','calendario',_renderCal=>function(){_renderCal.apply(this,arguments);if(!S)return;try{const sb=$('.sbar');if(!sb)return;const d=calDay();
  const l=sb.querySelector('.it.hm .l'),s=sb.querySelector('.it.hm .s');if(l)l.textContent=calFecha(d,S.month,S.year)+' '+S.year;if(s)s.textContent=`${d} ${MESES[S.month].slice(0,3)}`;
  const go=sb.querySelector('button.go');if(go&&!go.dataset.cal){go.dataset.cal=1;go.setAttribute('onclick','calSemana()');go.setAttribute('aria-label','Avanzar una semana');go.innerHTML=`<span class="goT">Avanzar</span><small class="goS">1 semana</small>${ICO.chev}`;
   const cb=document.createElement('button');cb.className='calBtn';cb.setAttribute('aria-label','Abrir el calendario');cb.innerHTML=ICO.cal;cb.onclick=calAbrir;const n=calPend().length;if(n)cb.insertAdjacentHTML('beforeend',`<i class="bdg">${n}</i>`);go.before(cb)}
- }catch(e){}};
+ }catch(e){}},{segura:true});
 /* finca 3D: el botón del HUD también avanza una semana */
 const _init3DCal=typeof init3D==='function'?init3D:null;
 function calHud(){const b=$('#h3adv');if(!b||b.dataset.cal)return;b.dataset.cal=1;b.textContent='Avanzar semana';b.onclick=()=>{calSemana();if(W3.mode==='finca'&&S)rebuildFinca()}}
-const _show3DCal=show3D;show3D=function(){const r=_show3DCal.apply(this,arguments);try{calHud()}catch(e){}return r};
+envolver('show3D','calendario',_show3DCal=>function(){const r=_show3DCal.apply(this,arguments);try{calHud()}catch(e){}return r});

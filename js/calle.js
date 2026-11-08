@@ -167,8 +167,8 @@ function calleHUD(on){let h=$('#h3calle');if(!h){h=document.createElement('div')
   window.addEventListener('keydown',e=>{if(!CL||W3.mode!=='calle')return;const k=e.key.toLowerCase();if(k===' '){e.preventDefault();clAccion('q')}if(k==='c')clAccion('cita');if(k==='shift')W3.run=true});
   window.addEventListener('keyup',e=>{if(e.key==='Shift'&&W3.mode==='calle')W3.run=false})}
  h.hidden=!on}
-const _hudMode=hudMode;
-hudMode=function(m){_hudMode(m);if(W3.root)W3.root.dataset.m=m||'';const h=$('#h3calle');if(h)h.hidden=m!=='calle';if(m==='calle'){$('#h3cap').hidden=false;$('#h3toro').hidden=false}};
+
+envolver('hudMode','calle',_hudMode=>function(m){_hudMode(m);if(W3.root)W3.root.dataset.m=m||'';const h=$('#h3calle');if(h)h.hidden=m!=='calle';if(m==='calle'){$('#h3cap').hidden=false;$('#h3toro').hidden=false}});
 
 /* ---------- reses ---------- */
 function calleNext(){const C=S.corro;if(CL.res){CL.ev.luc[CL.res.a.id]=clResLuc(CL.res);if(CL.res.b)CL.sc.remove(CL.res.b.root);CL.res=null}

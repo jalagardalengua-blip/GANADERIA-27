@@ -19,8 +19,8 @@ const INSTAL={placita:{x:-30,z:13,n:'Placita de tientas',f:'Aquí se tientan las
 function inspeccionar(k){const d=MEJ[k],I=INSTAL[k],lv=mejLv(k);const desc=d&&d.d?d.d:[];
  modal(I.n,`<div class="stack"><p style="margin:0">${esc(I.f)}</p><div class="kv"><span>Nivel <b>${lv}${d?' / '+d.max:''}</b></span><span>Mantenimiento <b>${eur(lv*180)}/mes</b></span>${k==='cercas'?`<span>Estado <b>${S.roto?'cerca rota':'en buen estado'}</b></span>`:''}${k==='placita'?`<span>Hembras por tentar <b>${campo().filter(a=>a.sex==='H'&&!a.tentado&&!a.role&&ageY(a)>=2).length}</b></span>`:''}${k==='corrales'?`<span>Capacidad de la finca <b>${campo().length}/${capacidad()}</b></span>`:''}</div>
  ${lv&&desc[lv-1]?`<small class="muted">Ahora: ${esc(desc[lv-1])}</small>`:''}${d&&lv<d.max?`<div class="card"><b>Siguiente nivel · ${eur(d.c[lv])}</b><br><small>${esc(desc[lv]||'')}</small></div><button class="btn oro adv" onclick="closeModal(true);construir('${k}')">Mejorar${ICO.chev}</button>`:'<small class="muted">Nivel máximo.</small>'}</div>`)}
-const _rebuildF3=rebuildFinca;
-rebuildFinca=function(){_rebuildF3.apply(this,arguments);if(W3.mode!=='finca'||!W3.scene||!S)return;const sc=W3.scene,G=geos(),col=W3.col,acts=W3.acts;
+
+envolver('rebuildFinca','finca3',_rebuildF3=>function(){_rebuildF3.apply(this,arguments);if(W3.mode!=='finca'||!W3.scene||!S)return;const sc=W3.scene,G=geos(),col=W3.col,acts=W3.acts;
  try{
   // 1. paredes de piedra seca: cada tramo con su propia geometría para que la piedra no se estire, y piedras de remate
   const mPied=M('#a69c88',.98);const piedra=new THREE.MeshStandardMaterial({map:piedraTex(),color:'#d8cfc0',roughness:1});const rem=[];
@@ -43,4 +43,4 @@ rebuildFinca=function(){_rebuildF3.apply(this,arguments);if(W3.mode!=='finca'||!
   acts.push({x:30.4,z:-43,r:2.4,l:'Mueco: revisar a los lesionados',cond:()=>!W3.ride,fn:()=>{const l=campo().filter(a=>a.lesion>0||a.salud<60);if(!l.length){toast('No hay reses que necesiten pasar por el mueco');return}const c=l.length*90;if(S.money<c){toast('No te llega para el veterinario');return}S.money-=c;l.forEach(a=>{a.salud=clamp(a.salud+12,5,100);a.lesion=Math.max(0,(a.lesion||0)-1)});save();toast(`${l.length} reses curadas en el mueco · −${eur(c)}`)}});
   // 4. inspección de instalaciones
   for(const [k,I] of Object.entries(INSTAL)){if(!MEJ[k]&&k!=='casa')continue;acts.push({x:I.x,z:I.z,r:2.2,l:`Inspeccionar: ${I.n.toLowerCase()}`,cond:()=>!W3.ride&&!W3.F.carry,fn:()=>inspeccionar(k)})}
- }catch(e){try{errLog('finca3: '+e.message,'finca3')}catch(e2){}}};
+ }catch(e){try{errLog('finca3: '+e.message,'finca3')}catch(e2){}}},{segura:true});
