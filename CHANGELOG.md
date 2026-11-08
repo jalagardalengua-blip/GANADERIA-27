@@ -64,3 +64,8 @@ Calendario por semanas al estilo FIFA, barra de gala y pantallas a juego, sonido
 - Toro de lidia propio (Tripo) con esqueleto y animaciones; pelos y señas pintados sobre su textura. Versión ligera para la finca.
 - Alguacilillos y picadores con cuerpo realista montados, vara en la mano.
 - Tarjetas de ganadería sin textos de descripción ni colores escritos; foto distinta para cada una según su pelo.
+
+## Interfaz moderna
+- Capa `css/moderno.css`: paneles de cristal con filo fino, cabeceras de sección limpias, barra superior compacta, pestañas segmentadas, botones y ventanas redondeados.
+- Fuentes alojadas en el juego (funcionan sin conexión y se ven igual en todos los móviles).
+- La vitrina de la ficha usa siempre el toro detallado.
