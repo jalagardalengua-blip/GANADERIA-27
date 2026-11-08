@@ -50,7 +50,7 @@ function triMat(lod){if(TRI.mats.has(lod))return TRI.mats.get(lod);const o=triMa
 function makeBullTri(spec){
  const G=geos(),kind=spec.kind||'toro',cab=kind==='cabestro',KD=TOR_KIND[kind]||TOR_KIND.toro;
  const m=spec.m||{len:1,alt:1,morr:.9,leg:1,girth:1,papada:1,horn:cab?'cab':'veleto',hl:cab?1.25:1,ht:.05,hc:'#e2d6bc'};
- const lod=(typeof W3!=='undefined'&&W3&&W3.mode==='finca'&&TRI.lo&&!spec.hi)?'lo':'hi';
+ const lod=(typeof W3!=='undefined'&&W3&&W3.mode==='finca'&&W3.on&&TRI.lo&&!spec.hi)?'lo':'hi';
  const I=torInfo('bull'),geo=triColores(lod,spec,m),mat=triMat(lod);
  const sc=THREE.SkeletonUtils.clone(TRI[lod].scene);const bones={};
  sc.traverse(o=>{if(o.isBone)bones[o.name]=o;if(!o.isSkinnedMesh)return;o.geometry=geo;o.material=mat;o.castShadow=true;o.receiveShadow=lod==='hi';o.frustumCulled=false});

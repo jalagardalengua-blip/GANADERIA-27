@@ -13,7 +13,7 @@ function vtInit(){if(VT.R||VT.err)return VT.R;try{const R=new THREE.WebGLRendere
  const cam=new THREE.PerspectiveCamera(28,2,.1,50);Object.assign(VT,{R,sc,cam,tx});return R}catch(e){VT.err=e;return null}}
 function vtKind(a){const y=ageY(a);if(y<1)return 'becerro';return a.sex==='H'?'vaca':'toro'}
 function vtMostrar(a){const cv=$('#fcv');if(!cv||!vtInit())return;const wrap=cv.parentElement;if(!wrap)return;
- if(VT.B){VT.sc.remove(VT.B.root);VT.B=null}let B;try{B=makeBull({pelo:a.pelo,kind:vtKind(a),m:morf(a)})}catch(e){return}
+ if(VT.B){VT.sc.remove(VT.B.root);VT.B=null}let B;try{B=makeBull({pelo:a.pelo,kind:vtKind(a),m:morf(a),hi:1})}catch(e){return}
  const y=ageY(a),s=y===0?.62:y===1?.78:y===2?.9:1;B.root.scale.multiplyScalar(s);B.root.traverse(o=>{if(o.isMesh){o.castShadow=true}});VT.sc.add(B.root);VT.B=B;try{gxScene(VT.sc)}catch(e){}
  const box=new THREE.Box3().setFromObject(B.root),ctr=box.getCenter(new THREE.Vector3()),sz=box.getSize(new THREE.Vector3());B.root.position.x-=ctr.x;B.root.position.z-=ctr.z;
  const R=VT.R,el=R.domElement;el.className='vtCv';cv.replaceWith(el);wrap.classList.add('vt3d');wrap.style.background='';
