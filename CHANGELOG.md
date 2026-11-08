@@ -7,7 +7,7 @@
   - Finca saturada: castigo de salud proporcional al exceso, menos partos y pastos arrendados (35 €/cabeza de más). La tienta solo preselecciona las vacas que caben.
   - Hierros nuevos: 240.000 € y algo más de ganado al empezar, más ofertas de plazas de tercera y pueblos, mejores precios en segunda y tercera, prestigio por darse a conocer en plazas pequeñas y un suelo de prestigio de 8.
 - Las corridas ya lidiadas salen de la lista de ofertas pasado un año (siguen en el historial).
-- `persona2` en formato GLB (más ligero de descargar); el APK ya no incluye modelos de respaldo, documentación ni pruebas.
+- `persona2` en formato GLB (más ligero de descargar, reempaquetado sin tocar el esqueleto); el APK ya no incluye los modelos JSON que tienen versión GLB, ni documentación ni pruebas (la vegetación sigue incluida).
 - Cabecera: en móviles estrechos el nombre y el subtítulo de la ganadería pasan a dos líneas en vez de cortarse.
 - Corrida en directo: la pantalla completa solo se pide al tocar (antes salía un error en la consola) y ya no se marcan para subir a la gráfica texturas que aún no han cargado.
 - Código: las 123 ampliaciones de funciones del núcleo pasan por `envolver()` (registro en `GANCHOS`, errores aislados y anotados); `esc()` escapa el apóstrofo y `jsq()` protege textos dentro de `onclick`.
