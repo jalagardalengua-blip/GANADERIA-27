@@ -61,8 +61,8 @@ function trHUD(){if($('#h3tor'))return;const d=document.createElement('div');d.i
  $('#trBig').addEventListener('pointerdown',e=>{e.preventDefault();trBig()});
  $('#trCam').onclick=()=>{if(!TR)return;TR.view=TR.view==='juego'?'tv':'juego';TR.cut=1;$('#trCam').textContent='Cámara: '+(TR.view==='juego'?'torero':'TV')};
  window.addEventListener('keydown',e=>{if(W3.mode!=='torero'||!TR)return;const k=e.key;if(k===' '){e.preventDefault();trBig()}const n=parseInt(k,10);if(n>=1&&n<=6){const b=document.querySelectorAll('#trBtns button')[n-1];if(b)b.click()}})}
-const _hudModeT=hudMode;
-hudMode=function(m){_hudModeT(m);const t=$('#h3tor');if(t)t.hidden=m!=='torero';if(W3.root)W3.root.classList.toggle('torMode',m==='torero');if(m==='torero'){$('#joy').hidden=false;$('.h3act').hidden=true;$('#h3adv').hidden=true;$('#h3toro').hidden=true;$('#h3cap').hidden=false;$('#h3tasks').hidden=true}};
+
+envolver('hudMode','torero',_hudModeT=>function(m){_hudModeT(m);const t=$('#h3tor');if(t)t.hidden=m!=='torero';if(W3.root)W3.root.classList.toggle('torMode',m==='torero');if(m==='torero'){$('#joy').hidden=false;$('.h3act').hidden=true;$('#h3adv').hidden=true;$('#h3toro').hidden=true;$('#h3cap').hidden=false;$('#h3tasks').hidden=true}});
 function enterTorero(o){if(!show3D())return;trHUD();W3.from='torero';
  try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(l=>W3.wl=l).catch(()=>{})}catch(e){}
  const P=buildPlaza();W3.mode='torero';W3.scene=P.sc;hudMode('torero');crowdStart();setPanu(0);P.pp.visible=false;
@@ -305,14 +305,14 @@ function trCam(dt){const C=TR,cam=W3.cam;if(!C||!C.b)return;const b=C.b,T=C.T;le
 const TR_LOCK=true;
 const TR_CAND='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="#e6bb55" d="M7 10V7a5 5 0 0 1 10 0v3h1.2c.7 0 1.3.6 1.3 1.3v8.4c0 .7-.6 1.3-1.3 1.3H5.8c-.7 0-1.3-.6-1.3-1.3v-8.4c0-.7.6-1.3 1.3-1.3H7zm2 0h6V7a3 3 0 0 0-6 0v3zm3 3.2a1.6 1.6 0 0 0-.8 3v1.8h1.6v-1.8a1.6 1.6 0 0 0-.8-3z"/></svg>';
 function trBloq(){try{uiSnd&&uiSnd('cap')}catch(e){}toast('Modo torero bloqueado: lo estamos terminando. Muy pronto podrás vestirte de luces.')}
-const _startScreenT=startScreen;
-startScreen=function(){if(MENU.v==='torero'&&!TR_LOCK)return toreroScreen();if(MENU.v==='torero')MENU.v='main';let h=_startScreenT();
+
+envolver('startScreen','torero',_startScreenT=>function(){if(MENU.v==='torero'&&!TR_LOCK)return toreroScreen();if(MENU.v==='torero')MENU.v='main';let h=_startScreenT();
  if(MENU.v==='main')h=h.replace(`<button class="mItem" onclick="menuGo('modos')">`,`<button class="mItem trItem trLock" aria-disabled="true" onclick="trBloq()"><b>Modo torero</b><small>Próximamente · en desarrollo</small><span class="mArr trCand">${TR_CAND}</span></button>\n   <button class="mItem" onclick="menuGo('modos')">`);
  if(MENU.v==='modos')h=h.replace(`<div class="mMode"><i style="background-image:url(img/palco.jpg)">`,`<div class="mMode"><i style="background-image:url(img/plaza-2.jpg)"></i><div><b>Modo torero · próximamente</b><p>Sé tú el matador: recibe con el capote, liga series de muleta con temple, entra a matar y sal a hombros. Carrera de novillero a figura.</p></div></div><div class="mMode"><i style="background-image:url(img/palco.jpg)">`);
- return h};
+ return h},{segura:true});
 /* capote y muleta con caída real: el paño se curva hacia delante y recoge la luz */
-const _clothTickT=clothTick;
-clothTick=function(m,t,amp){_clothTickT(m,t,amp);const k=m.userData.curv;if(!k)return;const g=m.geometry,p=g.attributes.position,W=g.parameters.width/2,H=g.parameters.height;
- for(let i=0;i<p.count;i++){const x=p.getX(i)/W,y=p.getY(i);const d=(H/2-y)/H;p.array[i*3+2]+=k*x*x-.06*d*d+.03*Math.sin(x*3+t*1.3)*d}p.needsUpdate=true;g.computeVertexNormals()};
-const _makeCapoteT=makeCapote;
-makeCapote=function(){const g=_makeCapoteT();const cl=g.userData.cl;cl.userData.curv=.36;g.position.y=1.02;g.position.z=.36;g.children.forEach(c=>{if(c.material){c.material.side=THREE.FrontSide;c.material.roughness=.92}});return g};
+
+envolver('clothTick','torero',_clothTickT=>function(m,t,amp){_clothTickT(m,t,amp);const k=m.userData.curv;if(!k)return;const g=m.geometry,p=g.attributes.position,W=g.parameters.width/2,H=g.parameters.height;
+ for(let i=0;i<p.count;i++){const x=p.getX(i)/W,y=p.getY(i);const d=(H/2-y)/H;p.array[i*3+2]+=k*x*x-.06*d*d+.03*Math.sin(x*3+t*1.3)*d}p.needsUpdate=true;g.computeVertexNormals()});
+
+envolver('makeCapote','torero',_makeCapoteT=>function(){const g=_makeCapoteT();const cl=g.userData.cl;cl.userData.curv=.36;g.position.y=1.02;g.position.z=.36;g.children.forEach(c=>{if(c.material){c.material.side=THREE.FrontSide;c.material.roughness=.92}});return g});

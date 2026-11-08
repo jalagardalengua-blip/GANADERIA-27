@@ -1,3 +1,14 @@
+/* ============ capas sobre funciones del núcleo ============
+   Los módulos (calendario, corro, efectos, menú…) amplían render(), advance(), show3D()… con envolver().
+   Cada capa queda registrada en GANCHOS[nombre] en orden de carga, y un fallo en una capa no tumba el juego:
+   se anota en el registro de errores y, en las funciones que se pueden repetir sin efectos (render, startScreen,
+   rebuildFinca, save, load…), se sigue con la versión anterior. En las demás (advance, celebrar…) el error se propaga. */
+const GANCHOS={};
+function envolver(nombre,modulo,fabrica,opt){const orig=window[nombre];if(typeof orig!=='function'){console.warn('envolver: no existe '+nombre+' ('+modulo+')');return}
+ const capa=fabrica(orig),segura=!!(opt&&opt.segura);
+ const f=function(){try{return capa.apply(this,arguments)}catch(e){try{if(typeof errLog==='function')errLog(modulo+' → '+nombre+': '+e.message,'ganchos')}catch(_){}
+   if(!f.avisado){f.avisado=1;console.error('['+modulo+'] '+nombre+':',e)}if(segura)return orig.apply(this,arguments);throw e}};
+ f.capa=modulo;window[nombre]=f;(GANCHOS[nombre]=GANCHOS[nombre]||[]).push(modulo);return f}
 /* ============ utilidades ============ */
 const $=s=>document.querySelector(s);
 const R=(a,b)=>a+Math.random()*(b-a), RI=(a,b)=>Math.floor(R(a,b+1)), pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -5,7 +16,9 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const gauss=()=>(Math.random()+Math.random()+Math.random()+Math.random()-2)*1.73;
 const r100=v=>Math.round(v/100)*100;
 const eur=v=>(v<0?'−':'')+Math.abs(Math.round(v)).toLocaleString('es-ES')+' €';
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* texto dentro de una cadena JS en un atributo onclick="…('…')": primero se escapa para JS y luego para HTML */
+const jsq=s=>esc(String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' '));
 function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
@@ -118,10 +131,10 @@ const lidiable=a=>a.sex==='M'&&a.st==='campo'&&!a.tentado&&!a.role&&a.res==null;
 
 /* ============ nueva partida ============ */
 function newGame(cfg){
- S={v:1,g:cfg,year:2027,month:0,money:cfg.real?260000:180000,pres:cfg.real?cfg.pres:12,feed:'nor',animals:[],nid:1,nums:{},offers:[],oid:1,
+ S={v:1,g:cfg,year:2027,month:0,money:cfg.real?260000:240000,pres:cfg.real?cfg.pres:12,feed:'nor',animals:[],nid:1,nums:{},offers:[],oid:1,
   hist:[],presHist:[],semAct:null,mej:cfg.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{},season:null,objs:[],porVer:[],mkt:null,log:[],stats:{corridas:0,toros:0,indultos:0,vueltas:0,orejas:0,premios:0,ingresos:0}};
  const real=cfg.real, enc=cfg.enc, b=real?2:-5;
- const nV=real?40:20, nM=real?12:5, nH=real?10:5, nS=real?2:1, maxM=real?5:4;
+ const nV=real?40:24, nM=real?12:7, nH=real?10:5, nS=real?2:1, maxM=real?5:4;
  const vacas=[];
  for(let i=0;i<nV;i++){const v=mk({sex:'H',born:S.year-RI(4,12),enc,bonus:b+2,role:'vaca'});tentar(v);vacas.push(v);S.animals.push(v)}
  for(let i=0;i<nS;i++){const s=mk({sex:'M',born:S.year-RI(5,7),enc,bonus:b+6,role:'semental'});tentar(s);if(s.nota<70){s.g.bra=Math.max(s.g.bra,78);tentar(s)}S.animals.push(s)}
@@ -138,7 +151,7 @@ function newGame(cfg){
 function newSeason(){
  S.season={lid:0,c1:0,ov:0,vu:0,ind:0,pts:0,ore:0};
  const p=S.pres, pool=[
-  {id:'lid',n:p<30?6:12,txt:n=>`Lidiar ${n} toros o novillos`,chk:(s,o)=>s.lid>=o.n},
+  {id:'lid',n:p<15?4:p<30?6:12,txt:n=>`Lidiar ${n} toros o novillos`,chk:(s,o)=>s.lid>=o.n},
   {id:'ov',n:2,txt:()=>'Conseguir 2 ovaciones o mejor',chk:s=>s.ov>=2},
   {id:'cash',n:r100(S.money*0.9/1000)*1000,txt:n=>`Cerrar el año con ${eur(n)} o más`,chk:(s,o)=>S.money>=o.n}];
  if(p>=35)pool.push({id:'c1',n:1,txt:()=>'Lidiar en una plaza de primera',chk:s=>s.c1>=1});
@@ -149,7 +162,7 @@ function newSeason(){
 const OBJCHK={lid:(s,o)=>s.lid>=o.n,ov:s=>s.ov>=2,cash:(s,o)=>S.money>=o.n,c1:s=>s.c1>=1,vu:s=>s.vu+s.ind>=1};
 
 /* ============ ofertas y mercado ============ */
-function priceFor(cat,tipo){const p=S.pres,bonus=1+(mejLv('corrales')>=2?.05:0)+(mej('oficina')?.05:0);let v=cat===1?6000+p*95:cat===2?3400+p*45:1800+p*22;if(tipo==='novillada')v*=.45;return r100(v*bonus*R(.9,1.1))}
+function priceFor(cat,tipo){const p=S.pres,bonus=1+(mejLv('corrales')>=2?.05:0)+(mej('oficina')?.05:0);let v=cat===1?6000+p*95:cat===2?4200+p*45:3000+p*22;if(tipo==='novillada')v*=.55;return r100(v*bonus*R(.9,1.1))}
 function genOffers(ahead,init){
  const tgt=absNow()+ahead, tm=tgt%12;
  for(const f of FERIAS){
@@ -160,7 +173,8 @@ function genOffers(ahead,init){
   if(Math.random()<ch)addOffer({fid:f.id,plaza:f.plaza,feria:f.feria,cat:f.cat,tipo:f.tipo,abs:tgt,n:6});
  }
  if(!init||ahead===2){
-  if(tm>=3&&tm<=9&&Math.random()<.5){const s=pick(SMALL.filter(x=>x.cat===3));addOffer({...s,tipo:Math.random()<.3?'novillada':'corrida',abs:tgt,n:Math.random()<.5?4:6})}
+  // las plazas de tercera y los pueblos llaman más a los hierros que empiezan
+  if(tm>=3&&tm<=9&&Math.random()<(S.pres<30?.8:.5)){const s=pick(SMALL.filter(x=>x.cat===3));addOffer({...s,tipo:Math.random()<.3?'novillada':'corrida',abs:tgt,n:Math.random()<(S.pres<30?.7:.5)?4:6})}
   if(tm>=5&&tm<=8&&S.pres>=15&&Math.random()<.35){const s=pick(SMALL.filter(x=>x.cat===2));addOffer({...s,tipo:'corrida',abs:tgt,n:6})}
  }
 }
@@ -191,6 +205,7 @@ function est(a){
 /* ============ avance de mes ============ */
 function log(t){S.log.unshift({d:`${MESES[S.month].slice(0,3)} ${S.year}`,t});S.log=S.log.slice(0,60)}
 function advance(){
+ if(S&&S.quiebra)return gameOver();
  const rep={lines:[],corridas:[],cost:0,inc:0};
  const n=campo().length;
  // fin de año
@@ -209,9 +224,10 @@ function advance(){
  const ev=Math.random()<.42?pick(['pelea','lluvia','sequia','veedor','visita','cojera']):null;
  if(ev==='lluvia'&&[1,2,3,9,10].includes(S.month))feedMod=.72;
  if(ev==='sequia'&&[5,6,7,8].includes(S.month)&&!mej('pozo'))feedMod=1.35;
- const fc=Math.round(n*FEED[S.feed].c*feedMod*feedMul()), pc=2500+10*n+mantenimiento();
- S.money-=fc+pc;rep.cost+=fc+pc;
- rep.lines.push(`Alimentación ${FEED[S.feed].n.toLowerCase()}: ${eur(fc)} · Personal y mantenimiento: ${eur(pc)}`);
+ const capF=capacidad(), sobra=Math.max(0,n-capF);
+ const fc=Math.round(n*FEED[S.feed].c*feedMod*feedMul()), pc=1200+18*n+mantenimiento(), xc=sobra*35;
+ S.money-=fc+pc+xc;rep.cost+=fc+pc+xc;
+ rep.lines.push(`Alimentación ${FEED[S.feed].n.toLowerCase()}: ${eur(fc)} · Personal y mantenimiento: ${eur(pc)}${xc?` · Pastos arrendados y forraje por exceso de ganado: ${eur(xc)}`:''}`);
  // avanzar calendario
  S.month++;if(S.month>11){S.month=0;S.year++;newSeason();rep.lines.push(`Empieza la temporada ${S.year}. Nuevos objetivos de la propiedad.`)}
  if(S.money<0)S.conf=clamp(S.conf-2,0,100);
@@ -234,14 +250,15 @@ function advance(){
   a.salud=clamp(a.salud+f.s+R(-1.2,1.4)+(a.lesion>0?(mej('clinica')?8:4):0)+(ev==='lluvia'?1.5:0)+mejLv('abrev')*.5+(mej('pozo')&&[5,6,7,8].includes(S.month)?.4:0)+(aMano?.6:0),5,100);
   if(a.lesion>0)a.lesion--;
  }
- {const cap=capacidad(),nc=campo().length;if(nc>cap){for(const a of campo())a.salud=clamp(a.salud-1.5,5,100);rep.lines.push(`Finca saturada: ${nc} cabezas para ${cap} de capacidad. Vende ganado o compra una finca colindante.`)}}
+ {const cap=capacidad(),nc=campo().length;if(nc>cap){const ex=(nc-cap)/cap,d=1.5+ex*6;for(const a of campo())a.salud=clamp(a.salud-d,5,100);
+  rep.lines.push(`⚠ Finca saturada: ${nc} cabezas para ${cap} de capacidad (${Math.round(ex*100)} % de más). La camada pierde salud cada mes, paren menos vacas y pagas pastos arrendados. Vende ganado, desecha vacas viejas o amplía la finca.`)}}
  // paridera
  if(S.month===2){
   const sem=byId(S.semAct);const p=sem&&sem.st==='campo'&&sem.role==='semental'?sem:null;
-  let nb=0,hm=0;
+  let nb=0,hm=0;const satF=Math.min(1,capacidad()/Math.max(1,campo().length));
   for(const v of campo().filter(a=>a.role==='vaca')){
    const y=ageY(v);if(y<3)continue;
-   const ch=.88*(v.salud/100)-(y>13?(y-13)*.06:0);
+   const ch=(.88*(v.salud/100)-(y>13?(y-13)*.06:0))*satF;
    if(Math.random()>ch)continue;
    const fg=p?p.g:genes(v.enc,-6);const g={};for(const k in v.g)g[k]=Math.round(clamp((v.g[k]+fg[k])/2+gauss()*6,15,99));
    const sex=Math.random()<.5?'M':'H';
@@ -254,6 +271,7 @@ function advance(){
   rep.lines.push(`Paridera: nacen ${nb} becerros (${hm} machos y ${nb-hm} hembras)${p?`, hijos de ${p.name} nº ${p.num}`:' con un semental prestado; asigna uno propio para mejorar la reata'}.`);
  }
  if(S.pres>40)S.pres-=(S.pres-40)*.006;
+ if(S.pres<8&&S.stats.corridas>0)S.pres+=(8-S.pres)*.05;
  // evento
  const males=campo().filter(a=>a.sex==='M'&&ageY(a)>=3&&!a.role);
  if(ev==='pelea'&&males.length>=2&&!(Math.random()<[0,.5,.8][mejLv('cercas')])){const v=pick(males);const d=RI(22,50);v.salud=clamp(v.salud-d,5,100);v.lesion=3;rep.lines.push(`Pelea en el cercado: ${v.name} nº ${v.num} sale herido (salud ${Math.round(v.salud)}).`)}
@@ -268,7 +286,8 @@ function advance(){
  for(const o of S.offers.filter(o=>o.st==='aceptada'&&o.abs===absNow())){const r=celebrar(o);rep.corridas.push(r);rep.inc+=r.ingreso}
  // ofertas
  for(const o of S.offers)if(o.st==='nueva'&&absNow()>=o.abs){o.st='caducada'}
- S.offers=S.offers.filter(o=>!(o.st==='caducada'||o.st==='rechazada')||absNow()-o.abs<3);
+ // las corridas ya lidiadas viven en el historial (S.hist): fuera de la lista de ofertas pasado un año
+ S.offers=S.offers.filter(o=>o.st==='lidiada'?absNow()-o.abs<12:!(o.st==='caducada'||o.st==='rechazada')||absNow()-o.abs<3);
  for(const o of S.offers)o.nuevo=false;
  const before=S.offers.length;genOffers(3);genOffers(2);
  const nuevas=S.offers.length-before;if(nuevas)rep.lines.push(`${nuevas} ${nuevas>1?'nuevas ofertas':'nueva oferta'} de empresas. Míralas en Ofertas.`);
@@ -319,6 +338,8 @@ function celebrar(o){
  o.toros.forEach((id,i)=>{const a=byId(id);if(!a)return;let mat=pool[i%3];if(hurt.has(mat.n))mat=pool.find(m=>!hurt.has(m.n))||SOBRE;
   const t=lidiar(a,o,mat);if(t.cogida){hurt.add(mat.n);const s=pool.find(m=>!hurt.has(m.n))||SOBRE;t.sust={n:s.n,t:s.t,e:s.e};t.trof=Math.min(t.trof,(typeof torPres==='function'?torPres(s.n):60)>=80?1:0)}toros.push(t)});
  let dp=0;for(const t of toros)dp+=RESPRES[t.res]*CATMUL[o.cat];
+ // un hierro joven se da a conocer lidiando en plazas pequeñas
+ if(o.cat===3&&S.pres<35)dp+=1;
  const best=toros.reduce((m,t)=>t.score>m.score?t:m,toros[0]);
  let premio=null;
  if(best&&best.score>=80&&o.cat<=2&&Math.random()<.6){premio=best.name;dp+=3;S.money+=6000;S.stats.premios++}
@@ -591,7 +612,7 @@ function rerStart(){const y=window.scrollY;render();window.scrollTo(0,y)}
 function startReal(i){const g=GANADERIAS[i];newGame({real:true,name:g.name,enc:g.enc,pres:g.pres,div:g.div,hierro:{l:g.name[0],a:'none'},prov:''})}
 function startNew(){const n=NEWG.name.trim();if(!n){toast('Ponle nombre a tu ganadería');$('#ng-name').focus();return}
  newGame({real:false,name:n,enc:NEWG.enc,div:[NEWG.c1,NEWG.c2],hierro:{l:(NEWG.l.trim()||n[0]),a:NEWG.a},prov:NEWG.prov,fund:2027})}
-function continuar(){S=load();if(!S.animals){S=null;return}migrate(S);if(!S.mej)S.mej=S.g.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{};UI.tab='inicio';render()}
+function continuar(){S=load();if(!S||!S.animals){S=null;return}migrate(S);if(!S.mej)S.mej=S.g.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{};UI.tab='inicio';render();if(S.quiebra)gameOver()}
 
 /* ============ INICIO ============ */
 function offerCard(o){
@@ -740,7 +761,7 @@ function openFicha(id){
  const acts=[];
  if(a.res!=null){const o=S.offers.find(x=>x.id===a.res);acts.push(`<p class="muted" style="margin:0">Reseñado para ${o?`${esc(o.plaza)} (${o.feria}, ${MESES[o.abs%12]})`:'una corrida'}. No se puede vender ni tentar.</p>`)}
  else if(a.role==='semental'){
-  acts.push(a.id===S.semAct?'<span class="badge ok">Cubre a las vacas este año</span>':`<button class="btn oro" onclick="S.semAct=${a.id};save();closeModal();render();toast('${esc(a.name)} cubrirá a las vacas')">Usar en la cubrición</button>`);
+  acts.push(a.id===S.semAct?'<span class="badge ok">Cubre a las vacas este año</span>':`<button class="btn oro" onclick="S.semAct=${a.id};save();closeModal();render();toast('${jsq(a.name)} cubrirá a las vacas')">Usar en la cubrición</button>`);
   acts.push(`<button class="btn" onclick="vender(${a.id},'mat')">Retirar al matadero · ${eur(a.peso*1.5)}</button>`);
  } else if(a.role==='vaca'){
   acts.push(`<button class="btn" onclick="vender(${a.id},'mat')">Desechar al matadero · ${eur(a.peso*1.3)}</button>`);
@@ -791,10 +812,10 @@ function tientaLote(){
  const pend=campo().filter(a=>a.sex==='H'&&!a.tentado&&!a.role&&ageY(a)>=2);
  if(!pend.length)return;
  const cost=pend.length*tCost('H');S.money-=cost;pend.forEach(tentar);save();render();
- const rows=pend.sort((a,b)=>b.nota-a.nota);
+ const rows=pend.sort((a,b)=>b.nota-a.nota);const libres=Math.max(0,capacidad()-campo().length+pend.length);
  modal('Tienta de hembras',`<div class="stack">
-  <p class="muted" style="margin:0">En la placita de tientas se mide la bravura de ${pend.length} hembras ante el caballo y la muleta (${eur(cost)}). Marca las que pasan a vacas de vientre; las demás van al matadero.</p>
-  <div class="list">${rows.map(a=>`<label class="chk"><input type="checkbox" id="tv-${a.id}" ${a.nota>=68?'checked':''}><span><b>${esc(a.name)}</b>${a.num!=null?` <span class="mono muted">${a.num}</span>`:''}<br><small class="muted">${a.pelo} · ${a.peso} kg · madre ${a.madre?esc(a.madre.name):'—'}</small></span><span style="text-align:right"><b class="num">${a.nota}</b><br><small class="muted">${notaTxt(a.nota)}</small></span></label>`).join('')}</div>
+  <p class="muted" style="margin:0">En la placita de tientas se mide la bravura de ${pend.length} hembras ante el caballo y la muleta (${eur(cost)}). Marca las que pasan a vacas de vientre; las demás van al matadero.${libres<pend.length?` <b>En la finca caben ${libres} más</b>: si apruebas más, se saturará.`:''}</p>
+  <div class="list">${rows.map((a,i)=>`<label class="chk"><input type="checkbox" id="tv-${a.id}" ${a.nota>=68&&i<libres?'checked':''}><span><b>${esc(a.name)}</b>${a.num!=null?` <span class="mono muted">${a.num}</span>`:''}<br><small class="muted">${a.pelo} · ${a.peso} kg · madre ${a.madre?esc(a.madre.name):'—'}</small></span><span style="text-align:right"><b class="num">${a.nota}</b><br><small class="muted">${notaTxt(a.nota)}</small></span></label>`).join('')}</div>
   <button class="btn pri adv" onclick="cerrarTienta([${rows.map(a=>a.id).join(',')}])">Confirmar selección</button></div>`);
 }
 function cerrarTienta(ids){let ap=0,ds=0,ing=0;for(const id of ids){const a=byId(id);if(!a)continue;const ck=$('#tv-'+id);if(ck&&ck.checked){a.role='vaca';ap++}else{ing+=a.peso*1.3;a.st='vendido';ds++}}
@@ -864,8 +885,14 @@ function spark(){const d=S.presHist;const W=600,H=120,p=24;const xs=i=>p+i*(W-2*
  return `<svg viewBox="0 0 ${W} ${H}" class="spark" role="img" aria-label="Prestigio por temporada"><line x1="${p}" x2="${W-p}" y1="${ys(50)}" y2="${ys(50)}" stroke="var(--line)" stroke-dasharray="4 4"/><text x="${p}" y="${ys(50)-4}" fill="var(--muted)" font-size="11">50</text>
  <polygon points="${xs(0)},${H-p} ${pts} ${xs(d.length-1)},${H-p}" fill="rgba(230,187,85,.15)"/><polyline points="${pts}" fill="none" stroke="var(--oro)" stroke-width="2.5"/>
  ${d.map((x,i)=>`<circle cx="${xs(i)}" cy="${ys(x.p)}" r="${i===d.length-1?5:3}" fill="var(--oro)"/><text x="${xs(i)}" y="${H-6}" fill="var(--muted)" font-size="11" text-anchor="middle">${x.y}</text>`).join('')}</svg>`}
-function resetGame(){try{localStorage.removeItem(KEY)}catch(e){}S=null;render()}
-function gameOver(){modal('Bancarrota',`<div class="stack"><p style="margin:0">El banco ejecuta la deuda y la finca sale a subasta. ${esc(S.g.name)} cierra con ${S.stats.toros} toros lidiados y ${S.stats.indultos} indultos.</p><button class="btn pri adv" onclick="closeModal();resetGame()">Empezar otra carrera</button></div>`)}
+/* borra la partida y su copia automática (las ranuras guardadas a mano por el jugador se conservan) */
+function resetGame(){try{for(const k of [KEY,KEY+'-bak',KEY+'-danada'])localStorage.removeItem(k)}catch(e){}S=null;render()}
+/* Fin de partida definitivo: la ventana no se puede cerrar, la partida queda marcada y no se puede seguir jugando */
+var BLOQ=false;
+function gameOver(){if(!S)return;const banco=S.money<-90000||S.quiebra==='banco';if(!S.quiebra){S.quiebra=banco?'banco':'propiedad';save()}BLOQ=false;closeModal(true);
+ const txt=S.quiebra==='banco'?`El banco ejecuta la deuda (${eur(S.money)}) y la finca sale a subasta.`:'La propiedad ha perdido la confianza en ti y te retira la gestión de la ganadería.';
+ modal(S.quiebra==='banco'?'Bancarrota':'Despedido',`<div class="stack"><p style="margin:0">${txt} ${esc(S.g.name)} cierra con ${S.stats.toros} toros lidiados y ${S.stats.indultos} indultos.</p><button class="btn pri adv" onclick="finQuiebra()">Empezar otra carrera</button></div>`,null,{fijo:true});BLOQ=true}
+function finQuiebra(){BLOQ=false;closeModal(true);try{if(typeof W3!=='undefined'&&W3.on&&typeof exit3D==='function')exit3D()}catch(e){}resetGame()}
 
 /* ============ informe mensual ============ */
 function showReport(rep){if(!rep)return;if(!rep.corridas)rep={...rep,corridas:(rep.cor||[]).map(id=>S.hist.find(h=>h.id===id)).filter(Boolean)};
@@ -996,10 +1023,10 @@ function endCorrida(){
 
 /* ============ modal y avisos ============ */
 let onClose=null;
-function modal(title,html,cb){closeModal(true);onClose=cb||null;const d=document.createElement('div');d.className='ov';d.id='ov';
- d.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="sh"><div class="wrap"><h2 style="flex:1;min-width:0">${esc(title)}</h2><button class="x" aria-label="Cerrar" onclick="closeModal()">✕</button></div></div><div class="bd"><div class="wrap">${html}</div></div></div>`;
- d.addEventListener('click',e=>{if(e.target===d)closeModal()});document.body.appendChild(d);document.body.style.overflow='hidden'}
-function closeModal(silent){const d=$('#ov');if(d)d.remove();document.body.style.overflow='';if(onClose&&!silent){const f=onClose;onClose=null;f()}else if(!silent)onClose=null}
+function modal(title,html,cb,opt){if(BLOQ)return;const fijo=!!(opt&&opt.fijo);closeModal(true);onClose=cb||null;const d=document.createElement('div');d.className='ov';d.id='ov';
+ d.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="sh"><div class="wrap"><h2 style="flex:1;min-width:0">${esc(title)}</h2>${fijo?'':'<button class="x" aria-label="Cerrar" onclick="closeModal()">✕</button>'}</div></div><div class="bd"><div class="wrap">${html}</div></div></div>`;
+ if(!fijo)d.addEventListener('click',e=>{if(e.target===d)closeModal()});document.body.appendChild(d);document.body.style.overflow='hidden'}
+function closeModal(silent){if(BLOQ)return;const d=$('#ov');if(d)d.remove();document.body.style.overflow='';if(onClose&&!silent){const f=onClose;onClose=null;f()}else if(!silent)onClose=null}
 let tt=null;function toast(m){let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2600)}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 

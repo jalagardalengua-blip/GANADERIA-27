@@ -100,3 +100,9 @@ html body .sheet .sh h2{font-size:1.2rem !important}
 /* ---------- corrida en directo (plaza realista) ---------- */
 #ruedoOv{position:fixed;inset:0;z-index:9000;background:#000}
 #ruedoOv iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+/* Móviles estrechos: el nombre y el subtítulo de la ganadería pasan a dos líneas en vez de cortarse */
+@media (max-width:440px){
+ .hdr .gname{white-space:normal !important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.08 !important;font-size:clamp(1rem,4.6vw,1.3rem) !important}
+ .hdr .gsub{flex-wrap:wrap;row-gap:1px;white-space:normal !important}
+ .hdr .gsub>span:last-child{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2}
+}

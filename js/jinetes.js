@@ -15,13 +15,13 @@ function makeJineteGL(st){let P;
  jinSombrero(P,st.hat);
  if(st.pole){const g=new THREE.Group();g.rotation.set(0,0,-1.5);P.arms[1].hand.add(g);mesh(geos().cyl,M('#a88b5a',.7),.025,st.pole,.025,0,-st.pole*.32,0,g);mesh(geos().cyl,M('#3a3a3a',.4,.6),.012,.09,.012,0,-st.pole*.82-.04,0,g)}
  P.gl.brazos=true;P.jinete=true;return P}
-const _makePersonJ=makePerson;
-makePerson=function(st){if(st&&(st.hat==='castoreno'||st.hat==='chambergo')&&MOD.per2&&MOD.reg&&!st.proc){try{return makeJineteGL(st)}catch(e){console.warn('jinete GL',e)}}return _makePersonJ(st)};
-const _seatJ=seat;
-seat=function(P){if(P&&P.jinete){P.montado=true;JIN.set.add(P);return}return _seatJ.apply(this,arguments)};
-const _animPersonJ=animPerson;
-animPerson=function(P,dt,sp,pose){if(P&&P.montado){P.gl.want='Idle_Loop';P.gl.wts=.35;P._jf=JIN.fr}
- const r=_animPersonJ.apply(this,arguments);if(P&&P.montado){try{f4Montado(P)}catch(e){}}return r};
+
+envolver('makePerson','jinetes',_makePersonJ=>function(st){if(st&&(st.hat==='castoreno'||st.hat==='chambergo')&&MOD.per2&&MOD.reg&&!st.proc){try{return makeJineteGL(st)}catch(e){console.warn('jinete GL',e)}}return _makePersonJ(st)});
+
+envolver('seat','jinetes',_seatJ=>function(P){if(P&&P.jinete){P.montado=true;JIN.set.add(P);return}return _seatJ.apply(this,arguments)});
+
+envolver('animPerson','jinetes',_animPersonJ=>function(P,dt,sp,pose){if(P&&P.montado){P.gl.want='Idle_Loop';P.gl.wts=.35;P._jf=JIN.fr}
+ const r=_animPersonJ.apply(this,arguments);if(P&&P.montado){try{f4Montado(P)}catch(e){}}return r});
 function jinRaiz(o){while(o.parent)o=o.parent;return o}
 function jinTick(){const now=performance.now(),dt=Math.min(.05,Math.max(0,(now-(JIN.t||now))/1000));JIN.t=now;
  for(const P of JIN.set){const top=jinRaiz(P.root);if(top.isScene&&top!==W3.scene){JIN.set.delete(P);continue}if(top!==W3.scene)continue;if(P._jf!==JIN.fr){try{animPerson(P,dt,0)}catch(e){}}}JIN.fr++}

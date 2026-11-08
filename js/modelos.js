@@ -8,7 +8,7 @@ function modLoad(){if(!THREE.GLTFLoader||!THREE.SkeletonUtils){MOD.err='sin carg
  const L=new THREE.GLTFLoader();let n=0;const fin=()=>{if(++n<2)return;try{if(W3&&W3.mode==='finca'&&!W3.ride&&S)rebuildFinca()}catch(e){}};
  /* .glb en la web; si el servidor no lo sirve, la misma escena en glTF incrustado (.gltf.json) */
  const ld=(n,ok)=>L.load(MOD_BASE+'modelos/'+n+'.glb',ok,undefined,()=>L.load(MOD_BASE+'modelos/'+n+'.gltf.json',ok,undefined,e=>{MOD.err=e;fin()}));
- ld('persona',g=>{MOD.per=g;modRegions();fin()});L.load(MOD_BASE+'modelos/persona2.gltf.json',g=>{MOD.per2=g},undefined,()=>{});ld('caballo',g=>{MOD.hor=g;fin()})}
+ ld('persona',g=>{MOD.per=g;modRegions();fin()});L.load(MOD_BASE+'modelos/persona2.glb',g=>{MOD.per2=g},undefined,()=>L.load(MOD_BASE+'modelos/persona2.gltf.json',g=>{MOD.per2=g},undefined,()=>{}));ld('caballo',g=>{MOD.hor=g;fin()})}
 /* zonas del cuerpo por vértice (pose de referencia en T) */
 const ZN={piel:0,pelo:1,cam:2,manga:3,cinto:4,pant:5,bota:6};
 function modRegions(){MOD.reg=new Map();MOD.per.scene.traverse(o=>{if(!o.isSkinnedMesh)return;const p=o.geometry.attributes.position,z=new Uint8Array(p.count);
@@ -60,10 +60,10 @@ function modAnimPerson(P,dt,sp){const G=P.gl;G.t+=dt;let k,ts=1;
  else if(sp<1){k='Jog_Fwd_Loop';ts=clamp(sp/.8,.75,1.3)}
  else{k='Sprint_Loop';ts=clamp(sp/1.4,.8,1.2)}
  modPlay(P,k,.22,ts);G.mixer.update(dt)}
-const _makePersonM=makePerson;
-makePerson=function(st){if(st&&st.gl&&MOD.per&&MOD.reg&&!st.traje&&!st.pole){try{return makePersonGL(st)}catch(e){console.warn('persona GL',e)}}return _makePersonM(st)};
-const _animPersonM=animPerson;
-animPerson=function(P,dt,sp,pose){if(P&&P.gl){if(pose==='kneel'&&P.gl.acts.Crouch_Idle_Loop){P.gl.want='Crouch_Idle_Loop'}modAnimPerson(P,dt,sp);return}return _animPersonM(P,dt,sp,pose)};
+
+envolver('makePerson','modelos',_makePersonM=>function(st){if(st&&st.gl&&MOD.per&&MOD.reg&&!st.traje&&!st.pole){try{return makePersonGL(st)}catch(e){console.warn('persona GL',e)}}return _makePersonM(st)});
+
+envolver('animPerson','modelos',_animPersonM=>function(P,dt,sp,pose){if(P&&P.gl){if(pose==='kneel'&&P.gl.acts.Crouch_Idle_Loop){P.gl.want='Crouch_Idle_Loop'}modAnimPerson(P,dt,sp);return}return _animPersonM(P,dt,sp,pose)});
 
 /* ---------- caballo ---------- */
 const HSC=.0031,HOFF=.4;
@@ -80,13 +80,13 @@ function makeHorseGL(o){const src=MOD.hor;const sc=THREE.SkeletonUtils.clone(src
  const mixer=new THREE.AnimationMixer(sc),acts={};for(const c of src.animations)acts[c.name.replace(/^.*\|/,'')]=mixer.clipAction(c);
  const H={root,body,legs,nk,hd,tp,ph:Math.random()*6,gl:{mixer,acts,cur:null,t:0}};modPlay(H,'Idle',0);if(acts.Idle)acts.Idle.time=Math.random()*5;
  root.scale.setScalar(1);return H}
-const _makeHorse2M=makeHorse2;
-makeHorse2=function(o={}){if(MOD.hor&&!o.peto&&!o.mule){try{return makeHorseGL(o)}catch(e){console.warn('caballo GL',e)}}return _makeHorse2M(o)};
-const _animHorseM=animHorse;
-animHorse=function(H,dt,sp){if(H&&H.gl){let k,ts=1;
+
+envolver('makeHorse2','modelos',_makeHorse2M=>function(o={}){if(MOD.hor&&!o.peto&&!o.mule){try{return makeHorseGL(o)}catch(e){console.warn('caballo GL',e)}}return _makeHorse2M(o)});
+
+envolver('animHorse','modelos',_animHorseM=>function(H,dt,sp){if(H&&H.gl){let k,ts=1;
   if(sp<.03)k='Idle';else if(sp<.45){k='WalkSlow';ts=clamp(sp/.3,.7,1.4)}else if(sp<.95){k='Walk';ts=clamp(sp/.65,.8,1.4)}else{k='Run';ts=clamp(sp/1.2,.85,1.25)}
   modPlay(H,k,.3,ts);H.gl.mixer.update(dt);H.ph+=dt*(sp>.02?3+sp*5:0);H.body.position.y=-HOFF+(k==='Run'?Math.abs(Math.sin(H.ph))*.04:0);return}
- return _animHorseM(H,dt,sp)};
+ return _animHorseM(H,dt,sp)});
 
 /* ---------- bous al carrer: los recortadores con animación real ---------- */
 if(typeof calleTick==='function'){const _ctM=calleTick;

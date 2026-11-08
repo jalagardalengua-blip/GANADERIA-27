@@ -17,7 +17,7 @@ function ruedoAbrir(id){const r=S.hist.find(h=>h.id===id);if(!r||!r.toros||!r.to
  if(typeof W3!=='undefined'&&W3.on){try{exit3D()}catch(e){}}
  RD.on=true;RD.r=r;RD.i=0;const el=document.createElement('div');el.id='ruedoOv';
  el.innerHTML='<iframe src="ruedo.html" title="Corrida en directo" allow="fullscreen; autoplay"></iframe>';document.body.appendChild(el);document.body.style.overflow='hidden';
- RD.el=el;RD.fr=el.querySelector('iframe');try{el.requestFullscreen&&matchMedia('(pointer:coarse)').matches&&el.requestFullscreen().catch(()=>{})}catch(e){}
+ RD.el=el;RD.fr=el.querySelector('iframe');try{el.requestFullscreen&&(!navigator.userActivation||navigator.userActivation.isActive)&&matchMedia('(pointer:coarse)').matches&&el.requestFullscreen().catch(()=>{})}catch(e){}
  try{navigator.wakeLock&&navigator.wakeLock.request('screen').catch(()=>{})}catch(e){}return true}
 addEventListener('message',e=>{const d=e.data;if(!RD.on||!d||typeof d.ruedo!=='string'||!RD.fr||e.source!==RD.fr.contentWindow)return;
  if(d.ruedo==='listo')ruedoEnviar();
@@ -26,4 +26,4 @@ addEventListener('message',e=>{const d=e.data;if(!RD.on||!d||typeof d.ruedo!=='s
  else if(d.ruedo==='clasica'){const id=RD.r.id;ruedoCerrar(false);RD.forzarClasica=true;try{_enterPlazaRD(id)}finally{RD.forzarClasica=false}}});
 function ruedoPuede(){try{if(localStorage.getItem('hd-ruedo')==='clasica')return false}catch(e){}try{const c=document.createElement('canvas');return !!(c.getContext('webgl')||c.getContext('experimental-webgl'))}catch(e){return false}}
 const _enterPlazaRD=enterPlaza;
-enterPlaza=function(id){if(!RD.forzarClasica&&ruedoPuede()){try{if(ruedoAbrir(id))return}catch(e){try{errLog('ruedo: '+e.message,'ruedo')}catch(e2){}}}return _enterPlazaRD.apply(this,arguments)};
+envolver('enterPlaza','ruedo',orig=>function(id){if(!RD.forzarClasica&&ruedoPuede()){try{if(ruedoAbrir(id))return}catch(e){try{errLog('ruedo: '+e.message,'ruedo')}catch(e2){}}}return orig.apply(this,arguments)});

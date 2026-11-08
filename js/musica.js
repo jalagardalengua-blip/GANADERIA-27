@@ -56,7 +56,7 @@ clarin=function(kind){if(!AU.ctx||!AU.on)return;try{auBus()}catch(e){}const c=AU
  if(kind!=='aviso'){for(let i=0;i<14;i++)timbal(out,t+i*.07,i%2?98:73,.18+i*.01,.25);timbal(out,tt-.1,73,.32,1.2)}
  setTimeout(()=>{try{out.disconnect()}catch(e){}},6000)};
 /* contexto: vuelta e indulto con «Puerta grande»; avisos con su toque; la charanga en la calle */
-if(typeof actVuelta==='function'){const _av=actVuelta;actVuelta=function(){const o=_av.apply(this,arguments);if(o&&o.init){const i0=o.init;o.init=function(Z){musicStop();AU.next='puerta';return i0.apply(this,arguments)}}return o}}
-if(typeof actIndulto==='function'){const _ai2=actIndulto;actIndulto=function(){const o=_ai2.apply(this,arguments);if(o&&o.init){const i0=o.init;o.init=function(Z){musicStop();AU.next='puerta';return i0.apply(this,arguments)}}return o}}
-if(typeof irCalle==='function'){const _icM=irCalle;irCalle=function(id){_icM(id);if(CL){musicStop();setTimeout(()=>{if(CL&&!CL.done)musicStart('charanga')},2500)}}}
-if(typeof salirCalle==='function'){const _scM=salirCalle;salirCalle=function(){musicStop();return _scM.apply(this,arguments)}}
+if(typeof actVuelta==='function'){envolver('actVuelta','musica',_av=>function(){const o=_av.apply(this,arguments);if(o&&o.init){const i0=o.init;o.init=function(Z){musicStop();AU.next='puerta';return i0.apply(this,arguments)}}return o});}
+if(typeof actIndulto==='function'){envolver('actIndulto','musica',_ai2=>function(){const o=_ai2.apply(this,arguments);if(o&&o.init){const i0=o.init;o.init=function(Z){musicStop();AU.next='puerta';return i0.apply(this,arguments)}}return o});}
+if(typeof irCalle==='function'){envolver('irCalle','musica',_icM=>function(id){_icM(id);if(CL){musicStop();setTimeout(()=>{if(CL&&!CL.done)musicStart('charanga')},2500)}});}
+if(typeof salirCalle==='function'){envolver('salirCalle','musica',_scM=>function(){musicStop();return _scM.apply(this,arguments)});}

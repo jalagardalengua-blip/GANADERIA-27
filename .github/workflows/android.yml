@@ -52,7 +52,7 @@ jobs:
           npm init -y > /dev/null
           npm install --no-audit --no-fund @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
           mkdir www
-          rsync -a --exclude .git --exclude .github --exclude '*.md' ../juego/ www/
+          rsync -a --exclude .git --exclude .github --exclude '*.md' --exclude tests --exclude docs --exclude 'modelos/*.gltf.json' ../juego/ www/
           cat > capacitor.config.json <<'JSON'
           {
             "appId": "io.github.jalagardalengua.hierroydivisa",

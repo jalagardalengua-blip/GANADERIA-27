@@ -10,13 +10,13 @@ function makeCampoGL(st){const P=makePersonGL(Object.assign({},st,{gl:1,pole:nul
  P.piernas=['l','r'].map(s=>({s:s==='l'?1:-1,th:bones['thigh_'+s],ca:bones['calf_'+s],ft:bones['foot_'+s]}));
  if(st.pole){const p=mesh(geos().cyl,M('#a88b5a',.7),.025,st.pole,.025,0,-.1,0,P.arms[1].hand);p.rotation.x=st.pole>3.2?1.2:.25}
  P.gl.brazos=true;return P}
-const _makePersonF4=makePerson;
-makePerson=function(st){if(st&&!st.traje&&st.hat==='campero'&&W3&&W3.mode==='finca'&&MOD.per2&&MOD.reg&&!st.proc){try{return makeCampoGL(st)}catch(e){console.warn('campo GL',e)}}return _makePersonF4(st)};
+
+envolver('makePerson','finca4',_makePersonF4=>function(st){if(st&&!st.traje&&st.hat==='campero'&&W3&&W3.mode==='finca'&&MOD.per2&&MOD.reg&&!st.proc){try{return makeCampoGL(st)}catch(e){console.warn('campo GL',e)}}return _makePersonF4(st)});
 function f4Montado(P){const bq=P.b.getWorldQuaternion(new THREE.Quaternion());for(const L of P.piernas||[]){if(!L.th||!L.ca)continue;
  trjApunta(L.th,L.ca,new THREE.Vector3(L.s*.42,-.42,.8).normalize().applyQuaternion(bq));trjApunta(L.ca,L.ft,new THREE.Vector3(L.s*.2,-1,-.12).normalize().applyQuaternion(bq))}}
-const _animPersonF4=animPerson;
-animPerson=function(P,dt,sp,pose){if(P&&P.gl&&P.gl.brazos&&P===W3.pl&&W3.ride){P.gl.want='Idle_Loop';P.gl.wts=.4}else if(P&&P.gl&&P.gl.brazos&&P.gl.want==='Idle_Loop'&&P.gl.wts===.4){P.gl.want=null}
- const r=_animPersonF4.apply(this,arguments);if(P&&P.gl&&P.gl.brazos){try{if(!P.gl.torero)trjBrazos(P);if(P===W3.pl&&W3.ride)f4Montado(P)}catch(e){}}return r};
+
+envolver('animPerson','finca4',_animPersonF4=>function(P,dt,sp,pose){if(P&&P.gl&&P.gl.brazos&&P===W3.pl&&W3.ride){P.gl.want='Idle_Loop';P.gl.wts=.4}else if(P&&P.gl&&P.gl.brazos&&P.gl.want==='Idle_Loop'&&P.gl.wts===.4){P.gl.want=null}
+ const r=_animPersonF4.apply(this,arguments);if(P&&P.gl&&P.gl.brazos){try{if(!P.gl.torero)trjBrazos(P);if(P===W3.pl&&W3.ride)f4Montado(P)}catch(e){}}return r});
 /* ---------- ruido para el suelo ---------- */
 function f4Hash(x,z){const s=Math.sin(x*127.1+z*311.7)*43758.5453;return s-Math.floor(s)}
 function f4Noise(x,z){const xi=Math.floor(x),zi=Math.floor(z),xf=x-xi,zf=z-zi,u=xf*xf*(3-2*xf),v=zf*zf*(3-2*zf);
@@ -60,7 +60,7 @@ function f4Mover(force){const G=F4.pasto;if(!G||!W3.F)return;const px=W3.F.p.x,p
  G.base.forEach(([bx,bz,sc,rot],i)=>{let x=px+((((bx-px)%D)+D*1.5)%D)-G.R,z=pz+((((bz-pz)%D)+D*1.5)%D)-G.R;const ok=f4Libre(x,z);const d=Math.hypot(x-px,z-pz);
   const fade=clamp((G.R-d)/4,0,1);const k=ok?sc*fade:0;q.setFromAxisAngle(Y,rot);s.set(k,k*(.85+.3*((i*13)%7)/7),k);v.set(x,gH(x,z)-.03,z);m.compose(v,q,s);G.im.setMatrixAt(i,m)});G.im.instanceMatrix.needsUpdate=true}
 /* ---------- montaje ---------- */
-const _rebuildF4=rebuildFinca;
-rebuildFinca=function(){_rebuildF4.apply(this,arguments);if(W3.mode!=='finca'||!W3.scene)return;try{f4Suelo(W3.scene)}catch(e){console.warn('suelo',e)}try{F4.pasto=null;f4Pasto(W3.scene)}catch(e){console.warn('pasto',e)}};
-const _fincaTickF4=fincaTick;
-fincaTick=function(dt){const r=_fincaTickF4.apply(this,arguments);try{if(F4.pasto&&F4.pasto.im.parent===W3.scene){F4.pasto.mat.userData.f4u.value+=dt;f4Mover(false)}}catch(e){}return r};
+
+envolver('rebuildFinca','finca4',_rebuildF4=>function(){_rebuildF4.apply(this,arguments);if(W3.mode!=='finca'||!W3.scene)return;try{f4Suelo(W3.scene)}catch(e){console.warn('suelo',e)}try{F4.pasto=null;f4Pasto(W3.scene)}catch(e){console.warn('pasto',e)}},{segura:true});
+
+envolver('fincaTick','finca4',_fincaTickF4=>function(dt){const r=_fincaTickF4.apply(this,arguments);try{if(F4.pasto&&F4.pasto.im.parent===W3.scene){F4.pasto.mat.userData.f4u.value+=dt;f4Mover(false)}}catch(e){}return r});

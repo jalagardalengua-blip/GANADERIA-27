@@ -3,10 +3,10 @@
    - Inicio con agenda de próximos festejos, centro de avisos y resumen económico de los últimos meses.
    - Ajustes de accesibilidad: tamaño de texto y reducir movimiento/efectos. */
 const Bus={h:{},on(ev,f){(this.h[ev]=this.h[ev]||[]).push(f)},emit(ev,d){for(const f of this.h[ev]||[])try{f(d)}catch(e){try{errLog('Bus '+ev+': '+e.message,'bus')}catch(e2){}}}};
-{const _s=save;save=function(){const r=_s.apply(this,arguments);if(r!==false)Bus.emit('SAVE_COMPLETED');return r}}
-{const _a=advance;advance=function(){const m0=S&&S.money;const r=_a.apply(this,arguments);if(S)Bus.emit('MONTH_CLOSED',{dinero:S.money-m0});return r}}
-{const _c=celebrar;celebrar=function(o){const r=_c.apply(this,arguments);Bus.emit('EVENT_COMPLETED',{tipo:'corrida',id:o.id,res:r});return r}}
-if(typeof cResolver==='function'){const _r=cResolver;cResolver=function(o){const r=_r.apply(this,arguments);if(r)Bus.emit('EVENT_COMPLETED',{tipo:'corro',id:o.id,res:r});return r}}
+{envolver('save','panel',_s=>function(){const r=_s.apply(this,arguments);if(r!==false)Bus.emit('SAVE_COMPLETED');return r},{segura:true});}
+{envolver('advance','panel',_a=>function(){const m0=S&&S.money;const r=_a.apply(this,arguments);if(S)Bus.emit('MONTH_CLOSED',{dinero:S.money-m0});return r});}
+{envolver('celebrar','panel',_c=>function(o){const r=_c.apply(this,arguments);Bus.emit('EVENT_COMPLETED',{tipo:'corrida',id:o.id,res:r});return r});}
+if(typeof cResolver==='function'){envolver('cResolver','panel',_r=>function(o){const r=_r.apply(this,arguments);if(r)Bus.emit('EVENT_COMPLETED',{tipo:'corro',id:o.id,res:r});return r});}
 /* ---------- avisos ---------- */
 function avisos(){if(!S)return [];const A=[],c=campo(),ab=absNow();const add=(nivel,txt,acc,ico)=>A.push({nivel,txt,acc,ico});
  if(S.porVer&&S.porVer.length)add('oro',`${S.porVer.length} ${S.porVer.length>1?'corridas listas':'corrida lista'} para ver`,`enterPlaza(${S.porVer[0]})`,'plazaI');
@@ -36,18 +36,18 @@ function panelHTML(){const A=avisos(),G=agenda(4),E=ecoMeses(6);const ab=absNow(
  return `<section class="sect pnSect"><header><h2>Avisos</h2></header>${A.length?`<div class="pnAv">${A.slice(0,6).map(a=>`<button class="pnA ${a.nivel}" onclick="${a.acc}">${icon(a.ico)}<span>${esc(a.txt)}</span>${ICO.chev}</button>`).join('')}</div>`:'<div class="pnOk">Todo en orden en la ganadería.</div>'}</section>
  <section class="sect"><header><h2>Agenda</h2></header><div class="agL">${ag}</div><button class="btn sm" onclick="calAbrir()">Abrir el calendario</button></section>
  <section class="sect"><header><h2>Cuentas</h2><span class="sp"></span><small class="muted">últimos meses</small></header><div class="card eco">${eco}</div></section>`}
-const _renderInicioP=renderInicio;
-renderInicio=function(el){_renderInicioP.apply(this,arguments);try{if(!S)return;const st=el.querySelector('.stack')||el;const ref=st.querySelector('.wid');const w=document.createElement('div');w.className='pnWrap';w.innerHTML=panelHTML();if(ref)ref.after(w);else st.prepend(w)}catch(e){errLog('panel: '+e.message,'panel')}};
+
+envolver('renderInicio','panel',_renderInicioP=>function(el){_renderInicioP.apply(this,arguments);try{if(!S)return;const st=el.querySelector('.stack')||el;const ref=st.querySelector('.wid');const w=document.createElement('div');w.className='pnWrap';w.innerHTML=panelHTML();if(ref)ref.after(w);else st.prepend(w)}catch(e){errLog('panel: '+e.message,'panel')}});
 /* ---------- accesibilidad ---------- */
 const ACC=(()=>{try{return JSON.parse(localStorage.getItem('hd-acc')||'{}')}catch(e){return {}}})();
 function accApply(){document.documentElement.classList.toggle('txtL',ACC.txt==='l');document.documentElement.classList.toggle('txtXL',ACC.txt==='xl');document.documentElement.classList.toggle('calma',!!ACC.calma)}
 function accSet(k,v){ACC[k]=v;try{localStorage.setItem('hd-acc',JSON.stringify(ACC))}catch(e){}accApply();render()}
 accApply();
-if(typeof shake==='function'){const _sh=shake;shake=function(){if(ACC.calma)return;return _sh.apply(this,arguments)}}
-if(typeof confetti==='function'){const _cf=confetti;confetti=function(){if(ACC.calma)return;return _cf.apply(this,arguments)}}
-if(typeof flash==='function'){const _fl=flash;flash=function(){if(ACC.calma)return;return _fl.apply(this,arguments)}}
-const _startScreenAcc=startScreen;
-startScreen=function(){let h=_startScreenAcc.apply(this,arguments);if(MENU.v!=='ajustes')return h;
+if(typeof shake==='function'){envolver('shake','panel',_sh=>function(){if(ACC.calma)return;return _sh.apply(this,arguments)});}
+if(typeof confetti==='function'){envolver('confetti','panel',_cf=>function(){if(ACC.calma)return;return _cf.apply(this,arguments)});}
+if(typeof flash==='function'){envolver('flash','panel',_fl=>function(){if(ACC.calma)return;return _fl.apply(this,arguments)});}
+
+envolver('startScreen','panel',_startScreenAcc=>function(){let h=_startScreenAcc.apply(this,arguments);if(MENU.v!=='ajustes')return h;
  const sec=`<section class="sect card goldline"><header><h2>Accesibilidad</h2></header><div class="seg">${[['','Normal','Tamaño de texto estándar'],['l','Grande','Texto un 12 % mayor'],['xl','Muy grande','Texto un 25 % mayor']].map(([k,n,d])=>`<button aria-pressed="${(ACC.txt||'')===k}" onclick="accSet('txt','${k}')"><b>${n}</b><span>${d}</span></button>`).join('')}</div>
   <div class="seg"><button aria-pressed="${!ACC.calma}" onclick="accSet('calma',false)"><b>Efectos completos</b><span>Transiciones, confeti y sacudidas</span></button><button aria-pressed="${!!ACC.calma}" onclick="accSet('calma',true)"><b>Reducir movimiento</b><span>Sin destellos, sacudidas ni animaciones</span></button></div></section>`;
- const i=h.indexOf('<section class="sect card goldline svSect">');return i>0?h.slice(0,i)+sec+h.slice(i):h};
+ const i=h.indexOf('<section class="sect card goldline svSect">');return i>0?h.slice(0,i)+sec+h.slice(i):h},{segura:true});

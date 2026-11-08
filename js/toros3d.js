@@ -137,10 +137,10 @@ function animBullGL(B,dt,o){const G=B.gl,sp=o.speed||0,campo='limp' in o;B.t+=dt
  /* mirar a un lado girando el cuello sobre la vertical del mundo */
  const lk=o.look||0;if(G.neck&&Math.abs(lk)>.01&&pose==null){G.neck.updateWorldMatrix(true,false);G.neck.getWorldQuaternion(TOR_W).invert();TOR_V.set(0,1,0).applyQuaternion(TOR_W).normalize();TOR_Q.setFromAxisAngle(TOR_V,lk*.45);G.neck.quaternion.multiply(TOR_Q)}}
 
-const _makeBullM=makeBull;
-makeBull=function(spec){const KD=TOR_KIND[(spec&&spec.kind)||'toro'];
- if(KD&&TOR.bull&&TOR[KD.m]&&!(spec&&spec.proc)){try{return makeBullGL(spec)}catch(e){console.warn('toro GL',e)}}return _makeBullM(spec)};
-const _animBullM=animBull;
-animBull=function(B,dt,o){if(B&&B.gl)return animBullGL(B,dt,o||{});return _animBullM(B,dt,o)};
+
+envolver('makeBull','toros3d',_makeBullM=>function(spec){const KD=TOR_KIND[(spec&&spec.kind)||'toro'];
+ if(KD&&TOR.bull&&TOR[KD.m]&&!(spec&&spec.proc)){try{return makeBullGL(spec)}catch(e){console.warn('toro GL',e)}}return _makeBullM(spec)},{segura:true});
+
+envolver('animBull','toros3d',_animBullM=>function(B,dt,o){if(B&&B.gl)return animBullGL(B,dt,o||{});return _animBullM(B,dt,o)},{segura:true});
 
 try{if(document.readyState!=='loading')torLoad();else document.addEventListener('DOMContentLoaded',torLoad)}catch(e){TOR.err=e}

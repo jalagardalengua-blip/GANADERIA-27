@@ -73,6 +73,6 @@ function makeBullTri(spec){
  const B={root,b,hp,hpq,legs:[],tp:new THREE.Group(),bg,ph:Math.random()*6,kind,hipY:1,t:Math.random()*10,tri:lod,
   cruz:{y:I.back(I.cruz)*sy,z:I.cruz*sz},gl:{mixer,acts,cur:null,neck:bones.Neck2||bones.Neck1||null}};
  torPlay(B,'Idle',0);if(acts.Idle)acts.Idle.time=Math.random()*3;return B}
-const _makeBullGLT=makeBullGL;
-makeBullGL=function(spec){const kind=(spec&&spec.kind)||'toro';if((kind==='toro'||kind==='cabestro')&&TRI.hi&&TOR.bull){try{return makeBullTri(spec)}catch(e){console.warn('toro Tripo',e)}}return _makeBullGLT.apply(this,arguments)};
+
+envolver('makeBullGL','toro3',_makeBullGLT=>function(spec){const kind=(spec&&spec.kind)||'toro';if((kind==='toro'||kind==='cabestro')&&TRI.hi&&TOR.bull){try{return makeBullTri(spec)}catch(e){console.warn('toro Tripo',e)}}return _makeBullGLT.apply(this,arguments)});
 try{if(document.readyState!=='loading')triLoad();else document.addEventListener('DOMContentLoaded',triLoad)}catch(e){TRI.err=e}

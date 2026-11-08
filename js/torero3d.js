@@ -53,7 +53,7 @@ function trjBrazos(P){const bq=P.b.getWorldQuaternion(new THREE.Quaternion());
  for(const ar of P.arms){if(!ar.lock||!ar.bUp)continue;const sh=ar.sh.rotation,el=ar.el.rotation.x||0;
   TQ.e.set(sh.x,sh.y,sh.z);const up=TQ.d.set(0,-1,0).applyEuler(TQ.e).applyQuaternion(bq).normalize();trjApunta(ar.bUp,ar.bLo,up.clone());
   TQ.e.set(sh.x+el,sh.y,sh.z);const lo=new THREE.Vector3(0,-1,0).applyEuler(TQ.e).applyQuaternion(bq).normalize();trjApunta(ar.bLo,ar.bHa,lo)}}
-const _animPersonT=animPerson;
-animPerson=function(P,dt,sp,pose){const r=_animPersonT.apply(this,arguments);if(P&&P.gl&&P.gl.torero){try{trjBrazos(P)}catch(e){}}return r};
-const _makePersonT=makePerson;
-makePerson=function(st){if(st&&st.traje&&!st.pole&&MOD.per2&&MOD.reg&&!st.proc){try{return makeToreroGL(st)}catch(e){console.warn('torero GL',e)}}return _makePersonT(st)};
+
+envolver('animPerson','torero3d',_animPersonT=>function(P,dt,sp,pose){const r=_animPersonT.apply(this,arguments);if(P&&P.gl&&P.gl.torero){try{trjBrazos(P)}catch(e){}}return r});
+
+envolver('makePerson','torero3d',_makePersonT=>function(st){if(st&&st.traje&&!st.pole&&MOD.per2&&MOD.reg&&!st.proc){try{return makeToreroGL(st)}catch(e){console.warn('torero GL',e)}}return _makePersonT(st)});

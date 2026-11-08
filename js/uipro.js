@@ -19,8 +19,8 @@ function hubHTML(){const nv=S.offers.filter(o=>o.st==='nueva').length,c=campo();
   ['ofertas',"go('ofertas')",'palco','Ofertas','Ferias y empresas',nv?`${nv} nuevas`:'al día'],['mercado',"go('mercado')",'cuerno','Mercado','Compra y vende',eur(S.money)],['tareas',"go('tareas')",'cabeza','Tareas','Faenas del mes',tp?`${tp} pendientes`:'todo hecho'],
   ['corro',"setCasa('corro')",'calle','Bous al carrer',S.corro?esc(S.corro.name):'Ganadería de corro',S.corro?`${S.corro.of.filter(o=>o.st==='nueva').length} contratos`:'empieza']];
  return `<section class="hub">${T.map(([k,fn,img,t,s,v],i)=>`<button class="hubT ${i===0?'big':''}" onclick="${fn}"><i style="background-image:url(img/${img}.jpg)"></i><span class="hubX"><small>${s}</small><b>${t}</b></span><em>${v}</em></button>`).join('')}</section>`}
-const _renderPro=render;
-render=function(){const prev=UI._tabPrev;_renderPro.apply(this,arguments);if(!S)return;try{const scr=$('#scr');if(!scr)return;const tab=UI.tab;
+
+envolver('render','uipro',_renderPro=>function(){const prev=UI._tabPrev;_renderPro.apply(this,arguments);if(!S)return;try{const scr=$('#scr');if(!scr)return;const tab=UI.tab;
  if(tab==='inicio'&&UI.casa!=='corro'){const st=scr.querySelector('.stack')||scr;if(!st.querySelector('.hub')){const ref=st.querySelector('.season')||st.firstElementChild;const w=document.createElement('div');w.innerHTML=hubHTML();if(ref)ref.after(w.firstElementChild);else st.prepend(w.firstElementChild)}const duo=[...st.querySelectorAll('.duo')].pop();if(duo&&duo.querySelector('[onclick="enter3D()"]'))duo.style.display='none'}
  else if(PG[tab]&&!scr.querySelector('.pgH')){scr.insertAdjacentHTML('afterbegin',pgHero(tab))}
- if(prev!==tab){scr.classList.remove('pgIn');void scr.offsetWidth;scr.classList.add('pgIn')}UI._tabPrev=tab}catch(e){try{errLog('uipro: '+e.message,'uipro')}catch(e2){}}};
+ if(prev!==tab){scr.classList.remove('pgIn');void scr.offsetWidth;scr.classList.add('pgIn')}UI._tabPrev=tab}catch(e){try{errLog('uipro: '+e.message,'uipro')}catch(e2){}}},{segura:true});
