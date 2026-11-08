@@ -59,3 +59,8 @@ Calendario por semanas al estilo FIFA, barra de gala y pantallas a juego, sonido
 - Vitrina 3D en la ficha: el animal real girando sobre albero, se puede arrastrar.
 - Cartel de toros clásico al entrar en la plaza (papel crema, hierro, divisa, terna y reseña).
 - Público de la plaza con siluetas de persona sentada, pelo y tonos de piel variados.
+
+## Toro realista y jinetes
+- Toro de lidia propio (Tripo) con esqueleto y animaciones; pelos y señas pintados sobre su textura. Versión ligera para la finca.
+- Alguacilillos y picadores con cuerpo realista montados, vara en la mano.
+- Tarjetas de ganadería sin textos de descripción ni colores escritos; foto distinta para cada una según su pelo.
