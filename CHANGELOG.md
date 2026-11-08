@@ -1,5 +1,40 @@
 # Cambios
 
+## Plaza en directo y fiestas de pueblo con más ambiente
+- **Público realista** (nuevo `js/publico.js`), en la plaza y en las fiestas de pueblo:
+  - Miles de espectadores con ropa, piel y pelo variados.
+  - Siguen la lidia con la cabeza.
+  - Se levantan y alzan los brazos en los olés y aplauden en los remates.
+  - Sacan pañuelos blancos para pedir la oreja, mientras el presidente saca el suyo del color que toca: blanco, azul, naranja o verde.
+  - Pitan a los toros malos.
+  - Abanicos y sombreros de paja al sol.
+- **Plaza en directo**:
+  - Palco presidencial, andanadas llenas, mozos y areneros en el callejón, y galería encalada con sus vomitorios.
+  - Albero sin repeticiones de textura y con huellas: pezuñas, zapatillas y surcos que se rastrillan entre toro y toro.
+  - La divisa cuelga sobre el morrillo; antes salía hacia delante como un cuerno.
+  - Al final de cada toro, la cámara enseña los pañuelos y el palco antes de la tarjeta del resultado.
+  - Suena con el audio del juego, sin tener que tocar la pantalla:
+    - la banda toca en las buenas faenas de muleta y calla al entrar a matar;
+    - aplausos en los remates y tras la estocada;
+    - pasodoble de puerta grande con dos orejas o indulto;
+    - pitos en los toros malos.
+- **Rendimiento de la plaza en directo**:
+  - La resolución se ajusta sola si va a menos de ~38 fps.
+  - Solo se dibuja el público que ve la cámara.
+  - Las sombras de los tendidos salen de una silueta de ~400 triángulos.
+  - Sombras más ligeras en el móvil.
+  - Sin filtros, grano ni desenfoques sobre la imagen 3D en el móvil.
+  - Unos 140 triángulos por espectador.
+  - En el emulador por software, el fotograma cuesta un 43 % menos.
+- **Fiestas de pueblo** (nuevo `js/pueblo.js`):
+  - Cadafales de madera de verdad: postes, vigas, cruces, tarima, barandilla, escalera y gradas con sillas de plástico.
+  - Toldo de lona a rayas con fleco y la pancarta de la peña; de noche, bombillas.
+  - En cada cadafal, la peña con su camiseta y el pañuelo rojo al cuello.
+  - Más senyeras en los balcones.
+  - Cohete al abrir el cajón: silbido, estampido y humo.
+- **Fallo corregido**: las personas animadas de la calle salían «explotadas» en pinchos. El GLB de `persona2` de la auditoría tenía los índices de hueso corruptos; ahora se reempaqueta sin tocar los datos. El APK vuelve a incluir la vegetación.
+- Nueva prueba `tests/e2e/publico.js`.
+
 ## Auditoría: fallos corregidos
 - **Bancarrota definitiva**: al bajar de −90.000 € (o si la propiedad te pierde la confianza) la ventana ya no se puede cerrar, la partida queda marcada, no se puede avanzar y al recargar vuelve a salir. «Empezar otra carrera» borra también la copia automática (las ranuras guardadas a mano se conservan).
 - **Equilibrio**:

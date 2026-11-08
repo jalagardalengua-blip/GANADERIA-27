@@ -456,7 +456,7 @@ function buildCrowd(){lMsg.textContent='Llenando los tendidos';const r=rng(9);co
  {const ys=2.3+17*.42,rr=R+2.35+16*.8+.38;[-.012,0,.012].forEach((da,j)=>{const a=SUN_AZ+da;seats.push({x:Math.cos(a)*rr,y:ys+.02,z:Math.sin(a)*rr,yaw:yawTo(a),sit:true,sol:false,presi:j===1})});}
  // callejón: mozos de espadas, areneros y prensa asomados a la barrera
  for(let k=0;k<18;k++){const a=r()*TAU;if(Math.abs(angDiff(a,SUN_AZ+Math.PI))<.12)continue;const rr=R+.85+r()*.4;seats.push({x:Math.cos(a)*rr,y:0,z:Math.sin(a)*rr,yaw:yawTo(a)+(r()-.5)*.5,sit:false,sol:false,grupo:r()<.5?'#1d1f26':r()<.5?'#3a3f4a':'#5b4a3a'});}
- PUB=Publico.crear(seats,{sentado:true,paleta:'plaza',rnd:rng(11),celda:13});scene.add(PUB.grupo);crowd=PUB;}
+ PUB=Publico.crear(seats,{sentado:true,paleta:'plaza',rnd:rng(11),celda:19});scene.add(PUB.grupo);crowd=PUB;}
 
 /* ---------- polvo ---------- */
 function buildDust(){const N=900;const g=new THREE.BufferGeometry();const pos=new Float32Array(N*3),size=new Float32Array(N),alpha=new Float32Array(N);

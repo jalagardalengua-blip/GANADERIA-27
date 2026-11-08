@@ -143,7 +143,7 @@ function crear(asientos,opt){opt=opt||{};const sentado=opt.sentado!==false;const
  // pelo largo: se decide en el shader con fract(seed*3.1)>=.45 → forzamos la semilla según el sexo
  ls.forEach(l=>{let s=l.seed;const f=v=>v-Math.floor(v);for(let k=0;k<40&&(f(s*3.1)>=.45)!==l.longHair;k++)s=f(s+.0617);l.seed=s});
  // sectores por cercanía
- const cell=opt.celda||14;const zonas=new Map();ls.forEach((l,i)=>{const k=Math.floor(l.a.x/cell)+','+Math.floor(l.a.z/cell)+','+(l.sit?1:0);if(!zonas.has(k))zonas.set(k,[]);zonas.get(k).push(l)});
+ const cell=opt.celda||20;const zonas=new Map();ls.forEach((l,i)=>{const k=Math.floor(l.a.x/cell)+','+Math.floor(l.a.z/cell)+','+(l.sit?1:0);if(!zonas.has(k))zonas.set(k,[]);zonas.get(k).push(l)});
  const mallas=[];const o=new TH.Object3D();
  const build=(lista,geo,mat,isHat)=>{const n=lista.length;if(!n)return null;const g=geo.clone();
   const at={iTop:new Float32Array(n*3),iBot:new Float32Array(n*3),iSkin:new Float32Array(n*3),iHair:new Float32Array(n*3),iProp:new Float32Array(n*4)};
@@ -155,7 +155,9 @@ function crear(asientos,opt){opt=opt||{};const sentado=opt.sentado!==false;const
   cx/=n;cy/=n;cz/=n;let r=0;lista.forEach(l=>{r=Math.max(r,Math.hypot(l.a.x-cx,l.a.y-cy,l.a.z-cz))});
   im.frustumCulled=false;im.receiveShadow=opt.sombras!==false;im.castShadow=false;im.userData.esfera=new TH.Sphere(new TH.Vector3(cx,cy+.8,cz),r+2);im.userData.m0=Float32Array.from(im.instanceMatrix.array);
   grupo.add(im);mallas.push(im);return im};
- for(const lista of zonas.values()){const sit=lista[0].sit;build(lista,sit?geoS:geoD,sit?matS:matD,false);const hs=lista.filter(l=>l.hat);if(hs.length)build(hs,sit?hatS:hatD,sit?matS:matD,true)}
+ for(const lista of zonas.values()){const sit=lista[0].sit;build(lista,sit?geoS:geoD,sit?matS:matD,false)}
+ // sombreros: pocos, en una sola malla por postura (menos llamadas de dibujo)
+ for(const sit of [true,false]){const hs=ls.filter(l=>l.hat&&l.sit===sit);if(hs.length){const im=build(hs,sit?hatS:hatD,sit?matS:matD,true);if(im)im.userData.esfera.radius=1e4}}
  const fr=new TH.Frustum(),pm=new TH.Matrix4();
  const api={grupo,U,mallas,total:ls.length,
   // nivel de ocupación (0..1): vacía asientos de forma estable
