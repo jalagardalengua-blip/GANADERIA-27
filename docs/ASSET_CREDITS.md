@@ -17,3 +17,8 @@
 
 ## Toro de lidia (Tripo)
 - `modelos/toro-tripo.glb` y `modelos/toro-tripo-lo.glb`: modelo creado por el propietario del juego con Tripo3D, aligerado (16k y 5k triángulos) y con el esqueleto y animaciones del toro de Quaternius (CC0) transferidos por cercanía.
+
+## Plaza en directo
+- `ruedo.html`: plaza realista propia (Ruedo de Valdeoro) para ver en directo las corridas de tu hierro. Albero, tendidos, torero de luces, capote y muleta con tela simulada, cámara de realizador.
+- Toro: `modelos/toro-ruedo.glb`, el modelo de lidia de grab3d (CC0) aligerado; pelo de cada res sobre su textura.
+- Libs: OrbitControls y Sky de three.js r128 (MIT).

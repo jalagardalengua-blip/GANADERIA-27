@@ -69,3 +69,6 @@ Calendario por semanas al estilo FIFA, barra de gala y pantallas a juego, sonido
 - Capa `css/moderno.css`: paneles de cristal con filo fino, cabeceras de sección limpias, barra superior compacta, pestañas segmentadas, botones y ventanas redondeados.
 - Fuentes alojadas en el juego (funcionan sin conexión y se ven igual en todos los móviles).
 - La vitrina de la ficha usa siempre el toro detallado.
+
+## Corrida en directo realista
+- Ver en directo abre la plaza realista. La faena se compone con la bravura, nobleza, casta, fuerza, encaste y pelo del toro y el estilo del matador; la presidencia saca los pañuelos según el resultado del juego (orejas, vuelta, indulto, silencio, pitos, devuelto). Botón “Vista clásica” para la plaza de antes.
