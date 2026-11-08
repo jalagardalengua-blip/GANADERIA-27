@@ -5,13 +5,15 @@
    según su bravura, nobleza, casta, fuerza, encaste y el matador; la faena se compone con esos mismos datos.
    "Vista clásica" vuelve a la plaza 3D de siempre. */
 const RD={on:false,r:null,i:0,el:null,fr:null};
+// la plaza (iframe) usa el sonido del juego, ya desbloqueado por el toque del jugador: banda, aplausos, murmullo y clarín
+window.ruedoSonido={au:()=>typeof AU!=='undefined'?AU:null,init:()=>{try{auInit()}catch(e){}}};
 function ruedoDatos(r,i){const t=r.toros[i];if(!t)return null;
  return {id:r.id*10+i,cid:r.id,cat:r.cat,seed:r.id*97+i*13+7,i:i+1,ultimo:i>=r.toros.length-1,plaza:r.plaza,feria:r.feria,gan:S.g.name,div:t.div||S.g.div,
   name:t.name,num:t.num,peso:t.peso,pelo:t.pelo,enc:t.enc,mat:t.mat,traje:t.traje,estilo:t.estilo,B:t.B,N:t.N,C:t.C,F:t.F,score:t.score,
   res:t.res,trof:t.trof||0,ent:t.ent,esto:t.esto,desc:t.desc,avisos:t.avisos,rajado:!!t.rajado,fell:!!t.fell,pases:t.pases,
   cogida:t.cogida?{parte:t.cogida.parte}:null,sust:t.sust?{n:t.sust.n}:null}}
 function ruedoEnviar(){if(!RD.fr||!RD.r)return;const d=ruedoDatos(RD.r,RD.i);if(d)RD.fr.contentWindow.postMessage({ruedo:'lidia',valor:d},'*')}
-function ruedoCerrar(resumen){const id=RD.r&&RD.r.id;RD.on=false;if(RD.el)RD.el.remove();RD.el=RD.fr=null;document.body.style.overflow='';try{render()}catch(e){}if(resumen&&id!=null)try{verCorrida(id)}catch(e){}}
+function ruedoCerrar(resumen){const id=RD.r&&RD.r.id;RD.on=false;try{musicStop();crowdStop()}catch(e){}if(RD.el)RD.el.remove();RD.el=RD.fr=null;document.body.style.overflow='';try{render()}catch(e){}if(resumen&&id!=null)try{verCorrida(id)}catch(e){}}
 function ruedoAbrir(id){const r=S.hist.find(h=>h.id===id);if(!r||!r.toros||!r.toros.length)return false;
  S.porVer=(S.porVer||[]).filter(x=>x!==id);r.visto=true;save();
  if(typeof W3!=='undefined'&&W3.on){try{exit3D()}catch(e){}}
