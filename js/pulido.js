@@ -50,3 +50,13 @@ buildPlaza=function(){const P=_buildPlazaP.apply(this,arguments);try{if(P&&!P.pu
  P.body.geometry.dispose();P.body.geometry=pubGeoCuerpo();P.body.material.vertexColors=true;P.body.material.needsUpdate=true;
  P.heads.geometry.dispose();P.heads.geometry=pubGeoCabeza();P.heads.material=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.75});
  const piel=['#e7bd98','#d6a37d','#c08a63','#a5734f','#f0caa6','#8c5f40'].map(c=>new THREE.Color(c));const r=mulberry(5);for(let i=0;i<P.heads.count;i++)P.heads.setColorAt(i,piel[Math.floor(r()*piel.length)]);P.heads.instanceColor.needsUpdate=true}}catch(e){try{errLog('público: '+e.message,'pulido')}catch(e2){}}return P};
+/* ---------- imagen propia para cada ganadería al elegirla ----------
+   Cada ganadería recibe una foto distinta (ninguna se repite) del pelo que más la caracteriza. */
+const PELO_GAN={'Miura':'cardeno','Victorino Martín':'cardeno','Adolfo Martín':'cardeno','La Quinta':'cardeno','Partido de Resina':'cardeno','José Escolar':'cardeno','Ana Romero':'cardeno',
+ 'Torrestrella':'jabonero','Prieto de la Cal':'jabonero',
+ 'El Pilar':'colorado','Zalduendo':'colorado','El Torero':'colorado','Hermanos García Jiménez':'colorado','Montalvo':'colorado','Puerto de San Lorenzo':'colorado',
+ 'Victoriano del Río':'castano','Alcurrucén':'castano','Daniel Ruiz':'castano','Salvador Domecq':'castano','Pedraza de Yeltes':'castano','Valdefresno':'castano','Baltasar Ibán':'castano'};
+const IMG_GAN=(()=>{const usado={cardeno:0,jabonero:0,colorado:0,castano:0,negro:0},m={},orden=['negro','castano','colorado','jabonero','cardeno'];
+ for(const g of GANADERIAS){const pref=PELO_GAN[g.name]||'negro';const lista=[pref,...orden.filter(x=>x!==pref)];const c=lista.find(x=>usado[x]<8);if(!c)continue;m[g.name]=`img/toro-${c}-${usado[c]++}.jpg`}return m})();
+const _encImgP=encImg;
+encImg=function(g,i){return (g&&IMG_GAN[g.name])||_encImgP.apply(this,arguments)};

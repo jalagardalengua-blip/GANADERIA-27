@@ -14,3 +14,6 @@
 | Iconos de la barra inferior y emblema | `img/nav/`, `img/nav-toro.png` | propietario (imágenes propias generadas con IA) | propiedad del propietario | Recorte y transparencia |
 | Fotografías de portada y toros | `img/*.jpg` | propietario (imágenes propias generadas con IA) | propiedad del propietario | — |
 | Música y sonidos | `js/musica.js`, `js/sonido.js` | sintetizados en el propio juego | propios | — |
+
+## Toro de lidia (Tripo)
+- `modelos/toro-tripo.glb` y `modelos/toro-tripo-lo.glb`: modelo creado por el propietario del juego con Tripo3D, aligerado (16k y 5k triángulos) y con el esqueleto y animaciones del toro de Quaternius (CC0) transferidos por cercanía.
