@@ -13,7 +13,7 @@ function ruedoDatos(r,i){const t=r.toros[i];if(!t)return null;
   res:t.res,trof:t.trof||0,ent:t.ent,esto:t.esto,desc:t.desc,avisos:t.avisos,rajado:!!t.rajado,fell:!!t.fell,pases:t.pases,
   cogida:t.cogida?{parte:t.cogida.parte}:null,sust:t.sust?{n:t.sust.n}:null}}
 function ruedoEnviar(){if(!RD.fr||!RD.r)return;const d=ruedoDatos(RD.r,RD.i);if(d)RD.fr.contentWindow.postMessage({ruedo:'lidia',valor:d},'*')}
-function ruedoCerrar(resumen){const id=RD.r&&RD.r.id;RD.on=false;try{musicStop();crowdStop()}catch(e){}if(RD.el)RD.el.remove();RD.el=RD.fr=null;document.body.style.overflow='';try{render()}catch(e){}if(resumen&&id!=null)try{verCorrida(id)}catch(e){}}
+function ruedoCerrar(resumen){const id=RD.r&&RD.r.id;RD.on=false;try{musicStop();crowdStop()}catch(e){}if(RD.el)RD.el.remove();RD.el=RD.fr=null;document.body.style.overflow='';try{render()}catch(e){}if(resumen&&id!=null)try{verCorrida(id);if(typeof endCorrida==='function')endCorrida()}catch(e){}}
 function ruedoAbrir(id){const r=S.hist.find(h=>h.id===id);if(!r||!r.toros||!r.toros.length)return false;
  S.porVer=(S.porVer||[]).filter(x=>x!==id);r.visto=true;save();
  if(typeof W3!=='undefined'&&W3.on){try{exit3D()}catch(e){}}

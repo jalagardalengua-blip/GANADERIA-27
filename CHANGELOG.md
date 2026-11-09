@@ -34,6 +34,15 @@
   - Cohete al abrir el cajón: silbido, estampido y humo.
 - **Fallo corregido**: las personas animadas de la calle salían «explotadas» en pinchos. El GLB de `persona2` de la auditoría tenía los índices de hueso corruptos; ahora se reempaqueta sin tocar los datos. El APK vuelve a incluir la vegetación.
 - Nueva prueba `tests/e2e/publico.js`.
+- **Barra inferior sencilla**: botones pequeños abajo con la velocidad (×1, ×2, ×4), la cámara, «Siguiente toro» y «Acabar corrida», que salta al resumen final. A ×4 la simulación va por subpasos y no da saltos.
+- **Toro con más movimiento**:
+  - Menudillos que se recogen al galopar y al andar.
+  - El cuello se dobla para humillar y mirar.
+  - Da pasos al girar.
+  - Cola más viva cuando tiene casta.
+  - Acciones nuevas: escarbar con cualquier mano y la cabeza baja, resoplar (con sonido), cabecear, derrotar al final del pase (más fuerte si tiene casta) y perder las manos si es flojo.
+  - Respira más fuerte según avanza la faena.
+- **Más calidad de imagen**: hasta 2× la resolución de la pantalla, sombras de 2048 y texturas más nítidas en el móvil. La resolución solo baja si va a menos de ~33 fps, y nunca por debajo de 0,85.
 
 ## Auditoría: fallos corregidos
 - **Bancarrota definitiva**: al bajar de −90.000 € (o si la propiedad te pierde la confianza) la ventana ya no se puede cerrar, la partida queda marcada, no se puede avanzar y al recargar vuelve a salir. «Empezar otra carrera» borra también la copia automática (las ranuras guardadas a mano se conservan).
