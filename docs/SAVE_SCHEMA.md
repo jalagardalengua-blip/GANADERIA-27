@@ -21,6 +21,7 @@ Una sola ranura: `localStorage['hierro-divisa-v1']`, JSON del objeto global `S`.
 | `mkt` | `{sem,lotes}` | Mercado del mes. |
 | `rivals`, `retos`, `retosM`, `news`, `log`, `mes` | | Carrera y noticias. |
 | `fedM`, `feedSpots`, `roto`, `escapado`, `vela`, `doma`, `festival`, `pesado`, `tor` | | Estado de tareas y obras. |
+| `quiebra` | `'banco'` / `'propiedad'` o ausente | Partida terminada: no se puede seguir jugando. |
 | `corro` | objeto o `null` | Ganadería de corro: `{name,l,div,pueblo,real,pres,an,nid,inv,of,hist,st,oid,mkt,fund}`. |
 
 ## Animal (bravo)

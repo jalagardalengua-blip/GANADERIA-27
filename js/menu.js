@@ -47,14 +47,14 @@ function menuIntro(name,sub,then){const d=document.createElement('div');d.classN
  clearTimeout(MENU.mt);try{musicStop()}catch(e){}setTimeout(()=>{then();MENU.v='main'},900);setTimeout(()=>d.classList.add('out'),1500);setTimeout(()=>d.remove(),2300)}
 function menuElegir(k){const g=GANADERIAS[k];menuIntro(g.name,`${g.loc||'España'} · encaste ${g.enc}`,()=>startReal(k))}
 function menuContinuar(){const sv=load();menuIntro(sv.g.name,`${MESES[sv.month]} ${sv.year}`,()=>continuar())}
-const _startNewM=startNew;startNew=function(){const n=NEWG.name.trim();if(!n){toast('Ponle nombre a tu ganadería');return}menuIntro(n,`Encaste ${NEWG.enc} · ${NEWG.prov}`,()=>_startNewM())};
+envolver('startNew','menu',_startNewM=>function(){const n=NEWG.name.trim();if(!n){toast('Ponle nombre a tu ganadería');return}menuIntro(n,`Encaste ${NEWG.enc} · ${NEWG.prov}`,()=>_startNewM())});
 /* partículas doradas y polvo de albero en el fondo del menú */
 let MFX=null;
 function menuFx(){const cv=$('#mFx');if(!cv){MFX=null;return}if(MFX&&MFX.cv===cv)return;const c=cv.getContext('2d');const P=[];for(let i=0;i<70;i++)P.push({x:Math.random(),y:Math.random(),r:.5+Math.random()*2.2,v:.008+Math.random()*.03,a:Math.random()*6,g:Math.random()<.6});
  MFX={cv};const loop=()=>{if(!MFX||MFX.cv!==cv||!document.body.contains(cv))return;const W=cv.width=cv.clientWidth,H=cv.height=cv.clientHeight;c.clearRect(0,0,W,H);
   for(const p of P){p.y-=p.v/60;p.a+=.01;if(p.y<-.02){p.y=1.02;p.x=Math.random()}const x=(p.x+Math.sin(p.a)*.02)*W,y=p.y*H,al=.25+.45*Math.abs(Math.sin(p.a*2));c.beginPath();c.fillStyle=p.g?`rgba(240,200,110,${al})`:`rgba(255,240,220,${al*.6})`;c.arc(x,y,p.r,0,7);c.fill()}
   requestAnimationFrame(loop)};requestAnimationFrame(loop)}
-const _renderM=render;render=function(){_renderM();if(!S)menuFx()};
+envolver('render','menu',_renderM=>function(){_renderM();if(!S)menuFx()},{segura:true});
 /* al abrir el juego siempre se entra por la portada; la partida guardada se continúa desde «Continuar carrera» */
 if(S){S=null;MENU.v='press';UI.casa='bravo'}
 render()

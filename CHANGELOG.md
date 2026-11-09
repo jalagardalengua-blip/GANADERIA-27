@@ -1,5 +1,61 @@
 # Cambios
 
+## Plaza en directo y fiestas de pueblo con más ambiente
+- **Público realista** (nuevo `js/publico.js`), en la plaza y en las fiestas de pueblo:
+  - Miles de espectadores con ropa, piel y pelo variados.
+  - Siguen la lidia con la cabeza.
+  - Se levantan y alzan los brazos en los olés y aplauden en los remates.
+  - Sacan pañuelos blancos para pedir la oreja, mientras el presidente saca el suyo del color que toca: blanco, azul, naranja o verde.
+  - Pitan a los toros malos.
+  - Abanicos y sombreros de paja al sol.
+- **Plaza en directo**:
+  - Palco presidencial, andanadas llenas, mozos y areneros en el callejón, y galería encalada con sus vomitorios.
+  - Albero sin repeticiones de textura y con huellas: pezuñas, zapatillas y surcos que se rastrillan entre toro y toro.
+  - La divisa cuelga sobre el morrillo; antes salía hacia delante como un cuerno.
+  - Al final de cada toro, la cámara enseña los pañuelos y el palco antes de la tarjeta del resultado.
+  - Suena con el audio del juego, sin tener que tocar la pantalla:
+    - la banda toca en las buenas faenas de muleta y calla al entrar a matar;
+    - aplausos en los remates y tras la estocada;
+    - pasodoble de puerta grande con dos orejas o indulto;
+    - pitos en los toros malos.
+- **Rendimiento de la plaza en directo**:
+  - La resolución se ajusta sola si va a menos de ~38 fps.
+  - Solo se dibuja el público que ve la cámara.
+  - Las sombras de los tendidos salen de una silueta de ~400 triángulos.
+  - Sombras más ligeras en el móvil.
+  - Sin filtros, grano ni desenfoques sobre la imagen 3D en el móvil.
+  - Unos 140 triángulos por espectador.
+  - En el emulador por software, el fotograma cuesta un 43 % menos.
+- **Fiestas de pueblo** (nuevo `js/pueblo.js`):
+  - Cadafales de madera de verdad: postes, vigas, cruces, tarima, barandilla, escalera y gradas con sillas de plástico.
+  - Toldo de lona a rayas con fleco y la pancarta de la peña; de noche, bombillas.
+  - En cada cadafal, la peña con su camiseta y el pañuelo rojo al cuello.
+  - Más senyeras en los balcones.
+  - Cohete al abrir el cajón: silbido, estampido y humo.
+- **Fallo corregido**: las personas animadas de la calle salían «explotadas» en pinchos. El GLB de `persona2` de la auditoría tenía los índices de hueso corruptos; ahora se reempaqueta sin tocar los datos. El APK vuelve a incluir la vegetación.
+- Nueva prueba `tests/e2e/publico.js`.
+- **Barra inferior sencilla**: botones pequeños abajo con la velocidad (×1, ×2, ×4), la cámara, «Siguiente toro» y «Acabar corrida», que salta al resumen final. A ×4 la simulación va por subpasos y no da saltos.
+- **Toro con más movimiento**:
+  - Menudillos que se recogen al galopar y al andar.
+  - El cuello se dobla para humillar y mirar.
+  - Da pasos al girar.
+  - Cola más viva cuando tiene casta.
+  - Acciones nuevas: escarbar con cualquier mano y la cabeza baja, resoplar (con sonido), cabecear, derrotar al final del pase (más fuerte si tiene casta) y perder las manos si es flojo.
+  - Respira más fuerte según avanza la faena.
+- **Más calidad de imagen**: hasta 2× la resolución de la pantalla, sombras de 2048 y texturas más nítidas en el móvil. La resolución solo baja si va a menos de ~33 fps, y nunca por debajo de 0,85.
+
+## Auditoría: fallos corregidos
+- **Bancarrota definitiva**: al bajar de −90.000 € (o si la propiedad te pierde la confianza) la ventana ya no se puede cerrar, la partida queda marcada, no se puede avanzar y al recargar vuelve a salir. «Empezar otra carrera» borra también la copia automática (las ranuras guardadas a mano se conservan).
+- **Equilibrio**:
+  - Personal proporcional al tamaño de la camada (1.200 € + 18 €/cabeza en vez de 2.500 € + 10 €/cabeza).
+  - Finca saturada: castigo de salud proporcional al exceso, menos partos y pastos arrendados (35 €/cabeza de más). La tienta solo preselecciona las vacas que caben.
+  - Hierros nuevos: 240.000 € y algo más de ganado al empezar, más ofertas de plazas de tercera y pueblos, mejores precios en segunda y tercera, prestigio por darse a conocer en plazas pequeñas y un suelo de prestigio de 8.
+- Las corridas ya lidiadas salen de la lista de ofertas pasado un año (siguen en el historial).
+- `persona2` en formato GLB (más ligero de descargar, reempaquetado sin tocar el esqueleto); el APK ya no incluye los modelos JSON que tienen versión GLB, ni documentación ni pruebas (la vegetación sigue incluida).
+- Cabecera: en móviles estrechos el nombre y el subtítulo de la ganadería pasan a dos líneas en vez de cortarse.
+- Corrida en directo: la pantalla completa solo se pide al tocar (antes salía un error en la consola) y ya no se marcan para subir a la gráfica texturas que aún no han cargado.
+- Código: las 123 ampliaciones de funciones del núcleo pasan por `envolver()` (registro en `GANCHOS`, errores aislados y anotados); `esc()` escapa el apóstrofo y `jsq()` protege textos dentro de `onclick`.
+
 ## Toro mejorado
 - Superficie suavizada: se acabaron las facetas del modelo.
 - Hechuras de toro de lidia esculpidas: morrillo alto, pecho hondo con papada, cuerpo más redondo y cara más corta.

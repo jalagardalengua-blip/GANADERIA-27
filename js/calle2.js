@@ -1,12 +1,12 @@
 /* ===================== FESTEJOS CON FORMA PROPIA: bou en corda, bous a la mar y encierro ===================== */
 /* ---------- bous a la mar: el final de la calle es el puerto ---------- */
 const MAR={x:40};
-const _envCalle=envCalle;
-envCalle=function(){const E=_envCalle();if(!(CL&&CL.o&&CL.o.tipo==='mar'))return E;
+
+envolver('envCalle','calle2',_envCalle=>function(){const E=_envCalle();if(!(CL&&CL.o&&CL.o.tipo==='mar'))return E;
  const w0=E.walk.bind(E),r0=E.refugio.bind(E),n0=E.nearRef.bind(E);
  E.walk=(p,vaca)=>{if(vaca&&p.x>MAR.x-.3&&Math.abs(p.z)<4)return false;return w0(p,vaca)};
  E.refugio=(x,z)=>r0(x,z)||(x>MAR.x+.4&&Math.abs(z)<4);
- E.nearRef=(x,z)=>{const b=n0(x,z),dw=Math.abs(x-(MAR.x+1.2))+Math.max(0,Math.abs(z)-3.5);return dw<b.d&&x>14?{x:MAR.x+1.2,z:clamp(z,-3,3),d:dw}:b};return E};
+ E.nearRef=(x,z)=>{const b=n0(x,z),dw=Math.abs(x-(MAR.x+1.2))+Math.max(0,Math.abs(z)-3.5);return dw<b.d&&x>14?{x:MAR.x+1.2,z:clamp(z,-3,3),d:dw}:b};return E});
 function marBuild(){const sc=CL.sc,G=geos();const geo=new THREE.PlaneGeometry(26,8,26,8);const m=new THREE.MeshStandardMaterial({color:'#1d6f8c',roughness:.12,metalness:.25,transparent:true,opacity:.92});
  const w=new THREE.Mesh(geo,m);w.rotation.x=-Math.PI/2;w.position.set(MAR.x+13,.05,0);w.receiveShadow=true;sc.add(w);CL.water=w;CL.wbase=geo.attributes.position.array.slice();
  mesh(G.box,M('#b9ad98',.9),.6,.35,8,MAR.x,.17,0,sc);for(let z=-3.5;z<=3.5;z+=1.75)mesh(G.cyl,M('#3b3b3b',.6,.4),.12,.4,.12,MAR.x-.2,.4,z,sc,true);
@@ -60,14 +60,14 @@ function encTick(dt){const E=CL.enc;E.t+=dt;const v=E.t<1.2?3:5.2;E.s+=v*dt;
  if(leadS>=E.L-.5&&!E.done){E.done=true;E.fin=E.t;banner('Manada en el corral',`${E.cerca.toFixed(1)} s corriendo en las astas`,3);clCrowd(1)}
  if(E.done&&E.t-E.fin>3.2){for(const h of E.herd){if(h.cab)continue;CL.ev.luc[h.a.id]=Math.round(clamp(62+h.a.g.bra*.15+h.a.g.fue*.12-h.st.par*2+R(-5,5),40,96))}CL.i=1e9;calleFin()}}
 /* ---------- enganche con el modo calle ---------- */
-const _irCalle=irCalle;
-irCalle=function(id){const o=S.corro&&S.corro.of.find(x=>x.id===id);_irCalle(id);if(!CL||!o)return;
+
+envolver('irCalle','calle2',_irCalle=>function(id){const o=S.corro&&S.corro.of.find(x=>x.id===id);_irCalle(id);if(!CL||!o)return;
  if(o.tipo==='mar'){marBuild();$('#h3cap').textContent='Bous a la mar: los recortadores se lanzan al agua del puerto… y si la vaca los persigue, ¡puede acabar en el mar!'}
  if(o.tipo==='corda'){cordaBuild();$('#h3cap').textContent='Bou en corda: el toro sale atado con la soga y los cordeleros lo sujetan.'}
- if(o.tipo==='encierro'){if(CL.res){CL.sc.remove(CL.res.b.root);CL.res=null}encBuild()}};
-const _calleNextE=calleNext;calleNext=function(){if(CL&&CL.enc)return;return _calleNextE.apply(this,arguments)};
-const _calleTickE=calleTick;
-calleTick=function(dt){if(CL&&CL.enc&&!CL.done){CL.t+=dt;const me=CL.me;let jx=W3.jx,jy=W3.jy;const k=W3.keys;if(k['w']||k['arrowup'])jy=1;if(k['s']||k['arrowdown'])jy=-1;if(k['a']||k['arrowleft'])jx=-1;if(k['d']||k['arrowright'])jx=1;
+ if(o.tipo==='encierro'){if(CL.res){CL.sc.remove(CL.res.b.root);CL.res=null}encBuild()}});
+envolver('calleNext','calle2',_calleNextE=>function(){if(CL&&CL.enc)return;return _calleNextE.apply(this,arguments)});
+
+envolver('calleTick','calle2',_calleTickE=>function(dt){if(CL&&CL.enc&&!CL.done){CL.t+=dt;const me=CL.me;let jx=W3.jx,jy=W3.jy;const k=W3.keys;if(k['w']||k['arrowup'])jy=1;if(k['s']||k['arrowdown'])jy=-1;if(k['a']||k['arrowleft'])jx=-1;if(k['d']||k['arrowright'])jx=1;
   if(!CL.spect&&me.toss<=0){const L=Math.min(1,Math.hypot(jx,jy));if(L>.08){const fx=-Math.sin(W3.yaw),fz=-Math.cos(W3.yaw);const mx=fx*jy-fz*jx,mz=fz*jy+fx*jx,ml=Math.hypot(mx,mz)||1;const v=(W3.run?7.1:3.6)*L;me.vx=mx/ml*v;me.vz=mz/ml*v}else{me.vx*=.85;me.vz*=.85}}
   encTick(dt);const E=CL.env;
   for(const p of CL.ppl){if(p.toss>0){p.toss-=dt;const ph=2.2-p.toss;if(ph<.7){p.x+=p.tv.x*dt;p.z+=p.tv.z*dt}}else{const nx=p.x+p.vx*dt,nz=p.z+p.vz*dt;if(E.walk({x:nx,z:nz},false)){p.x=nx;p.z=nz}else if(E.walk({x:nx,z:p.z},false))p.x=nx;else if(E.walk({x:p.x,z:nz},false))p.z=nz}
@@ -76,4 +76,4 @@ calleTick=function(dt){if(CL&&CL.enc&&!CL.done){CL.t+=dt;const me=CL.me;let jx=W
   const ld=CL.enc.herd[0];if(ld){CL.res={a:ld.a,b:ld.b,x:ld.x,z:ld.z,yaw:encAt(ld.s).yaw,mode:'enc',st:ld.st,v:6,tt:0,dur:999}}
   if(CL.t%0.2<dt)tvMap();if(CL.t%0.5<dt)$('#clres').textContent=`Encierro · ${Math.round(CL.enc.lead)} / ${Math.round(CL.enc.L)} m`;
   camCalle(dt);return}
- _calleTickE(dt);if(!CL)return;if(CL.water)marTick(dt);if(CL.cord&&CL.res)cordaTick(dt)};
+ _calleTickE(dt);if(!CL)return;if(CL.water)marTick(dt);if(CL.cord&&CL.res)cordaTick(dt)});

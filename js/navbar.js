@@ -9,5 +9,5 @@ function navGala(){const nav=document.querySelector('nav.tabs');if(!nav)return;c
   if(k&&NAV_IMG[k]){const sv=b.querySelector('svg');const im=document.createElement('img');im.className='gIco';im.alt='';im.src='img/nav/'+k+'.png';im.decoding='async';im.onerror=()=>{im.remove();if(sv)sv.style.display=''};if(sv){sv.style.display='none';sv.after(im)}else b.prepend(im)}});
  if(!corro&&!wrap.querySelector('.gEmb')){const btns=wrap.querySelectorAll(':scope > button');if(btns.length>=4){const e=document.createElement('div');e.className='gEmb';e.setAttribute('aria-hidden','true');e.innerHTML='<img src="img/nav-toro.png" alt="">';btns[3].before(e)}}
  if(!nav.querySelector('.gDrL')){nav.insertAdjacentHTML('beforeend','<i class="gDrL" aria-hidden="true"></i><i class="gDrR" aria-hidden="true"></i>')}}
-const _renderNav=render;
-render=function(){_renderNav.apply(this,arguments);try{navGala()}catch(e){}};
+
+envolver('render','navbar',_renderNav=>function(){_renderNav.apply(this,arguments);try{navGala()}catch(e){}},{segura:true});

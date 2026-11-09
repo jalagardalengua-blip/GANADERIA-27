@@ -1,25 +1,25 @@
 /* ===================== VER TU HIERRO EN DIRECTO: retransmisión limpia, automática y cogidas realistas ===================== */
 /* el ganadero mira: no participa. Las reses salen y se recogen solas, como en la plaza. */
 const CLDUR={vaca:50,toro:60,becerro:40,embolado:65};
-const _irCalle3=irCalle;
-irCalle=function(id){_irCalle3(id);if(!CL)return;CL.spd=1;CL.her=[];CL.spect=true;W3.root.classList.add('clspect');
+
+envolver('irCalle','calle3',_irCalle3=>function(id){_irCalle3(id);if(!CL)return;CL.spd=1;CL.her=[];CL.spect=true;W3.root.classList.add('clspect');
  const h=$('#h3calle');if(h&&!h.__v3){h.__v3=1;const B=h.querySelector('.clB');B.innerHTML=`<button class="btn sm" id="clcam">Cámara: general</button><button class="btn sm" id="clspd">×1</button>`;
   $('#clcam').onclick=()=>{const v=['tv','cad','res'],n={tv:'general',cad:'cadafal',res:'la res'};CL.cam=v[(v.indexOf(CL.cam)+1)%3];$('#clcam').textContent='Cámara: '+n[CL.cam]};
   $('#clspd').onclick=()=>{CL.spd=CL.spd===1?2:CL.spd===2?4:1;$('#clspd').textContent='×'+CL.spd}}
- $('#clcam').textContent='Cámara: general';$('#clspd').textContent='×1';CL.cam='tv';durRes()};
+ $('#clcam').textContent='Cámara: general';$('#clspd').textContent='×1';CL.cam='tv';durRes()});
 clSpect=function(){if(!CL)return;CL.spect=true;W3.root.classList.add('clspect');const r=CL.env.nearRef(CL.me.x,CL.me.z);CL.me.x=r.x;CL.me.z=r.z;CL.cam=CL.cam==='jug'?'tv':CL.cam};
 function durRes(){const r=CL&&CL.res;if(!r||r.durSet)return;r.durSet=1;const t=cTipo(r.a);r.dur=CL.o.tipo==='embolado'?CLDUR.embolado:CLDUR[t]||50;CL.lowT=CL.t}
-const _calleNext3=calleNext;calleNext=function(){_calleNext3.apply(this,arguments);if(CL&&CL.res)durRes()};
+envolver('calleNext','calle3',_calleNext3=>function(){_calleNext3.apply(this,arguments);if(CL&&CL.res)durRes()});
 /* la recogida nunca se atasca */
-const _resTick3=resTick;resTick=function(r,dt){_resTick3(r,dt);if(CL&&CL.res===r&&r.mode==='recogida'&&r.t>14){calleNext()}};
+envolver('resTick','calle3',_resTick3=>function(r,dt){_resTick3(r,dt);if(CL&&CL.res===r&&r.mode==='recogida'&&r.t>14){calleNext()}});
 /* velocidad de la retransmisión y heridos */
-const _calleTick3=calleTick;
-calleTick=function(dt){if(!CL)return;const k=CL.spd||1;for(let i=0;i<k;i++){_calleTick3(dt);if(!CL||CL.done)break;heridosTick(dt)}
+
+envolver('calleTick','calle3',_calleTick3=>function(dt){if(!CL)return;const k=CL.spd||1;for(let i=0;i<k;i++){_calleTick3(dt);if(!CL||CL.done)break;heridosTick(dt)}
  if(!CL)return;const low=$('#tvLow');if(low)low.classList.toggle('off',CL.t-(CL.lowT||0)>8);
- const r=CL.res,n=$('#tvN');if(n&&r&&r.dur&&CL.t%0.5<dt*k){const tot=CL.an.map(cById).filter(x=>x&&x.tipo!=='cabestro').length,s=Math.max(0,Math.ceil(r.dur-r.tt));n.textContent=`RES ${Math.min(tot,CL.i+1)}/${tot} · ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`}};
+ const r=CL.res,n=$('#tvN');if(n&&r&&r.dur&&CL.t%0.5<dt*k){const tot=CL.an.map(cById).filter(x=>x&&x.tipo!=='cabestro').length,s=Math.max(0,Math.ceil(r.dur-r.tt));n.textContent=`RES ${Math.min(tot,CL.i+1)}/${tot} · ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`}});
 /* ---------- recortadores: más oficio, menos cogidas ---------- */
-const _npcTick3=npcTick;
-npcTick=function(p,dt){if(p.herido)return;const r=CL.res;
+
+envolver('npcTick','calle3',_npcTick3=>function(p,dt){if(p.herido)return;const r=CL.res;
  if(r&&r.mode==='embiste'&&r.tgt===p&&p.dodge<=0){const d=Math.hypot(r.x-p.x,r.z-p.z);
   if(d<3.6&&!p.tryT){p.tryT=1;const sen=r.a.g.sen,ok=Math.random()<clamp(p.sk+.3-(sen-50)/300-(d<1.3?.15:0),.62,.98);
    if(ok){const fx=Math.sin(r.yaw),fz=Math.cos(r.yaw),side=((p.x-r.x)*fz-(p.z-r.z)*fx)>=0?1:-1;p.dodge=.5;p.dx=fz*side*2.6;p.dz=-fx*side*2.6;r.mode='pasa';r.t=0;r.st.qui++;CL.ev.quieb++;clCrowd(.6);if(Math.random()<.35)ole(pick(['¡Olé!','¡Bien!','¡Toma!','¡Qué recorte!']))}
@@ -32,7 +32,7 @@ npcTick=function(p,dt){if(p.herido)return;const r=CL.res;
   if(d>5&&d<12&&Math.random()<dt*.6&&p.st!=='cita'){p.st='cita';p.t=3}}
  _npcTick3(p,dt);
  // en la plaza se acercan de frente para la anilla
- if(CL.plaza&&r&&r.mode==='mira'&&p.st==='cita'){const fx=Math.sin(r.yaw),fz=Math.cos(r.yaw),tx=r.x+fx*1.9,tz=r.z+fz*1.9,ex=tx-p.x,ez=tz-p.z,el=Math.hypot(ex,ez);if(el>.3){p.vx=ex/el*2.4;p.vz=ez/el*2.4}}};
+ if(CL.plaza&&r&&r.mode==='mira'&&p.st==='cita'){const fx=Math.sin(r.yaw),fz=Math.cos(r.yaw),tx=r.x+fx*1.9,tz=r.z+fz*1.9,ex=tx-p.x,ez=tz-p.z,el=Math.hypot(ex,ez);if(el>.3){p.vx=ex/el*2.4;p.vz=ez/el*2.4}}});
 /* ---------- cogidas realistas: revolcón, menos grave o grave ---------- */
 const HER_TXT={leve:'Revolcón sin consecuencias: se levanta por su pie y vuelve al cadafal entre aplausos.',mg:'Cogida: sale conmocionado y cojeando, ayudado por sus compañeros, camino de la enfermería.',grave:'Cogida grave: herida por asta en el muslo. Los compañeros hacen el quite y los servicios sanitarios lo evacuan en camilla a la enfermería.'};
 clToss=function(p){if(p.toss>0||p.herido)return;const r=CL.res;if(!r)return;const a=r.a,male=a.sex==='M'&&cTipo(a)!=='becerro';
@@ -62,7 +62,7 @@ function camilla(p){const rf=CL.env.nearRef(p.x,p.z);const g=new THREE.Group();C
  p.herido.cam={g,men,x:rf.x,z:rf.z,yaw:0,st:0,dest:{x:rf.x,z:rf.z}};try{cencerro(.2)}catch(e){}}
 function retirar(p){const H=p.herido;if(H&&H.cam)CL.sc.remove(H.cam.g);p.m.root.visible=false;CL.her=CL.her.filter(q=>q!==p);CL.ret=(CL.ret||0)+1;$('#h3cap').textContent=`${p.name} ya está en la enfermería. Sigue el festejo.`;try{applause(2,.25)}catch(e){}}
 /* ---------- final: clasificación de anillas en el concurso y parte médico ---------- */
-const _calleFin3=calleFin;
-calleFin=function(){_calleFin3.apply(this,arguments);const box=$('#h3dim .stack');if(!box||!CL)return;
+
+envolver('calleFin','calle3',_calleFin3=>function(){_calleFin3.apply(this,arguments);const box=$('#h3dim .stack');if(!box||!CL)return;
  if(CL.plaza){const L=CL.npc.map(p=>({n:p.name,a:p.anillas||0})).sort((a,b)=>b.a-a.a);const d=document.createElement('div');d.className='clFin';d.innerHTML=`<span class="lbl">Concurso de anillas</span>${L.map((x,i)=>`<div><span>${i+1}º <b>${esc(x.n)}</b></span><b>${x.a}</b></div>`).join('')}`;box.insertBefore(d,box.querySelector('button'))}
- const g=CL.ev.grave||0,c=CL.ev.cog||0;const sm=box.querySelector('small.muted');if(sm)sm.textContent=`Quiebros y recortes ${CL.ev.quieb} · cogidas ${c}${g?` (${g} grave${g>1?'s':''})`:''}${CL.plaza?` · anillas ${CL.ev.anil}`:''}`};
+ const g=CL.ev.grave||0,c=CL.ev.cog||0;const sm=box.querySelector('small.muted');if(sm)sm.textContent=`Quiebros y recortes ${CL.ev.quieb} · cogidas ${c}${g?` (${g} grave${g>1?'s':''})`:''}${CL.plaza?` · anillas ${CL.ev.anil}`:''}`});
