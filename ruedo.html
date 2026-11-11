@@ -320,7 +320,7 @@ function init(){
  setupControls();
  onResize();addEventListener('resize',onResize);
  const start=()=>{const inGame=parent!==window;if(!inGame)newCorrida(sd);else{JUEGO.on=true;}document.body.classList.toggle('cine',ui.cam==='cine');initPanel();requestAnimationFrame(frame);};
- if(THREE.GLTFLoader){const ok=g=>{let mesh=null;g.scene.traverse(o=>{if(o.isMesh&&!mesh)mesh=o;});if(mesh)prepGLB(mesh);start();};const L=new THREE.GLTFLoader();L.load('modelos/toro-ruedo.glb',ok,undefined,()=>start());}else start();
+ if(THREE.GLTFLoader){const ok=g=>{let mesh=null;g.scene.traverse(o=>{if(o.isMesh&&!mesh)mesh=o;});if(mesh)prepGLB(mesh);L.load('modelos/toro-tripo.glb',g2=>{try{prepRig(g2);}catch(e){console.warn('rig',e);}start();},undefined,()=>start());};const L=new THREE.GLTFLoader();L.load('modelos/toro-ruedo.glb',ok,undefined,()=>start());}else start();
 }
 function onResize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 
@@ -649,7 +649,7 @@ function updateDirector(dt){D.t+=dt;const tYaw=Math.atan2(B.x-T.x,B.z-T.z);if(D.
  if(D.phase==='cite'){Tyaw+=clamp(angDiff(Tyaw,tYaw),-2*dt,2*dt);bullSpeed=damp(bullSpeed,0,6,dt);if(D.t>=D.citeDur)beginPass();}
  else if(D.phase==='pass'){const tr=D.track,sp=CUR.t;const mzP=trackAt(tr,D.s,new V3());const dl=Math.hypot(mzP.x-T.x,mzP.z-T.z);D.minD=Math.min(D.minD,dl);
   const p=clamp((D.s-D.s0)/(tr.len-D.s0),0,1);const vPass=3.3*sp.temple*CUR.b.tb,vApp=CUR.b.vApp;let target=vPass+(vApp-vPass)*smooth(1.4,4.6,dl);if(p>.55)target=lerp(vPass,5.2,smooth(.55,.78,p));
-  target=Math.min(target,.5+(tr.len-D.s)*1.5);bullSpeed+=clamp(target-bullSpeed,-6*dt,7*dt);D.s+=bullSpeed*dt;
+  target=Math.min(target,.5+(tr.len-D.s)*1.5);target*=Math.max(.72,1-.055*D.si)*(D.phase==='pass'&&JUEGO.t&&JUEGO.t.fell&&D.si>1?.8:1);bullSpeed+=clamp(target-bullSpeed,-6*dt,7*dt);D.s+=bullSpeed*dt;
   const a=trackAt(tr,D.s,new V3()),b=trackAt(tr,D.s-D.HO,new V3());B.copy(b);const ny=Math.atan2(a.x-b.x,a.z-b.z);bull.yawRate=dt>1e-5?angDiff(Byaw,ny)/dt:0;Byaw=ny;
   D.embroque=dl<2.5&&p<.7;if(!D.ole&&p>.52){D.ole=true;ole((SU[D.cur].single?1:.6+.4*Math.random())*(D.minD<1.25?1:.7));}
   if(SU[D.cur].spin&&!D.spinDone&&p>.46){D.spinning=true;D.spinT+=dt;D.spinA=-D.side*TAU*smooth(0,1,D.spinT/.75);if(D.spinT>=.75){D.spinA=0;D.spinning=false;D.spinDone=true;D.spinT=0;}}
@@ -811,9 +811,9 @@ function newCorrida(seed){const load=document.getElementById('loading');
  const go=()=>{const r=rng(seed!==undefined&&seed!==null?(typeof seed==='number'?seed:seedFromStr(String(seed))):(Math.random()*4294967295)>>>0);
   CUR.t=randomTorero(r);CUR.b=randomBull(r);CUR.prog=randomProgram(r);if(JUEGO.on&&JUEGO.t)aplicaJuego(r);
   if(torero){scene.remove(torero.root);disposeTree(torero.root);}
-  if(bull){scene.remove(bull.root);if(bull.glb){bull.body.remove(bullGLB);bull.mesh.remove(bull.hp);bull.legs.forEach(l=>bull.mesh.remove(l.foot));bull.mesh.remove(bull.div);disposeTree(bull.div);}else disposeTree(bull.root);}
+  if(bull){scene.remove(bull.root);if(bull.rig){bull.anchors.forEach(a=>a.parent&&a.parent.remove(a));disposeTree(bull.div);bull.wrap.remove(RIG.sc);RIG.mixer.stopAllAction();}else if(bull.glb){bull.body.remove(bullGLB);bull.mesh.remove(bull.hp);bull.legs.forEach(l=>bull.mesh.remove(l.foot));bull.mesh.remove(bull.div);disposeTree(bull.div);}else disposeTree(bull.root);}
   torero=buildTorero(CUR.t);scene.add(torero.root);
-  bull=bullGLB?buildBullGLB(CUR.b):buildBull({capa:{negro2:'negro',negro3:'negro',castano:'colorado'}[CUR.b.capa]||CUR.b.capa});scene.add(bull.root);
+  bull=(RIG&&bullGLB)?buildBullRig(CUR.b):bullGLB?buildBullGLB(CUR.b):buildBull({capa:{negro2:'negro',negro3:'negro',castano:'colorado'}[CUR.b.capa]||CUR.b.capa});scene.add(bull.root);
   resetLidia();updateBull(0);updateTorero(0);if(ui.cam==='cine')cut(pick(['tendido','grua','callejon']));else camS.snap=true;audio.clarin();
   setTimeout(()=>load.classList.add('off'),firstCorrida?60:250);firstCorrida=false;};
  if(firstCorrida)go();else{load.classList.remove('off');setTimeout(go,750);}}
@@ -842,7 +842,7 @@ function supremaTick(dt){SP.t+=dt;const step=SP.plan[SP.k];const toB=Math.atan2(
   if(SP.t>(step==='descabello'?1.6:2.6)){SP.st=step==='descabello'?'descabellar':'entrar';SP.t=0;SP.from=T.clone();const m=morrilloW(new V3());const lv=new V3(Math.cos(Tyaw),0,-Math.sin(Tyaw));SP.to=m.clone().setY(0).addScaledVector(lv,.45);bannerSup(step==='indulto'?'Simula la estocada con la mano':step==='descabello'?'Descabello':'Entra a matar');if(step!=='descabello'&&ui.cam==='cine')cut(pick(['raso','torero','callejon']));}}
  else if(SP.st==='entrar'){D.embroque=true;const u=clamp(SP.t/.95,0,1),e=u*u*(3-2*u);T.x=lerp(SP.from.x,SP.to.x,e);T.z=lerp(SP.from.z,SP.to.z,e);torero.walkV=2.2;SP.arm=lerp(.35,1,smooth(.2,.75,u));SP.armY=lerp(1.5,1.38,u);SP.mulY=lerp(.62,.45,u);
   bullSpeed=damp(bullSpeed,1.4,4,dt);B.x+=Math.sin(Byaw)*bullSpeed*dt;B.z+=Math.cos(Byaw)*bullSpeed*dt;SP.pitch=damp(SP.pitch,.6,6,dt);
-  if(u>=.78&&!SP.hit){SP.hit=true;if(step==='pinchazo'){SP.sw='suelo';const m=morrilloW(new V3());SP.swFrom=m;SP.swT=0;ole(.3);}else if(step==='indulto'){ole(1);}else{SP.sw='toro';const inv=bull.body.matrixWorld.clone().invert();SP.swL=new V3(0,1.6,.36);SP.swQ=new THREE.Quaternion().setFromUnitVectors(new V3(0,0,1),new V3(0,-.82,.57).normalize());ole(step==='entera'?1:.7);emitDust(B,6,.6);}}
+  if(u>=.78&&!SP.hit){SP.hit=true;if(step==='pinchazo'){SP.sw='suelo';const m=morrilloW(new V3());SP.swFrom=m;SP.swT=0;ole(.3);}else if(step==='indulto'){ole(1);}else{SP.sw='toro';SP.swBL=null;const inv=bull.body.matrixWorld.clone().invert();SP.swL=new V3(0,1.6,.36);SP.swQ=new THREE.Quaternion().setFromUnitVectors(new V3(0,0,1),new V3(0,-.82,.57).normalize());ole(step==='entera'?1:.7);emitDust(B,6,.6);}}
   if(u>=1){SP.st='salida';SP.t=0;SP.hit=false;D.embroque=false;SP.arm=0;}}
  else if(SP.st==='salida'){const lv=new V3(Math.cos(Tyaw),0,-Math.sin(Tyaw));T.addScaledVector(lv,1.3*dt*Math.max(0,1-SP.t/1.2));torero.walkV=1.2*Math.max(0,1-SP.t/1.2);bullSpeed=damp(bullSpeed,0,2.5,dt);B.x+=Math.sin(Byaw)*bullSpeed*dt;B.z+=Math.cos(Byaw)*bullSpeed*dt;SP.pitch=damp(SP.pitch,.15,2,dt);
   if(SP.t>1.6){torero.walkV=0;if(step==='indulto'){SP.st='indulto';SP.t=0;bannerSup('Indultado');}else if(step==='pinchazo'){SP.k++;cuadrar();}else{const next=SP.plan[SP.k+1];if(next==='descabello'){SP.k++;SP.st='espera';SP.t=0;bannerSup('El toro aguanta en pie');}else{SP.st='muere';SP.t=0;bannerSup(step==='entera'?'Estocada entera':'Media estocada');if(ui.cam==='cine')cut(pick(['raso','tendido','grua']));}}}}
@@ -855,10 +855,12 @@ function supremaTick(dt){SP.t+=dt;const step=SP.plan[SP.k];const toB=Math.atan2(
  else if(SP.st==='indulto'){const toril=SUN_AZ+Math.PI,dx=Math.cos(toril)*(R-1)-B.x,dz=Math.sin(toril)*(R-1)-B.z;const ty=Math.atan2(dx,dz);Byaw+=clamp(angDiff(Byaw,ty),-1.4*dt,1.4*dt);bullSpeed=damp(bullSpeed,1.6,2,dt);B.x+=Math.sin(Byaw)*bullSpeed*dt;B.z+=Math.cos(Byaw)*bullSpeed*dt;SP.pitch=damp(SP.pitch,0,2,dt);
   if(SP.t>4.5){SP.on=false;D.phase='fin';finFaena();}}}
 function supremaPost(dt){if(!bull)return;const b=bull;
- if(D.phase==='suprema'||D.phase==='fin'){b.body.rotation.z=b.roll+SP.sway+SP.fall*1.42;b.body.position.y+=-SP.kneel*.3*(1-SP.fall)+SP.fall*.36;b.body.rotation.x+=SP.kneel*.12;b.root.updateMatrixWorld(true);}
+ if((D.phase==='suprema'||D.phase==='fin')&&!b.rig){b.body.rotation.z=b.roll+SP.sway+SP.fall*1.42;b.body.position.y+=-SP.kneel*.3*(1-SP.fall)+SP.fall*.36;b.body.rotation.x+=SP.kneel*.12;b.root.updateMatrixWorld(true);}
  if(SP.sw==='toro'&&SP.plan&&SP.plan[SP.k]==='descabello'&&D.phase==='suprema'&&torero){if(!window.__sw2){window.__sw2=sword.clone();scene.add(__sw2);}const g=torero.aR.grip.getWorldPosition(new V3()),hp=bull.hp.getWorldPosition(new V3());__sw2.visible=true;__sw2.position.copy(g);__sw2.quaternion.setFromUnitVectors(new V3(0,0,1),hp.sub(g).normalize());}else if(window.__sw2)__sw2.visible=false;
  if(!sword.visible)return;
- if(SP.sw==='toro'&&SP.swL){sword.position.copy(b.body.localToWorld(SP.swL.clone()));const q=new THREE.Quaternion();b.body.getWorldQuaternion(q);sword.quaternion.copy(q.multiply(SP.swQ));}
+ if(SP.sw==='toro'&&SP.swL&&b.rig&&b.div&&b.div.parent){const bn=b.div.parent;bn.updateWorldMatrix(true,false);if(!SP.swBL){const pw=b.body.localToWorld(SP.swL.clone()),qw=new THREE.Quaternion();b.body.getWorldQuaternion(qw);qw.multiply(SP.swQ);SP.swBL=new THREE.Matrix4().copy(bn.matrixWorld).invert().multiply(new THREE.Matrix4().compose(pw,qw,new V3(1,1,1)));}
+  const mw=new THREE.Matrix4().multiplyMatrices(bn.matrixWorld,SP.swBL),sc=new V3();mw.decompose(sword.position,sword.quaternion,sc);}
+ else if(SP.sw==='toro'&&SP.swL){sword.position.copy(b.body.localToWorld(SP.swL.clone()));const q=new THREE.Quaternion();b.body.getWorldQuaternion(q);sword.quaternion.copy(q.multiply(SP.swQ));}
  else if(SP.sw==='suelo'){SP.swT=Math.min(1,(SP.swT||0)+dt/0.9);const u=SP.swT;sword.position.set(lerp(SP.swFrom.x,SP.swFrom.x+1.4,u),Math.max(.02,lerp(SP.swFrom.y,0,u)+Math.sin(Math.PI*u)*1.2),lerp(SP.swFrom.z,SP.swFrom.z+.6,u));sword.rotation.set(u*9,u*4,0);if(u>=1)sword.rotation.set(0,1.1,Math.PI/2);}
  else if(D.phase==='suprema'&&torero){const g=torero.aR.grip.getWorldPosition(new V3()),m=morrilloW(new V3());sword.position.copy(g);sword.quaternion.setFromUnitVectors(new V3(0,0,1),m.sub(g).normalize());}}
 /* ---------- cada corrida distinta: luz, albero, barrera y entrada según la plaza, la fecha y el toro ---------- */
@@ -873,6 +875,86 @@ function entrada(fill,r){if(!crowd||!crowd.m0)return;const Z=new THREE.Matrix4()
  const n=crowd.bodies.count;for(let i=0;i<n;i++){if(hash2(i,77)<fill)continue;crowd.bodies.instanceMatrix.array.set(Z,i*16);crowd.heads.instanceMatrix.array.set(Z,i*16);}
  crowd.bodies.instanceMatrix.needsUpdate=crowd.heads.instanceMatrix.needsUpdate=true;}
 
+
+/* ---------- toro con esqueleto: animaciones reales (paso, galope, muerte) y conducta de lidia ----------
+   El modelo del toro lleva el esqueleto de un bóvido con sus animaciones; encima se añaden, hueso a hueso:
+   humillar en el embroque, derrote al salir del pase, cara que sigue a la tela, rabo vivo (alto al arrancarse),
+   respiración que crece con el cansancio, escarbar si el toro es manso o de poca casta, rajarse hacia tablas,
+   aplomarse antes de la estocada y caer con la animación de muerte. */
+let RIG=null;
+function prepRig(g){const sc=g.scene;let sk=null;sc.traverse(o=>{if(o.isSkinnedMesh&&!sk)sk=o;});if(!sk)return;
+ sk.castShadow=sk.receiveShadow=true;sk.frustumCulled=false;const m=sk.material;m.skinning=true;m.envMapIntensity=.75;
+ m.onBeforeCompile=sh=>{sh.uniforms.uCoat=BU.uCoat;sh.uniforms.uCoatAmt=BU.uCoatAmt;sh.uniforms.uSpeck=BU.uSpeck;sh.fragmentShader='uniform vec3 uCoat;uniform float uCoatAmt;uniform float uSpeck;\n'+sh.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
+ {float lum=dot(diffuseColor.rgb,vec3(.299,.587,.114));float keep=smoothstep(.1,.28,lum);vec3 coat=uCoat*(.5+lum*7.);
+ #ifdef USE_UV
+ float sp=fract(sin(dot(floor(vUv*1400.),vec2(12.9898,78.233)))*43758.5453);coat*=mix(1.,mix(.4,2.,step(.5,sp)),uSpeck);
+ #endif
+ diffuseColor.rgb=mix(diffuseColor.rgb,coat,uCoatAmt*(1.-keep));}`);};
+ sc.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(sc);const bones={};sc.traverse(o=>{if(o.isBone)bones[o.name]=o;});
+ const mixer=new THREE.AnimationMixer(sc),A={};for(const c of g.animations)A[c.name]=mixer.clipAction(c);
+ RIG={sc,sk,box,bones,mixer,A};}
+function buildBullRig(info){const R0=RIG,root=new THREE.Group(),body=new THREE.Group(),wrap=new THREE.Group();root.add(body);body.add(wrap);wrap.add(R0.sc);
+ R0.mixer.stopAllAction();R0.sc.traverse(o=>{if(o.isBone&&o.userData.q0)o.quaternion.copy(o.userData.q0);else if(o.isBone)o.userData.q0=o.quaternion.clone();});
+ const g=bullGLB.geometry;if(!g.boundingBox)g.computeBoundingBox();const tb=g.boundingBox,s=R0.box.getSize(new V3()),ts=tb.getSize(new V3()),c=R0.box.getCenter(new V3()),tc=tb.getCenter(new V3());
+ const k=new V3(ts.x/s.x*info.sx,ts.y/s.y*info.sy,ts.z/s.z*info.sz);wrap.scale.copy(k);wrap.position.set(tc.x*info.sx-k.x*c.x,tb.min.y*info.sy-k.y*R0.box.min.y,tc.z*info.sz-k.z*c.z);
+ const cc=COATS[info.capa]||COATS.negro;if(cc[0])BU.uCoat.value.copy(col(cc[0]));BU.uCoatAmt.value=cc[1];BU.uSpeck.value=cc[2];
+ root.updateMatrixWorld(true);
+ // puntos de referencia sacados de la propia malla (en reposo)
+ const sk=R0.sk,pos=sk.geometry.attributes.position,P=new V3(),pts=[];for(let i=0;i<pos.count;i+=2){P.fromBufferAttribute(pos,i).applyMatrix4(sk.matrixWorld);pts.push(P.clone());}
+ const wb=new THREE.Box3().setFromPoints(pts),L=wb.max.z-wb.min.z,H=wb.max.y;
+ let muz=pts[0];for(const q of pts)if(q.z>muz.z)muz=q;
+ const head=pts.filter(q=>q.z>wb.min.z+L*.72&&q.y>muz.y);let tL=null,tR=null;for(const q of head){if(q.x>0&&(!tL||q.x>tL.x))tL=q;if(q.x<0&&(!tR||q.x<tR.x))tR=q;}
+ tL=tL||muz.clone().add(new V3(.3,.3,0));tR=tR||muz.clone().add(new V3(-.3,.3,0));const fore=tL.clone().add(tR).multiplyScalar(.5);fore.y-=.08;
+ let mor=null;for(const q of pts)if(Math.abs(q.x)<.12&&q.z>wb.min.z+L*.5&&q.z<wb.min.z+L*.72&&(!mor||q.y>mor.y))mor=q;mor=mor||new V3(0,H,.3);
+ const B0=R0.bones,anchors=[];const att=(bone,wp)=>{const o=new THREE.Object3D();bone=bone||R0.sc;bone.updateWorldMatrix(true,false);o.position.copy(bone.worldToLocal(wp.clone()));bone.add(o);anchors.push(o);return o;};
+ const hb=B0.Head||B0.Neck3;const muzzle=att(hb,muz),tipL=att(hb,tL),tipR=att(hb,tR),foreO=att(hb,fore),hp=att(hb,hb.getWorldPosition(new V3()));
+ const div=att(B0.Torso3||B0.Neck1,mor.clone().add(new V3(0,.02,0)));{const qb=new THREE.Quaternion();div.parent.getWorldQuaternion(qb);const qr=new THREE.Quaternion();body.getWorldQuaternion(qr);div.quaternion.copy(qb.invert().multiply(qr));const sw=new V3();div.parent.getWorldScale(sw);div.scale.set(1/sw.x,1/sw.y,1/sw.z);}
+ const dc=(info.div&&info.div.length)?[info.div[0],info.div[1]||info.div[0]]:['#2d7a44','#f2eee6'];const ros=M(new THREE.CylinderGeometry(.05,.05,.02,12),std({color:dc[0],roughness:.6}));div.add(ros);const rib=[];
+ for(const[cl,x] of [[dc[0],-.02],[dc[1],.02]]){const rg=new THREE.PlaneGeometry(.035,.3);rg.translate(0,-.15,0);const rb=M(rg,std({color:cl,roughness:.7,side:THREE.DoubleSide}));rb.position.x=x;rb.rotation.x=-1.2;div.add(rb);rib.push(rb);}
+ const legs=[];[['FrontLowerLegL',1,1,0,.25],['FrontLowerLegR',-1,1,.12,.75],['BackLowerLegL',1,-1,.5,0],['BackLowerLegR',-1,-1,.62,.5]].forEach(([bn,sx,sz,ph,phW])=>{let lo=null;for(const q of pts)if(Math.sign(q.x)===sx&&Math.sign(q.z-wb.getCenter(new V3()).z)===sz&&(!lo||q.y<lo.y))lo=q;
+  legs.push({up:{rotation:{x:0}},lo:{rotation:{x:0}},foot:att(B0[bn],lo||new V3()),front:sz>0,ph,phW,restU:0,restL:0,last:0});});
+ const A=R0.A,loco=['Idle','Walk','Gallop'];for(const n of loco)if(A[n]){A[n].reset();A[n].setEffectiveWeight(n==='Idle'?1:0);A[n].play();}
+ if(A.Idle_Headlow){A.Idle_Headlow.reset();A.Idle_Headlow.setEffectiveWeight(0);A.Idle_Headlow.play();}
+ const vW=A.Walk?(L*.55)/A.Walk.getClip().duration:1.2,vG=A.Gallop?(L*1.15)/A.Gallop.getClip().duration:5.5;
+ return{rig:true,glb:false,mesh:sk,root,body,wrap,hp,muzzle,fore:foreO,tipL,tipR,legs,tail:[new THREE.Object3D(),new THREE.Object3D(),new THREE.Object3D()],rib,div,anchors,
+  phG:0,phW:0,pitch:0,yawH:0,roll:0,yawRate:0,muzzleW:new V3(),foreW:new V3(),tipLW:new V3(),tipRW:new V3(),info,vW,vG,dead:false,breath:0,raja:0};}
+const _qa=new THREE.Quaternion(),_qb=new THREE.Quaternion(),_qc=new THREE.Quaternion(),AXX=new V3(1,0,0),AXY=new V3(0,1,0),AXZ=new V3(0,0,1);
+function qRel(o,stop,out){const ch=[];for(let x=o;x&&x!==stop;x=x.parent)ch.push(x);out.identity();for(let i=ch.length-1;i>=0;i--)out.multiply(ch[i].quaternion);return out;}
+function rotB(b,bone,axis,a){if(!bone||!a)return;qRel(bone,b.wrap,_qa);qRel(bone.parent,b.wrap,_qb);_qc.setFromAxisAngle(axis,a);_qa.premultiply(_qc);bone.quaternion.copy(_qb.invert().multiply(_qa));}
+function rigTick(b,dt){const A=RIG.A,Bn=RIG.bones,sp=bullSpeed;
+ b.body.position.y=0;b.body.rotation.x=0;b.body.scale.y=1;b.body.rotation.z=b.roll;
+ const dying=D.phase==='suprema'&&SP.st==='muere'&&SP.t>1.35;
+ if(dying&&!b.dead&&A.Death){b.dead=true;for(const k in A)if(k!=='Death')A[k].fadeOut(.35);A.Death.reset();A.Death.setLoop(THREE.LoopOnce,1);A.Death.clampWhenFinished=true;A.Death.timeScale=.85;A.Death.setEffectiveWeight(1);A.Death.fadeIn(.35).play();}
+ if(!b.dead){const plomo=D.phase==='suprema'&&/cuadrar|espera|descabellar/.test(SP.st);
+  const wI=1-smooth(.05,.7,sp),wG=smooth(1.7,3.2,sp),wW=Math.max(0,1-wI-wG);
+  if(A.Idle)A.Idle.setEffectiveWeight(wI*(plomo?.15:1));if(A.Idle_Headlow)A.Idle_Headlow.setEffectiveWeight(wI*(plomo?.85:0));
+  if(A.Walk){A.Walk.setEffectiveWeight(wW);A.Walk.timeScale=clamp(sp/b.vW,.35,1.8);}if(A.Gallop){A.Gallop.setEffectiveWeight(wG);A.Gallop.timeScale=clamp(sp/b.vG,.55,1.5);}}
+ RIG.mixer.update(dt);
+ if(!b.dead){
+  // cara y cuello: humillar, derrote y seguir la tela
+  let pitch=b.pitch;if(D.phase==='pass'&&D.track){const p=clamp((D.s-D.s0)/(D.track.len-D.s0),0,1);pitch-=gauss(p,.8,.055)*(.2+.55*(CUR.b.derrote||0));}
+  if(D.phase==='suprema'&&/cuadrar|espera/.test(SP.st))pitch=Math.max(pitch,.25);
+  const yaw=b.yawH;
+  rotB(b,Bn.Neck1,AXX,pitch*.32);rotB(b,Bn.Neck2,AXX,pitch*.28);rotB(b,Bn.Neck3,AXX,pitch*.2);rotB(b,Bn.Head,AXX,pitch*.2);
+  rotB(b,Bn.Neck1,AXY,yaw*.35);rotB(b,Bn.Neck2,AXY,yaw*.35);rotB(b,Bn.Head,AXY,yaw*.3);
+  // escarbar: el toro manso o sin casta rasca el albero antes de arrancarse
+  if(D.phase==='cite'&&CUR.b.escarba&&D.citeDur>1.4&&D.t>.3&&D.t<1.8){const ps=Math.sin(D.t*8.5);rotB(b,Bn.FrontUpperLegR,AXX,-.55*ps);rotB(b,Bn.FrontLowerLegR,AXX,.7*Math.max(0,ps));}
+  // rabo: vivo en reposo, alto al arrancarse y en el embroque
+  const t=simTime,lift=smooth(2.5,6,sp)*(.35+.4*(CUR.b.derrote||0));
+  ['Tail1','Tail2','Tail3','Tail4'].forEach((n,i)=>{rotB(b,Bn[n],AXY,(.18+.05*i)*Math.sin(t*(1.4+sp*.25)-i*.6)+b.roll*.6);rotB(b,Bn[n],AXX,-lift*(i===0?.9:.25));});
+  // respiración: más honda y rápida según avanza la faena
+  const fat=clamp(D.si/Math.max(2,D.prog.length),0,1)+(D.phase==='suprema'?.4:0);b.breath+=dt*(2.2+3*fat);const br=Math.sin(b.breath*TAU*.5);
+  const T2=Bn.Torso2||Bn.Torso;if(T2){if(!T2.userData.s0)T2.userData.s0=T2.scale.clone();T2.scale.copy(T2.userData.s0).multiplyScalar(1+(.008+.022*fat)*br);}
+  rotB(b,Bn.Head,AXX,.03*fat*br);}
+ b.root.updateMatrixWorld(true);b.muzzle.getWorldPosition(b.muzzleW);b.fore.getWorldPosition(b.foreW);b.tipL.getWorldPosition(b.tipLW);b.tipR.getWorldPosition(b.tipRW);
+ b.rib.forEach((r,i)=>{r.rotation.x=-1.2-sp*.05+.12*Math.sin(simTime*(6+sp*2)+i);});}
+const _updateBullR=updateBull;
+updateBull=function(dt){_updateBullR(dt);if(bull&&bull.rig)rigTick(bull,dt);};
+/* rajarse: el toro sin casta se va a tablas al acabar la serie antes de volver a la muleta */
+const _updDirR=updateDirector;
+updateDirector=function(dt){_updDirR(dt);if(!bull||!CUR.b.raja||D.phase!=='turn'||D.after!=='serie'||D.t>2.6||D.si<1)return;
+ const out=Math.atan2(B.x,B.z),d=angDiff(Byaw,out);Byaw+=clamp(d,-1.6*dt,1.6*dt);bullSpeed=damp(bullSpeed,1.5,3,dt);if(Math.hypot(B.x,B.z)<R-3){B.x+=Math.sin(Byaw)*bullSpeed*dt;B.z+=Math.cos(Byaw)*bullSpeed*dt;}};
+
 /* ---------- puente con Hierro y Divisa ----------
    El juego envía cada toro de la corrida ya lidiado en su simulación (bravura, nobleza, casta, fuerza, encaste,
    pelo, peso, matador, traje y el resultado). La faena se compone con esos datos: más series y pases cuanto más
@@ -881,7 +963,7 @@ function entrada(fill,r){if(!crowd||!crowd.m0)return;const Z=new THREE.Matrix4()
 const JUEGO={on:false,t:null,oleK:1};
 const PELO_CAPA={'negro':'negro','entrepelado':'negro2','burraco':'negro3','berrendo en negro':'negro3','cárdeno':'cardeno','salinero':'cardeno','colorado':'colorado','castaño':'castano','melocotón':'colorado','berrendo en colorado':'colorado','jabonero':'jabonero','albahío':'jabonero','ensabanado':'jabonero'};
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function lidiaJuego(d){JUEGO.on=true;JUEGO.t=d;hideRes();Object.assign(SP,{on:false,st:'',sw:'mano',swL:null,fall:0,kneel:0,sway:0,hit:false,dust:false});if(window.__sw2)__sw2.visible=false;newCorrida(d.seed||d.id||1);}
+function lidiaJuego(d){JUEGO.on=true;JUEGO.t=d;hideRes();Object.assign(SP,{on:false,st:'',sw:'mano',swL:null,swBL:null,fall:0,kneel:0,sway:0,hit:false,dust:false});if(window.__sw2)__sw2.visible=false;newCorrida(d.seed||d.id||1);}
 function aplicaJuego(r){const d=JUEGO.t,cl=(x,a,b)=>Math.max(a,Math.min(b,x));const B=d.B||65,N=d.N||65,C=d.C||65,F=d.F||60;
  // torero: el traje del matador del cartel, oro para matadores
  const base=d.traje||CUR.t.base;const light=/^#(?:[ef]|d[89a-f]|c[c-f])/i.test(base);CUR.t.base=base;CUR.t.orn=light&&r()<.3?'jet':'gold';
@@ -896,7 +978,7 @@ function aplicaJuego(r){const d=JUEGO.t,cl=(x,a,b)=>Math.max(a,Math.min(b,x));co
  const P=[];const nc=d.res==='devuelto'?1:B>72?2:1;for(let i=0;i<nc;i++)P.push([i===0?pk(CAP):pk(CAP),cl(Math.round(2+(B-60)/10+r()),2,5),B>62?REMC:null]);
  let nm=d.res==='devuelto'?0:d.rajado||d.fell?1:N>80?4:N>68?3:2;if(d.pases)nm=Math.min(nm,Math.max(1,Math.ceil(d.pases/2)));
  let last=est==='artista'||r()<.35?'natural':'derechazo';for(let i=0;i<nm;i++){let n=i===0?last:(last==='derechazo'?'natural':'derechazo');if(i===nm-1&&nm>2&&(est==='tremendista'||est==='valiente')&&r()<.5)n='manoletina';last=n;P.push([n,cl(Math.round(2+(N-55)/9+r()*1.4),2,6),N>58?pk(REMM):null]);}
- CUR.prog=P;JUEGO.oleK=d.res==='pitos'?.35:d.res==='silencio'?.6:d.res==='ovacion'?.85:1;
+ CUR.b.escarba=B<62||C<55||r()<.12;CUR.b.derrote=cl((C-55)/40,0,1);CUR.b.raja=!!d.rajado;CUR.prog=P;JUEGO.oleK=d.res==='pitos'?.35:d.res==='silencio'?.6:d.res==='ovacion'?.85:1;
  variaPlaza(d);hudCartel();}
 function hudCartel(){const d=JUEGO.t;if(!d)return;const $=id=>document.getElementById(id);
  $('cEy').textContent=`${d.plaza||''}${d.feria?' · '+d.feria:''} · ${d.i}º de la tarde`;

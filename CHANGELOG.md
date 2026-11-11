@@ -76,3 +76,7 @@ Calendario por semanas al estilo FIFA, barra de gala y pantallas a juego, sonido
 ## Estocada y corridas distintas
 - Suerte suprema animada: perfilarse, entrar a matar, pinchazos, media o entera, descabellos, avisos con clarín, toro que se amorcilla y cae; indulto con simulacro y vuelta a toriles.
 - Cada corrida distinta: luz (tarde, ocaso, noche) según orden y feria, albero y barrera por plaza, entrada de público según categoría, repertorio por estilo del matador (delantal, tafallera, revolera, manoletina, molinete, trincherazo, firma).
+
+## Toro con esqueleto en la plaza en directo
+- Animaciones reales de paso, galope y muerte; humilla, derrota, sigue la tela, rabo vivo, respiración con cansancio, escarba si es manso, se raja a tablas y se aploma antes de la estocada. Estoque clavado en el morrillo.
+- Catálogo de modelos revisados en docs/CATALOGO_MODELOS.md.
