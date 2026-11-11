@@ -91,3 +91,8 @@ Calendario por semanas al estilo FIFA, barra de gala y pantallas a juego, sonido
 - Cartel y resultado con la tipografía y paneles del juego; sin grano ni franjas negras.
 - Público con siluetas sentadas y colores sobrios; cámara del callejón por encima de la barrera; pelo cárdeno natural.
 - Más ritmo (citas, paseos y estocada más ágiles) y giros del toro en arco según su velocidad.
+
+## Corrida en directo: imagen limpia
+- Sin cartel arriba: solo la plaza y la barra de botones.
+- Cabeza del toro suave: sigue la tela sin sacudidas y el derrote es natural.
+- Arreglos de imagen en móviles: sin parpadeo en el pelo, rayas del albero y barrera sin parpadeos, sombras más estables.

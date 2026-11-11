@@ -90,6 +90,7 @@ body.cine .bar{height:0}
 .btnR.oro{border-radius:12px}
 .vig{background:radial-gradient(130% 100% at 50% 45%,transparent 62%,rgba(0,0,0,.4) 100%)!important}
 
+#cartel{display:none!important}
 /* ---------- barra mínima (como en el corro) ---------- */
 .bar2{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:0 12px;opacity:.82;transition:opacity .25s;pointer-events:none}
 .bar2:hover,.bar2:focus-within{opacity:1}
@@ -316,20 +317,20 @@ setTimeout(()=>{try{init();}catch(e){console.error(e);}},40);
 
 function init(){
  const canvas=document.getElementById('c');
- renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+ renderer=new THREE.WebGLRenderer({canvas,antialias:true,precision:'highp',powerPreference:'high-performance'});
  const mobile=Math.min(innerWidth,innerHeight)<700;
  renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1.5:2));
  renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.72;
  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
  ANISO=renderer.capabilities.getMaxAnisotropy();
  scene=new THREE.Scene();
- camera=new THREE.PerspectiveCamera(35,1,.05,1800);camera.position.set(30,7,6);
+ camera=new THREE.PerspectiveCamera(35,1,.25,900);camera.position.set(30,7,6);
  controls=new THREE.OrbitControls(camera,canvas);controls.enableDamping=true;controls.maxPolarAngle=Math.PI*.495;controls.minDistance=1.5;controls.maxDistance=70;controls.enabled=false;
  pmrem=new THREE.PMREMGenerator(renderer);
- sky=new THREE.Sky();sky.scale.setScalar(1000);scene.add(sky);
+ sky=new THREE.Sky();sky.scale.setScalar(450);scene.add(sky);
  hemi=new THREE.HemisphereLight(0xffffff,0x886644,.5);scene.add(hemi);
  sun=new THREE.DirectionalLight(0xffffff,2.5);sun.castShadow=true;sun.shadow.mapSize.set(mobile?2048:4096,mobile?2048:4096);
- const sc=sun.shadow.camera;sc.left=-36;sc.right=36;sc.top=36;sc.bottom=-36;sc.near=1;sc.far=240;sun.shadow.bias=-.0004;sun.shadow.normalBias=.03;
+ const sc=sun.shadow.camera;sc.left=-36;sc.right=36;sc.top=36;sc.bottom=-36;sc.near=1;sc.far=240;sun.shadow.bias=-.0006;sun.shadow.normalBias=.05;
  scene.add(sun);scene.add(sun.target);
  scene.fog=new THREE.FogExp2(0xd8cbb6,.0022);
  buildPlaza();
@@ -378,7 +379,7 @@ function buildPlaza(){
  // rayas de picadores (7 y 9 m desde la barrera)
  const chalkA=gen(512,512,(u,v,x,y,o)=>{const n=fbm(u,v,16,3);const a=clamp((n-.32)*3,0,1)*255;o.r=o.g=o.b=a;}).color;
  const chalkMat=new THREE.MeshStandardMaterial({color:col('#f4efe4'),roughness:1,transparent:true,alphaMap:new THREE.CanvasTexture(chalkA),depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2});
- for(const rr of [R-7,R-9]){const ring=M(new THREE.RingGeometry(rr-.07,rr+.07,256),chalkMat,false,true);ring.rotation.x=-Math.PI/2;ring.position.y=.006;scene.add(ring);}
+ for(const rr of [R-7,R-9]){const ring=M(new THREE.RingGeometry(rr-.07,rr+.07,256),chalkMat,false,true);ring.rotation.x=-Math.PI/2;ring.position.y=.02;scene.add(ring);}
  lMsg.textContent='Pintando la barrera';
  const wm=woodMaps([132,24,20]);
  const woodMat=new THREE.MeshStandardMaterial({map:tex(wm.color,62,1),bumpMap:tex(wm.height,62,1,false),bumpScale:.01,roughness:.62,side:THREE.DoubleSide});
@@ -632,7 +633,7 @@ function prepGLB(mesh){mesh.position.set(0,0,0);mesh.rotation.set(0,0,0);mesh.ca
  m.onBeforeCompile=sh=>{injectDeform(sh,true);sh.fragmentShader='uniform vec3 uCoat;uniform float uCoatAmt;uniform float uSpeck;\n'+sh.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
  {float lum=dot(diffuseColor.rgb,vec3(.299,.587,.114));float keep=smoothstep(.1,.28,lum);vec3 coat=uCoat*(.5+lum*7.);
  #ifdef USE_UV
- vec2 cc=vUv*520.;vec2 ci=floor(cc),cf=fract(cc);cf=cf*cf*(3.-2.*cf);float h00=fract(sin(dot(ci,vec2(12.9898,78.233)))*43758.5453),h10=fract(sin(dot(ci+vec2(1.,0.),vec2(12.9898,78.233)))*43758.5453),h01=fract(sin(dot(ci+vec2(0.,1.),vec2(12.9898,78.233)))*43758.5453),h11=fract(sin(dot(ci+vec2(1.,1.),vec2(12.9898,78.233)))*43758.5453);float sp=mix(mix(h00,h10,cf.x),mix(h01,h11,cf.x),cf.y);coat*=mix(1.,mix(.55,1.6,smoothstep(.35,.65,sp)),uSpeck);
+ 
  #endif
  diffuseColor.rgb=mix(diffuseColor.rgb,coat,uCoatAmt*(1.-keep));}`);};
  const dm=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking});dm.onBeforeCompile=sh=>injectDeform(sh,false);mesh.customDepthMaterial=dm;bullGLB=mesh;}
@@ -707,7 +708,7 @@ function updateBull(dt){const b=bull,sp=bullSpeed;b.root.position.copy(B);b.root
   const ph=g>.4?pg:pw;if(ph<L.last&&sp>.6&&simTime>.1){const fp=L.foot.getWorldPosition(new V3());emitDust(fp,Math.round(1+sp*.5*(1+Math.abs(b.yawRate))),.3+sp*.08);if(g>.4)audio.hoof(fp);}L.last=ph;}
  b.body.position.y=g*.045*Math.sin(b.phG*TAU)*ampG;b.body.rotation.x=g*.05*Math.sin(b.phG*TAU+1.5);b.body.scale.y=1+.008*Math.sin(simTime*3.2);
  // cabeza
- let pt=-.06+.04*Math.sin(simTime*1.7),yt=0;if(D.phase==='suprema')pt=SP.pitch;
+ let pt=-.06+.012*Math.sin(simTime*.9),yt=0;if(D.phase==='suprema')pt=SP.pitch;
  if(D.phase==='pass'){const tr=D.track,p=clamp((D.s-D.s0)/(tr.len-D.s0),0,1);const mz=b.muzzleW,dl=Math.hypot(mz.x-T.x,mz.z-T.z);const hum=p<.62?smooth(3.6,1.4,dl):0;pt=.05+hum*(b.glb?CUR.b.hum*1.1:.42)-gauss(p,.7,.06)*.35;
   const hpw=b.hp.getWorldPosition(new V3());yt=angDiff(Byaw,Math.atan2(D.lureW.x-hpw.x,D.lureW.z-hpw.z));}
  else{const hpw=b.hp.getWorldPosition(new V3());yt=angDiff(Byaw,Math.atan2(T.x-hpw.x,T.z-hpw.z));}
@@ -918,7 +919,7 @@ function prepRig(g){const sc=g.scene;let sk=null;sc.traverse(o=>{if(o.isSkinnedM
  m.onBeforeCompile=sh=>{sh.uniforms.uCoat=BU.uCoat;sh.uniforms.uCoatAmt=BU.uCoatAmt;sh.uniforms.uSpeck=BU.uSpeck;sh.fragmentShader='uniform vec3 uCoat;uniform float uCoatAmt;uniform float uSpeck;\n'+sh.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
  {float lum=dot(diffuseColor.rgb,vec3(.299,.587,.114));float keep=smoothstep(.1,.28,lum);vec3 coat=uCoat*(.5+lum*7.);
  #ifdef USE_UV
- vec2 cc=vUv*520.;vec2 ci=floor(cc),cf=fract(cc);cf=cf*cf*(3.-2.*cf);float h00=fract(sin(dot(ci,vec2(12.9898,78.233)))*43758.5453),h10=fract(sin(dot(ci+vec2(1.,0.),vec2(12.9898,78.233)))*43758.5453),h01=fract(sin(dot(ci+vec2(0.,1.),vec2(12.9898,78.233)))*43758.5453),h11=fract(sin(dot(ci+vec2(1.,1.),vec2(12.9898,78.233)))*43758.5453);float sp=mix(mix(h00,h10,cf.x),mix(h01,h11,cf.x),cf.y);coat*=mix(1.,mix(.55,1.6,smoothstep(.35,.65,sp)),uSpeck);
+ 
  #endif
  diffuseColor.rgb=mix(diffuseColor.rgb,coat,uCoatAmt*(1.-keep));}`);};
  sc.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(sc);const bones={};sc.traverse(o=>{if(o.isBone)bones[o.name]=o;});
@@ -963,9 +964,9 @@ function rigTick(b,dt){const A=RIG.A,Bn=RIG.bones,sp=bullSpeed;
  RIG.mixer.update(dt);
  if(!b.dead){
   // cara y cuello: humillar, derrote y seguir la tela
-  let pitch=b.pitch;if(D.phase==='pass'&&D.track){const p=clamp((D.s-D.s0)/(D.track.len-D.s0),0,1);pitch-=gauss(p,.8,.055)*(.2+.55*(CUR.b.derrote||0));}
+  let pitch=b.pitch;if(D.phase==='pass'&&D.track){const p=clamp((D.s-D.s0)/(D.track.len-D.s0),0,1);pitch-=gauss(p,.82,.09)*(.08+.22*(CUR.b.derrote||0));}
   if(D.phase==='suprema'&&/cuadrar|espera/.test(SP.st))pitch=Math.max(pitch,.25);
-  const yaw=b.yawH;
+  const yawT=clamp(b.yawH,-.38,.38);b.sP=b.sP==null?pitch:damp(b.sP,pitch,3.2,dt);b.sY=b.sY==null?yawT:damp(b.sY,yawT,2.6,dt);pitch=b.sP;const yaw=b.sY;
   rotB(b,Bn.Neck1,AXX,pitch*.32);rotB(b,Bn.Neck2,AXX,pitch*.28);rotB(b,Bn.Neck3,AXX,pitch*.2);rotB(b,Bn.Head,AXX,pitch*.2);
   rotB(b,Bn.Neck1,AXY,yaw*.35);rotB(b,Bn.Neck2,AXY,yaw*.35);rotB(b,Bn.Head,AXY,yaw*.3);
   // escarbar: el toro manso o sin casta rasca el albero antes de arrancarse
@@ -976,7 +977,7 @@ function rigTick(b,dt){const A=RIG.A,Bn=RIG.bones,sp=bullSpeed;
   // respiración: más honda y rápida según avanza la faena
   const fat=clamp(D.si/Math.max(2,D.prog.length),0,1)+(D.phase==='suprema'?.4:0);b.breath+=dt*(2.2+3*fat);const br=Math.sin(b.breath*TAU*.5);
   const T2=Bn.Torso2||Bn.Torso;if(T2){if(!T2.userData.s0)T2.userData.s0=T2.scale.clone();T2.scale.copy(T2.userData.s0).multiplyScalar(1+(.008+.022*fat)*br);}
-  rotB(b,Bn.Head,AXX,.03*fat*br);}
+}
  b.root.updateMatrixWorld(true);b.muzzle.getWorldPosition(b.muzzleW);b.fore.getWorldPosition(b.foreW);b.tipL.getWorldPosition(b.tipLW);b.tipR.getWorldPosition(b.tipRW);
  b.rib.forEach((r,i)=>{r.rotation.x=-1.2-sp*.05+.12*Math.sin(simTime*(6+sp*2)+i);});}
 const _updateBullR=updateBull;
