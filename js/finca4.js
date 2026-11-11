@@ -36,13 +36,13 @@ function f4Suelo(sc){let ter=null;sc.traverse(o=>{const g=o.geometry;if(o.isMesh
 /* ---------- pasto alto que se mece ---------- */
 function f4TexPasto(){if(F4.tx)return F4.tx;const cv=document.createElement('canvas');cv.width=128;cv.height=128;const c=cv.getContext('2d');const r=mulberry(77);
  for(let i=0;i<22;i++){const x=10+r()*108,h=50+r()*74,w=2+r()*3.5,lean=(r()-.5)*34;const g=c.createLinearGradient(0,128,0,128-h);const k=.55+r()*.45;
-  const v0=Math.round(150*k),v1=Math.round(255*(.85+k*.15));g.addColorStop(0,`rgb(${v0},${v0},${Math.round(v0*.9)})`);g.addColorStop(1,`rgb(${v1},${v1},${Math.round(v1*.92)})`);c.fillStyle=g;
+  const v0=Math.round(195*k),v1=Math.round(255*(.85+k*.15));g.addColorStop(0,`rgb(${v0},${v0},${Math.round(v0*.9)})`);g.addColorStop(1,`rgb(${v1},${v1},${Math.round(v1*.92)})`);c.fillStyle=g;
   c.beginPath();c.moveTo(x-w,128);c.quadraticCurveTo(x+lean*.3,128-h*.5,x+lean,128-h);c.quadraticCurveTo(x+lean*.3+w*.4,128-h*.5,x+w,128);c.fill()}
- const t=new THREE.CanvasTexture(cv);t.encoding=THREE.sRGBEncoding;F4.tx=t;return t}
+ const t=new THREE.CanvasTexture(cv);t.encoding=THREE.sRGBEncoding;t.generateMipmaps=false;t.minFilter=THREE.LinearFilter;F4.tx=t;return t}
 function f4GeoPasto(){if(F4.geo)return F4.geo;const W=.62,H=.5,gs=[];for(const a of [0,Math.PI/3,-Math.PI/3,Math.PI,Math.PI*4/3,Math.PI*2/3]){const p=new THREE.PlaneGeometry(W,H);p.translate(0,H/2,0);p.rotateY(a);gs.push(p)}
  const g=THREE.BufferGeometryUtils.mergeBufferGeometries(gs);const n=g.attributes.normal;for(let i=0;i<n.count;i++)n.setXYZ(i,0,1,0);F4.geo=g;return g}
 function f4Pasto(sc){const q=txrQ();if(q==='baja')return;const N=q==='alta'?4200:2600,R=q==='alta'?30:24;const P=f4Paleta(S.month);
- const mat=new THREE.MeshStandardMaterial({map:f4TexPasto(),color:P.pasto,alphaTest:.5,side:THREE.FrontSide,roughness:1});mat.userData.f4u={value:0};
+ const mat=new THREE.MeshStandardMaterial({map:f4TexPasto(),color:P.pasto,alphaTest:.5,side:THREE.FrontSide,roughness:1,emissive:new THREE.Color(P.pasto).multiplyScalar(.22)});mat.userData.f4u={value:0};
  mat.onBeforeCompile=s=>{s.uniforms.uT=mat.userData.f4u;s.vertexShader='uniform float uT;\n'+s.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
   #ifdef USE_INSTANCING
   vec4 wp=instanceMatrix*vec4(0.,0.,0.,1.);

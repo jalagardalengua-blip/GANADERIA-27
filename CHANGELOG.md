@@ -109,3 +109,10 @@ Calendario por semanas al estilo FIFA, barra de gala y pantallas a juego, sonido
 - Velocidad hasta ×4 con subpasos de física.
 - Público: pañuelos blancos al pedir la oreja o el indulto antes de que decida la presidencia.
 - Sin cálculo oculto de grano en cada fotograma.
+
+## Móvil (Android e iOS)
+- Pantalla completa solo donde el navegador la admite (oculta en iPhone).
+- Tareas de la finca plegadas en pantallas bajas y ocultas si están vacías.
+- Sin zoom automático de iOS en buscadores y desplegables.
+- Plaza en directo en vertical con encuadre más abierto; vibración breve en los grandes momentos (Android); vibración en la cogida en la finca.
+- Pasto alto sin manchas negras (sin mezcla de bordes transparentes con negro).
