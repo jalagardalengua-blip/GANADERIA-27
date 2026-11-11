@@ -651,11 +651,14 @@ function herdTick(dt){
   }
   if(h.jump>0)h.jump-=dt;
   if(h.free){const p={x:h.x,z:h.z,hit:0};collide(p,.9);if(p.hit)h.stuck=(h.stuck||0)+dt;h.x=p.x;h.z=p.z;if(h.target&&inR(h.target,h.x,h.z,1.2))capturar(h)}
-  else{h.x=clamp(h.x,Rc.x0+1.2,Rc.x1-1.2);h.z=clamp(h.z,Rc.z0+1.2,Rc.z1-1.2)}
+  else{const p={x:h.x,z:h.z,hit:0};collide(p,h.kind==='becerro'?.6:.9);if(p.hit&&h.mode==='walk'){h.stuck=(h.stuck||0)+dt;if(h.stuck>1.2){h.stuck=0;h.mode='idle';h.t=R(1,3);h.feedGo=null}}h.x=clamp(p.x,Rc.x0+1.2,Rc.x1-1.2);h.z=clamp(p.z,Rc.z0+1.2,Rc.z1-1.2)}
   if(h.tyaw!=null)h.yaw+=angD(h.yaw,h.tyaw)*Math.min(1,dt*4);
   h.anim={speed:spd,head,paw,push,toss,look,limp:h.a.salud<55}}
  for(let i=0;i<H.length;i++)for(let j=i+1;j<H.length;j++){const a=H[i],b=H[j];if(a.rk!==b.rk&&!a.free&&!b.free)continue;const dx=b.x-a.x,dz=b.z-a.z,d=Math.hypot(dx,dz),m=(a.kind==='becerro'||b.kind==='becerro')?1.1:1.8;
   if(d<m&&d>1e-4&&!(a.foe===b&&a.contact)){const p=(m-d)/2;a.x-=dx/d*p;a.z-=dz/d*p;b.x+=dx/d*p;b.z+=dz/d*p}}
+ for(const h of H){if(h.free){const p={x:h.x,z:h.z,hit:0};collide(p,.9);h.x=p.x;h.z=p.z}else{h.x=clamp(h.x,h.R.x0+1.2,h.R.x1-1.2);h.z=clamp(h.z,h.R.z0+1.2,h.R.z1-1.2)}}
+ // ni tú ni el caballo atravesáis a las reses
+ if(!W3.drive&&!(F.toss>0)){const q=W3.ride?Hh:F.p,qr=W3.ride?1:.4;for(const h of H){if(h.mode==='derribado')continue;const m=qr+(h.kind==='becerro'?.5:h.kind==='vaca'?.75:.9),dx=q.x-h.x,dz=q.z-h.z,d=Math.hypot(dx,dz);if(d<m&&d>1e-4){q.x=h.x+dx/d*m;q.z=h.z+dz/d*m}}if(!W3.ride)collide(F.p)}
  for(const h of H){const dd=Math.hypot(h.x-px,h.z-pz);const fl=h.mode==='derribado'?Math.min(1,(2.2-h.dT)*4)*Math.min(1,h.dT*2.5):0;h.B.root.position.set(h.x,gH(h.x,h.z)+(h.jump>0?Math.sin(h.jump/.6*Math.PI)*.5:0)+fl*.22,h.z);h.B.root.rotation.set(0,h.yaw,-(h.fallSide||1)*fl*1.4);
   h.B.root.visible=dd<200;if(dd<110)animBull(h.B,dt,h.anim)}}
 
