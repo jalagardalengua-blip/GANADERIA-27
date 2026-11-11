@@ -96,3 +96,9 @@ Calendario por semanas al estilo FIFA, barra de gala y pantallas a juego, sonido
 - Sin cartel arriba: solo la plaza y la barra de botones.
 - Cabeza del toro suave: sigue la tela sin sacudidas y el derrote es natural.
 - Arreglos de imagen en móviles: sin parpadeo en el pelo, rayas del albero y barrera sin parpadeos, sombras más estables.
+
+## Rendimiento y fallos de la plaza en directo
+- 80% menos triángulos (de 2,8 M a 540 k): público ligero.
+- Calidad automática: baja resolución, sombras y sombreros si el móvil no llega a ~38 FPS.
+- Polvo sin discos grandes; rayas de picadores finas y gastadas.
+- Pesos del esqueleto del toro alisados y soldados en costuras: sin roturas en cuello, patas ni costuras al moverse.
