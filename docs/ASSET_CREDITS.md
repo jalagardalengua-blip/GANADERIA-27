@@ -20,5 +20,5 @@
 
 ## Plaza en directo
 - `ruedo.html`: plaza realista propia (Ruedo de Valdeoro) para ver en directo las corridas de tu hierro. Albero, tendidos, torero de luces, capote y muleta con tela simulada, cámara de realizador.
-- Toro: `modelos/toro-ruedo.glb`, el modelo de lidia de grab3d (CC0) aligerado; pelo de cada res sobre su textura.
+- Toro: `modelos/toro-ruedo.glb` (malla) y `modelos/toro-tripo.glb` (con esqueleto y animaciones), ambos del toro creado por el propietario con Tripo3D; pelo de cada res sobre su textura.
 - Libs: OrbitControls y Sky de three.js r128 (MIT).
