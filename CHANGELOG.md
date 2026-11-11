@@ -102,3 +102,10 @@ Calendario por semanas al estilo FIFA, barra de gala y pantallas a juego, sonido
 - Calidad automática: baja resolución, sombras y sombreros si el móvil no llega a ~38 FPS.
 - Polvo sin discos grandes; rayas de picadores finas y gastadas.
 - Pesos del esqueleto del toro alisados y soldados en costuras: sin roturas en cuello, patas ni costuras al moverse.
+
+## Plaza en directo: física, cámara, velocidad y público
+- Capote y muleta chocan con todo el toro (cabeza, cuello, morrillo, costillar, cuartos) en cada iteración: ya no lo atraviesan.
+- La cámara nunca se mete dentro del toro, del torero ni bajo el albero; la del tendido va por encima de las gradas.
+- Velocidad hasta ×4 con subpasos de física.
+- Público: pañuelos blancos al pedir la oreja o el indulto antes de que decida la presidencia.
+- Sin cálculo oculto de grano en cada fotograma.
