@@ -682,7 +682,7 @@ function nextAfterTurn(){if(D.after==='serie'){if(D.si>=D.prog.length){if(JUEGO.
  D.phase='cite';D.t=0;D.citeDur=.12+Math.random()*.4;}
 function startPaseo(){const away=T.clone().sub(B).setY(0).normalize().applyAxisAngle(new V3(0,1,0),(Math.random()-.5)*1.4);let dest=T.clone().addScaledVector(away,1.6+Math.random()*1.4);
  if(dest.length()>12)dest=T.clone().addScaledVector(T.clone().negate().setY(0).normalize(),3);D.dest=dest;D.phase='paseo';D.t=0;ole(1);director.onPaseo();}
-function ole(k){k*=JUEGO.on?JUEGO.oleK:1;oleLevel=Math.max(oleLevel,k);audio.ole(k);if(k>.55){const o=document.getElementById('ole');o.textContent=k>.9?'¡Olé!':'¡Bien!';o.classList.add('on');clearTimeout(ole.t);ole.t=setTimeout(()=>o.classList.remove('on'),900);}}
+function ole(k){k*=JUEGO.on?JUEGO.oleK:1;try{if(k>.9&&navigator.vibrate&&matchMedia('(pointer:coarse)').matches)navigator.vibrate(18);}catch(e){}oleLevel=Math.max(oleLevel,k);audio.ole(k);if(k>.55){const o=document.getElementById('ole');o.textContent=k>.9?'¡Olé!':'¡Bien!';o.classList.add('on');clearTimeout(ole.t);ole.t=setTimeout(()=>o.classList.remove('on'),900);}}
 
 function updateDirector(dt){D.t+=dt;const tYaw=Math.atan2(B.x-T.x,B.z-T.z);if(D.phase==='suprema'){supremaTick(dt);return;}
  if(D.phase==='cite'){Tyaw+=clamp(angDiff(Tyaw,tYaw),-2*dt,2*dt);bullSpeed=damp(bullSpeed,0,6,dt);if(D.t>=D.citeDur)beginPass();}
@@ -813,7 +813,7 @@ function updateCamera(dt){camS.shotT+=dt;
  {const cp=camS.pos;if(ui.cam!=='tendido'){const bc=B.clone().setY(1),dB=cp.distanceTo(bc),mB=2.1;if(dB<mB){cp.copy(bc).addScaledVector(cp.clone().sub(bc).normalize(),mB);}
   const tc=T.clone().setY(1.1),dT=cp.distanceTo(tc),mT=.95;if(dT<mT){cp.copy(tc).addScaledVector(cp.clone().sub(tc).normalize(),mT);}cp.y=Math.max(cp.y,.22);}}
  camera.position.copy(camS.pos);const lk=camS.look.clone();if(_pose.shake&&!reduceMotion){const d=camS.pos.distanceTo(lk)/30,tt=performance.now()/1000;lk.x+=Math.sin(tt*1.3)*.03*d+Math.sin(tt*3.1)*.01*d;lk.y+=Math.sin(tt*1.7+1)*.02*d;}
- camera.lookAt(lk);camera.fov=camS.fov;camera.updateProjectionMatrix();}
+ camera.lookAt(lk);camera.fov=camera.aspect<1?Math.min(78,camS.fov*(1+.9*(1-camera.aspect))):camS.fov;camera.updateProjectionMatrix();}
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- audio ---------- */
