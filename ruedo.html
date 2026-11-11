@@ -984,7 +984,7 @@ function rigTick(b,dt){const A=RIG.A,Bn=RIG.bones,sp=bullSpeed;
  RIG.mixer.update(dt);
  if(!b.dead){
   // cara y cuello: humillar, derrote y seguir la tela
-  let pitch=b.pitch;if(D.phase==='pass'&&D.track){const p=clamp((D.s-D.s0)/(D.track.len-D.s0),0,1);pitch-=gauss(p,.82,.09)*(.08+.22*(CUR.b.derrote||0));}
+  let pitch=b.pitch;if(D.phase==='cogida')pitch=-.75*Math.sin(Math.PI*clamp(CG.t/.9,0,1))+.2;if(D.phase==='pass'&&D.track){const p=clamp((D.s-D.s0)/(D.track.len-D.s0),0,1);pitch-=gauss(p,.82,.09)*(.08+.22*(CUR.b.derrote||0));}
   if(D.phase==='suprema'&&/cuadrar|espera/.test(SP.st))pitch=Math.max(pitch,.25);
   const yawT=clamp(b.yawH,-.38,.38);b.sP=b.sP==null?pitch:damp(b.sP,pitch,3.2,dt);b.sY=b.sY==null?yawT:damp(b.sY,yawT,2.6,dt);pitch=b.sP;const yaw=b.sY;
   rotB(b,Bn.Neck1,AXX,pitch*.32);rotB(b,Bn.Neck2,AXX,pitch*.28);rotB(b,Bn.Neck3,AXX,pitch*.2);rotB(b,Bn.Head,AXX,pitch*.2);
@@ -1005,11 +1005,37 @@ updateBull=function(dt){_updateBullR(dt);if(bull&&bull.rig)rigTick(bull,dt);};
 /* física del ruedo: nadie atraviesa la barrera y el toro no se monta sobre el torero fuera del embroque */
 function limitesRuedo(){const rb=Math.hypot(B.x,B.z),mb=R-1.3;if(rb>mb){B.x*=mb/rb;B.z*=mb/rb;if(D.phase!=='pass')bullSpeed*=.6;}
  const rt=Math.hypot(T.x,T.z),mt=R-1;if(rt>mt){T.x*=mt/rt;T.z*=mt/rt;}
- if(D.phase!=='pass'&&D.phase!=='suprema'){const dx=B.x-T.x,dz=B.z-T.z,d=Math.hypot(dx,dz),m=1.6;if(d<m&&d>1e-4){B.x=T.x+dx/d*m;B.z=T.z+dz/d*m;}}}
+ if(D.phase!=='pass'&&D.phase!=='suprema'&&D.phase!=='cogida'){const dx=B.x-T.x,dz=B.z-T.z,d=Math.hypot(dx,dz),m=1.6;if(d<m&&d>1e-4){B.x=T.x+dx/d*m;B.z=T.z+dz/d*m;}}}
 /* rajarse: el toro sin casta se va a tablas al acabar la serie antes de volver a la muleta */
 const _updDirR=updateDirector;
 updateDirector=function(dt){_updDirR(dt);limitesRuedo();if(!bull||!CUR.b.raja||D.phase!=='turn'||D.after!=='serie'||D.t>2.6||D.si<1)return;
  const out=Math.atan2(B.x,B.z),d=angDiff(Byaw,out);Byaw+=clamp(d,-1.6*dt,1.6*dt);bullSpeed=damp(bullSpeed,1.5,3,dt);if(Math.hypot(B.x,B.z)<R-3){B.x+=Math.sin(Byaw)*bullSpeed*dt;B.z+=Math.cos(Byaw)*bullSpeed*dt;}};
+
+
+/* ---------- cogidas: el toro prende al torero, lo voltea y lo deja en el albero ----------
+   Ocurren solo cuando el juego ha decidido cogida para ese toro. Leve: se levanta y sigue la faena.
+   Grave (con sustituto): se lo llevan a la enfermería y el resultado dice quién mata al toro. */
+const CG={t:0,on:false,dir:new V3(),h:0,rx:0,rz:0,land:new V3()};
+function cogidaInicia(){D.phase='cogida';D.t=0;CG.on=true;CG.t=0;CG.h=0;CG.rx=0;CG.rz=0;CG.dir.set(Math.sin(Byaw),0,Math.cos(Byaw));CG.from=T.clone();CG.land=T.clone().addScaledVector(CG.dir,1.7);
+ CUR.cog.done=true;capote.mesh.visible=muleta.mesh.visible=stick.visible=sword.visible=false;D.embroque=false;D.spinA=0;
+ const o=document.getElementById('ole');o.textContent='¡Cogida!';o.style.color='#e0454c';o.classList.add('on');setTimeout(()=>{o.classList.remove('on');o.style.color='';},1800);
+ try{navigator.vibrate&&matchMedia('(pointer:coarse)').matches&&navigator.vibrate([70,40,140]);}catch(e){}emitDust(T,18,1.2);if(ui.cam==='cine')cut(pick(['raso','torero','callejon']));}
+function cogidaTick(dt){CG.t+=dt;const u=CG.t;
+ // el toro sigue su viaje, derrota y se va frenando
+ if(u<2.4)bullSpeed=damp(bullSpeed,u<1.4?3.2:1.2,2,dt);B.x+=Math.sin(Byaw)*bullSpeed*dt;B.z+=Math.cos(Byaw)*bullSpeed*dt;if(u<2.4)Byaw+=(u>1.2?.5:0)*dt;else{const away=Math.atan2(B.x-T.x,B.z-T.z);let dy=away-Byaw;dy=Math.atan2(Math.sin(dy),Math.cos(dy));Byaw+=dy*Math.min(1,2.5*dt);bullSpeed=damp(bullSpeed,Math.hypot(B.x-T.x,B.z-T.z)<6?2.4:0,2,dt);}
+ // el torero: prendido, volteado en el aire y al suelo
+ if(u<.32){const k=u/.32;T.lerpVectors(CG.from,CG.from.clone().addScaledVector(CG.dir,.45),k);CG.h=.55*k;CG.rx=-.6*k;}
+ else if(u<1.25){const k=(u-.32)/.93;const a=CG.from.clone().addScaledVector(CG.dir,.45);T.lerpVectors(a,CG.land,k);CG.h=.55*(1-k)+2.1*Math.sin(Math.PI*k);CG.rx=-.6-(Math.PI*2-.6+Math.PI/2)*smooth(0,1,k);CG.rz=.5*Math.sin(Math.PI*k);if(k>.97&&!CG.polvo){CG.polvo=1;emitDust(T,24,1.4);}}
+ else{CG.h=.12;CG.rx=-Math.PI/2;CG.rz=0;}
+ torero.walkV=0;const grave=CUR.cog&&CUR.cog.grave;
+ if(!grave&&u>3.2){const k=smooth(3.2,4.6,u);CG.rx=-Math.PI/2*(1-k);CG.h=.12*(1-k);
+  if(u>4.6){CG.on=false;CG.polvo=0;D.phase='turn';D.t=0;D.after='serie';D.si++;D.passN=99;setTool(D.tool,D.hand);}}
+ if(grave&&u>3.6&&!CG.fin){CG.fin=1;const o=document.getElementById('ole');o.textContent='A la enfermería';o.style.color='#e0454c';o.classList.add('on');setTimeout(()=>{o.classList.remove('on');o.style.color='';},2000);setTimeout(()=>{CG.on=false;CG.fin=0;CG.polvo=0;D.phase='fin';finFaena();},2200);}}
+const _updDirC=updateDirector;
+updateDirector=function(dt){if(D.phase==='cogida'){D.t+=dt;cogidaTick(dt);limitesRuedo();return;}_updDirC(dt);
+ if(D.phase==='pass'&&CUR.cog&&!CUR.cog.done&&D.si>=CUR.cog.si&&D.passN>=CUR.cog.pn&&D.track){const p=clamp((D.s-D.s0)/(D.track.len-D.s0),0,1);if(p>.4&&p<.55)cogidaInicia();}};
+const _updTorC=updateTorero;
+updateTorero=function(dt){_updTorC(dt);if(D.phase==='cogida'||CG.on){const r=torero.root;r.position.y+=CG.h;r.rotation.x=CG.rx;r.rotation.z=CG.rz;}else{torero.root.rotation.x=0;torero.root.rotation.z=0;}};
 
 /* ---------- puente con Hierro y Divisa ----------
    El juego envía cada toro de la corrida ya lidiado en su simulación (bravura, nobleza, casta, fuerza, encaste,
@@ -1034,7 +1060,7 @@ function aplicaJuego(r){const d=JUEGO.t,cl=(x,a,b)=>Math.max(a,Math.min(b,x));co
  const P=[];const nc=d.res==='devuelto'?1:B>72?2:1;for(let i=0;i<nc;i++)P.push([i===0?pk(CAP):pk(CAP),cl(Math.round(2+(B-60)/10+r()),2,5),B>62?REMC:null]);
  let nm=d.res==='devuelto'?0:d.rajado||d.fell?1:N>80?4:N>68?3:2;if(d.pases)nm=Math.min(nm,Math.max(1,Math.ceil(d.pases/2)));
  let last=est==='artista'||r()<.35?'natural':'derechazo';for(let i=0;i<nm;i++){let n=i===0?last:(last==='derechazo'?'natural':'derechazo');if(i===nm-1&&nm>2&&(est==='tremendista'||est==='valiente')&&r()<.5)n='manoletina';last=n;P.push([n,cl(Math.round(2+(N-55)/9+r()*1.4),2,6),N>58?pk(REMM):null]);}
- CUR.b.escarba=B<62||C<55||r()<.12;CUR.b.derrote=cl((C-55)/40,0,1);CUR.b.raja=!!d.rajado;CUR.prog=P;JUEGO.oleK=d.res==='pitos'?.35:d.res==='silencio'?.6:d.res==='ovacion'?.85:1;
+ CUR.cog=d.cogida&&d.res!=='devuelto'?{si:Math.max(0,Math.min(P.length-1,1+Math.floor(r()*Math.max(1,P.length-1)))),pn:1+Math.floor(r()*2),grave:!!d.sust,parte:d.cogida.parte||'',done:false}:null;CUR.b.escarba=B<62||C<55||r()<.12;CUR.b.derrote=cl((C-55)/40,0,1);CUR.b.raja=!!d.rajado;CUR.prog=P;JUEGO.oleK=d.res==='pitos'?.35:d.res==='silencio'?.6:d.res==='ovacion'?.85:1;
  variaPlaza(d);hudCartel();}
 function hudCartel(){const d=JUEGO.t;if(!d)return;const $=id=>document.getElementById(id);
  $('cEy').textContent=`${d.plaza||''}${d.feria?' · '+d.feria:''} · ${d.i}º de la tarde`;
@@ -1093,7 +1119,7 @@ function frame(now){requestAnimationFrame(frame);try{if(last)autoCalidad(Math.mi
  renderer.render(scene,camera);
 
  if(false){const d=gimg.data;for(let i=0;i<d.length;i+=4){const v=Math.random()*255;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}gctx.putImageData(gimg,0,0);}}
-window.__ruedo={D,ui,setCam,fin:()=>finFaena(),sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
+window.__ruedo={D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
 })();
 </script>
 

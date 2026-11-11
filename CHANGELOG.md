@@ -1,5 +1,11 @@
 # Cambios
 
+## Cogidas en la corrida en directo
+- Cuando el juego decide que hay cogida, en la plaza realista el toro prende al torero en mitad de un pase, lo voltea en el aire y lo deja en el albero, con polvo, aviso "¡Cogida!", vibración en el móvil y cambio de cámara.
+- Cogida leve: el toro se aleja, el matador se levanta y sigue la faena.
+- Cogida grave (con sustituto): se lo llevan a la enfermería y el resultado dice quién mata al toro.
+- Auditoría: sin errores de JavaScript ni archivos rotos, sin fugas de memoria al entrar y salir de la finca y un año de simulación limpio.
+
 ## Toro mejorado
 - Superficie suavizada: se acabaron las facetas del modelo.
 - Hechuras de toro de lidia esculpidas: morrillo alto, pecho hondo con papada, cuerpo más redondo y cara más corta.
