@@ -80,3 +80,8 @@ Calendario por semanas al estilo FIFA, barra de gala y pantallas a juego, sonido
 ## Toro con esqueleto en la plaza en directo
 - Animaciones reales de paso, galope y muerte; humilla, derrota, sigue la tela, rabo vivo, respiración con cansancio, escarba si es manso, se raja a tablas y se aploma antes de la estocada. Estoque clavado en el morrillo.
 - Catálogo de modelos revisados en docs/CATALOGO_MODELOS.md.
+
+## Física y choques
+- Finca: las reses ya no atraviesan árboles, abrevaderos, comederos ni muros; ni tú ni el caballo atravesáis a los animales; la separación entre reses ya no las saca del cercado.
+- Corro: el mozo volteado ya no atraviesa fachadas.
+- Plaza en directo: toro y torero no cruzan la barrera y el toro no se monta sobre el torero fuera del embroque.

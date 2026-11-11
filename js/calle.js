@@ -221,7 +221,7 @@ function calleTick(dt){if(!CL)return;CL.t+=dt;const E=CL.env,r=CL.res;
  if(!CL.spect&&me.toss<=0&&me.dodge<=0){const L=Math.min(1,Math.hypot(jx,jy));if(L>.08){const fx=-Math.sin(W3.yaw),fz=-Math.cos(W3.yaw);const mx=fx*jy-fz*jx,mz=fz*jy+fx*jx,ml=Math.hypot(mx,mz)||1;const v=(W3.run?6.9:3.4)*L;me.vx=mx/ml*v;me.vz=mz/ml*v;me.yaw+=angD(me.yaw,Math.atan2(mx,mz))*Math.min(1,dt*12)}else{me.vx*=.8;me.vz*=.8}}
  else if(CL.spect){me.vx=me.vz=0}
  for(const p of CL.ppl){if(p!==me&&p.toss<=0&&p.dodge<=0)npcTick(p,dt);
-  if(p.toss>0){p.toss-=dt;const ph=2.2-p.toss;if(ph<.7){p.x+=p.tv.x*dt;p.z+=p.tv.z*dt}if(p.toss<=0){p.m.root.rotation.x=0}}
+  if(p.toss>0){p.toss-=dt;const ph=2.2-p.toss;if(ph<.7){const nx=p.x+p.tv.x*dt,nz=p.z+p.tv.z*dt;if(E.walk({x:nx,z:nz},false)){p.x=nx;p.z=nz}else{p.tv.x*=-.3;p.tv.z*=-.3}}if(p.toss<=0){p.m.root.rotation.x=0}}
   else if(p.dodge>0){p.dodge-=dt;p.x+=p.dx*dt*2;p.z+=p.dz*dt*2}
   else{const nx=p.x+p.vx*dt,nz=p.z+p.vz*dt;if(E.walk({x:nx,z:nz},false)){p.x=nx;p.z=nz}else if(E.walk({x:nx,z:p.z},false))p.x=nx;else if(E.walk({x:p.x,z:nz},false))p.z=nz}
   if(p.jump>0)p.jump-=dt;p.cite=Math.max(0,p.cite-dt);p.safe=E.refugio(p.x,p.z)}

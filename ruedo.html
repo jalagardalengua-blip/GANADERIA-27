@@ -950,9 +950,13 @@ function rigTick(b,dt){const A=RIG.A,Bn=RIG.bones,sp=bullSpeed;
  b.rib.forEach((r,i)=>{r.rotation.x=-1.2-sp*.05+.12*Math.sin(simTime*(6+sp*2)+i);});}
 const _updateBullR=updateBull;
 updateBull=function(dt){_updateBullR(dt);if(bull&&bull.rig)rigTick(bull,dt);};
+/* física del ruedo: nadie atraviesa la barrera y el toro no se monta sobre el torero fuera del embroque */
+function limitesRuedo(){const rb=Math.hypot(B.x,B.z),mb=R-1.3;if(rb>mb){B.x*=mb/rb;B.z*=mb/rb;if(D.phase!=='pass')bullSpeed*=.6;}
+ const rt=Math.hypot(T.x,T.z),mt=R-1;if(rt>mt){T.x*=mt/rt;T.z*=mt/rt;}
+ if(D.phase!=='pass'&&D.phase!=='suprema'){const dx=B.x-T.x,dz=B.z-T.z,d=Math.hypot(dx,dz),m=1.6;if(d<m&&d>1e-4){B.x=T.x+dx/d*m;B.z=T.z+dz/d*m;}}}
 /* rajarse: el toro sin casta se va a tablas al acabar la serie antes de volver a la muleta */
 const _updDirR=updateDirector;
-updateDirector=function(dt){_updDirR(dt);if(!bull||!CUR.b.raja||D.phase!=='turn'||D.after!=='serie'||D.t>2.6||D.si<1)return;
+updateDirector=function(dt){_updDirR(dt);limitesRuedo();if(!bull||!CUR.b.raja||D.phase!=='turn'||D.after!=='serie'||D.t>2.6||D.si<1)return;
  const out=Math.atan2(B.x,B.z),d=angDiff(Byaw,out);Byaw+=clamp(d,-1.6*dt,1.6*dt);bullSpeed=damp(bullSpeed,1.5,3,dt);if(Math.hypot(B.x,B.z)<R-3){B.x+=Math.sin(Byaw)*bullSpeed*dt;B.z+=Math.cos(Byaw)*bullSpeed*dt;}};
 
 /* ---------- puente con Hierro y Divisa ----------
