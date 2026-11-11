@@ -85,3 +85,9 @@ Calendario por semanas al estilo FIFA, barra de gala y pantallas a juego, sonido
 - Finca: las reses ya no atraviesan árboles, abrevaderos, comederos ni muros; ni tú ni el caballo atravesáis a los animales; la separación entre reses ya no las saca del cercado.
 - Corro: el mozo volteado ya no atraviesa fachadas.
 - Plaza en directo: toro y torero no cruzan la barrera y el toro no se monta sobre el torero fuera del embroque.
+
+## Corrida en directo con acabado del juego
+- Sin mando inferior: barra mínima como en el corro (cámara, velocidad, siguiente, vista clásica, salir).
+- Cartel y resultado con la tipografía y paneles del juego; sin grano ni franjas negras.
+- Público con siluetas sentadas y colores sobrios; cámara del callejón por encima de la barrera; pelo cárdeno natural.
+- Más ritmo (citas, paseos y estocada más ágiles) y giros del toro en arco según su velocidad.
