@@ -387,7 +387,7 @@ function buildPlaza(){
  sandMat.onBeforeCompile=sh=>{sh.uniforms.uMacro={value:macroT};sh.vertexShader='varying vec2 vMac;varying vec3 vWp;varying float vRr;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvMac=position.xy/'+span+'+0.5;vRr=length(position.xy);vWp=(modelMatrix*vec4(transformed,1.0)).xyz;');
   sh.fragmentShader='uniform sampler2D uMacro;\nvarying vec2 vMac;varying vec3 vWp;varying float vRr;\n'+sh.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\ndiffuseColor.rgb*=texture2D(uMacro,vMac).rgb*2.0;'+
    '{float dc=distance(cameraPosition,vWp);float gz=max(abs(normalize(vWp-cameraPosition).y),.1);float hw=max(.04,dc*.0012/gz);float k=min(1.0,.04/hw*1.4);'+
-   'float l=smoothstep(hw,hw*.25,abs(vRr-'+(R-7).toFixed(1)+'))+smoothstep(hw,hw*.25,abs(vRr-'+(R-9).toFixed(1)+'));'+
+   'float l=(1.-smoothstep(hw*.25,hw,abs(vRr-'+(R-7).toFixed(1)+')))+(1.-smoothstep(hw*.25,hw,abs(vRr-'+(R-9).toFixed(1)+')));'+
    'float wear=.85+.15*texture2D(uMacro,vMac*1.3).g;diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.80,.75,.66),clamp(l,0.,1.)*.5*k*wear);}');};
  const floor=M(new THREE.CircleGeometry(R+1.8,160),sandMat,false,true);floor.rotation.x=-Math.PI/2;scene.add(floor);
  // rayas de picadores (7 y 9 m desde la barrera)
@@ -482,17 +482,21 @@ function crowdPanuelos(bodies){const n=bodies.count,sel=[];const m=new THREE.Mat
   transformed.z+=sin(uTime*10.+ph*5.+w*3.)*.12*w;transformed.y+=sin(uTime*7.+ph*3.)*.05;transformed.x+=sin(uTime*6.+ph)*.06;vec4 wpP=modelMatrix*instanceMatrix*vec4(0.,1.,0.,1.);transformed*=on*smoothstep(7.,10.,distance(wpP.xyz,cameraPosition));`);};
  const pm=new THREE.InstancedMesh(g,mat,sel.length);sel.forEach((i,k)=>{bodies.getMatrixAt(i,m);pm.setMatrixAt(k,m);});pm.frustumCulled=false;scene.add(pm);}
 /* ---------- polvo ---------- */
-function buildDust(){const N=900;const g=new THREE.BufferGeometry();const pos=new Float32Array(N*3),size=new Float32Array(N),alpha=new Float32Array(N);
- g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('aSize',new THREE.BufferAttribute(size,1));g.setAttribute('aAlpha',new THREE.BufferAttribute(alpha,1));
+function buildDust(){/* polvo con cuadritos orientados a la cámara (no puntos de GPU): en los iPhone los puntos grandes salían como círculos negros */
+ const N=900;const q=new THREE.PlaneGeometry(1,1);const g=new THREE.InstancedBufferGeometry();g.index=q.index;g.setAttribute('position',q.attributes.position);g.setAttribute('uv',q.attributes.uv);g.instanceCount=N;
+ const pos=new Float32Array(N*3),size=new Float32Array(N),alpha=new Float32Array(N);
+ g.setAttribute('iPos',new THREE.InstancedBufferAttribute(pos,3));g.setAttribute('aSize',new THREE.InstancedBufferAttribute(size,1));g.setAttribute('aAlpha',new THREE.InstancedBufferAttribute(alpha,1));
+ g.attributes.position=g.attributes.iPos;   // las banderas de actualización del resto del código siguen valiendo
+ g.setAttribute('qPos',q.attributes.position);
  const mat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,uniforms:{uScale:{value:500},uColor:{value:col('#c49a6c')}},
-  vertexShader:'attribute float aSize;attribute float aAlpha;uniform float uScale;varying float vA;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);float ps=aSize*uScale/-mv.z;gl_PointSize=min(48.,ps);gl_Position=projectionMatrix*mv;vA=aAlpha*smoothstep(1.2,4.,-mv.z)*(1.-smoothstep(26.,48.,ps));}',
-  fragmentShader:'uniform vec3 uColor;varying float vA;void main(){vec2 p=gl_PointCoord-.5;float d2=dot(p,p)*4.;float a=exp(-d2*3.2)*(1.-d2)*vA;if(a<.004)discard;gl_FragColor=vec4(uColor,a);}'});
- const pts=new THREE.Points(g,mat);pts.frustumCulled=false;scene.add(pts);
+  vertexShader:'attribute vec3 qPos;attribute vec3 iPos;attribute float aSize;attribute float aAlpha;uniform float uScale;varying float vA;varying vec2 vUv;void main(){vec4 mv=modelViewMatrix*vec4(iPos,1.);float z=max(-mv.z,.05);float ps=aSize*uScale/z;mv.xy+=qPos.xy*aSize;gl_Position=projectionMatrix*mv;vUv=uv;vA=(aAlpha>0.&&aAlpha<1.01?aAlpha:0.)*smoothstep(1.2,4.,z)*(1.-smoothstep(70.,150.,ps));}',
+  fragmentShader:'uniform vec3 uColor;varying float vA;varying vec2 vUv;void main(){vec2 p=vUv-.5;float d2=min(dot(p,p)*4.,1.);float a=clamp(exp(-d2*3.2)*(1.-d2)*vA,0.,1.);gl_FragColor=vec4(uColor,a);}'});
+ const pts=new THREE.Mesh(g,mat);pts.frustumCulled=false;scene.add(pts);
  return{N,pos,size,alpha,vel:new Float32Array(N*3),life:new Float32Array(N).fill(9),max:new Float32Array(N).fill(1),s0:new Float32Array(N),i:0,g,mat};}
 function emitDust(p,n,str){for(let k=0;k<n;k++){const d=dust,i=d.i;d.i=(d.i+1)%d.N;d.pos[i*3]=p.x+(Math.random()-.5)*.2;d.pos[i*3+1]=.05+Math.random()*.08;d.pos[i*3+2]=p.z+(Math.random()-.5)*.2;
  d.vel[i*3]=(Math.random()-.5)*1.2*str;d.vel[i*3+1]=.3+Math.random()*.6*str;d.vel[i*3+2]=(Math.random()-.5)*1.2*str;d.life[i]=0;d.max[i]=1.6+Math.random()*1.8;d.s0[i]=.15+Math.random()*.2;}}
 function updateDust(dt){const d=dust;for(let i=0;i<d.N;i++){if(d.life[i]>d.max[i]){d.alpha[i]=0;continue;}d.life[i]+=dt;const k=i*3,f=Math.exp(-1.6*dt);d.vel[k]*=f;d.vel[k+2]*=f;d.vel[k+1]=d.vel[k+1]*f+.05*dt;
- d.pos[k]+=d.vel[k]*dt;d.pos[k+1]+=d.vel[k+1]*dt;d.pos[k+2]+=d.vel[k+2]*dt;const t=d.life[i]/d.max[i];d.size[i]=d.s0[i]+t*1.3;d.alpha[i]=.2*Math.pow(1-t,1.6)*smooth(0,.08,t);}
+ d.pos[k]+=d.vel[k]*dt;d.pos[k+1]+=d.vel[k+1]*dt;d.pos[k+2]+=d.vel[k+2]*dt;const t=Math.min(1,d.life[i]/d.max[i]);d.size[i]=d.s0[i]+t*1.3;d.alpha[i]=.2*Math.pow(1-t,1.6)*smooth(0,.08,t);/* t>1 daba NaN y en el iPhone se pintaba un círculo negro */}
  d.g.attributes.position.needsUpdate=d.g.attributes.aSize.needsUpdate=d.g.attributes.aAlpha.needsUpdate=true;}
 
 /* ---------- tela (verlet) ---------- */
@@ -634,7 +638,7 @@ vec3 bRZ(vec3 v,float a){float c=cos(a),s=sin(a);return vec3(v.x*c-v.y*s,v.x*s+v
 vec3 bullDeform(vec3 p,inout vec3 n){
  float wH=smoothstep(.74,1.,p.z)*smoothstep(.62,.82,p.y);
  if(wH>0.){vec3 pv=vec3(.03,1.1,.86);vec3 q=p-pv;q=bRY(q,uFix*wH);n=bRY(n,uFix*wH);q=bRX(q,uHP*wH);n=bRX(n,uHP*wH);q=bRY(q,uHY*wH);n=bRY(n,uHY*wH);p=q+pv;}
- float wT=smoothstep(-.8,-.92,p.z)*(1.-smoothstep(.07,.14,abs(p.x)))*(1.-smoothstep(1.,1.13,p.y));
+ float wT=(1.-smoothstep(-.92,-.8,p.z))*(1.-smoothstep(.07,.14,abs(p.x)))*(1.-smoothstep(1.,1.13,p.y));
  if(wT>0.){vec3 tr=vec3(0.,1.1,-.9);float a=uTail*wT*clamp((1.12-p.y)/.7,0.,1.);n=bRZ(n,a);p=bRZ(p-tr,a)+tr;}
  if(p.y<1.&&wH<.01){bool fr=p.z>0.;float sx=p.x>0.?1.:-1.;
   float aU=fr?(sx>0.?uLegU[0]:uLegU[1]):(sx>0.?uLegU[2]:uLegU[3]);float aK=fr?(sx>0.?uLegK[0]:uLegK[1]):(sx>0.?uLegK[2]:uLegK[3]);
@@ -1138,7 +1142,7 @@ function frame(now){requestAnimationFrame(frame);try{if(last)autoCalidad(Math.mi
  renderer.render(scene,camera);
 
  if(false){const d=gimg.data;for(let i=0;i<d.length;i+=4){const v=Math.random()*255;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}gctx.putImageData(gimg,0,0);}}
-window.__ruedo={D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
+window.__ruedo={D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
 })();
 </script>
 

@@ -59,7 +59,7 @@ function gxHook(){if(!W3.R||W3.R.__gx)return;const R3=W3.R;R3.__gx=1;R3.outputEn
 function gxDome(sc){sc.userData.dome=1;const u={top:{value:new THREE.Color()},hor:{value:new THREE.Color()}};
  const dome=new THREE.Mesh(new THREE.SphereGeometry(400,24,12),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,uniforms:u,
   vertexShader:'varying float h;void main(){h=normalize(position).y;vec4 p=modelViewMatrix*vec4(position,1.);gl_Position=projectionMatrix*p;gl_Position.z=gl_Position.w*.9999;}',
-  fragmentShader:'uniform vec3 top;uniform vec3 hor;varying float h;void main(){vec3 c=mix(hor,top,smoothstep(-.02,.5,h));c=mix(c,hor*1.06,smoothstep(.0,-.2,h));gl_FragColor=vec4(c,1.);}'}));
+  fragmentShader:'uniform vec3 top;uniform vec3 hor;varying float h;void main(){vec3 c=mix(hor,top,smoothstep(-.02,.5,h));c=mix(c,hor*1.06,(1.-smoothstep(-.2,.0,h)));gl_FragColor=vec4(c,1.);}'}));
  dome.userData.dome=1;dome.frustumCulled=false;dome.renderOrder=-10;dome.onBeforeRender=()=>{const bg=sc.background;if(!bg||!bg.isColor)return;u.hor.value.copy(bg).multiplyScalar(1.12);u.top.value.copy(bg).lerp(new THREE.Color(.08,.22,.55),.55)};
  sc.add(dome)}
 const _show3D=show3D;
