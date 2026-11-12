@@ -1,5 +1,10 @@
 # Cambios
 
+## Logos en todas las ganaderías, torero y público
+- Todas las tarjetas de elegir ganadería muestran el logo (hierro sobre los colores de la divisa) en lugar del toro genérico. Victorino Martín lleva su hierro real; el resto lleva de forma provisional sus letras trazadas como un hierro de marcar, hasta tener la imagen de su hierro real.
+- Torero: hombreras con flecos y borlas, camisa blanca y corbatín, oro más rico y cara más fina.
+- Público: figuras sentadas con hombros y rodillas en lugar de cilindros, con el mismo coste para el móvil.
+
 ## Círculos negros en el iPhone, corregidos
 - Causa: en su último fotograma cada partícula de polvo calculaba su transparencia con una potencia de un número negativo (NaN). Los iPhone pintan ese valor como un disco negro opaco; en ordenador no se veía.
 - El polvo ya no envía nunca valores no válidos a la GPU y ahora se dibuja con cuadritos orientados a la cámara en lugar de puntos de GPU, que cada móvil trata a su manera.
