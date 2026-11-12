@@ -1,5 +1,11 @@
 # Cambios
 
+## Pantalla de carga y hierros reales
+- Pantalla de carga profesional con la imagen de cartel: al abrir el juego, al entrar en la finca, la plaza, la tienta o un festejo, y en la corrida en directo. Zoom lento, título, destino, barra de progreso y un consejo.
+- Al tocar un botón que entra en 3D, primero aparece la pantalla de carga y después se monta la escena; los sombreados se precompilan para que el primer movimiento no dé tirones.
+- Logo de cada ganadería: su hierro real en negro sobre los colores de su divisa, en la elección de ganadería y en el emblema del juego. Victorino Martín ya tiene su hierro (A coronada) trazado de la imagen real.
+- Herramienta tools/hierro_svg.py para vectorizar cada hierro a partir de su imagen.
+
 ## Esqueleto del toro, arrastre y calidad de imagen
 - El toro muerto ya no queda patas arriba ni hundido en el albero: la animación de muerte lo tumba de costado sin el giro extra.
 - Arrastre real: las mulillas se enganchan del lado de la puerta y tiran del toro por los pitones con cuerda, sin hacerlo girar ni pasar por debajo de ellas.
