@@ -1,5 +1,12 @@
 # Cambios
 
+## Ganadería de corro: nueva Plaza Mayor para ver tu hierro en directo
+- El pueblo de los bous al carrer se sustituye por una plaza de calidad (js/plazamayor.js): casas con planta baja de sillería de granito, fachadas encaladas o de entramado, balcones de forja con geranios, galerías de madera, soportales con columnas de piedra y terraza, tejados de teja árabe con aleros y chimeneas, y faroles de pared.
+- Texturas generadas con relieve y rugosidad (arena con huellas de pezuñas y pisadas en plaza y calles, enlosado de granito, sillería, teja, madera y pintura); de noche las ventanas y los faroles se encienden.
+- Cadafales de tubo pintado con jaula, tablado, barandilla, rótulos de peñas y toldos; escaleras de acero azules hasta los tablados; talanqueras de tubo en las calles; refugio central amarillo con torre y farol; fuente de granito con caños y talanquera.
+- Público: los personajes reales del juego en los tablados y bajo los soportales (animan cuando la res embiste) y el público instanciado en balcones, jaulas y barreras.
+- Solo cambia el escenario de los festejos de la ganadería de corro: las zonas de juego, la res, los recortadores, las cámaras y todos los festejos (vaquillas, embolat, capea, encierro, corda, bous a la mar y cerril) funcionan igual. El concurso de recortadores sigue en la plaza de toros.
+
 ## Logos en todas las ganaderías, torero y público
 - Todas las tarjetas de elegir ganadería muestran el logo (hierro sobre los colores de la divisa) en lugar del toro genérico. Victorino Martín lleva su hierro real; el resto lleva de forma provisional sus letras trazadas como un hierro de marcar, hasta tener la imagen de su hierro real.
 - Torero: hombreras con flecos y borlas, camisa blanca y corbatín, oro más rico y cara más fina.
