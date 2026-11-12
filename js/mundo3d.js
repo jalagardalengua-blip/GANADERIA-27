@@ -1114,9 +1114,9 @@ function actPeticion(t,who,mat){const fr=t.trof>=2?.72:t.trof===1?.48:(t.score||
    if(fr>0)Z.cam={p:[0,2.4,-PR+14],l:[0,8,PR]}}}}
 function actArrastre(t){const vu=t.res==='vuelta';let p0;const D=vu?16:10;
  return {d:D,shots:['wide','low'],cap:{vuelta:'¡Pañuelo azul! La presidencia concede la vuelta al ruedo al toro: las mulillas lo pasean por el anillo entre una ovación.',ovacion:'Ovación cerrada al toro en el arrastre.',silencio:'Silencio en el arrastre.',pitos:'Pitos para el toro en el arrastre.'}[t.res]||'Arrastre.',
-  init(Z){p0={x:Z.b.x,z:Z.b.z};Z.team.vis=true;Z.team.x=DOOR.x;Z.team.z=DOOR.z;const T=TS(Z);T.vis=false;Z.s2.vis=false;Z.pe.forEach(p=>p.vis=false);if(vu){Z.palco='#3a78ff';applause(D,.5)}else if(t.res==='ovacion')applause(5,.4);else if(t.res==='pitos')whistles(1);setPanu(vu?.5:0)},
+  init(Z){p0={x:Z.b.x,z:Z.b.z};Z.team.vis=true;Z.hor.vis=false;Z.team.x=DOOR.x;Z.team.z=DOOR.z;const T=TS(Z);T.vis=false;Z.s2.vis=false;Z.pe.forEach(p=>p.vis=false);if(vu){Z.palco='#3a78ff';applause(D,.5)}else if(t.res==='ovacion')applause(5,.4);else if(t.res==='pitos')whistles(1);setPanu(vu?.5:0)},
   f(Z,u){const tm=Z.team,tt=u*D,b=Z.b;
-   const ap={x:p0.x+Math.sin(b.yaw)*3.6,z:p0.z+Math.cos(b.yaw)*3.6};
+   const dg=vu?Math.atan2(p0.x,p0.z)+Math.PI/2:Math.atan2(DOOR.x*1.08-p0.x,DOOR.z*1.08-p0.z),ap={x:p0.x+Math.sin(dg)*3.6,z:p0.z+Math.cos(dg)*3.6};   // las mulillas se enganchan del lado de la puerta: tiran sin dar la vuelta al toro
    if(tt<3.6){const v=ease(tt/3.6);const nx=lerp(DOOR.x,ap.x,v),nz=lerp(DOOR.z,ap.z,v);tm.yaw=Math.atan2(nx-tm.x,nz-tm.z)||tm.yaw;tm.x=nx;tm.z=nz;tm.sp=.8}
    else if(tt<4.6){tm.sp=0;tm.yaw+=angD(tm.yaw,Math.atan2(ap.x-p0.x,ap.z-p0.z))*.1}
    else{b.drag=true;const dd=tt-4.6;let nx,nz;
@@ -1144,8 +1144,9 @@ function plazaTick(dt){
  for(const T of [Z.t,Z.s2]){T.sp=0;if(T.arm!=='up'&&T.arm!=='perfil')T.arm=null}
  Z.pe.forEach(p=>p.sp=0);Z.ban.sp=0;Z.cab.sp=0;Z.team.sp=0;
  a.f(Z,u,dt);
- if(b.drag&&Z.team.vis){const fx=Math.sin(Z.team.yaw),fz=Math.cos(Z.team.yaw);b.x=Z.team.x-fx*3.2;b.z=Z.team.z-fz*3.2;b.yaw=Z.team.yaw+Math.PI;b.fall=1;b.sword=0}
- else{const mv=Math.hypot(b.x-ox,b.z-oz);
+ if(b.drag&&Z.team.vis){/* arrastrado con cuerda: el toro va detrás de las mulillas a distancia fija, por los pitones, sin girar alrededor de ellas */let dx=b.x-Z.team.x,dz=b.z-Z.team.z,dd=Math.hypot(dx,dz);if(!b.dragOn||dd<.01){b.dragOn=1;dx=-Math.sin(Z.team.yaw);dz=-Math.cos(Z.team.yaw);dd=1}
+  const L=3.2;b.x=Z.team.x+dx/dd*L;b.z=Z.team.z+dz/dd*L;b.yaw+=angD(b.yaw,Math.atan2(Z.team.x-b.x,Z.team.z-b.z))*Math.min(1,dt*5);b.fall=1;b.sword=0}
+ else{b.dragOn=0;const mv=Math.hypot(b.x-ox,b.z-oz);
   if(b.yawOverride!=null)b.yaw+=angD(b.yaw,b.yawOverride)*Math.min(1,dt*12);else if(mv>.004&&!b.fall)b.yaw+=angD(b.yaw,Math.atan2(b.x-ox,b.z-oz))*Math.min(1,dt*10);
   const rb=Math.hypot(b.x,b.z);if(rb>PR-1){b.x*=(PR-1)/rb;b.z*=(PR-1)/rb}}
  const BM=C.bull;BM.root.visible=b.vis;BM.root.position.set(b.x,.3*b.fall,b.z);BM.root.rotation.set(0,b.yaw,-b.fall*1.45);

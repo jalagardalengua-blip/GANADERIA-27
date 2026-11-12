@@ -141,6 +141,6 @@ const _makeBullM=makeBull;
 makeBull=function(spec){const KD=TOR_KIND[(spec&&spec.kind)||'toro'];
  if(KD&&TOR.bull&&TOR[KD.m]&&!(spec&&spec.proc)){try{return makeBullGL(spec)}catch(e){console.warn('toro GL',e)}}return _makeBullM(spec)};
 const _animBullM=animBull;
-animBull=function(B,dt,o){if(B&&B.gl)return animBullGL(B,dt,o||{});return _animBullM(B,dt,o)};
+animBull=function(B,dt,o){if(B&&B.gl){/* la animación de muerte ya tumba al toro: sin el giro extra del cuerpo, que lo dejaba patas arriba y hundido */if(o&&(o.fall>0||o.kneel>0)){B.root.rotation.z=0;B.root.rotation.x=0;B.root.position.y=0}return animBullGL(B,dt,o||{})}return _animBullM(B,dt,o)};
 
 try{if(document.readyState!=='loading')torLoad();else document.addEventListener('DOMContentLoaded',torLoad)}catch(e){TOR.err=e}
