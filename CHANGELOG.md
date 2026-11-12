@@ -1,5 +1,12 @@
 # Cambios
 
+## Corrida en directo: tendido, toro y fallos de imagen en móvil
+- Sin "círculos": las rayas de picadores se pintan en el propio albero con un grosor que se adapta a la distancia y al ángulo; ya no parpadean ni se cortan en el móvil.
+- Polvo más suave: sin discos visibles cerca de la cámara.
+- Cámara del tendido como la de televisión: más baja y cercana, sigue la acción con panorámica suave y zona muerta, zoom solo en cambios claros y sin ver sus propios asientos en vertical. El callejón también se suaviza.
+- Toro: da pasos al revolverse en vez de girar como una estatua, y se inclina al arrancar y al frenar.
+- Test nuevo: tendido.js (capturas en apaisado y vertical y suavidad de la cámara).
+
 ## Pantalla de carga y hierros reales
 - Pantalla de carga profesional con la imagen de cartel: al abrir el juego, al entrar en la finca, la plaza, la tienta o un festejo, y en la corrida en directo. Zoom lento, título, destino, barra de progreso y un consejo.
 - Al tocar un botón que entra en 3D, primero aparece la pantalla de carga y después se monta la escena; los sombreados se precompilan para que el primer movimiento no dé tirones.
