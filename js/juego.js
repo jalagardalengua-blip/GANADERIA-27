@@ -564,7 +564,7 @@ function startScreen(){
  <div class="hero2"><div class="img" style="background-image:url(img/hero.jpg)"></div><div class="txt"><div class="k">Modo carrera · ganadero de bravo</div><h1>Hierro y Divisa</h1><div class="tag">Tradición<i>·</i>Pasión<i>·</i>Toros</div></div></div>
  ${sv&&sv.g?`<button class="btn oro adv" onclick="continuar()">Continuar · ${esc(sv.g.name)} · ${MESES[sv.month]} ${sv.year}</button>`:''}
  <section class="sect"><header><h2>Ganaderías históricas</h2></header>
-  <div class="list">${GANADERIAS.map((g,i)=>`<button class="gan" onclick="startReal(${i})">${emblem({hierro:{l:g.name[0]}},44)}
+  <div class="list">${GANADERIAS.map((g,i)=>`<button class="gan" onclick="startReal(${i})">${emblem(Object.assign({hierro:{l:g.name[0]}},g),44)}
    <span style="min-width:0"><b>${esc(g.name)}</b><br><small class="muted">Encaste ${g.enc} · prestigio ${g.pres}</small><div class="pres"><i style="width:${g.pres}%"></i></div></span>${divisa(g.div)}</button>`).join('')}</div>
  </section>
  <section class="sect card goldline"><header><h2>Funda tu ganadería</h2></header>

@@ -47,6 +47,17 @@ body.cine .bar{height:0}
 .ptop .hint{font-size:12px;color:var(--muted);letter-spacing:.04em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #tog{font:600 12px/1 var(--ui);letter-spacing:.14em;text-transform:uppercase;background:none;border:1px solid var(--line);color:var(--oro);padding:6px 10px;cursor:pointer}
 #loading{position:absolute;inset:0;background:#000;z-index:5;display:grid;place-content:center;opacity:1;transition:opacity .7s ease;pointer-events:none;text-align:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#loading{display:block!important;padding:0!important}
+#loading .ldImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;animation:ldZ 14s ease-out forwards}
+@keyframes ldZ{to{transform:scale(1.07)}}
+#loading .ldVig{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.5),transparent 18%,transparent 46%,rgba(0,0,0,.8) 72%,#000)}
+#loading .ldInfo{position:absolute;left:0;right:0;bottom:max(26px,env(safe-area-inset-bottom,0px));padding:0 22px;text-align:center}
+#loading p{font-family:'Cinzel',serif!important;font-style:normal!important;font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:clamp(24px,7vw,40px)!important;background:linear-gradient(180deg,#fbe7b0,#e6bb55 55%,#b7862e);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+#loading .ldBar{position:relative;height:3px;max-width:320px;margin:14px auto 0;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden}
+#loading .ldBar i{position:absolute;inset:0;width:40%;background:linear-gradient(90deg,transparent,#f3d68b,transparent);animation:ldB 1.2s linear infinite}
+@keyframes ldB{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+@media (orientation:landscape) and (min-aspect-ratio:5/4){#loading .ldImg{width:62%;-webkit-mask-image:linear-gradient(90deg,#000 72%,transparent);mask-image:linear-gradient(90deg,#000 72%,transparent)}
+ #loading .ldVig{background:linear-gradient(90deg,transparent 40%,rgba(0,0,0,.7) 62%,#000)}#loading .ldInfo{left:auto;right:0;top:0;bottom:0;width:min(46%,460px);display:flex;flex-direction:column;justify-content:center;text-align:left}#loading .ldBar{margin-left:0;margin-right:0;width:100%}}
 #loading.off{opacity:0}
 #loading p{font-family:var(--display);font-style:italic;font-size:28px;margin:0}
 #loading small{display:block;margin-top:8px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--oro)}
@@ -117,7 +128,7 @@ body.cine .bar{height:0}
   <div id="ole">¡Olé!</div>
   <div id="res"><div class="resC"><span class="eyebrow" id="rEy"></span><h2 id="rT"></h2><div class="panu" id="rPa"></div><div class="trof" id="rTr"></div><p id="rD"></p><p class="muted" id="rM"></p><div class="acts"><button class="btnR oro" id="rSig">Siguiente toro</button></div></div></div>
   <div class="bar2" id="panel"><button class="b2" id="bCam">Cámara: realizador</button><button class="b2" id="bVel">×1</button><button class="b2" id="bSig">Siguiente toro</button><button class="b2" id="bClas">Vista clásica</button><button class="b2" id="bSal">Salir</button></div></div>
-  <div id="loading"><p>Hierro y Divisa</p><small>Preparando la plaza…</small></div>
+  <div id="loading"><img class="ldImg" src="img/carga.jpg" alt=""><div class="ldVig"></div><div class="ldInfo"><p>Hierro y Divisa</p><small>Preparando la plaza…</small><div class="ldBar"><i></i></div></div></div>
 </div>
 
 <script src="js/libs/three.min.js"></script>
