@@ -460,8 +460,10 @@ function buildCrowd(){lMsg.textContent='Llenando los tendidos';const r=rng(9);
   for(let k=0;k<n;k++){const a=off+k/n*TAU;const sec=frac((a-SUN_AZ)/(TAU/10));if(sec<.02||sec>.98)continue;if(r()<(i>15?.12:.07))continue;seats.push([a,rr,ys,i]);}}
  const N=seats.length;
  const mergeG=gs=>{let n=0;gs=gs.map(g=>{g=g.index?g.toNonIndexed():g;n+=g.attributes.position.count;return g;});const P=new Float32Array(n*3),N=new Float32Array(n*3);let o=0;for(const g of gs){P.set(g.attributes.position.array,o*3);N.set(g.attributes.normal.array,o*3);o+=g.attributes.position.count;}const r=new THREE.BufferGeometry();r.setAttribute('position',new THREE.BufferAttribute(P,3));r.setAttribute('normal',new THREE.BufferAttribute(N,3));return r;};
- const tor=new THREE.CylinderGeometry(.15,.22,.52,6,1);tor.scale(1,1,.66);tor.translate(0,.26,0);
- const bodyG=mergeG([tor]);const headG=new THREE.SphereGeometry(.105,6,4);headG.scale(.92,1.1,.98);headG.translate(0,.66,0);
+ /* persona sentada: tronco con hombros, brazos a los lados y rodillas; pocas caras para que el móvil aguante miles */
+ const tor=new THREE.LatheGeometry([new THREE.Vector2(.17,0),new THREE.Vector2(.165,.24),new THREE.Vector2(.205,.43),new THREE.Vector2(.06,.56)],6);tor.scale(1,1,.6);
+ const knee=new THREE.BoxGeometry(.3,.12,.3);knee.translate(0,.06,.15);
+ const bodyG=mergeG([tor,knee]);const headG=new THREE.SphereGeometry(.105,6,4);headG.scale(.92,1.1,.98);headG.translate(0,.66,0);
  const bodies=new THREE.InstancedMesh(bodyG,crowdMat(),N),heads=new THREE.InstancedMesh(headG,crowdMat(),N);
  const pal=['#ece8df','#e4ded2','#d3cab8','#f0ede6','#26324a','#1d2333','#7f96b2','#a9b8c8','#5b5f66','#2a2a2c','#6d5747','#b8a684','#8b3a35','#c4b28a','#46553f','#d9d4ca','#9aa6b4','#3a3f4a'];
  const skins=['#e0b898','#c99a78','#b07f5c','#8a5f44','#f0cfb4','#2a1d16','#3b2a20'];
@@ -533,7 +535,7 @@ class Cloth{constructor(nx,ny,w,h,mat){this.nx=nx;this.ny=ny;this.sx=w/(nx-1);th
 function buildTorero(spec){
  const skin=std({color:spec.skin,roughness:.55,side:THREE.DoubleSide});const hair=std({color:spec.hair,roughness:.7});
  const jacket=suitCanvas(spec,'jacket'),sleeve=suitCanvas(spec,'sleeve'),leg=suitCanvas(spec,'leg'),pelv=suitCanvas(spec,'pelvis');
- const gold=std({color:spec.orn==='gold'?'#d9b25a':spec.orn==='silver'?'#d6dbe0':'#1a1a1e',metalness:spec.orn==='jet'?.4:1,roughness:spec.orn==='jet'?.25:.32});
+ const gold=std({color:spec.orn==='gold'?'#d6a640':spec.orn==='silver'?'#e2e6ea':'#1a1a1e',metalness:spec.orn==='jet'?.4:1,roughness:spec.orn==='jet'?.25:.26,envMapIntensity:1.5});
  const faja=std({color:spec.sash,roughness:.55,side:THREE.DoubleSide});const media=std({color:'#e7aeb0',roughness:.48,side:THREE.DoubleSide});const zap=std({color:'#0b0b0b',roughness:.32});
  const astr=gen(256,256,(u,v,x,y,o)=>{const n=fbm(u,v,32,3);o.r=o.g=o.b=0;o.h=clamp(n*300-40,0,255);},true).height;
  const mont=new THREE.MeshStandardMaterial({color:col('#0c0b0b'),roughness:.92,bumpMap:tex(astr,3,3,false),bumpScale:.01});
@@ -545,13 +547,21 @@ function buildTorero(spec){
  const tr=prof([[0,.15],[.25,.152],[.55,.172],[.75,.172],[.88,.155],[.95,.12],[1,.06]]);
  const torso=M(paramGeo((u,v,t)=>{const th=v*TAU,rr=tr(u);t.set(Math.cos(th)*rr,u*.5,Math.sin(th)*rr*(.66+.06*gauss(u,.6,.2)));},24,28),jacket);spine.add(torso);
  const shL=new THREE.Group(),shR=new THREE.Group();shL.position.set(.185,.43,0);shR.position.set(-.185,.43,0);spine.add(shL,shR);
- for(const [sh,sg] of [[shL,1],[shR,-1]]){const hb=M(new THREE.SphereGeometry(1,14,10),gold);hb.scale.set(.085,.045,.08);hb.position.set(sg*.01,.035,0);hb.rotation.z=sg*-.35;sh.add(hb);
-  for(let k=0;k<9;k++){const a=(k/8-.5)*2.4;const cl=M(new THREE.CylinderGeometry(.006,.008,.065,5),gold,true,false);cl.position.set(sg*(.06+Math.cos(a)*.0),.0-.02,Math.sin(a)*.075);cl.position.x=sg*(.07+.01*Math.cos(a));sh.add(cl);}}
+ const flecoG=new THREE.CylinderGeometry(.007,.011,.085,6),borla=new THREE.SphereGeometry(.013,8,6);
+ for(const [sh,sg] of [[shL,1],[shR,-1]]){const hb=M(new THREE.SphereGeometry(1,18,12),gold);hb.scale.set(.082,.04,.08);hb.position.set(sg*.008,.035,0);hb.rotation.z=sg*-.38;sh.add(hb);
+  const hb2=M(new THREE.SphereGeometry(1,14,10),gold);hb2.scale.set(.045,.026,.045);hb2.position.set(sg*.022,.058,0);sh.add(hb2);   // hombrera abultada
+  for(let k=0;k<13;k++){const a=(k/12-.5)*2.7;const cl=M(flecoG,gold,true,false);cl.position.set(sg*(.074+.01*Math.cos(a)),-.03,Math.sin(a)*.075);cl.rotation.z=sg*.18;sh.add(cl);
+   const bo=M(borla,gold,true,false);bo.position.set(sg*(.08+.01*Math.cos(a)),-.078,Math.sin(a)*.077);sh.add(bo);}}
+ // camisa blanca, corbatín y chaleco asomando por la chaquetilla abierta
+ const camisa=std({color:'#f4f1ea',roughness:.6,side:THREE.DoubleSide}),corb=std({color:'#0e0e10',roughness:.4});
+ const pech=M(new THREE.PlaneGeometry(.075,.19),camisa);pech.position.set(0,.37,.118);pech.rotation.x=-.2;spine.add(pech);
+ const ct=M(new THREE.BoxGeometry(.012,.17,.006),corb);ct.position.set(0,.36,.125);ct.rotation.x=-.2;spine.add(ct);
+ const cue=M(new THREE.CylinderGeometry(.056,.06,.04,16,1,true),camisa);cue.position.y=.505;spine.add(cue);
  const neck=new THREE.Group();neck.position.y=.49;neck.rotation.order='YXZ';spine.add(neck);neck.add(M(limbGeo(.1,()=>.05,null,6,12,true,.1),skin));
  const head=new THREE.Group();head.position.y=.07;head.rotation.order='YXZ';neck.add(head);
  const hm=M(new THREE.SphereGeometry(1,28,20),skin);hm.scale.set(.09,.116,.103);hm.position.set(0,.1,.01);head.add(hm);
  const jaw=M(new THREE.SphereGeometry(1,16,12),skin);jaw.scale.set(.068,.05,.075);jaw.position.set(0,.036,.035);head.add(jaw);
- const nose=M(new THREE.SphereGeometry(1,10,8),skin);nose.scale.set(.016,.03,.024);nose.position.set(0,.088,.108);head.add(nose);
+ const nose=M(new THREE.SphereGeometry(1,10,8),skin);nose.scale.set(.011,.024,.016);nose.position.set(0,.09,.104);head.add(nose);
  for(const s of [1,-1]){const ear=M(new THREE.SphereGeometry(1,8,8),skin);ear.scale.set(.014,.028,.02);ear.position.set(s*.09,.095,0);head.add(ear);
   const eye=M(new THREE.SphereGeometry(.011,8,8),std({color:'#140d0a',roughness:.15}));eye.position.set(s*.032,.112,.092);head.add(eye);
   const brow=M(new THREE.BoxGeometry(.032,.007,.012),hair);brow.position.set(s*.033,.131,.096);brow.rotation.z=s*-.12;head.add(brow);}
@@ -1142,7 +1152,7 @@ function frame(now){requestAnimationFrame(frame);try{if(last)autoCalidad(Math.mi
  renderer.render(scene,camera);
 
  if(false){const d=gimg.data;for(let i=0;i<d.length;i+=4){const v=Math.random()*255;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}gctx.putImageData(gimg,0,0);}}
-window.__ruedo={D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
+window.__ruedo={D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},get tor(){return torero;},render:(c)=>renderer.render(scene,c),get canvas(){return renderer.domElement;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
 })();
 </script>
 
