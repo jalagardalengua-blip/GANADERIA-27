@@ -1,5 +1,13 @@
 # Cambios
 
+## Esqueleto del toro, arrastre y calidad de imagen
+- El toro muerto ya no queda patas arriba ni hundido en el albero: la animación de muerte lo tumba de costado sin el giro extra.
+- Arrastre real: las mulillas se enganchan del lado de la puerta y tiran del toro por los pitones con cuerda, sin hacerlo girar ni pasar por debajo de ellas.
+- Mulillas con el caballo animado, collera con cascabeles y madroños de colores.
+- Corrida en directo: la cabeza del toro ya no da bandazos de un lado a otro cuando el torero queda a su espalda; el giro del cuello es más suave y contenido.
+- Calidad de imagen: texturas nítidas en ángulos rasantes y resolución que sube sola hasta 2x si el móvil va sobrado (y baja si se resiente).
+- Tests nuevos: arrastre y esqueleto del toro.
+
 ## Cogidas en la corrida en directo
 - Cuando el juego decide que hay cogida, en la plaza realista el toro prende al torero en mitad de un pase, lo voltea en el aire y lo deja en el albero, con polvo, aviso "¡Cogida!", vibración en el móvil y cambio de cámara.
 - Cogida leve: el toro se aleja, el matador se levanta y sigue la faena.

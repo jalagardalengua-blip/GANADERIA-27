@@ -1,0 +1,18 @@
+// QA: esqueleto del toro en la corrida en directo: la cabeza nunca se retuerce, no gira bruscamente ni se mete bajo el albero
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
+const p=await b.newPage({viewport:{width:640,height:360}});const errs=[];p.on('pageerror',e=>errs.push('P '+e.message));
+await p.goto('http://localhost:8765/index.html');await p.waitForTimeout(1500);
+await p.evaluate(()=>{localStorage.clear();startReal(1);const o={id:9504,plaza:'Las Ventas (Madrid)',feria:'San Isidro',cat:1,tipo:'corrida',abs:absNow(),n:1,precio:12000,st:'aceptada'};const L=campo().filter(a=>a.sex==='M'&&ageY(a)>=3);o.toros=L.slice(0,1).map(a=>a.id);S.offers.push(o);const r=celebrar(o);r.toros[0].res='oreja';r.toros[0].trof=1;enterPlaza(r.id)});
+const fr=()=>p.frames().find(f=>/ruedo\.html/.test(f.url()));
+for(let i=0;i<120&&!(fr()&&await fr().evaluate(()=>window.__ruedo&&__ruedo.rig&&document.getElementById('loading').classList.contains('off')).catch(()=>false));i++)await p.waitForTimeout(1000);
+// muestreo dentro de la página en cada fotograma
+await fr().evaluate(()=>{__ruedo.ui.speed=4;const R=__ruedo,Bn=R.rig.bones,THREE=window.THREE;const st={n:0,maxRel:0,maxJump:0,minHead:9,phases:{},worst:null};window.__esq=st;
+ const qB=new THREE.Quaternion(),qH=new THREE.Quaternion(),f=new THREE.Vector3(),hf=new THREE.Vector3(),hp=new THREE.Vector3();let last=null;
+ (function tick(){try{const body=Bn.Torso||Bn.Body,head=Bn.Head;if(body&&head&&R.bull&&!R.bull.dead){body.getWorldQuaternion(qB);head.getWorldQuaternion(qH);
+  const mz=Bn.Head.getWorldPosition(new THREE.Vector3()),hh=(Bn.Neck1||Bn.Torso3).getWorldPosition(new THREE.Vector3());const t0=(Bn.Body||Bn.Torso).getWorldPosition(new THREE.Vector3()),t3=(Bn.Torso3||Bn.Torso2).getWorldPosition(new THREE.Vector3());let ang=Math.atan2(mz.x-hh.x,mz.z-hh.z)-Math.atan2(t3.x-t0.x,t3.z-t0.z);ang=Math.atan2(Math.sin(ang),Math.cos(ang));const sgn=ang;ang=Math.abs(ang);if(Math.abs(sgn)>.3){const s=Math.sign(sgn);if(st.ls&&st.ls!==s&&R.t-st.lt<1.5)st.swings=(st.swings||0)+1;st.ls=s;st.lt=R.t;}const qR=ang;head.getWorldPosition(hp);st.n++;st.minHead=Math.min(st.minHead,hp.y);
+  if(last!=null){const jj=Math.abs(qR-last);if(jj>st.maxJump){st.maxJump=jj;st.worst={ph:R.D.phase,ang,t:R.t}}}last=qR;
+  st.maxRel=Math.max(st.maxRel,ang);(st.hist=st.hist||[]).push(+ang.toFixed(2));if(ang>1.1&&(st.shots=st.shots||[]).length<4)st.shots.push(R.shot());if(ang>.9&&(st.big=st.big||[]).length<6){const A=R.rig.A,w={};for(const k in A){const x=A[k].getEffectiveWeight();if(x>.01)w[k]=+x.toFixed(2)}st.big.push({ang:+ang.toFixed(2),ph:R.D.phase,sP:+(R.bull.sP||0).toFixed(2),sY:+(R.bull.sY||0).toFixed(2),pitch:+(R.bull.pitch||0).toFixed(2),w,spin:R.D.spinA,after:R.D.after,emb:R.D.embroque})}if(st.hist.length>400)st.hist.shift();st.phases[R.D.phase]=(st.phases[R.D.phase]||0)+1}}catch(e){st.err=e.message}requestAnimationFrame(tick)})()});
+for(let i=0;i<40;i++){await p.waitForTimeout(3000);const s=await fr().evaluate(()=>({ph:__ruedo.D.phase,t:__ruedo.t}));if(s.ph==='fin')break}
+const st=await fr().evaluate(()=>window.__esq);delete st.hist;(st.shots||[]).forEach((u,i)=>require('fs').writeFileSync('/tmp/esq-'+i+'.jpg',Buffer.from(u.split(',')[1],'base64')));delete st.shots;delete st.big;console.log(JSON.stringify(st));
+const ok=st.n>50&&st.maxRel<1.25&&!(st.swings>1)&&st.minHead>.25&&!st.err;
+console.log(errs.length?"ERRORES "+JSON.stringify(errs):ok?"ESQUELETO OK":"ESQUELETO MAL");await b.close()})();
