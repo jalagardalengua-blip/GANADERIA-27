@@ -1,5 +1,11 @@
 # Cambios
 
+## Círculos negros en el iPhone, corregidos
+- Causa: en su último fotograma cada partícula de polvo calculaba su transparencia con una potencia de un número negativo (NaN). Los iPhone pintan ese valor como un disco negro opaco; en ordenador no se veía.
+- El polvo ya no envía nunca valores no válidos a la GPU y ahora se dibuja con cuadritos orientados a la cámara en lugar de puntos de GPU, que cada móvil trata a su manera.
+- Corregidos cuatro sombreados con bordes de smoothstep invertidos (comportamiento indefinido en GPU de Apple).
+- Test nuevo: polvo.js (cero valores no válidos durante la faena).
+
 ## Corrida en directo: tendido, toro y fallos de imagen en móvil
 - Sin "círculos": las rayas de picadores se pintan en el propio albero con un grosor que se adapta a la distancia y al ángulo; ya no parpadean ni se cortan en el móvil.
 - Polvo más suave: sin discos visibles cerca de la cámara.
