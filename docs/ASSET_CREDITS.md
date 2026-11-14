@@ -22,3 +22,8 @@
 - `ruedo.html`: plaza realista propia (Ruedo de Valdeoro) para ver en directo las corridas de tu hierro. Albero, tendidos, torero de luces, capote y muleta con tela simulada, cámara de realizador.
 - Toro: `modelos/toro-ruedo.glb` (malla) y `modelos/toro-tripo.glb` (con esqueleto y animaciones), ambos del toro creado por el propietario con Tripo3D; pelo de cada res sobre su textura.
 - Libs: OrbitControls y Sky de three.js r128 (MIT).
+
+## Ganadería de corro: objetos de la Plaza Mayor
+- `modelos/corro/*.glb`: modelos fotoescaneados de **Poly Haven** (polyhaven.com), licencia **CC0 1.0**: `plastic_monobloc_chair_01` → `silla-plastico`, `gallinera_chair` → `silla-gallinera`, `outdoor_table_chair_set_01` → `mesa-terraza`, `painted_wooden_bench` → `banco`, `planter_box_02` → `jardinera`, `wine_barrel_01` → `barrica`, `wooden_crate_01` → `caja-madera`.
+- Modificación: mallas simplificadas con meshoptimizer (600–5.800 triángulos), texturas reducidas a 512 px en JPEG y mallas unidas por material (glTF-Transform). Se dibujan con instancias en `js/corro-props.js`.
+- Plaza, casas, cadafales, refugio, fuente, pilón y soga: generados por código (`js/plazamayor.js`, `js/corro-fisicas.js`).

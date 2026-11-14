@@ -177,7 +177,7 @@ function calleNext(){const C=S.corro;if(CL.res){CL.ev.luc[CL.res.a.id]=clResLuc(
  const a=vivos[CL.i],t=cTipo(a),emb=CL.o.tipo==='embolado';
  const b=makeBull({pelo:a.pelo,kind:t==='toro'||a.sex==='M'?(t==='becerro'?'becerro':'toro'):(t==='becerro'?'becerro':'vaca'),m:cMorf(a)});CL.add(b.root);
  const E=CL.env.cajon;const res={a,b,x:E.x,z:E.z,yaw:Math.atan2(E.ox-E.x,E.oz-E.z),v:0,mode:'sale',t:0,tt:0,tgt:null,st:{emb:0,rem:0,pers:0,par:0,qui:0,dist:0},dur:emb?85:t==='toro'?80:t==='becerro'?55:70,fire:null,ring:0};
- if(emb){res.fire=embolar(b)}CL.res=res;CL.cab.forEach(c=>c.b.root.visible=false);
+ if(emb&&typeof embStart!=='function'){res.fire=embolar(b)}CL.res=res;CL.cab.forEach(c=>c.b.root.visible=false);
  if(CL.door)CL.door.position.y=4.2;
  $('#h3toro').textContent=`${t==='becerro'?'Becerr'+(a.sex==='H'?'a':'o'):TIPOTXT[t]} · ${a.name}${a.num!=null?' nº '+a.num:''} · ${a.pelo} · ${C.name}`;
  $('#h3cap').textContent=emb?'Sale el toro embolado. Las bolas arden: respeta la distancia y busca los cadafales.':t==='becerro'?'Sale el becerro: es su primera prueba. Fíjate en cómo embiste.':CL.plaza?`Sale ${a.name}. Concurso de anillas: los recortadores buscan ponerle anillas en los pitones.`:`Se abre el cajón y sale ${a.name}, de ${S.corro.name}.`;
@@ -221,9 +221,9 @@ function calleTick(dt){if(!CL)return;CL.t+=dt;const E=CL.env,r=CL.res;
  if(!CL.spect&&me.toss<=0&&me.dodge<=0){const L=Math.min(1,Math.hypot(jx,jy));if(L>.08){const fx=-Math.sin(W3.yaw),fz=-Math.cos(W3.yaw);const mx=fx*jy-fz*jx,mz=fz*jy+fx*jx,ml=Math.hypot(mx,mz)||1;const v=(W3.run?6.9:3.4)*L;me.vx=mx/ml*v;me.vz=mz/ml*v;me.yaw+=angD(me.yaw,Math.atan2(mx,mz))*Math.min(1,dt*12)}else{me.vx*=.8;me.vz*=.8}}
  else if(CL.spect){me.vx=me.vz=0}
  for(const p of CL.ppl){if(p!==me&&p.toss<=0&&p.dodge<=0)npcTick(p,dt);
-  if(p.toss>0){p.toss-=dt;const ph=2.2-p.toss;if(ph<.7){const nx=p.x+p.tv.x*dt,nz=p.z+p.tv.z*dt;if(E.walk({x:nx,z:nz},false)){p.x=nx;p.z=nz}else{p.tv.x*=-.3;p.tv.z*=-.3}}if(p.toss<=0){p.m.root.rotation.x=0}}
-  else if(p.dodge>0){p.dodge-=dt;p.x+=p.dx*dt*2;p.z+=p.dz*dt*2}
-  else{const nx=p.x+p.vx*dt,nz=p.z+p.vz*dt;if(E.walk({x:nx,z:nz},false)){p.x=nx;p.z=nz}else if(E.walk({x:nx,z:p.z},false))p.x=nx;else if(E.walk({x:p.x,z:nz},false))p.z=nz}
+  if(p.toss>0){p.toss-=dt;const ph=2.2-p.toss;if(ph<.7){const nx=p.x+p.tv.x*dt,nz=p.z+p.tv.z*dt;if(clFree(E,nx,nz,.28,false)){p.x=nx;p.z=nz}else{p.tv.x*=-.3;p.tv.z*=-.3}}if(p.toss<=0){p.m.root.rotation.x=0}}
+  else if(p.dodge>0){p.dodge-=dt;const nx=p.x+p.dx*dt*2,nz=p.z+p.dz*dt*2;if(clFree(E,nx,nz,.28,false)){p.x=nx;p.z=nz}else if(clFree(E,nx,p.z,.28,false))p.x=nx;else if(clFree(E,p.x,nz,.28,false))p.z=nz}
+  else{const nx=p.x+p.vx*dt,nz=p.z+p.vz*dt;if(clFree(E,nx,nz,.28,false)){p.x=nx;p.z=nz}else if(clFree(E,nx,p.z,.28,false))p.x=nx;else if(clFree(E,p.x,nz,.28,false))p.z=nz;else clUnstickP(E,p)}
   if(p.jump>0)p.jump-=dt;p.cite=Math.max(0,p.cite-dt);p.safe=E.refugio(p.x,p.z)}
  if(r)resTick(r,dt);
  for(const p of CL.ppl){const m=p.m,sp=Math.hypot(p.vx||0,p.vz||0);m.root.position.set(p.x,0,p.z);
@@ -250,7 +250,7 @@ function npcTick(p,dt){const r=CL.res,E=CL.env;p.t-=dt;let tx=null,tz=null,spd=0
  else if(p.st==='cita'){spd=d>6?2.2:0;tx=r.x;tz=r.z;p.cite=Math.max(p.cite,.3);if(p.t<0||d<4.5){p.st='idle';p.t=R(1.5,4)}}
  else{if(p.t<0){if(d<14&&r.mode==='mira'&&Math.random()<p.sk){p.st='cita';p.t=R(2,4)}else{const q=E.rand();p.wx=q.x;p.wz=q.z;p.t=R(2,5)}}if(p.wx!=null){tx=p.wx;tz=p.wz;spd=d<5?5:2.6}}
  if(tx!=null&&spd>0){const ex=tx-p.x,ez=tz-p.z,el=Math.hypot(ex,ez);if(el>.3){p.vx=ex/el*spd;p.vz=ez/el*spd}else{p.vx*=.8;p.vz*=.8}}else{p.vx*=.85;p.vz*=.85}}
-function resTick(r,dt){const E=CL.env,a=r.a,g=a.g;r.t+=dt;r.tt+=dt;let cs=0,head=.35,toss=0,paw=false;
+function resTick(r,dt){const E=CL.env,a=r.a,g=a.g;r.t+=dt;r.tt+=dt;r.pyaw=r.yaw;let cs=0,head=.35,toss=0,paw=false;
  const vmax=(6.4+(g.fue-60)/26)*(cTipo(a)==='becerro'?.82:1)*(r.tt>r.dur*.7?.86:1),turn=(2.4+g.sen/60)*(cTipo(a)==='toro'?.8:1);
  const alive=CL.ppl.filter(p=>p.toss<=0&&!p.safe&&!(p===CL.me&&CL.spect));
  const pickT=()=>{let b=null,bw=0;for(const p of alive){const d=Math.hypot(p.x-r.x,p.z-r.z);if(d>26)continue;const mv=Math.hypot(p.vx||0,p.vz||0)>2;const w=(p.cite>0?3:1)*(mv?1.5:1)*(p.me?1.25:1)/(d+2);if(w>bw){bw=w;b=p}}return b};
@@ -261,8 +261,8 @@ function resTick(r,dt){const E=CL.env,a=r.a,g=a.g;r.t+=dt;r.tt+=dt;let cs=0,head
    const wait=clamp(2.6-g.bra/40,.35,2.4);if(r.t>wait*.6&&g.bra<62)paw=true;
    if(tg&&r.t>wait){const d=Math.hypot(tg.x-r.x,tg.z-r.z);if(d<20&&Math.random()<clamp(g.bra/90,.2,1)){r.mode='embiste';r.t=0;r.st.emb++;bufido&&bufido(.4)}else if(r.t>wait+2.5){r.st.par++;r.mode='trota';r.t=0;const q=E.rand();r.wx=q.x;r.wz=q.z}}
    else if(!tg&&r.t>3){r.mode='trota';r.t=0;const q=E.rand();r.wx=q.x;r.wz=q.z}break}
-  case 'trota':{const ex=r.wx-r.x,ez=r.wz-r.z,d=Math.hypot(ex,ez);r.yaw+=angD(r.yaw,Math.atan2(ex,ez))*Math.min(1,dt*2.5);r.v+=(2.6-r.v)*Math.min(1,dt*2);cs=.55;if(d<1.5||r.t>5){r.mode='mira';r.t=0}const tg=pickT();if(tg&&Math.hypot(tg.x-r.x,tg.z-r.z)<6&&Math.random()<dt*2){r.tgt=tg;r.mode='embiste';r.t=0;r.st.emb++}break}
-  case 'embiste':{const tg=r.tgt;if(!tg||tg.toss>0){r.mode='mira';r.t=0;break}const px=tg.x+(tg.vx||0)*.25,pz=tg.z+(tg.vz||0)*.25;const fy=Math.atan2(px-r.x,pz-r.z);r.yaw+=clamp(angD(r.yaw,fy),-turn*dt,turn*dt);
+  case 'trota':{const wp=clWp(r.x,r.z,r.wx,r.wz),ex=wp[0]-r.x,ez=wp[1]-r.z,d=Math.hypot(r.wx-r.x,r.wz-r.z);r.yaw+=angD(r.yaw,Math.atan2(ex,ez)+clAvoid(r))*Math.min(1,dt*2.5);r.v+=(2.6-r.v)*Math.min(1,dt*2);cs=.55;if(d<1.5||r.t>5){r.mode='mira';r.t=0}const tg=pickT();if(tg&&Math.hypot(tg.x-r.x,tg.z-r.z)<6&&Math.random()<dt*2){r.tgt=tg;r.mode='embiste';r.t=0;r.st.emb++}break}
+  case 'embiste':{const tg=r.tgt;if(!tg||tg.toss>0){r.mode='mira';r.t=0;break}const px=tg.x+(tg.vx||0)*.25,pz=tg.z+(tg.vz||0)*.25;const wq=clWp(r.x,r.z,px,pz),fy=Math.atan2(wq[0]-r.x,wq[1]-r.z)+clAvoid(r)*.6;r.yaw+=clamp(angD(r.yaw,fy),-turn*dt,turn*dt);
    r.v=Math.min(vmax,r.v+dt*7);cs=r.v>4.5?1.2:.9;head=.6;const d=Math.hypot(tg.x-r.x,tg.z-r.z);r.st.dist+=r.v*dt;if(r.v>5&&Math.random()<dt*5)dust(CL.plaza?CL.P.D:CL.D,r.x,0,r.z,.3);
    if(tg.safe){r.mode='remata';r.t=0;break}
    if(d<.95&&tg.dodge<=0&&tg.jump<=0){if(tg.me||!tg.tryT)clToss(tg);toss=1}
@@ -271,13 +271,13 @@ function resTick(r,dt){const E=CL.env,a=r.a,g=a.g;r.t+=dt;r.tt+=dt;let cs=0,head
   case 'remata':{r.v=Math.max(0,r.v-dt*12);head=.9;toss=Math.sin(r.t*8)>0?.7:0;if(r.t<.05){r.st.rem++;clCrowd(.7);try{bufido(.5)}catch(e){}}if(r.t>1.4){r.mode='mira';r.t=0}break}
   case 'recogida':{CL.cab.forEach((c,i)=>{if(!c.b.root.visible){c.b.root.visible=true;c.x=E.cajon.ox+(i?1.4:-1.4);c.z=E.cajon.oz;}});
    const cx=(CL.cab[0].x+CL.cab[1].x)/2,cz=(CL.cab[0].z+CL.cab[1].z)/2;const goHome=Math.hypot(r.x-cx,r.z-cz)<4;
-   for(const [i,c] of CL.cab.entries()){const tx=goHome?E.cajon.x+(i?.8:-.8):r.x+(i?2:-2),tz=goHome?E.cajon.z:r.z+(i?1:-1);const ex=tx-c.x,ez=tz-c.z,el=Math.hypot(ex,ez);if(el>.5){c.x+=ex/el*2.4*dt;c.z+=ez/el*2.4*dt;c.yaw=Math.atan2(ex,ez)}c.b.root.position.set(c.x,0,c.z);c.b.root.rotation.y=c.yaw;animBull(c.b,dt,{speed:el>.5?.5:0,head:.3})}
-   if(goHome){if(CL.door)CL.door.position.y=4.2;const ex=E.cajon.x-r.x,ez=E.cajon.z-r.z,el=Math.hypot(ex,ez);r.yaw+=angD(r.yaw,Math.atan2(ex,ez))*Math.min(1,dt*3);r.v+=(2.3-r.v)*Math.min(1,dt*2);cs=.5;if(el<1.2||r.t>40){calleNext();return}}
+   for(const [i,c] of CL.cab.entries()){const tx=goHome?E.cajon.x+(i?.8:-.8):r.x+(i?2:-2),tz=goHome?E.cajon.z:r.z+(i?1:-1);const w2=clWp(c.x,c.z,tx,tz),ex=w2[0]-c.x,ez=w2[1]-c.z,el=Math.hypot(tx-c.x,tz-c.z),wl=Math.hypot(ex,ez)||1;if(el>.5){const nx=c.x+ex/wl*2.4*dt,nz=c.z+ez/wl*2.4*dt;if(clFreeHome(E,nx,nz,.5)){c.x=nx;c.z=nz}else if(clFreeHome(E,nx,c.z,.5))c.x=nx;else if(clFreeHome(E,c.x,nz,.5))c.z=nz;c.yaw+=angD(c.yaw,Math.atan2(ex,ez))*Math.min(1,dt*5)}c.b.root.position.set(c.x,0,c.z);c.b.root.rotation.y=c.yaw;animBull(c.b,dt,{speed:el>.5?.5:0,head:.3})}
+   if(goHome){if(CL.door)CL.door.position.y=4.2;const w3=clWp(r.x,r.z,E.cajon.x,E.cajon.z),ex=w3[0]-r.x,ez=w3[1]-r.z,el=Math.hypot(E.cajon.x-r.x,E.cajon.z-r.z);r.yaw+=angD(r.yaw,Math.atan2(ex,ez))*Math.min(1,dt*3);r.v+=(2.3-r.v)*Math.min(1,dt*2);cs=.5;if(el<1.2||r.t>40){calleNext();return}}
    else{r.v=Math.max(0,r.v-dt*3);head=.3}break}}
- const nx=r.x+Math.sin(r.yaw)*r.v*dt,nz=r.z+Math.cos(r.yaw)*r.v*dt;const home=r.mode==='recogida'||r.mode==='sale';
- if(home||E.walk({x:nx,z:nz},true)){r.x=nx;r.z=nz}else if(E.walk({x:nx,z:r.z},true)&&Math.abs(nx-r.x)>.004){r.x=nx;r.v*=.97}else if(E.walk({x:r.x,z:nz},true)&&Math.abs(nz-r.z)>.004){r.z=nz;r.v*=.97}else{if(r.mode==='embiste'&&r.v>4){r.mode='remata';r.t=0}else{r.yaw+=Math.PI*.6*(Math.random()<.5?1:-1)*dt*4;r.v*=.5}}
+ const home=r.mode==='recogida'||r.mode==='sale';
+ if(clBullMove(r,dt,home)){if(r.mode==='embiste'&&r.v>4){r.mode='remata';r.t=0;r.v*=.3}else if(r.mode==='trota'&&r.t>.6){r.mode='mira';r.t=0}}
  r.b.root.position.set(r.x,0,r.z);r.b.root.rotation.y=r.yaw;animBull(r.b,dt,{speed:Math.min(1.25,r.v/5)*(cs?1:1),head,toss,paw});
- if(r.fire){const f=.85+Math.sin(CL.t*23)*.1+Math.random()*.08;r.fire.L.intensity=2.1*f;r.fire.fires.forEach(fl=>{fl.scale.set(f,f*(1+Math.random()*.2),1);fl.lookAt(W3.cam.position)})}}
+ if(r.fire){const f=(.85+Math.sin(CL.t*23)*.1+Math.random()*.08)*(r.fire.k??1);r.fire.L.intensity=2.1*f;r.fire.fires.forEach(fl=>{fl.scale.set(f,f*(1+Math.random()*.2),1);fl.lookAt(W3.cam.position)})}}
 function camCalle(dt){if(CL.cam==='fix')return;const c=W3.cam.position,me=CL.me,r=CL.res;let tx,ty,tz,lx,ly,lz;const k=Math.min(1,dt*3.5);
  if(CL.cam==='jug'&&!CL.spect){const dist=6.2*(W3.zoom||1),hgt=1.6+W3.pitch*5.5;tx=me.x+Math.sin(W3.yaw)*dist;tz=me.z+Math.cos(W3.yaw)*dist;ty=hgt;
   if(r&&r.mode==='embiste'&&r.tgt===me){lx=(me.x+r.x)/2;lz=(me.z+r.z)/2}else{lx=me.x-Math.sin(W3.yaw)*2;lz=me.z-Math.cos(W3.yaw)*2}ly=1.1}
