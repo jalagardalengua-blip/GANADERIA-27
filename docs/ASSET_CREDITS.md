@@ -8,6 +8,7 @@
 | Personas realistas (cuerpo, cara, ojos, cejas, peinados) | `modelos/persona2.gltf.json` | Quaternius, *Universal Base Characters* (vía espejo verificado por SHA-256 WaviestSun/atelier-packs) | CC0 1.0 | Ropa por zonas, texturas a 512 px, animaciones de la UAL |
 | Caballo animado | `modelos/caballo.*` | Quaternius, *Farm Animals* | CC0 1.0 | Sombreado suave, recoloreado |
 | Toro y vaca animados | `modelos/toro.glb`, `modelos/vaca.glb` | Quaternius, *Ultimate Animated Animals* (vía [danwahl/animasim](https://github.com/danwahl/animasim)) | CC0 1.0 | 10 animaciones, pistas constantes eliminadas; la vaca usa las animaciones del toro; cuernos originales ocultos y sustituidos por los procedurales; pelo pintado por vértice |
+| Personas realistas con captura de movimiento, caballo con montura y perro pastor | `modelos/rb/` | Microsoft, *Microsoft Rocketbox Avatar Library* ([github.com/microsoft/Microsoft-Rocketbox](https://github.com/microsoft/Microsoft-Rocketbox)) | MIT (© 2020 Microsoft, ver `modelos/rb/LICENCIA.txt`) | FBX→GLB con FBX2glTF; texturas reducidas (1024/512 px), geometría cuantizada; animaciones de los animales generadas por código en `js/rocketbox.js` |
 | Árbol, hierbas, flores, rocas | `modelos/natura.gltf.json` | Quaternius, *Stylized Nature MegaKit* | CC0 1.0 | Texturas reducidas a 256 px |
 | Texturas de tierra y asfalto | `img/tex/` | Quaternius, *Downtown City MegaKit* | CC0 1.0 | Reducidas, albero teñido |
 | Fuentes Barlow, Cinzel, IBM Plex Mono | Google Fonts | sus autores | SIL OFL 1.1 | — |

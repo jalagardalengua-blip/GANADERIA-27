@@ -215,7 +215,7 @@ buildCalle=function(night){
  crowd.forEach((c,i)=>{c.w=r2();const col=pc[Math.floor(c.w*977)%pc.length];bodyI.setColorAt(i,col);armI.setColorAt(i*2,col);armI.setColorAt(i*2+1,col);headI.setColorAt(i,piel[i%piel.length])});
  for(const im of [bodyI,headI,legI,hairI,armI])im.castShadow=true;CL.bodyI=bodyI;CL.headI=headI;CL.legI=legI;CL.hairI=hairI;CL.armI=armI;sc.add(bodyI,headI,legI,hairI,armI);crowdPose(0,0);
  // personajes reales del juego en primera fila de los tablados y bajo los soportales
- CL.pmxSpec=[];const nGL=q==='alta'?14:q==='media'?9:4,spots=CL.pmxDeck.slice();for(let i=spots.length-1;i>0;i--){const j=Math.floor(r2()*(i+1));[spots[i],spots[j]]=[spots[j],spots[i]]}
+ CL.pmxSpec=[];const nGL=q==='alta'?20:q==='media'?12:4,spots=CL.pmxDeck.slice();for(let i=spots.length-1;i>0;i--){const j=Math.floor(r2()*(i+1));[spots[i],spots[j]]=[spots[j],spots[i]]}
  const sp2=[...spots.slice(0,Math.max(0,nGL-2)),[-4.5,.04,-11.7,0],[5.5,.04,-11.9,0]];
  for(const s of sp2.slice(0,nGL)){try{const P=makePerson({gl:1,jacket:pick(['#f4f4f0','#c42a2a','#2b5aa0','#1f6b3a','#e6bb55','#f4f4f0','#3a3a3a']),mangas:r2()<.5?false:undefined,pants:pick(['#2c3e5c','#20242c','#3a4a6a','#d8d2c4']),belt:pick(['#c42a2a','#141414']),boots:'#ececec',hair:pick(['#231812','#3b2a1c','#151010','#8a6a48'])});
   P.root.position.set(s[0],s[1],s[2]);P.root.rotation.y=s[3]+(r2()-.5)*.4;sc.add(P.root);CL.pmxSpec.push({P,t:r2()*3,ch:0})}catch(e){}}
