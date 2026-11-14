@@ -257,3 +257,12 @@ function clLinea(E,x0,z0,x1,z1){const L=Math.hypot(x1-x0,z1-z0),n=Math.max(1,Mat
 // los destinos al azar nunca caen dentro de un cadafal, una talanquera o el refugio: siempre donde cabe la res
 if(typeof envCalle==='function'){const _ecF=envCalle;envCalle=function(){const E=_ecF.apply(this,arguments),r0=E.rand.bind(E);
  E.rand=()=>{let q=r0();for(let k=0;k<24;k++){if(clFree(E,q.x,q.z,1.0,true))return q;q=r0()}return q};return E}}
+
+/* ---------------- la res desiste si no puede alcanzar a quien embiste ----------------
+   Si en 1,2 s de embestida no se acerca al menos medio metro a su objetivo (está pegado a una barrera,
+   detrás de una escalera o de un refugio), remata contra las tablas y vuelve a buscar, en vez de
+   quedarse serpenteando contra la barrera. */
+if(typeof resTick==='function'){const _rtD=resTick;resTick=function(r,dt){_rtD(r,dt);if(!CL||CL.res!==r)return;
+ if(r.mode!=='embiste'||!r.tgt){r.prog=null;return}
+ const d=Math.hypot(r.tgt.x-r.x,r.tgt.z-r.z);if(!r.prog||r.prog.tg!==r.tgt){r.prog={tg:r.tgt,t0:CL.t,d0:d};return}
+ if(CL.t-r.prog.t0>1.2){if(r.prog.d0-d<.5){r.mode='remata';r.t=.06;r.v*=.3;r.prog=null}else r.prog={tg:r.tgt,t0:CL.t,d0:d}}}}
