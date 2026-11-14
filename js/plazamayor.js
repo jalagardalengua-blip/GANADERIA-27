@@ -157,11 +157,16 @@ buildCalle=function(night){
   g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.computeVertexNormals();const m=new THREE.Mesh(g,sandM);m.receiveShadow=true;sc.add(m)};
  sandRect(-14.2,14.2,-11.2,11.2);sandRect(14.2,CL.o&&CL.o.tipo==='mar'&&typeof MAR!=='undefined'?MAR.x:64,-4,4);sandRect(-64,-14.2,-4,4);sandRect(-3.5,3.5,11.2,47);
  // ---------- casas ----------
- const PAL=typeof locPal==='function'?locPal():FACOL,styles=['calA','calA','calB','calC','calT','calA','calB'];
+ const PT=PMX.PT=pmxTipo();CL.plazaNom=PT.nom;
+ const PAL=typeof locPal==='function'?locPal():FACOL,styles=PT.styles;
  const house=(a0,a1,line,axis,face,o={})=>{let a=a0;while(a<a1-.1){let w=[5.6,8.4,8.4,11.2][(rnd()*4)|0];if(a1-(a+w)<4.5)w=a1-a;pmxHouse(G,MT,T,rnd,a,a+w,line,axis,face,styles[(rnd()*styles.length)|0],pmxHex(PAL[(rnd()*PAL.length)|0]),o,LAN);a+=w}};
  // plaza: fondo con soportales (antes la iglesia), frente con salida al cajón y laterales con las calles
- house(-21,21,-11,'x',1,{arcade:1,plaza:1,fl:[2,3]});house(-21,-3.5,11,'x',-1,{plaza:1,fl:[2,3]});house(3.5,21,11,'x',-1,{plaza:1,fl:[2,3]});
- house(-11,-4,14,'z',-1,{plaza:1,fl:[2,3]});house(4,11,14,'z',-1,{plaza:1,fl:[2,3]});house(-11,-4,-14,'z',1,{plaza:1,fl:[2,3]});house(4,11,-14,'z',1,{plaza:1,fl:[2,3]});
+ const FL=PT.fl;
+ if(PT.fondo==='iglesia'){house(-21,-8,-11,'x',1,{plaza:1,fl:FL});pmxIglesia(G,sc,-8,8,-11,PT,LAN);house(8,21,-11,'x',1,{plaza:1,fl:FL})}
+ else if(PT.fondo==='ajuntament'){house(-21,-9,-11,'x',1,{plaza:1,fl:FL});pmxAjuntament(G,sc,-9,9,-11,PT,LAN);house(9,21,-11,'x',1,{plaza:1,fl:FL})}
+ else house(-21,21,-11,'x',1,{arcade:1,plaza:1,fl:FL});
+ house(-21,-3.5,11,'x',-1,{plaza:1,fl:FL});house(3.5,21,11,'x',-1,{plaza:1,fl:FL});
+ house(-11,-4,14,'z',-1,{plaza:1,fl:FL});house(4,11,14,'z',-1,{plaza:1,fl:FL});house(-11,-4,-14,'z',1,{plaza:1,fl:FL});house(4,11,-14,'z',1,{plaza:1,fl:FL});
  house(21,64,4,'x',-1);house(21,64,-4,'x',1);house(-64,-21,4,'x',-1);house(-64,-21,-4,'x',1);house(18,46,3.5,'z',-1);house(18,46,-3.5,'z',1);house(-4,4,66,'z',-1);house(-4,4,-66,'z',1);
  // ---------- cadafales en los refugios de la plaza ----------
  const PNT=[[.12,.3,.75],[.1,.45,.22],[.72,.08,.06],[.95,.72,.08],[.92,.92,.9],[.9,.35,.05],[.25,.55,.85]];
@@ -174,7 +179,7 @@ buildCalle=function(night){
   if(long){dep=d;len=w;if((rf.z0+rf.z1)/2>0)f=new PmxFace(rf.x1,rf.z1,0,-1);else f=new PmxFace(rf.x0,rf.z0,0,1)}else{dep=w;len=d;if((rf.x0+rf.x1)/2>0)f=new PmxFace(rf.x1,rf.z0,-1,0);else f=new PmxFace(rf.x0,rf.z1,1,0)}
   // módulos de distinto color a lo largo del cadafal
   let s=0;while(s<len-.3){let m=Math.min(len-s,3+((rnd()*3)|0)*1.2);if(len-(s+m)<2)m=len-s;
-   pmxCadafal(G,sc,f,s,s+m,dep,PNT[(rnd()*PNT.length)|0],rnd()<.65?{t:PEN[pi++%PEN.length],c:BCOL[(rnd()*BCOL.length)|0]}:null,rnd()<.35,rnd);s+=m}}
+   pmxCadafal(G,sc,f,s,s+m,dep,(PT.cad||PNT)[(rnd()*(PT.cad||PNT).length)|0],rnd()<.65?{t:PEN[pi++%PEN.length],c:BCOL[(rnd()*BCOL.length)|0]}:null,rnd()<.35,rnd);s+=m}}
  // escaleras de acero azules que bajan de dos cadafales a la arena (también son refugio)
  if(!CLREF.some(r=>r.esc)){CLREF.push({x0:-7.45,x1:-5.85,z0:4.9,z1:7.6,cad:0,esc:1},{x0:7.9,x1:10.6,z0:-8.45,z1:-6.85,cad:0,esc:1})}
  for(const rf of CLREF.filter(r=>r.esc))pmxStair(G,sc,rf);
@@ -184,7 +189,7 @@ buildCalle=function(night){
   for(let t=.02;t<=L;t+=.26)at(t,1,.05,2,.05);for(const y of [.35,1.2,2])at(L/2,y,L,.07,.08);for(let t=0;t<=L+.01;t+=1.2)at(Math.min(t,L-.05),1.05,.09,2.1,.09);
   if(vert)for(let i=0;i<22;i++)CL.crowd.push([ln+(rf.x0>0?1:-1)*R(.6,3.2),0,R(rf.z0+.3,rf.z1-.3),rf.x0>0?-Math.PI/2:Math.PI/2,0])}
  // ---------- refugio amarillo y fuente de granito (CLCIRC) ----------
- pmxRefugio(G,CLCIRC[0],LAN);pmxFuente(sc,G,CLCIRC[1],MT,T);
+ pmxRefugio(G,CLCIRC[0],LAN);if(PT.centro==='palmera')pmxPalmera(sc,G,CLCIRC[1]);else if(PT.centro==='fanal')pmxFanal(sc,G,CLCIRC[1],LAN);else pmxFuente(sc,G,CLCIRC[1],MT,T);
  // ---------- cajón ----------
  const cj=new THREE.Group();cj.position.set(0,0,43.6);sc.add(cj);mesh(G0.box,M('#e6e2d6',.7),5.2,3.4,7,0,2.2,3,cj);mesh(G0.box,M('#2d2d2d'),5.2,.8,7,0,.4,3,cj,true);mesh(G0.box,M('#bf3a3f',.6),5.25,.5,7.05,0,3.2,3,cj,true);
  const door=mesh(G0.box,M('#4a4f55',.5,.5),2.2,2.6,.1,0,1.9,-.55,cj);CL.door=door;for(const s of [-1,1])mesh(G0.box,M('#4a4f55',.5,.5),.12,3,.12,s*1.2,1.5,-.55,cj);mesh(G0.box,M('#4a4f55',.5,.5),7,2.2,.12,0,1.1,6.8,cj);
@@ -232,19 +237,19 @@ function pmxHouse(G,MT,T,rnd,a0,a1,line,axis,face,style,tint,o,LAN){const d=7,fl
   if(arc&&fr){const b0=[p0[0]-f.n[0]*AD,p0[1]-f.n[1]*AD],b1=[p1[0]-f.n[0]*AD,p1[1]-f.n[1]*AD];G.stone.wall(b0,b1,.02,GF+.02,sT.tw,sT.th,[1,1,1],f.n,0,.02);
    G.wood.q([b0[0],GF+.02,b0[1]],[b1[0],GF+.02,b1[1]],[p1[0],GF+.02,p1[1]],[p0[0],GF+.02,p0[1]],[0,0,6,0,6,1.6,0,1.6],[.8,.8,.8],[0,-1,0]);
    G.paving.top(Math.min(p0[0],b1[0]),Math.min(p0[1],b1[1]),Math.max(p0[0],b1[0]),Math.max(p0[1],b1[1]),.025,4,[.92,.92,.92])}
-  else{G.stone.wall(p0,p1,.02,GF+.02,sT.tw,sT.th,[1,1,1],f.n,fr?0:.37,.02);if(fr){const e=[f.n[0]*.04,f.n[1]*.04];G.granite.wall([p0[0]+e[0],p0[1]+e[1]],[p1[0]+e[0],p1[1]+e[1]],.02,.45,1.5,1.5,[.72,.7,.66],f.n)}}
-  G[style].wall(p0,p1,GF+.02,H,uT.tw,uT.th,tint,f.n,fr?0:.5,GF+.02);
+  else{const PT=PMX.PT||{};G.stone.wall(p0,p1,.02,GF+.02,sT.tw,sT.th,PT.gfTint||[1,1,1],f.n,fr?0:.37,.02);if(fr){const e=[f.n[0]*.04,f.n[1]*.04];if(PT.zocalo)G.paint.wall([p0[0]+e[0],p0[1]+e[1]],[p1[0]+e[0],p1[1]+e[1]],.02,.85,1,1,PT.zocalo,f.n);else G.granite.wall([p0[0]+e[0],p0[1]+e[1]],[p1[0]+e[0],p1[1]+e[1]],.02,.45,1.5,1.5,[.72,.7,.66],f.n)}}
+  G[style].wall(p0,p1,GF+.02,H,uT.tw,uT.th,style==='stone'?[1.08,1,.9]:tint,f.n,fr?0:.5,GF+.02);
   const len=Math.hypot(p1[0]-p0[0],p1[1]-p0[1]),fc=new PmxFace(p0[0],p0[1],f.n[0],f.n[1]);fc.box(G.granite,0,len,-.02,.09,GF-.01,GF+.17,[.85,.83,.79])}
  // soportales: columnas de granito con zapatas, viga y mesas de café
  if(arc){const fz=n[1]>0?z1:z0,cnt=Math.max(2,Math.round((x1-x0)/3.2));for(let k=0;k<=cnt;k++){const x=x0+.25+(x1-x0-.5)*(k/cnt);if(Math.abs(x)>13.8)continue;const z=fz-n[1]*.3;
-   G.granite.box(x,.17,z,.5,.3,.5,1.5,[.8,.78,.74]);pmxColumn(G.granite,x,z,.32,2.5);G.granite.box(x,2.88,z,.46,.12,.46,1.5,[.85,.83,.79]);G.wood.box(x,3.03,z,.9,.18,.38,1.5,[.75,.72,.7])}
+   G.granite.box(x,.17,z,.5,.3,.5,1.5,[.8,.78,.74]);if((PMX.PT||{}).colWood){G.wood.box(x,1.6,z,.3,2.6,.3,1.5,[.75,.7,.65]);G.wood.box(x,2.95,z,.7,.12,.34,1.5,[.7,.66,.6])}else{pmxColumn(G.granite,x,z,.32,2.5);G.granite.box(x,2.88,z,.46,.12,.46,1.5,[.85,.83,.79])}G.wood.box(x,3.03,z,.9,.18,.38,1.5,[.75,.72,.7])}
   G.wood.box((x0+x1)/2,3.2,fz-n[1]*.3,x1-x0,.2,.3,1.5,[.7,.66,.62]);
   const PR_=CL.pmxProps;for(let x=x0+2;x<x1-1.5;x+=4.2){if(Math.abs(x)>12.5||rnd()<.25)continue;if(CL.pmxGLB)PR_.mesa.push({x,z:fz-n[1]*1.3,yaw:rnd()<.5?Math.PI/2:-Math.PI/2});else pmxTable(G,x,fz-n[1]*1.3)}
   // junto a la pared del soportal: bancos, sillas de anea y jardineras; barricas y cajas de la peña en los extremos
   for(let x=x0+1;x<x1-.8;x+=1.7){if(Math.abs(x)>12.8)continue;const z=fz-n[1]*2.08,k=rnd();if(k<.22)PR_.banco.push({x,z,yaw:n[1]>0?0:Math.PI});else if(k<.45)PR_.gallinera.push({x,z:z+n[1]*.15,yaw:(n[1]>0?0:Math.PI)+(rnd()-.5)*.5});else if(k<.6)PR_.jardinera.push({x,z,yaw:n[1]>0?0:Math.PI})}
   if(x0<-12)for(const [dx,k] of [[1.0,'barrica'],[1.85,'barrica'],[2.6,'caja']])PR_[k].push({x:-13.3+dx,z:fz-n[1]*1.95,yaw:rnd()*6})}
- pmxRoofGable(G,x0,z0,x1,z1,H,axis,style==='calT'?.8:.55,rnd);
- if(rnd()<.5){const fx=x0+(x1-x0)*(.25+rnd()*.5),fz=z0+(z1-z0)*(.3+rnd()*.4);G.granite.box(fx,H+2.1,fz,.65,2.4,.65,1.5,[1.05,1.03,1]);G.roof.box(fx,H+3.35,fz,.9,.14,.9,3,[.9,.9,.9])}
+ const terr=(PMX.PT||{}).terrat&&!arc&&rnd()<PMX.PT.terrat;if(terr)pmxTerrat(G,x0,z0,x1,z1,H,rnd);else pmxRoofGable(G,x0,z0,x1,z1,H,axis,style==='calT'?.8:.55,rnd);
+ if(!terr&&rnd()<.5){const fx=x0+(x1-x0)*(.25+rnd()*.5),fz=z0+(z1-z0)*(.3+rnd()*.4);G.granite.box(fx,H+2.1,fz,.65,2.4,.65,1.5,[1.05,1.03,1]);G.roof.box(fx,H+3.35,fz,.9,.14,.9,3,[.9,.9,.9])}
  // balcones o galería y faroles en la fachada
  const ff=faces.find(front),len=Math.hypot(ff.p1[0]-ff.p0[0],ff.p1[1]-ff.p0[1]),fc=new PmxFace(ff.p0[0],ff.p0[1],ff.n[0],ff.n[1]);
  const vis=s=>{const [x,z]=fc.pt(s,0);return !(o.plaza&&(Math.abs(x)>14.2||Math.abs(z)>11.2))};
@@ -316,12 +321,13 @@ function pmxStair(G,sc,rf){const blue=[.1,.32,.72],alongX=rf.x1-rf.x0>rf.z1-rf.z
   m.position.set((a[0]+b[0])/2+nn[0]*.02,H/2+.55,(a[2]+b[2])/2+nn[2]*.02);m.rotation.order='YXZ';m.rotation.y=Math.atan2(nn[0],nn[2]);
   const lx=Math.cos(m.rotation.y)*ux-Math.sin(m.rotation.y)*uz;m.rotation.z=Math.atan2(H,run)*(lx>=0?1:-1);sc.add(m)}}
 /* refugio amarillo: muro octogonal con cuatro accesos, torre central con cornisa y farol */
-function pmxRefugio(G,c,LAN){const R_=c.r,n=12,h=1.1,th=.2,Y=[1,1,1];
+function pmxRefugio(G,c,LAN){const R_=c.r,n=12,h=1.1,th=.2,rf=(PMX.PT||{}).ref||'amarillo',RM=rf==='amarillo'?RM:rf==='fusta'?G.wood:G.paint,Y=rf==='blanco'?[.95,.95,.92]:rf==='rojo'?[.78,.1,.08]:rf==='fusta'?[.85,.75,.65]:[1,1,1];
+ const B2=rf==='blanco'?[.12,.32,.72]:rf==='rojo'?[.96,.95,.92]:null;
  for(let i=0;i<n;i++){if(i%3===1)continue;const a0=i/n*Math.PI*2,a1=(i+1)/n*Math.PI*2,p0=[c.x+Math.sin(a0)*R_,c.z+Math.cos(a0)*R_],p1=[c.x+Math.sin(a1)*R_,c.z+Math.cos(a1)*R_],am=(a0+a1)/2,nn=[Math.sin(am),Math.cos(am)],o=[nn[0]*th/2,nn[1]*th/2];
-  G.yellow.wall([p0[0]+o[0],p0[1]+o[1]],[p1[0]+o[0],p1[1]+o[1]],0,h,2,2,Y,nn);G.yellow.wall([p1[0]-o[0],p1[1]-o[1]],[p0[0]-o[0],p0[1]-o[1]],0,h,2,2,Y,[-nn[0],-nn[1]]);
+  RM.wall([p0[0]+o[0],p0[1]+o[1]],[p1[0]+o[0],p1[1]+o[1]],0,h,2,2,Y,nn);RM.wall([p1[0]-o[0],p1[1]-o[1]],[p0[0]-o[0],p0[1]-o[1]],0,h,2,2,Y,[-nn[0],-nn[1]]);
   G.granite.q([p0[0]+o[0]*1.4,h+.06,p0[1]+o[1]*1.4],[p1[0]+o[0]*1.4,h+.06,p1[1]+o[1]*1.4],[p1[0]-o[0]*1.4,h+.06,p1[1]-o[1]*1.4],[p0[0]-o[0]*1.4,h+.06,p0[1]-o[1]*1.4],[0,0,1,0,1,.2,0,.2],[.9,.88,.84],[0,1,0]);
-  for(const pa of [p0,p1])G.yellow.box(pa[0],h/2+.03,pa[1],th*1.05,h+.06,th*1.05,2,Y)}
- const T=.6,ty=3.6;G.yellow.box(c.x,ty/2,c.z,T*2,ty,T*2,2,Y);G.granite.box(c.x,ty+.1,c.z,T*2+.3,.2,T*2+.3,1.5,[.9,.88,.84]);G.yellow.box(c.x,ty+.38,c.z,T*2-.2,.36,T*2-.2,2,Y);
+  for(const pa of [p0,p1])RM.box(pa[0],h/2+.03,pa[1],th*1.05,h+.06,th*1.05,2,Y);if(B2){G.paint.wall([p0[0]+o[0]*1.1,p0[1]+o[1]*1.1],[p1[0]+o[0]*1.1,p1[1]+o[1]*1.1],.55,.75,1,1,B2,nn)}}
+ const T=.6,ty=3.6;RM.box(c.x,ty/2,c.z,T*2,ty,T*2,2,Y);G.granite.box(c.x,ty+.1,c.z,T*2+.3,.2,T*2+.3,1.5,[.9,.88,.84]);RM.box(c.x,ty+.38,c.z,T*2-.2,.36,T*2-.2,2,Y);
  G.granite.box(c.x,.14,c.z,T*2+.5,.28,T*2+.5,1.5,[.85,.83,.79]);const ir=[.06,.06,.065];G.iron.box(c.x,ty+.9,c.z,.08,.7,.08,1,ir);G.iron.box(c.x,ty+1.27,c.z,.42,.06,.42,1,ir);G.glow.box(c.x,ty+1.56,c.z,.3,.48,.3,1,[1,.8,.5]);
  for(const [dx,dz] of [[-1,-1],[1,-1],[-1,1],[1,1]])G.iron.box(c.x+dx*.17,ty+1.56,c.z+dz*.17,.03,.54,.03,1,ir);G.iron.box(c.x,ty+1.86,c.z,.48,.06,.48,1,ir);G.iron.box(c.x,ty+1.97,c.z,.2,.16,.2,1,ir);
  LAN.push([c.x,ty+1.56,c.z,14]);for(let i=0;i<8;i++){const a=R(0,6.28),d=R(.95,c.r-.35);CL.crowd.push([c.x+Math.sin(a)*d,0,c.z+Math.cos(a)*d,a+Math.PI,0])}}
@@ -346,3 +352,116 @@ function pmxSpecTick(dt){if(!CL||!CL.pmxSpec||!CL.pmxSpec.length)return;const le
   if(P.gl){P.gl.want=s.ch?'Celebration':null;P.gl.wts=1;if((CL.pmxF+i)%2===0)modAnimPerson(P,dt*2,0)}
   else{const ar=P.arms;if(ar){ar[0].lock=ar[1].lock=s.ch?1:0;if(s.ch){const w=Math.sin(CL.t*9+i);ar[0].sh.rotation.set(-2.7+w*.25,0,.3);ar[1].sh.rotation.set(-2.7-w*.25,0,-.3)}}animPerson(P,dt,0)}}}
 if(typeof calleTick==='function'){const _ctPmx=calleTick;calleTick=function(dt){_ctPmx(dt);try{if(CL&&!CL.plaza)pmxSpecTick(dt)}catch(e){}}}
+
+/* ===================== DIFERENTES PLAZAS =====================
+   Cada pueblo tiene su plaza según su comarca (las zonas de juego no cambian):
+   · Plaça Major (interior): soportales de piedra, entramado, fuente de granito, cadafales de colores.
+   · Plaça de l'Església (costa): iglesia con portada, rosetón y campanario con chapitel de azulejo; casas encaladas
+     con zócalo azul y terrados; palmera con talanquera; refugio blanco y azul; cadafales azules, blancos y verdes.
+   · Plaça de l'Ajuntament (ribera): ayuntamiento con porches de arcos, balcón corrido con banderas y reloj;
+     casas más altas; farola monumental; refugio rojo y blanco; cadafales con los colores de la senyera.
+   · Plaça de la Vila (interior): casas de piedra con galerías de madera, porches de madera, cadafales de madera. */
+const PMX_PLAZAS={
+ major:{nom:'Plaça Major',fondo:'arcade',styles:['calA','calA','calB','calC','calT','calA','calB'],fl:[2,3],ref:'amarillo',centro:'fuente'},
+ esglesia:{nom:"Plaça de l'Església",fondo:'iglesia',styles:['calA','calC','calA','calC','calB','calA'],fl:[2,3],terrat:.55,zocalo:[.16,.36,.72],gfTint:[1.32,1.3,1.24],ref:'blanco',centro:'palmera',azulejo:true,
+  cad:[[.12,.3,.75],[.92,.92,.9],[.1,.45,.22],[.25,.55,.85],[.92,.92,.9]]},
+ ajuntament:{nom:"Plaça de l'Ajuntament",fondo:'ajuntament',styles:['calB','calA','calB','calC'],fl:[3,4],ref:'rojo',centro:'fanal',cad:[[.85,.12,.08],[.95,.72,.08],[.92,.92,.9],[.72,.08,.06],[.95,.72,.08]]},
+ vila:{nom:'Plaça de la Vila',fondo:'arcade',styles:['stone','stone','calT','stone','calT'],fl:[2,3],colWood:true,ref:'fusta',centro:'fuente',cad:[[.62,.45,.3],[.5,.36,.24],[.7,.55,.38],[.56,.42,.3]]}};
+function pmxTipo(){let k='major';try{const o=CL&&CL.o;if(o&&o.plaza&&PMX_PLAZAS[o.plaza])k=o.plaza;else{const c=typeof locComarca==='function'?locComarca():'interior';k=c==='costa'?'esglesia':c==='ribera'?'ajuntament':((typeof locSeed==='function'?locSeed():0)%2?'vila':'major')}}catch(e){}
+ return Object.assign({k},PMX_PLAZAS[k])}
+const PMXC={};
+function pmxCanvas(key,w,h,draw){if(PMXC[key])return PMXC[key];const cv=document.createElement('canvas');cv.width=w;cv.height=h;draw(cv.getContext('2d'),w,h);const t=new THREE.CanvasTexture(cv);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;PMXC[key]=t;return t}
+function pmxCyl(Gr,x,z,y0,h,r0,r1,col,seg=12,su=1){const g=new THREE.CylinderGeometry(r1,r0,h,seg,1),p=g.attributes.position,nr=g.attributes.normal,uv=g.attributes.uv,idx=g.index.array,b=Gr.n;
+ for(let i=0;i<p.count;i++){Gr.pos.push(p.getX(i)+x,p.getY(i)+y0+h/2,p.getZ(i)+z);Gr.nor.push(nr.getX(i),nr.getY(i),nr.getZ(i));Gr.uv.push(uv.getX(i)*su,uv.getY(i)*h/1.5);Gr.col.push(col[0],col[1],col[2])}for(let i=0;i<idx.length;i++)Gr.idx.push(b+idx[i]);Gr.n+=p.count}
+/* terrado plano con barandilla encalada y suelo de rasilla */
+function pmxTerrat(G,x0,z0,x1,z1,H,rnd){const wc=[1.3,1.28,1.22],t=.22,h=.95;G.paving.top(x0,z0,x1,z1,H,1.2,[1.15,.72,.55]);
+ G.granite.box((x0+x1)/2,H+h/2,z0+t/2,x1-x0,h,t,1.5,wc);G.granite.box((x0+x1)/2,H+h/2,z1-t/2,x1-x0,h,t,1.5,wc);G.granite.box(x0+t/2,H+h/2,(z0+z1)/2,t,h,z1-z0,1.5,wc);G.granite.box(x1-t/2,H+h/2,(z0+z1)/2,t,h,z1-z0,1.5,wc);
+ G.roof.box((x0+x1)/2,H+h+.04,z0+t/2,x1-x0+.06,.08,t+.08,3,[.95,.9,.9]);G.roof.box((x0+x1)/2,H+h+.04,z1-t/2,x1-x0+.06,.08,t+.08,3,[.95,.9,.9]);
+ if(rnd()<.5){const cx=x0+(x1-x0)*(.3+rnd()*.4),cz=z0+(z1-z0)*(.3+rnd()*.4);G.granite.box(cx,H+1.3,cz,1.8,2.6,1.8,1.5,wc);G.roof.box(cx,H+2.66,cz,2,.1,2,3,[.9,.9,.9])}}
+/* ---------- iglesia con portada, rosetón y campanario ---------- */
+function pmxIglesia(G,sc,a0,a1,line,PT,LAN){const fz=line-1,D=16,W=a1-a0,cx=(a0+a1)/2,Hn=12.5,st=[1.06,.99,.88],z0=fz-D;
+ // nave
+ for(const [p0,p1,n] of [[[a0,fz],[a1,fz],[0,1]],[[a1,fz],[a1,z0],[1,0]],[[a0,z0],[a0,fz],[-1,0]],[[a1,z0],[a0,z0],[0,-1]]])G.granite.wall(p0,p1,0,Hn,1.5,1.5,st,n);
+ pmxRoofGable(G,a0,z0,a1,fz,Hn,'z',.4,()=>.5);
+ // frontón y cornisas
+ G.granite.q([a0,Hn,fz],[a1,Hn,fz],[cx,Hn+3.4,fz],[cx,Hn+3.4,fz],[0,0,W/1.5,0,W/3,2.2,W/3,2.2],st,[0,0,1]);
+ G.granite.box(cx,Hn+.15,fz+.15,W+.3,.3,.3,1.5,[.9,.86,.78]);G.granite.box(cx,4.3,fz+.12,W,.25,.24,1.5,[.9,.86,.78]);
+ for(const x of [a0+.35,a1-.35,cx-3.4,cx+3.4])G.granite.box(x,Hn/2,fz+.18,.6,Hn,.36,1.5,[.95,.9,.8]);
+ // portada: columnas, puerta de madera y arco
+ G.granite.box(cx,2.7,fz+.25,4.2,5.4,.5,1.5,[.92,.88,.8]);G.wood.wall([cx-1.2,fz+.51],[cx+1.2,fz+.51],.4,4,1.2,1.2,[.42,.3,.22],[0,1]);
+ for(const s of [-1,1]){pmxCyl(G.granite,cx+s*1.75,fz+.62,.4,4.8,.2,.17,[.95,.9,.82],14);G.granite.box(cx+s*1.75,.2,fz+.62,.6,.4,.6,1.5,[.9,.86,.78])}
+ const arc=new THREE.Mesh(new THREE.RingGeometry(1.2,1.65,28,1,0,Math.PI),new THREE.MeshStandardMaterial({map:PMX.T.granite.map,color:'#e6dccb',roughness:.9}));arc.position.set(cx,4,fz+.52);sc.add(arc);
+ const tim=new THREE.Mesh(new THREE.CircleGeometry(1.2,24,0,Math.PI),new THREE.MeshStandardMaterial({color:'#3a2a1c',roughness:.8}));tim.position.set(cx,4,fz+.51);sc.add(tim);
+ // rosetón con vidriera (se ilumina de noche)
+ const vid=pmxCanvas('vidriera',256,256,(c,w,h)=>{c.fillStyle='#1b1d3a';c.fillRect(0,0,w,h);const cols=['#c8102e','#1d3f8f','#f2c200','#2e7d32','#7b1fa2'];for(let i=0;i<24;i++){c.fillStyle=cols[i%5];c.beginPath();c.moveTo(128,128);c.arc(128,128,124,i/24*6.283,(i+1)/24*6.283);c.fill()}
+  c.strokeStyle='#2a2a2a';c.lineWidth=6;for(let i=0;i<12;i++){c.beginPath();c.moveTo(128,128);c.lineTo(128+Math.cos(i/12*6.283)*128,128+Math.sin(i/12*6.283)*128);c.stroke()}c.beginPath();c.arc(128,128,60,0,7);c.stroke();c.fillStyle='#f2c200';c.beginPath();c.arc(128,128,22,0,7);c.fill()});
+ const night=!!(CL&&CL.night),rm=new THREE.Mesh(new THREE.CircleGeometry(1.35,32),new THREE.MeshStandardMaterial({map:vid,emissive:'#ffffff',emissiveMap:vid,emissiveIntensity:night?.9:.08,roughness:.2}));rm.position.set(cx,9,fz+.03);sc.add(rm);
+ const rr=new THREE.Mesh(new THREE.RingGeometry(1.35,1.75,32),new THREE.MeshStandardMaterial({map:PMX.T.granite.map,color:'#e6dccb',roughness:.9}));rr.position.set(cx,9,fz+.04);sc.add(rr);
+ // escalinata
+ for(let i=0;i<3;i++)G.granite.box(cx,.1+i*.17,fz+.85-i*.28,7.5-i*.6,.2,.6,1.5,[.86,.83,.78]);
+ // campanario
+ const tx=a1-2.6,tz=fz-2.4,T=2.1,TH=23;for(const [p0,p1,n] of [[[tx-T,tz+T],[tx+T,tz+T],[0,1]],[[tx+T,tz+T],[tx+T,tz-T],[1,0]],[[tx-T,tz-T],[tx-T,tz+T],[-1,0]],[[tx+T,tz-T],[tx-T,tz-T],[0,-1]]])G.granite.wall(p0,p1,0,TH,1.5,1.5,st,n);
+ for(const y of [Hn+.2,TH-4.4,TH])G.granite.box(tx,y,tz,T*2+.3,.3,T*2+.3,1.5,[.9,.86,.78]);
+ for(const [nx,nz] of [[0,1],[1,0],[0,-1],[-1,0]]){G.iron.box(tx+nx*(T+.01),TH-2.4,tz+nz*(T+.01),nz?1.3:.04,2.8,nx?1.3:.04,1,[.04,.04,.05]);G.granite.box(tx+nx*(T+.04),TH-.95,tz+nz*(T+.04),nz?1.6:.12,.18,nx?1.6:.12,1.5,[.9,.86,.78])}
+ const bell=new THREE.Mesh(new THREE.LatheGeometry([[0,.6],[.18,.58],[.28,.4],[.34,.1],[.44,0],[.4,-.02]].map(([r,y])=>new THREE.Vector2(r,y)),16),new THREE.MeshStandardMaterial({color:'#8a6a2a',metalness:.85,roughness:.35,side:THREE.DoubleSide}));bell.position.set(tx,TH-3.4,tz+T-.6);sc.add(bell);
+ if(PT.azulejo){const az=pmxCanvas('azulejo',128,128,(c,w,h)=>{for(let y=0;y<8;y++)for(let x=0;x<8;x++){c.fillStyle=(x+y)%2?'#1f4fa8':'#e9eef5';c.fillRect(x*16,y*16,16,16)}c.globalAlpha=.25;c.fillStyle='#fff';for(let i=0;i<64;i++)c.fillRect((i%8)*16+2,Math.floor(i/8)*16+2,5,3)});az.wrapS=az.wrapT=THREE.RepeatWrapping;az.repeat.set(4,3);
+  const sp=new THREE.Mesh(new THREE.CylinderGeometry(.15,T+.05,5.2,8,1),new THREE.MeshStandardMaterial({map:az,roughness:.25,metalness:.1}));sp.position.set(tx,TH+2.75,tz);sp.castShadow=true;sc.add(sp)}
+ else{const sp=new THREE.Mesh(new THREE.ConeGeometry(T*1.45,4.4,4),new THREE.MeshStandardMaterial({map:PMX.T.roof.map,roughness:.8}));sp.position.set(tx,TH+2.35,tz);sp.rotation.y=Math.PI/4;sp.castShadow=true;sc.add(sp)}
+ G.iron.box(tx,TH+5.7,tz,.06,1.2,.06,1,[.1,.1,.1]);G.iron.box(tx,TH+6,tz,.5,.06,.06,1,[.1,.1,.1]);
+ LAN.push([cx-2.6,4.6,fz+.4,6]);LAN.push([cx+2.6,4.6,fz+.4,6]);
+ for(let i=0;i<12;i++)CL.crowd.push([cx+R(-3.2,3.2),.15+(i%3)*.17,fz+.75-(i%3)*.28,0,0])}
+/* ---------- ayuntamiento con porches de arcos, balcón con banderas y reloj ---------- */
+function pmxAjuntament(G,sc,a0,a1,line,PT,LAN){const fz=line,D=10,W=a1-a0,cx=(a0+a1)/2,GF=4.4,FH=3.2,H=GF+2*FH,AD=3,z0=fz-D,tint=[1.05,.9,.76],st=[1,.95,.86];
+ G.stone.wall([a0,fz-AD],[a1,fz-AD],0,GF,PMX.T.stone.tw,PMX.T.stone.th*1.4,[1,1,1],[0,1]);
+ G.wood.q([a0,GF,fz-AD],[a1,GF,fz-AD],[a1,GF,fz],[a0,GF,fz],[0,0,8,0,8,1.5,0,1.5],[.8,.8,.8],[0,-1,0]);G.paving.top(a0,fz-AD,a1,fz,.025,4,[.95,.95,.95]);
+ for(const [p0,p1,n] of [[[a0,fz],[a1,fz],[0,1]],[[a1,fz],[a1,z0],[1,0]],[[a0,z0],[a0,fz],[-1,0]],[[a1,z0],[a0,z0],[0,-1]]])G.calB.wall(p0,p1,GF,H,PMX.T.calB.tw,PMX.T.calB.th,tint,n,0,GF);
+ for(const [p0,p1,n] of [[[a1,fz],[a1,z0],[1,0]],[[a0,z0],[a0,fz],[-1,0]],[[a1,z0],[a0,z0],[0,-1]]])G.stone.wall(p0,p1,0,GF,PMX.T.stone.tw,PMX.T.stone.th*1.4,[1,1,1],n);
+ // pilares y arcos de piedra
+ const n=5,sp=W/n,am=new THREE.MeshStandardMaterial({map:PMX.T.granite.map,normalMap:PMX.T.granite.normalMap,color:'#e8decb',roughness:.9});
+ for(let i=0;i<=n;i++){const x=a0+i*sp;G.granite.box(x,GF/2,fz-.35,.75,GF,.7,1.5,st)}
+ for(let i=0;i<n;i++){const x=a0+(i+.5)*sp,r=sp/2-.38;const a=new THREE.Mesh(new THREE.TorusGeometry(r,.22,8,20,Math.PI),am);a.position.set(x,GF-r-.3,fz-.15);a.castShadow=true;sc.add(a);
+  G.granite.box(x,GF-.15,fz-.35,sp,.3,.7,1.5,st)}
+ G.granite.box(cx,GF+.1,fz+.05,W+.2,.25,.3,1.5,[.9,.86,.78]);G.granite.box(cx,H+.2,fz+.1,W+.4,.4,.4,1.5,[.9,.86,.78]);
+ // balcón corrido de la planta noble
+ const fc=new PmxFace(a0,fz,0,1);fc.box(G.granite,0,W,0,.9,GF+.15,GF+.32,[.86,.83,.78]);const ir=[.08,.08,.09];fc.box(G.iron,0,W,.84,.88,GF+1.25,GF+1.3,ir);for(let s=.1;s<W;s+=.14)fc.box(G.iron,s-.01,s+.01,.84,.87,GF+.32,GF+1.25,ir);
+ // banderas: España, Comunitat Valenciana y Unión Europea
+ const flags=[['es',(c,w,h)=>{c.fillStyle='#c60b1e';c.fillRect(0,0,w,h);c.fillStyle='#ffc400';c.fillRect(0,h/4,w,h/2)}],
+  ['cv',(c,w,h)=>{c.fillStyle='#fcdd09';c.fillRect(0,0,w,h);c.fillStyle='#da121a';for(let i=0;i<4;i++)c.fillRect(w*.25,h*(.11+i*.22),w*.75,h*.11);c.fillStyle='#0f47af';c.fillRect(0,0,w*.25,h)}],
+  ['eu',(c,w,h)=>{c.fillStyle='#003399';c.fillRect(0,0,w,h);c.fillStyle='#ffcc00';for(let i=0;i<12;i++){const a=i/12*6.283;c.beginPath();c.arc(w/2+Math.cos(a)*h*.33,h/2+Math.sin(a)*h*.33,h*.045,0,7);c.fill()}}]];
+ flags.forEach(([k,dr],i)=>{const x=cx+(i-1)*1.4,pole=new THREE.Group();pole.position.set(x,GF+1.3,fz+.85);pole.rotation.x=.75;sc.add(pole);mesh(geos().cyl,M('#d9d9d9',.3,.8),.025,2.4,.025,0,1.2,0,pole,true);
+  const fl=new THREE.Mesh(new THREE.PlaneGeometry(1.2,.8,6,3),new THREE.MeshStandardMaterial({map:pmxCanvas('flag'+k,96,64,dr),side:THREE.DoubleSide,roughness:.8}));fl.position.set(.62,1.95,0);fl.rotation.x=-.75;const p=fl.geometry.attributes.position;for(let j=0;j<p.count;j++)p.setZ(j,Math.sin(p.getX(j)*4)*.05);fl.castShadow=true;pole.add(fl)});
+ // reloj y espadaña con campana
+ G.calB.box(cx,H+1.6,fz-.3,4.6,2.8,.6,PMX.T.calB.tw,tint);G.granite.q([cx-2.3,H+3,fz],[cx+2.3,H+3,fz],[cx,H+4.2,fz],[cx,H+4.2,fz],[0,0,2,0,1,1,1,1],st,[0,0,1]);
+ const clk=pmxCanvas('reloj',128,128,(c,w,h)=>{c.fillStyle='#f4efe2';c.beginPath();c.arc(64,64,62,0,7);c.fill();c.strokeStyle='#1a1a1a';c.lineWidth=4;c.stroke();c.fillStyle='#1a1a1a';c.font='bold 14px serif';c.textAlign='center';c.textBaseline='middle';
+  ['XII','III','VI','IX'].forEach((t,i)=>{const a=i*Math.PI/2-Math.PI/2;c.fillText(t,64+Math.cos(a)*48,64+Math.sin(a)*48)});c.lineWidth=5;c.beginPath();c.moveTo(64,64);c.lineTo(64,24);c.stroke();c.lineWidth=4;c.beginPath();c.moveTo(64,64);c.lineTo(92,70);c.stroke()});
+ const ck=new THREE.Mesh(new THREE.CircleGeometry(.9,32),new THREE.MeshStandardMaterial({map:clk,roughness:.4,emissive:'#ffffff',emissiveMap:clk,emissiveIntensity:CL&&CL.night?.6:0}));ck.position.set(cx,H+1.6,fz+.02);sc.add(ck);
+ G.granite.box(cx,H+4.9,fz-.3,1.4,1.4,.4,1.5,st);G.iron.box(cx,H+4.75,fz-.08,.8,.9,.05,1,[.04,.04,.05]);
+ const bell=new THREE.Mesh(new THREE.LatheGeometry([[0,.45],[.13,.43],[.2,.3],[.25,.08],[.32,0]].map(([r,y])=>new THREE.Vector2(r,y)),14),new THREE.MeshStandardMaterial({color:'#8a6a2a',metalness:.85,roughness:.35,side:THREE.DoubleSide}));bell.position.set(cx,H+4.45,fz-.3);sc.add(bell);
+ const pl=new THREE.Mesh(new THREE.PlaneGeometry(4.2,.6),new THREE.MeshStandardMaterial({map:textPanelPmx('AJUNTAMENT','#f4efe2','#3a2a1c'),roughness:.6}));pl.position.set(cx,GF+2.75,fz+.02);sc.add(pl);
+ pmxRoofGable(G,a0,z0,a1,fz,H+.4,'x',.5,()=>.5);
+ for(let i=0;i<=n;i++)if(i%2===0)LAN.push([a0+i*sp,GF-1,fz+.2,7]);
+ for(let i=0;i<12;i++)CL.crowd.push([R(a0+1,a1-1),.03,fz-R(.6,2.4),0,0])}
+/* ---------- talanquera circular alrededor del elemento central ---------- */
+function pmxAnilla(G,c,col){const n=16;for(let i=0;i<n;i++){if(i%4===0)continue;const a0=i/n*Math.PI*2,a1=(i+1)/n*Math.PI*2,p0=[c.x+Math.sin(a0)*c.r,c.z+Math.cos(a0)*c.r],p1=[c.x+Math.sin(a1)*c.r,c.z+Math.cos(a1)*c.r],am=(a0+a1)/2,nn=[Math.sin(am),Math.cos(am)],L=Math.hypot(p1[0]-p0[0],p1[1]-p0[1]);
+  for(const y of [.4,.9,1.4]){G.paint.wall([p0[0]+nn[0]*.03,p0[1]+nn[1]*.03],[p1[0]+nn[0]*.03,p1[1]+nn[1]*.03],y,y+.07,L,1,col,nn);G.paint.wall([p1[0]-nn[0]*.03,p1[1]-nn[1]*.03],[p0[0]-nn[0]*.03,p0[1]-nn[1]*.03],y,y+.07,L,1,col,[-nn[0],-nn[1]])}G.paint.box(p0[0],.72,p0[1],.08,1.44,.08,1,col)}
+ for(let i=0;i<7;i++){const a=R(0,6.28),d=R(1.0,c.r-.3);CL.crowd.push([c.x+Math.sin(a)*d,0,c.z+Math.cos(a)*d,a+Math.PI,0])}}
+/* ---------- palmera datilera con alcorque de piedra ---------- */
+function pmxPalmera(sc,G,c){pmxCyl(G.granite,c.x,c.z,0,.5,.7,.68,[.92,.9,.86],20,4);G.paving.top(c.x-.62,c.z-.62,c.x+.62,c.z+.62,.51,1,[.55,.42,.3]);
+ const bark=pmxCanvas('corteza',64,256,(x,w,h)=>{x.fillStyle='#6b5640';x.fillRect(0,0,w,h);for(let y=0;y<h;y+=10){for(let i=0;i<4;i++){x.fillStyle=i%2?'#4a3b2c':'#87705a';x.beginPath();x.moveTo(i*16,y);x.lineTo(i*16+8,y+9);x.lineTo(i*16+16,y);x.fill()}}});bark.wrapS=bark.wrapT=THREE.RepeatWrapping;bark.repeat.set(2,6);
+ const H=8.4,tr=new THREE.Mesh(new THREE.CylinderGeometry(.24,.34,H,14,8),new THREE.MeshStandardMaterial({map:bark,roughness:.95}));const p=tr.geometry.attributes.position;for(let i=0;i<p.count;i++){const y=p.getY(i)+H/2;p.setX(i,p.getX(i)+Math.pow(y/H,2)*.5)}tr.geometry.computeVertexNormals();
+ tr.position.set(c.x,.5+H/2,c.z);tr.castShadow=true;sc.add(tr);const top=new THREE.Vector3(c.x+.5,.5+H,c.z);
+ const leaf=pmxCanvas('palma',64,256,(x,w,h)=>{x.clearRect(0,0,w,h);x.strokeStyle='#6c7a2c';x.lineWidth=3;x.beginPath();x.moveTo(w/2,0);x.lineTo(w/2,h);x.stroke();x.strokeStyle='#4f7a2a';x.lineWidth=2.4;for(let y=8;y<h-4;y+=5){const l=(w/2-2)*Math.min(1,(h-y)/h*1.6);x.beginPath();x.moveTo(w/2,y);x.lineTo(w/2-l,y+14);x.moveTo(w/2,y);x.lineTo(w/2+l,y+14);x.stroke()}});
+ const lm=new THREE.MeshStandardMaterial({map:leaf,alphaTest:.4,transparent:false,side:THREE.DoubleSide,roughness:.8});
+ for(let i=0;i<18;i++){const g=new THREE.PlaneGeometry(1.1,3.6,1,8),q=g.attributes.position;for(let j=0;j<q.count;j++){const v=(q.getY(j)+1.8)/3.6;q.setZ(j,-v*v*1.6);q.setY(j,v*3.4)}g.computeVertexNormals();
+  const f=new THREE.Mesh(g,lm);f.position.copy(top);f.rotation.order='YXZ';f.rotation.y=i/18*Math.PI*2+(i%2)*.15;f.rotation.x=-(i%3===0?.35:i%3===1?.9:1.35);f.castShadow=true;sc.add(f)}
+ for(let i=0;i<5;i++){const a=i*1.25,d=mesh(geos().sph,M('#c8742a',.6),.22,.35,.22,top.x+Math.sin(a)*.35,top.y-.55,top.z+Math.cos(a)*.35,sc)}
+ pmxAnilla(G,c,[.15,.35,.78])}
+/* ---------- farola monumental de hierro con cuatro brazos ---------- */
+function pmxFanal(sc,G,c,LAN){G.granite.box(c.x,.5,c.z,1.3,1,1.3,1.5,[.9,.87,.8]);G.granite.box(c.x,1.06,c.z,1.45,.14,1.45,1.5,[.86,.83,.78]);
+ const im=new THREE.MeshStandardMaterial({color:'#1d2124',metalness:.75,roughness:.4}),col=new THREE.Mesh(new THREE.LatheGeometry([[.26,0],[.26,.3],[.17,.45],[.13,1.6],[.1,3.6],[.16,3.8],[.1,4],[.08,4.6],[.14,4.75],[0,4.8]].map(([r,y])=>new THREE.Vector2(r,y)),16),im);col.position.set(c.x,1.13,c.z);col.castShadow=true;sc.add(col);
+ const y=1.13+4.4;for(let i=0;i<4;i++){const a=i*Math.PI/2+Math.PI/4,s=Math.sin(a),cc=Math.cos(a),ax=c.x+s*.8,az=c.z+cc*.8;
+  const arm=new THREE.Mesh(new THREE.TorusGeometry(.42,.03,6,12,Math.PI),im);arm.position.set(c.x+s*.42,y-.05,c.z+cc*.42);arm.rotation.y=a+Math.PI/2;sc.add(arm);
+  G.iron.box(ax,y-.48,az,.34,.06,.34,1,[.08,.08,.09]);G.glow.box(ax,y-.25,az,.24,.42,.24,1,[1,.82,.5]);G.iron.box(ax,y,az,.38,.08,.38,1,[.08,.08,.09]);G.iron.box(ax,y+.1,az,.12,.12,.12,1,[.08,.08,.09]);LAN.push([ax,y-.25,az,9])}
+ G.glow.box(c.x,y+.55,c.z,.28,.5,.28,1,[1,.82,.5]);G.iron.box(c.x,y+.85,c.z,.42,.08,.42,1,[.08,.08,.09]);pmxAnilla(G,c,[.78,.1,.08])}
+/* nombre de la plaza en el rótulo de entrada */
+if(typeof irCalle==='function'){const _icP=irCalle;irCalle=function(){_icP.apply(this,arguments);try{if(CL&&!CL.plaza&&CL.plazaNom&&!CL.emb)banner(FEST[CL.o.tipo].n,`${CL.plazaNom} · ${CL.o.pueblo}`,3.6)}catch(e){}}}
