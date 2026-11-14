@@ -83,13 +83,14 @@ function embStart(r){const E=CL.env,sc=CL.sc,add=o=>{CL.add?CL.add(o):sc.add(o);
  // emboladors en fila detrás del pilón, los dos que embolan y el de la antorcha
  const men=[];for(let i=0;i<6;i++){const m=embMan(i%2?'#f4f4f0':'#1e1f24');if(m){add(m.root);objs.push(m.root);men.push({P:m,x:P.x,z:P.z-1.6-i*1.1})}}
  const fit=[0,1].map(i=>{const m=embMan(i?'#c42a2a':'#f4f4f0');if(m){add(m.root);objs.push(m.root)}return m&&{P:m,x:P.x+(i?2.5:-2.5),z:P.z-1.2}}).filter(Boolean);
+ const rm=embMan('#1e1f24');if(rm){add(rm.root);objs.push(rm.root)}const rabo=rm&&{P:rm,x:P.x+2.2,z:P.z+4};
  const tm=embMan('#e6bb55');let torch=null,tor=null;if(tm){add(tm.root);objs.push(tm.root);torch=new THREE.Group();mesh(G.cyl,M('#4a2f1c',.9),.03,.75,.03,0,0,0,torch,true);
   const fl=new THREE.Mesh(new THREE.PlaneGeometry(.35,.6),new THREE.MeshBasicMaterial({map:fireTex(),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));fl.position.y=.55;torch.add(fl);torch.userData.fl=fl;
   const L=new THREE.PointLight('#ff9a3a',1.4,9,1.8);L.position.y=.6;torch.add(L);torch.position.set(.3,1.25,.3);torch.rotation.x=-.35;tm.root.add(torch);tor={P:tm,x:P.x+2.6,z:P.z-2.6}}
  // soga: tramo con física (verlet) del pitón a la anilla y tramo recto por las manos de los emboladors
  const NS=16,nodes=[];for(let i=0;i<=NS;i++)nodes.push({x:P.x,y:1,z:P.z,px:P.x,py:1,pz:P.z});
  const segs=NS+men.length+1,rope=new THREE.InstancedMesh(new THREE.CylinderGeometry(.022,.022,1,6).translate(0,.5,0).rotateX(Math.PI/2),M('#cdb27c',.95),segs);rope.castShadow=true;rope.frustumCulled=false;add(rope);objs.push(rope);
- const e=CL.emb={r,ph:'puerta',t:0,objs,men,fit,tor,torch,rope,nodes,NS,ring:{x:P.x,y:1,z:P.z+.24},L:0,Ltot:0,mode:'tira',mt:0,ang:0,clay:[],ferros:null,cut:false};
+ const e=CL.emb={r,ph:'puerta',t:0,objs,men,fit,tor,rabo,torch,rope,nodes,NS,ring:{x:P.x,y:1,z:P.z+.24},L:0,Ltot:0,mode:'tira',mt:0,ang:0,clay:[],ferros:null,cut:false};
  // la res empieza dentro del cajón, con la soga ya en los cuernos
  r.mode='emb';r.v=0;r.x=E.cajon.x;r.z=E.cajon.z;r.yaw=Math.atan2(P.x-r.x,P.z-r.z);r.fire=null;
  const H=embHorn(r);e.L=Math.hypot(H.x-e.ring.x,H.z-e.ring.z);e.Ltot=e.L+.6;e.L0=e.L;
@@ -135,7 +136,7 @@ function embTick(r,dt){const e=CL.emb,E=CL.env,b=r.b,P=EMB_POST;e.t+=dt;let anim
   const tx=ring.x+ux*(e.L+1.15),tz=ring.z+uz*(e.L+1.15);const nx=r.x+(tx-r.x)*Math.min(1,dt*6),nz=r.z+(tz-r.z)*Math.min(1,dt*6);
   const fy=Math.atan2(ring.x-nx,ring.z-nz)+e.ang*.5,okp=clBody(E,nx,nz,fy,true);if(okp){r.x=nx;r.z=nz;r.yaw+=angD(r.yaw,fy)*Math.min(1,dt*4)}else{r.yaw+=angD(r.yaw,Math.atan2(ring.x-r.x,ring.z-r.z))*Math.min(1,dt*4)}
   if(e.ph==='amarre'||e.ph==='fang'||e.ph==='ferros'||e.ph==='foc'||e.ph==='solta'){r.x+=Math.cos(r.yaw)*Math.sin(CL.t*2.2)*.12*dt*6;r.z-=Math.sin(r.yaw)*Math.sin(CL.t*2.2)*.12*dt*6}}
- b.root.position.set(r.x,0,r.z);b.root.rotation.y=r.yaw;animBull(b,dt,anim);
+ b.root.position.set(r.x,0,r.z);b.root.rotation.y=r.yaw;animBull(b,dt,anim);embTail(e,r,dt);
  if(r.fire){const f=(.85+Math.sin(CL.t*23)*.1+Math.random()*.08)*(r.fire.k??1);r.fire.L.intensity=2.1*f;r.fire.fires.forEach(fl=>{fl.scale.set(f,f*(1+Math.random()*.2),1);fl.lookAt(W3.cam.position)})}
  embPeople(e,r,dt);embRope(e,r,dt)}
 // emboladors, los que embolan y el de la antorcha
@@ -174,7 +175,7 @@ function embRope(e,r,dt){const N=e.nodes,NS=e.NS,ring=e.ring,H=embHorn(r);const 
 if(typeof calleNext==='function'){const _cnE=calleNext;calleNext=function(){_cnE.apply(this,arguments);try{if(CL&&CL.res&&!CL.plaza&&CL.o.tipo==='embolado')embStart(CL.res)}catch(e){console.warn('embolat',e)}}}
 // mientras dura el ritual la res la controla la soga
 if(typeof resTick==='function'){const _rtE=resTick;resTick=function(r,dt){if(CL&&CL.emb&&CL.emb.r===r&&CL.emb.ph!=='libre'){embTick(r,dt);return}
-  _rtE(r,dt);if(CL&&CL.emb&&CL.emb.r===r){const e=CL.emb;if(e.cut)embPeople(e,r,dt),embRope(e,r,dt);
+  _rtE(r,dt);if(CL&&CL.emb&&CL.emb.r===r){const e=CL.emb;if(e.cut){embPeople(e,r,dt);embRope(e,r,dt);embTail(e,r,dt)}
    // las bolas se van consumiendo al final
    if(r.fire&&r.dur){const q=r.tt/r.dur;r.fire.k=q<.7?1:clamp(1-(q-.7)/.3*.75,.2,1);if(r.mode==='recogida')r.fire.k=Math.min(r.fire.k,.25)}}}}
 // recortadores: durante el ritual miran desde los refugios de la calle
@@ -193,3 +194,23 @@ if(typeof camCalle==='function'){const _ccE=camCalle;camCalle=function(dt){const
 function embClean(){for(let i=CLCIRC.length-1;i>=0;i--)if(CLCIRC[i].post)CLCIRC.splice(i,1);if(CL)CL.emb=null}
 if(typeof salirCalle==='function'){const _scE=salirCalle;salirCalle=function(){embClean();return _scE.apply(this,arguments)}}
 if(typeof irCalle==='function'){const _icE=irCalle;irCalle=function(){for(let i=CLCIRC.length-1;i>=0;i--)if(CLCIRC[i].post)CLCIRC.splice(i,1);return _icE.apply(this,arguments)}}
+
+/* ---------------- el del rabo: sujeta la cola del toro amarrado y tira de ella ---------------- */
+const EMB_TQ=new THREE.Quaternion(),EMB_V1=new THREE.Vector3(),EMB_V2=new THREE.Vector3(),EMB_V3=new THREE.Vector3(),EMB_WQ=new THREE.Quaternion(),EMB_PQ=new THREE.Quaternion();
+function embTailBones(r){if(r.tail!==undefined)return r.tail;const L=[];for(let i=1;i<=7;i++){const o=r.b.root.getObjectByName('Tail'+i);if(o)L.push(o)}r.tail=L.length>=4?L:null;return r.tail}
+// cinemática inversa (CCD) para llevar la punta de la cola a la mano
+function embTailIK(bones,target,w){const end=bones[bones.length-1];for(let it=0;it<4;it++)for(let j=bones.length-2;j>=0;j--){const bj=bones[j];bj.updateMatrixWorld(true);
+  bj.getWorldPosition(EMB_V1);end.getWorldPosition(EMB_V2);EMB_V2.sub(EMB_V1).normalize();EMB_V3.copy(target).sub(EMB_V1).normalize();
+  const a=Math.acos(clamp(EMB_V2.dot(EMB_V3),-1,1));if(a<1e-3)continue;EMB_TQ.setFromUnitVectors(EMB_V2,EMB_V3);const lim=Math.min(a,.35*w);if(lim<a)EMB_TQ.slerp(new THREE.Quaternion(),1-lim/a);
+  bj.getWorldQuaternion(EMB_WQ);EMB_WQ.premultiply(EMB_TQ);bj.parent.getWorldQuaternion(EMB_PQ);bj.quaternion.copy(EMB_PQ.invert().multiply(EMB_WQ))}}
+function embTail(e,r,dt){const m=e.rabo;if(!m)return;const P=EMB_POST,E=CL.env,s=Math.sin(r.yaw),c=Math.cos(r.yaw),hold=!e.cut&&['amarre','fang','ferros','foc','solta'].includes(e.ph);
+ // agarre detrás de la grupa, un poco hacia un lado, con un tirón de vez en cuando
+ // la mano, a partir de la base real de la cola: detrás, a un lado y algo más baja (con un tirón de vez en cuando)
+ const pull=Math.sin(CL.t*1.3)*.08,tb0=embTailBones(r);let bx=r.x-s*1.0,bz=r.z-c*1.0,by=1.25;if(tb0){r.b.root.updateMatrixWorld(true);tb0[0].getWorldPosition(EMB_V1);bx=EMB_V1.x;bz=EMB_V1.z;by=EMB_V1.y}
+ const hx=bx-s*(.38+pull)+c*.26,hz=bz-c*(.38+pull)-s*.26,hy=by-.22;let tx,tz;
+ if(hold){tx=hx-s*.42+c*.08;tz=hz-c*.42-s*.08}else if(e.cut||e.ph==='libre'){if(!m.ref){const q=E.nearRef(m.x,m.z);m.ref=[q.x,q.z]}tx=m.ref[0];tz=m.ref[1]}else{tx=P.x+2.3;tz=P.z+4}
+ const dx=tx-m.x,dz=tz-m.z,d=Math.hypot(dx,dz),sp=e.cut?5.2:2.4;if(d>.04){const k=Math.min(d,sp*dt);const nx=m.x+dx/d*k,nz=m.z+dz/d*k;if(clFree(E,nx,nz,.25,false)||e.cut){m.x=nx;m.z=nz}else{m.x+=dx/d*k*.3;m.z+=dz/d*k*.3}}
+ const near=hold&&d<.35;m.P.root.position.set(m.x,0,m.z);m.P.root.rotation.y=near?Math.atan2(hx-m.x,hz-m.z):d>.3?Math.atan2(dx,dz):Math.atan2(r.x-m.x,r.z-m.z);
+ embAnim(m.P,dt,d>.3?(e.cut?'Sprint_Loop':'Walk_Loop'):'Idle_Loop',1,near?-.3:0);
+ // la cola va a su mano mientras la sujeta
+ const tb=embTailBones(r);if(tb&&near){r.b.root.updateMatrixWorld(true);embTailIK(tb,EMB_V3.set(hx,hy,hz).clone(),1)}}

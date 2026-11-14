@@ -9,7 +9,7 @@ await p.goto((process.env.BASE||'http://localhost:8765/')+'index.html');await p.
 await p.evaluate(()=>{startReal(0);S.money=3e6;NEWC.name='Prueba';NEWC.l='PR';NEWC.lote=1;crearCorro()});
 let fallos=0;
 for(const tipo of ['vaquillas','capea','cerril','mar','embolado','vaquillas','vaquillas']){
- const r=await p.evaluate(tipo=>{if(W3.mode==='calle')salirCalle();const C=S.corro;if(tipo==='cerril'&&!C.an.some(a=>a.cerril)){C.mkt=null;corroMkt();cComprar('c',0)}
+ const r=await p.evaluate(tipo=>{if(W3.mode==='calle')salirCalle();const C=S.corro;if(tipo==='cerril'&&!C.an.some(a=>a.cerril)){S.money=Math.max(S.money,3e6);for(let k=0;k<20&&!C.an.some(a=>a.cerril);k++){C.mkt=null;corroMkt();if(C.mkt&&C.mkt.c&&C.mkt.c.length)cComprar('c',0)}}
   const o={id:8000+Math.floor(Math.random()*1000),pueblo:'Onda',prov:'Castellón',tam:3,fiesta:'Sant Cristòfol',tipo,abs:absNow(),pago:3000,st:'aceptada',night:tipo==='embolado'};C.of.push(o);
   for(const a of C.an){a.salMes=0;a.lesion=0;a.salud=90}irCalle(o.id);if(!CL)return 'sin festejo';
   // fuera de la zona transitable: distancia aproximada que asoma cada parte del cuerpo
