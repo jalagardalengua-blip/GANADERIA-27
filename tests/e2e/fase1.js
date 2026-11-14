@@ -7,7 +7,7 @@ const R={};const ok=(k,v)=>{R[k]=v;console.log((v&&v.ok!==false?'OK  ':'FAIL')+'
 await p.goto(BASE+'index.html');await p.waitForTimeout(800);
 ok('three local sin CDN',{ok:await p.evaluate(()=>typeof THREE!=='undefined'&&THREE.REVISION)});
 // memoria
-const mem=await p.evaluate(async()=>{localStorage.clear();startReal(0);const r=[];for(let i=0;i<10;i++){show3D();enterFinca();await new Promise(z=>setTimeout(z,250));exit3D();await new Promise(z=>setTimeout(z,80));const m=W3.R.info.memory;r.push([m.geometries,m.textures])}return r});
+const mem=await p.evaluate(async()=>{localStorage.clear();startReal(0);const r=[];for(let i=0;i<10;i++){show3D();enterFinca();await new Promise(z=>setTimeout(z,250));exit3D();await new Promise(z=>setTimeout(z,700));   /* la limpieza de la escena termina tras salir: se mide ya asentada */const m=W3.R.info.memory;r.push([m.geometries,m.textures])}return r});
 ok('memoria finca x10',{ok:mem[9][1]<=mem[2][1]+8&&mem[9][0]<=mem[2][0]+15,mem:[mem[0],mem[2],mem[9]]});
 // guardado y copia
 const sv=await p.evaluate(()=>{save();for(let i=0;i<2;i++)advance();save();return {bak:!!localStorage.getItem(KEY+'-bak'),main:localStorage.getItem(KEY).length}});ok('copia de seguridad',{ok:sv.bak,...sv});
