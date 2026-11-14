@@ -1,5 +1,11 @@
 # Cambios
 
+## Menos tirones y toro más estable
+- Corrida en directo: un 40 % menos de llamadas de dibujo por fotograma (733.000 → 494.000 triángulos, 156 → 82 piezas con sombra). Los flecos de las hombreras son una sola malla por hombro, los adornos pequeños no proyectan sombra y en el móvil el público usa figuras más ligeras y sombras más baratas.
+- Las sombras ya no tiemblan: la caja de sombras del sol se mueve a saltos de un píxel de su mapa, en la plaza y en la finca.
+- Finca: el encinar y los berrocales ya no desaparecen al mirar hacia otro lado (fallo de visibilidad de las mallas instanciadas). Las encinas llevan una sombra pintada en lugar de sombra en tiempo real: el pase de sombras baja de 457.000 a 215.000 triángulos.
+- Herramienta tests/gpu.js para medir el coste de dibujo de cada escena.
+
 ## Ganadería de corro: físicas de la res, bou embolat real y plaza rodeada de cadafales
 - Físicas: la res ya no atraviesa casas ni paredes ni se queda enganchada. Se comprueba el cuerpo entero (hocico, centro y grupa); resbala por las paredes, gira hacia el lado libre al chocar, se desencaja sola y va de la plaza a las calles por las bocacalles, también al recogerse y los cabestros. Los recortadores tampoco se meten en las fachadas al correr, esquivar o ser volteados (js/corro-fisicas.js).
 - Bou embolat como en la vida real: la res sale del cajón lazada por los cuernos, la soga pasa por la anilla del pilón y los emboladors la recogen a tirones hasta amarrarla; le protegen las astas con barro, le colocan el armazón de hierro con las bolas de estopa, las encienden con la antorcha, se apagan las luces de la calle, se corta la soga y queda libre. Soga con física, planos de cámara del ritual y bolas que se van consumiendo.

@@ -340,7 +340,7 @@ function init(){
  pmrem=new THREE.PMREMGenerator(renderer);
  sky=new THREE.Sky();sky.scale.setScalar(450);scene.add(sky);
  hemi=new THREE.HemisphereLight(0xffffff,0x886644,.5);scene.add(hemi);
- sun=new THREE.DirectionalLight(0xffffff,2.5);sun.castShadow=true;sun.shadow.mapSize.set(mobile?2048:4096,mobile?2048:4096);
+ sun=new THREE.DirectionalLight(0xffffff,2.5);sun.castShadow=true;sun.shadow.mapSize.set(mobile?1024:4096,mobile?1024:4096);if(mobile)renderer.shadowMap.type=THREE.PCFShadowMap;
  const sc=sun.shadow.camera;sc.left=-36;sc.right=36;sc.top=36;sc.bottom=-36;sc.near=1;sc.far=240;sun.shadow.bias=-.0006;sun.shadow.normalBias=.05;
  scene.add(sun);scene.add(sun.target);
  scene.fog=new THREE.FogExp2(0xd8cbb6,.0022);
@@ -461,9 +461,10 @@ function buildCrowd(){lMsg.textContent='Llenando los tendidos';const r=rng(9);
  const N=seats.length;
  const mergeG=gs=>{let n=0;gs=gs.map(g=>{g=g.index?g.toNonIndexed():g;n+=g.attributes.position.count;return g;});const P=new Float32Array(n*3),N=new Float32Array(n*3);let o=0;for(const g of gs){P.set(g.attributes.position.array,o*3);N.set(g.attributes.normal.array,o*3);o+=g.attributes.position.count;}const r=new THREE.BufferGeometry();r.setAttribute('position',new THREE.BufferAttribute(P,3));r.setAttribute('normal',new THREE.BufferAttribute(N,3));return r;};
  /* persona sentada: tronco con hombros, brazos a los lados y rodillas; pocas caras para que el móvil aguante miles */
- const tor=new THREE.LatheGeometry([new THREE.Vector2(.17,0),new THREE.Vector2(.165,.24),new THREE.Vector2(.205,.43),new THREE.Vector2(.06,.56)],6);tor.scale(1,1,.6);
+ const MOV=Math.min(innerWidth,innerHeight)<700;   // en el móvil, figuras con menos caras
+ const tor=new THREE.LatheGeometry([new THREE.Vector2(.17,0),new THREE.Vector2(.165,.24),new THREE.Vector2(.205,.43),new THREE.Vector2(.06,.56)],MOV?5:6);tor.scale(1,1,.6);
  const knee=new THREE.BoxGeometry(.3,.12,.3);knee.translate(0,.06,.15);
- const bodyG=mergeG([tor,knee]);const headG=new THREE.SphereGeometry(.105,6,4);headG.scale(.92,1.1,.98);headG.translate(0,.66,0);
+ const bodyG=mergeG(MOV?[tor]:[tor,knee]);const headG=new THREE.SphereGeometry(.105,MOV?5:6,MOV?3:4);headG.scale(.92,1.1,.98);headG.translate(0,.66,0);
  const bodies=new THREE.InstancedMesh(bodyG,crowdMat(),N),heads=new THREE.InstancedMesh(headG,crowdMat(),N);
  const pal=['#ece8df','#e4ded2','#d3cab8','#f0ede6','#26324a','#1d2333','#7f96b2','#a9b8c8','#5b5f66','#2a2a2c','#6d5747','#b8a684','#8b3a35','#c4b28a','#46553f','#d9d4ca','#9aa6b4','#3a3f4a'];
  const skins=['#e0b898','#c99a78','#b07f5c','#8a5f44','#f0cfb4','#2a1d16','#3b2a20'];
@@ -532,6 +533,10 @@ class Cloth{constructor(nx,ny,w,h,mat){this.nx=nx;this.ny=ny;this.sx=w/(nx-1);th
  update(){this.g.attributes.position.needsUpdate=true;this.g.computeVertexNormals();}}
 
 /* ---------- torero ---------- */
+/* une geometrías (posición y normal) en una sola malla: menos llamadas de dibujo */
+const unirGeo=gs=>{let n=0;gs=gs.map(g=>{g=g.index?g.toNonIndexed():g;n+=g.attributes.position.count;return g;});const P=new Float32Array(n*3),N=new Float32Array(n*3);let o=0;for(const g of gs){P.set(g.attributes.position.array,o*3);N.set(g.attributes.normal.array,o*3);o+=g.attributes.position.count;}const r=new THREE.BufferGeometry();r.setAttribute('position',new THREE.BufferAttribute(P,3));r.setAttribute('normal',new THREE.BufferAttribute(N,3));return r;};
+/* solo proyectan sombra las piezas grandes: botones, borlas y adornos no se ven en la sombra y cada uno es otra llamada de dibujo */
+function sombraSoloGrande(root){root.updateMatrixWorld(true);const s=new THREE.Vector3();root.traverse(o=>{if(!o.isMesh||!o.castShadow||!o.geometry)return;const g=o.geometry;if(!g.boundingSphere)g.computeBoundingSphere();o.getWorldScale(s);if(g.boundingSphere.radius*Math.max(s.x,s.y,s.z)<.07)o.castShadow=false;});}
 function buildTorero(spec){
  const skin=std({color:spec.skin,roughness:.55,side:THREE.DoubleSide});const hair=std({color:spec.hair,roughness:.7});
  const jacket=suitCanvas(spec,'jacket'),sleeve=suitCanvas(spec,'sleeve'),leg=suitCanvas(spec,'leg'),pelv=suitCanvas(spec,'pelvis');
@@ -550,8 +555,9 @@ function buildTorero(spec){
  const flecoG=new THREE.CylinderGeometry(.007,.011,.085,6),borla=new THREE.SphereGeometry(.013,8,6);
  for(const [sh,sg] of [[shL,1],[shR,-1]]){const hb=M(new THREE.SphereGeometry(1,18,12),gold);hb.scale.set(.082,.04,.08);hb.position.set(sg*.008,.035,0);hb.rotation.z=sg*-.38;sh.add(hb);
   const hb2=M(new THREE.SphereGeometry(1,14,10),gold);hb2.scale.set(.045,.026,.045);hb2.position.set(sg*.022,.058,0);sh.add(hb2);   // hombrera abultada
-  for(let k=0;k<13;k++){const a=(k/12-.5)*2.7;const cl=M(flecoG,gold,true,false);cl.position.set(sg*(.074+.01*Math.cos(a)),-.03,Math.sin(a)*.075);cl.rotation.z=sg*.18;sh.add(cl);
-   const bo=M(borla,gold,true,false);bo.position.set(sg*(.08+.01*Math.cos(a)),-.078,Math.sin(a)*.077);sh.add(bo);}}
+  {const pz=[];for(let k=0;k<13;k++){const a=(k/12-.5)*2.7;const f=flecoG.clone();f.rotateZ(sg*.18);f.translate(sg*(.074+.01*Math.cos(a)),-.03,Math.sin(a)*.075);pz.push(f);
+   const b=borla.clone();b.translate(sg*(.08+.01*Math.cos(a)),-.078,Math.sin(a)*.077);pz.push(b);}
+   const fl=M(unirGeo(pz),gold,false,false);fl.castShadow=false;sh.add(fl);}}
  // camisa blanca, corbatín y chaleco asomando por la chaquetilla abierta
  const camisa=std({color:'#f4f1ea',roughness:.6,side:THREE.DoubleSide}),corb=std({color:'#0e0e10',roughness:.4});
  const pech=M(new THREE.PlaneGeometry(.075,.19),camisa);pech.position.set(0,.37,.118);pech.rotation.x=-.2;spine.add(pech);
@@ -889,7 +895,7 @@ function newCorrida(seed){const load=document.getElementById('loading');
   CUR.t=randomTorero(r);CUR.b=randomBull(r);CUR.prog=randomProgram(r);if(JUEGO.on&&JUEGO.t)aplicaJuego(r);
   if(torero){scene.remove(torero.root);disposeTree(torero.root);}
   if(bull){scene.remove(bull.root);if(bull.rig){bull.anchors.forEach(a=>a.parent&&a.parent.remove(a));disposeTree(bull.div);bull.wrap.remove(RIG.sc);RIG.mixer.stopAllAction();}else if(bull.glb){bull.body.remove(bullGLB);bull.mesh.remove(bull.hp);bull.legs.forEach(l=>bull.mesh.remove(l.foot));bull.mesh.remove(bull.div);disposeTree(bull.div);}else disposeTree(bull.root);}
-  torero=buildTorero(CUR.t);scene.add(torero.root);
+  torero=buildTorero(CUR.t);scene.add(torero.root);sombraSoloGrande(torero.root);
   bull=(RIG&&bullGLB)?buildBullRig(CUR.b):bullGLB?buildBullGLB(CUR.b):buildBull({capa:{negro2:'negro',negro3:'negro',castano:'colorado'}[CUR.b.capa]||CUR.b.capa});scene.add(bull.root);
   resetLidia();updateBull(0);updateTorero(0);if(ui.cam==='cine')cut(pick(['tendido','grua','callejon']));else camS.snap=true;audio.clarin();
   setTimeout(()=>load.classList.add('off'),firstCorrida?60:250);firstCorrida=false;};
@@ -1147,12 +1153,17 @@ function autoCalidad(dtR){AQ.acc+=dtR;AQ.n++;AQ.t+=dtR;if(AQ.t<2)return;const ms
   if(AQ.lvl===2){sun.shadow.mapSize.set(1024,1024);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null;}}
   if(AQ.lvl===3&&crowd){crowd.hm.visible=false;}}
  else if(ms<17.8&&AQ.lvl===0&&!AQ.max){const pr=renderer.getPixelRatio(),top=Math.min(devicePixelRatio||1,mobile?1.75:2);if(pr<top-.01){renderer.setPixelRatio(Math.min(top,pr+.25));onResize();}else AQ.max=1;}}
+const SOMB={};
 function frame(now){requestAnimationFrame(frame);try{if(last)autoCalidad(Math.min(.2,(now-last)/1000));}catch(e){}if(!bull||!torero)return;const dtR=Math.min(.05,(now-last)/1000);last=now;
  const tgt=ui.paused?0:ui.speed*(ui.slow&&D.embroque?.6:1);timeScale=ui.paused?0:damp(timeScale,tgt,5,dtR);const dt=dtR*timeScale;
  {const nS=Math.min(4,Math.max(1,Math.ceil(dt/.05))),h=dt/nS;for(let s=0;s<nS;s++){if(h>0){simTime+=h;updateDirector(h);}updateBull(h);updateTorero(h);supremaPost(h);}}updateDust(dt);
  oleLevel=Math.max(0,oleLevel-dt*.45);PAN.t-=dtR;crowdU.uPan.value=damp(crowdU.uPan.value,PAN.t>0?1:0,1.6,dtR);crowdU.uOle.value=smooth(0,.6,oleLevel);crowdU.uTime.value=simTime;
- for(const fl of flags){const a=fl.m.geometry.attributes.position,b=fl.base;for(let i=0;i<a.count;i++){const x=b[i*3];a.array[i*3+2]=Math.sin(x*4-simTime*6+fl.ph)*.14*x+Math.sin(x*7-simTime*9)*.03*x;}a.needsUpdate=true;fl.m.geometry.computeVertexNormals();}
- const focus=T.clone().lerp(B,.38);sun.position.copy(focus).addScaledVector(sun.userData.dir,110);sun.target.position.copy(focus);
+ for(const fl of flags){const a=fl.m.geometry.attributes.position,b=fl.base;for(let i=0;i<a.count;i++){const x=b[i*3];a.array[i*3+2]=Math.sin(x*4-simTime*6+fl.ph)*.14*x+Math.sin(x*7-simTime*9)*.03*x;}a.needsUpdate=true;if((SOMB.f=(SOMB.f||0)+1)%3===0)fl.m.geometry.computeVertexNormals();}
+ const focus=T.clone().lerp(B,.38);
+ /* la caja de sombras se mueve a saltos de un píxel de su mapa: así los bordes de las sombras no tiemblan al seguir al toro */
+ {if(!SOMB.R){SOMB.R=new THREE.Matrix4().lookAt(sun.userData.dir,new V3(0,0,0),new V3(0,1,0));SOMB.Ri=SOMB.R.clone().invert();SOMB.tx=(sun.shadow.camera.right-sun.shadow.camera.left)/sun.shadow.mapSize.x;}
+  const lp=focus.clone().applyMatrix4(SOMB.Ri);lp.x=Math.round(lp.x/SOMB.tx)*SOMB.tx;lp.y=Math.round(lp.y/SOMB.tx)*SOMB.tx;focus.copy(lp.applyMatrix4(SOMB.R));}
+ sun.position.copy(focus).addScaledVector(sun.userData.dir,110);sun.target.position.copy(focus);
  updateCamera(dtR);
  dust.mat.uniforms.uScale.value=renderer.domElement.height/(2*Math.tan(camera.fov*Math.PI/360));
  renderer.render(scene,camera);
