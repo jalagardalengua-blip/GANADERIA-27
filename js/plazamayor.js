@@ -373,8 +373,14 @@ const PMX_PLAZAS={
  onda:{nom:"Plaça del Pla d'Onda",fondo:'iglesia',dosPortes:true,castell:true,styles:['calA','stone','calT','calB','stone'],fl:[2,3],ref:'amarillo',centro:'fuente'},
  vila:{nom:'Plaça de la Vila',fondo:'arcade',styles:['stone','stone','calT','stone','calT'],fl:[2,3],colWood:true,ref:'fusta',centro:'fuente',cad:[[.62,.45,.3],[.5,.36,.24],[.7,.55,.38],[.56,.42,.3]]}};
 const PMX_PUEBLOS={'vila-real':'vilareal','villarreal':'vilareal','nules':'nules','burriana':'borriana','borriana':'borriana','onda':'onda'};
-function pmxTipo(){let k='major';try{const o=CL&&CL.o,pu=((o&&o.pueblo)||'').toLowerCase().trim();if(o&&o.plaza&&PMX_PLAZAS[o.plaza])k=o.plaza;else if(PMX_PUEBLOS[pu])k=PMX_PUEBLOS[pu];else{const c=typeof locComarca==='function'?locComarca():'interior';k=c==='costa'?'esglesia':c==='ribera'?'ajuntament':((typeof locSeed==='function'?locSeed():0)%2?'vila':'major')}}catch(e){}
- return Object.assign({k},PMX_PLAZAS[k])}
+// tipo de plaza de cada pueblo del selector (los que no tienen plaza documentada propia)
+const PMX_TIPO_PUEBLO={'almassora':'esglesia','cabanes':'vila','torreblanca':'esglesia','benicarló':'esglesia','vinaròs':'esglesia','peñíscola':'esglesia','segorbe':'major',
+ 'moncofa':'esglesia','la vall d\'uixó':'ajuntament','betxí':'vila','l\'alcora':'vila','borriol':'vila','alcalà de xivert':'vila','benicàssim':'esglesia','meliana':'ajuntament',
+ 'museros':'ajuntament','puçol':'esglesia','massamagrell':'ajuntament','foios':'ajuntament','alboraia':'ajuntament','llíria':'major','chiva':'major','ontinyent':'major',
+ 'sueca':'ajuntament','el puig':'esglesia','sagunt':'major','dénia':'esglesia','pedreguer':'vila','xàbia':'esglesia','la romana':'vila','cheste':'major','xaló':'vila','moixent':'vila'};
+function pmxNomPueblo(nom,pu){if(!pu)return nom;return nom+(/^[aeiouàèéíòóúh]/i.test(pu)?" d'":' de ')+pu}
+function pmxTipo(){let k='major',gen=false,pn='';try{const o=CL&&CL.o,pu=((o&&o.pueblo)||'').toLowerCase().trim();pn=(o&&o.pueblo)||'';if(o&&o.plaza&&PMX_PLAZAS[o.plaza])k=o.plaza;else if(PMX_PUEBLOS[pu])k=PMX_PUEBLOS[pu];else if(PMX_TIPO_PUEBLO[pu]){k=PMX_TIPO_PUEBLO[pu];gen=true}else{gen=true;const c=typeof locComarca==='function'?locComarca():'interior';k=c==='costa'?'esglesia':c==='ribera'?'ajuntament':((typeof locSeed==='function'?locSeed():0)%2?'vila':'major')}}catch(e){}
+ const T_=Object.assign({k},PMX_PLAZAS[k]);if(gen&&pn)T_.nom=pmxNomPueblo(T_.nom,pn);return T_}
 const PMXC={};
 function pmxCanvas(key,w,h,draw){if(PMXC[key])return PMXC[key];const cv=document.createElement('canvas');cv.width=w;cv.height=h;draw(cv.getContext('2d'),w,h);const t=new THREE.CanvasTexture(cv);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;PMXC[key]=t;return t}
 function pmxCyl(Gr,x,z,y0,h,r0,r1,col,seg=12,su=1){const g=new THREE.CylinderGeometry(r1,r0,h,seg,1),p=g.attributes.position,nr=g.attributes.normal,uv=g.attributes.uv,idx=g.index.array,b=Gr.n;

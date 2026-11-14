@@ -73,7 +73,7 @@ calleTick=function(dt){if(CL&&CL.enc&&!CL.done){CL.t+=dt;const me=CL.me;let jx=W
   for(const p of CL.ppl){if(p.toss>0){p.toss-=dt;const ph=2.2-p.toss;if(ph<.7){const nx=p.x+p.tv.x*dt,nz=p.z+p.tv.z*dt;if(E.walk({x:nx,z:nz},false)){p.x=nx;p.z=nz}else{p.tv.x*=-.3;p.tv.z*=-.3}}}else{const nx=p.x+p.vx*dt,nz=p.z+p.vz*dt;if(E.walk({x:nx,z:nz},false)){p.x=nx;p.z=nz}else if(E.walk({x:nx,z:p.z},false))p.x=nx;else if(E.walk({x:p.x,z:nz},false))p.z=nz}
    const m=p.m,sp=Math.hypot(p.vx,p.vz);m.root.position.set(p.x,0,p.z);if(p.toss>0){const ph=2.2-p.toss;m.root.position.y=ph<.7?Math.sin(ph/.7*Math.PI)*1.8:.12;m.root.rotation.x=ph<1.7?-Math.PI/2:0}else{m.root.rotation.x=0;if(sp>.3)p.yaw+=angD(p.yaw,Math.atan2(p.vx,p.vz))*Math.min(1,dt*10);m.root.rotation.y=p.yaw;m.arms[0].lock=m.arms[1].lock=0;animPerson(m,dt,Math.min(1.5,sp/4))}m.root.visible=!(p===me&&CL.spect)}
   crowdPose(.25+(CL.cheer||0),CL.t);dustTick(CL.D,dt);if(CL.cheer>0)CL.cheer=Math.max(0,CL.cheer-dt*.35);
-  const ld=CL.enc.herd[0];if(ld){CL.res={a:ld.a,b:ld.b,x:ld.x,z:ld.z,yaw:encAt(ld.s).yaw,mode:'enc',st:ld.st,v:6,tt:0,dur:999}}
+  const ld=CL.enc.herd[0];if(ld){CL.res={a:ld.a,b:ld.b,x:ld.x,z:ld.z,yaw:ld.syaw??encAt(ld.s).yaw,mode:'enc',st:ld.st,v:6,tt:0,dur:999}}
   if(CL.t%0.2<dt)tvMap();if(CL.t%0.5<dt)$('#clres').textContent=`Encierro · ${Math.round(CL.enc.lead)} / ${Math.round(CL.enc.L)} m`;
   camCalle(dt);return}
  _calleTickE(dt);if(!CL)return;if(CL.water)marTick(dt);if(CL.cord&&CL.res)cordaTick(dt)};

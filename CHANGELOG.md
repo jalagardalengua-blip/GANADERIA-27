@@ -1,5 +1,13 @@
 # Cambios
 
+## Ganadería de corro: físicas sin errores y pilón del embolat en medio de la plaza
+- El pilón del bou embolat está en medio de la plaza: el toro sale del cajón con la soga, baja la calle caminando con los emboladors, se resiste cerca del poste y queda amarrado en el centro.
+- Al cortar la soga el toro arranca y se aleja del pilón, y corre libre por toda la plaza y las calles. El pilón es un poste físico real (ya no un refugio con margen) y la res lo rodea por el lado con más espacio.
+- Movimientos de la res sin errores: rodeo inteligente de pilón, fuente y refugio central; sin teletransportes al desencajarse (sale caminando); giro limitado a ~260° por segundo, sin latigazos.
+- Encierro: la manada toma las esquinas sin saltos ni cambios bruscos de dirección (también la cámara «la res»).
+- Cada pueblo del selector tiene su plaza con su nombre (por ejemplo «Plaça de l'Església de Benicarló»).
+- Test de física endurecido: falla con cualquier teletransporte, giro brusco, atasco, res dentro de una casa o embolat que no se despegue del pilón.
+
 ## Ganadería de corro: diferentes plazas según el pueblo
 - Plaça Major (interior): soportales de piedra, casas de entramado, fuente de granito y cadafales de colores.
 - Plaça de l'Església (costa): iglesia con portada de columnas, rosetón de vidriera y campanario con chapitel de azulejo azul; casas encaladas con zócalo azul y terrados; palmera con talanquera; refugio blanco y azul; cadafales azules, blancos y verdes.
