@@ -5,6 +5,7 @@
 | three.js (`js/libs/three.min.js`) | r128 | MIT | https://github.com/mrdoob/three.js |
 | GLTFLoader, SkeletonUtils (`js/libs/`) | r128 | MIT | three.js `examples/js` |
 | Quaternius: Universal Animation Library, Farm Animals, Stylized Nature MegaKit, Downtown City MegaKit | — | CC0 1.0 | https://quaternius.com |
+| Poly Haven: silla monobloc, silla gallinera, mesa de terraza, banco, jardinera, barrica, caja de madera (`modelos/corro/`) | — | CC0 1.0 | https://polyhaven.com |
 | Barlow, Barlow Condensed, Cinzel, IBM Plex Mono | — | SIL Open Font License 1.1 | Google Fonts |
 | Capacitor (solo para compilar el APK, no se distribuye en la web) | 7 | MIT | https://capacitorjs.com |
 

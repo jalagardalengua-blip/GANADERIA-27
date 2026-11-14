@@ -1,5 +1,14 @@
 # Cambios
 
+## Ganadería de corro: físicas de la res, bou embolat real y plaza rodeada de cadafales
+- Físicas: la res ya no atraviesa casas ni paredes ni se queda enganchada. Se comprueba el cuerpo entero (hocico, centro y grupa); resbala por las paredes, gira hacia el lado libre al chocar, se desencaja sola y va de la plaza a las calles por las bocacalles, también al recogerse y los cabestros. Los recortadores tampoco se meten en las fachadas al correr, esquivar o ser volteados (js/corro-fisicas.js).
+- Bou embolat como en la vida real: la res sale del cajón lazada por los cuernos, la soga pasa por la anilla del pilón y los emboladors la recogen a tirones hasta amarrarla; le protegen las astas con barro, le colocan el armazón de hierro con las bolas de estopa, las encienden con la antorcha, se apagan las luces de la calle, se corta la soga y queda libre. Soga con física, planos de cámara del ritual y bolas que se van consumiendo.
+- Fuego de verdad en el embolat (js/corro-fuego.js): llamas de partículas que dejan estela cuando el toro corre, humo negro de la brea, bolas de estopa incandescentes que se consumen, luz que parpadea y antorcha encendida. Número fijo de partículas para que no haya tirones.
+- El embolador del rabo: mientras el toro está amarrado, uno le sujeta la cola desde atrás y tira de ella (la cola se dobla de verdad hacia su mano); al cortar la soga la suelta y corre.
+- Toda la plaza central rodeada de cadafales (solo quedan abiertas las bocas de las calles).
+- Objetos fotoescaneados de Poly Haven (CC0): sillas de plástico en los tablados, sillas gallinera, mesas de terraza, bancos, jardineras, barricas y cajas de las peñas. Optimizados y dibujados con instancias; en calidad media se colocan menos y en baja ninguno.
+- Test nuevo: tests/e2e/fisicas-corro.js (la res no asoma dentro de las casas, no se atasca y el embolat sigue todas las fases).
+
 ## Finca más real, mando táctil moderno y realización de TV
 - Dehesa: encinas de copa ancha y redondeada con la línea de ramoneo, tronco gris pardo con ramas maestras; berrocales de granito con líquenes; sierra azulada en el horizonte; sol más cálido y suelo con más color.
 - Mando: joystick flotante en la mitad izquierda, correr al empujar a fondo, pellizco para el zoom y doble toque para poner la cámara a tu espalda. El botón de acción late y vibra cuando hay algo que hacer, y unas etiquetas flotantes señalan lo que tienes cerca (cortijo, mayoral, caballo, camioneta…).
