@@ -41,6 +41,10 @@ function clAvoid(r,signOnly){const E=CL&&CL.env;if(!E)return 0;const home=r.mode
 // movimiento de la res: avanza, resbala por la pared o gira; devuelve true si ha chocado de frente
 function clBullMove(r,dt,home){const E=CL.env,ok=(x,z,y)=>clBody(E,x,z,y,home);
  if(r.pyaw!=null){const dy=angD(r.pyaw,r.yaw),mx=4.6*dt;if(Math.abs(dy)>mx)r.yaw=r.pyaw+Math.sign(dy)*mx}
+ // escapando de una pared: gira hacia el rumbo libre y sale por él (sin que la persecución lo vuelva a meter)
+ if(r.esc&&CL.t<r.esc.until){const a=r.esc.a,dy=clamp(angD(r.yaw,a),-4.6*dt,4.6*dt),ny=r.yaw+dy;if(ok(r.x,r.z,ny))r.yaw=ny;
+  if(Math.abs(angD(r.yaw,a))<.35){const sp2=Math.max(1.6,r.v)*dt,nx=r.x+Math.sin(r.yaw)*sp2,nz=r.z+Math.cos(r.yaw)*sp2;if(ok(nx,nz,r.yaw)){r.x=nx;r.z=nz}else r.esc=null}
+  r.v=Math.max(r.v,1.6);r.stuck=0;return false}else if(r.esc)r.esc=null;
  // desencaje en curso: camina hasta el hueco libre sin saltos
  if(r.unst){const u=r.unst,dx=u[0]-r.x,dz=u[1]-r.z,d=Math.hypot(dx,dz),st=Math.min(d,2.4*dt),nx=r.x+dx/(d||1)*st,nz=r.z+dz/(d||1)*st,ny=r.yaw+clamp(angD(r.yaw,u[2]),-3*dt,3*dt);
   // cada paso del desencaje se comprueba con el cuerpo entero: nunca atraviesa una pared ni una esquina
@@ -55,8 +59,9 @@ function clBullMove(r,dt,home){const E=CL.env,ok=(x,z,y)=>clBody(E,x,z,y,home);
   if(Math.hypot(tx,tz)>sp*.15&&ok(r.x+tx,r.z+tz,r.yaw)){r.x+=tx;r.z+=tz;r.v*=1-Math.min(.5,dt*2.2);r.yaw+=angD(r.yaw,Math.atan2(tx,tz))*Math.min(1,dt*3);r.stuck=0;return false}}
  if(Math.abs(dx)>1e-4&&ok(r.x+dx,r.z,r.yaw)){r.x+=dx;r.v*=.97;return false}
  if(Math.abs(dz)>1e-4&&ok(r.x,r.z+dz,r.yaw)){r.z+=dz;r.v*=.97;return false}
- r.stuck=(r.stuck||0)+dt;const sg=clAvoid(r,1)||(r.x*Math.cos(r.yaw)-r.z*Math.sin(r.yaw)>0?-1:1),ny=r.yaw+sg*dt*3.2;if(ok(r.x,r.z,ny))r.yaw=ny;
- if(r.stuck>1.2){const f=clFindFree({x:r.x-Math.sin(r.yaw)*.6,z:r.z-Math.cos(r.yaw)*.6,yaw:r.yaw+sg*.8},home);if(f)r.unst=[f[0],f[1],f[2],CL.t];r.stuck=0}
+ // choque de frente: rumbo libre más parecido al que quería, y a escapar por él
+ r.stuck=(r.stuck||0)+dt;let esc=null;for(let k=1;k<=12&&!esc;k++)for(const sg2 of [1,-1]){const a=r.yaw+sg2*k*.26;if(ok(r.x+Math.sin(a)*.4,r.z+Math.cos(a)*.4,a)&&ok(r.x,r.z,r.yaw+sg2*Math.min(k*.26,.5))){esc=a;break}}
+ if(esc!=null)r.esc={a:esc,until:CL.t+.9};else if(r.stuck>.6){const f=clFindFree({x:r.x-Math.sin(r.yaw)*.6,z:r.z-Math.cos(r.yaw)*.6,yaw:r.yaw+Math.PI},home);if(f)r.unst=[f[0],f[1],f[2],CL.t];r.stuck=0}
  r.v*=.4;return true}
 // personas encajadas: al hueco libre más cercano
 function clUnstickP(E,p){if(clFree(E,p.x,p.z,.28,false))return;for(let d=.1;d<=2;d+=.1)for(let i=0;i<12;i++){const a=i/12*Math.PI*2,x=p.x+Math.sin(a)*d,z=p.z+Math.cos(a)*d;if(clFree(E,x,z,.28,false)){p.x=x;p.z=z;return}}}
