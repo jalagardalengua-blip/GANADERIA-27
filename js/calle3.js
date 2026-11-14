@@ -48,7 +48,7 @@ function heridosTick(dt){if(!CL)return;const r=CL.res;
   try{crowdLevel(.02)}catch(e){}}
  for(const p of CL.her.slice()){const H=p.herido,m=p.m;H.t+=dt;
   if(H.ph==='tendido'){m.root.position.set(p.x,.12,p.z);m.root.rotation.x=-Math.PI/2;
-   if(r&&r.hook===p&&H.t<1.6&&Math.hypot(r.x-p.x,r.z-p.z)<2.2){r.v=0;const fy=Math.atan2(p.x-r.x,p.z-r.z);r.yaw+=angD(r.yaw,fy)*Math.min(1,dt*6);if(Math.sin(H.t*7)>.6)r.b.hp.rotation.x=.9}
+   if(r&&r.hook===p&&H.t<1.6&&Math.hypot(r.x-p.x,r.z-p.z)<2.2){r.v=0;const fy=Math.atan2(p.x-r.x,p.z-r.z);r.yaw+=clamp(angD(r.yaw,fy)*Math.min(1,dt*6),-4.6*dt,4.6*dt);if(Math.sin(H.t*7)>.6)r.b.hp.rotation.x=.9}
    if(H.t>(H.sev==='grave'?3.2:2.2)){if(H.sev==='mg'){H.ph='ayuda';H.t=0;m.root.rotation.x=0}else{H.ph='camilla';H.t=0;camilla(p)}}}
   else if(H.ph==='ayuda'){const rf=CL.env.nearRef(p.x,p.z);const ex=rf.x-p.x,ez=rf.z-p.z,el=Math.hypot(ex,ez);if(el>.4){p.x+=ex/el*1.4*dt;p.z+=ez/el*1.4*dt;p.yaw=Math.atan2(ex,ez)}
    m.root.position.set(p.x,0,p.z);m.root.rotation.set(0,p.yaw,Math.sin(H.t*6)*.12);animPerson(m,dt,.4);if(el<=.4||H.t>14)retirar(p)}

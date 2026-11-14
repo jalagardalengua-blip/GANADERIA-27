@@ -61,7 +61,7 @@ function clBullMove(r,dt,home){const E=CL.env,ok=(x,z,y)=>clBody(E,x,z,y,home);
  if(Math.abs(dz)>1e-4&&ok(r.x,r.z+dz,r.yaw)){r.z+=dz;r.v*=.97;return false}
  // choque de frente: rumbo libre más parecido al que quería, y a escapar por él
  r.stuck=(r.stuck||0)+dt;let esc=null;for(let k=1;k<=12&&!esc;k++)for(const sg2 of [1,-1]){const a=r.yaw+sg2*k*.26;if(ok(r.x+Math.sin(a)*.4,r.z+Math.cos(a)*.4,a)&&ok(r.x,r.z,r.yaw+sg2*Math.min(k*.26,.5))){esc=a;break}}
- if(esc!=null)r.esc={a:esc,until:CL.t+.9};else if(r.stuck>.6){const f=clFindFree({x:r.x-Math.sin(r.yaw)*.6,z:r.z-Math.cos(r.yaw)*.6,yaw:r.yaw+Math.PI},home);if(f)r.unst=[f[0],f[1],f[2],CL.t];r.stuck=0}
+ if(esc!=null){r.esc={a:esc,until:CL.t+.9};if(r.mode==='trota'&&!r.salida){r.mode='mira';r.t=0}}else if(r.stuck>.6){const f=clFindFree({x:r.x-Math.sin(r.yaw)*.6,z:r.z-Math.cos(r.yaw)*.6,yaw:r.yaw+Math.PI},home);if(f)r.unst=[f[0],f[1],f[2],CL.t];r.stuck=0}
  r.v*=.4;return true}
 // personas encajadas: al hueco libre más cercano
 function clUnstickP(E,p){if(clFree(E,p.x,p.z,.28,false))return;for(let d=.1;d<=2;d+=.1)for(let i=0;i<12;i++){const a=i/12*Math.PI*2,x=p.x+Math.sin(a)*d,z=p.z+Math.cos(a)*d;if(clFree(E,x,z,.28,false)){p.x=x;p.z=z;return}}}
@@ -153,7 +153,7 @@ function embTick(r,dt){const e=CL.emb,E=CL.env,b=r.b,P=EMB_POST;e.t+=dt;let anim
    if(e.t>1.6){e.ph='libre';CLPOST.on=true;CLPOST.x=EMB_POST.x;CLPOST.z=EMB_POST.z;
     // salida: arranca al galope calle abajo hacia la plaza
     r.salida=CL.t;r.mode='trota';r.t=0;r.tt=0;r.v=2.5;r.trotV=5.6;CL.lowT=CL.t;
-    {let best=null;for(let k=0;k<24;k++){const a=Math.random()*6.283,d=7.5+Math.random()*3,x=EMB_POST.x+Math.sin(a)*d,z=EMB_POST.z+Math.cos(a)*d;if(clRectOf(x,z)==='plz'&&clFree(CL.env,x,z,.8,true)){best=[x,z];break}}r.wx=best?best[0]:0;r.wz=best?best[1]:8}$('#h3cap').textContent='El toro embolado corre libre por la plaza. Respeta la distancia y busca los cadafales.'}break}}
+    {let best=null;for(let k=0;k<24;k++){const a=Math.random()*6.283,d=7.5+Math.random()*3,x=EMB_POST.x+Math.sin(a)*d,z=EMB_POST.z+Math.cos(a)*d;if(clRectOf(x,z)==='plz'&&clFree(CL.env,x,z,.8,true)&&clLinea(CL.env,r.x,r.z,x,z)){best=[x,z];break}}r.wx=best?best[0]:0;r.wz=best?best[1]:8}$('#h3cap').textContent='El toro embolado corre libre por la plaza. Respeta la distancia y busca los cadafales.'}break}}
  // posición de la res según la soga (tensa mientras está atada)
  if(!e.cut){const H=embHorn(r),d=Math.hypot(H.x-ring.x,H.z-ring.z);void H;
   void d;const a=Math.atan2(E.cajon.x-ring.x,E.cajon.z-ring.z)+e.ang*.8*Math.min(1,3/(e.L+1)),ux=Math.sin(a),uz=Math.cos(a);
@@ -200,7 +200,7 @@ function embRope(e,r,dt){const N=e.nodes,NS=e.NS,ring=e.ring,H=embHorn(r);const 
 if(typeof calleNext==='function'){const _cnE=calleNext;calleNext=function(){_cnE.apply(this,arguments);try{if(CL&&CL.res&&!CL.plaza&&CL.o.tipo==='embolado')embStart(CL.res)}catch(e){console.warn('embolat',e)}}}
 // mientras dura el ritual la res la controla la soga
 if(typeof resTick==='function'){const _rtE=resTick;resTick=function(r,dt){if(CL&&CL.emb&&CL.emb.r===r&&CL.emb.ph!=='libre'){embTick(r,dt);return}
-  if(r.salida){if(Math.hypot(r.x-EMB_POST.x,r.z-EMB_POST.z)>6||CL.t-r.salida>8){r.salida=0;r.trotV=0}else if(r.mode==='trota'||r.mode==='mira'){if(r.mode==='mira'){r.mode='trota'}r.t=0}}
+  if(r.salida){if(Math.hypot(r.x-EMB_POST.x,r.z-EMB_POST.z)>6||CL.t-r.salida>4){r.salida=0;r.trotV=0}else if(r.mode==='trota'||r.mode==='mira'){if(r.mode==='mira'){r.mode='trota'}r.t=0}}
   _rtE(r,dt);if(CL&&CL.emb&&CL.emb.r===r){const e=CL.emb;if(e.cut){embPeople(e,r,dt);embRope(e,r,dt);embTail(e,r,dt)}
    // las bolas se van consumiendo al final
    if(r.fire&&r.dur){const q=r.tt/r.dur;r.fire.k=q<.7?1:clamp(1-(q-.7)/.3*.75,.2,1);if(r.mode==='recogida')r.fire.k=Math.min(r.fire.k,.25)}}}}
@@ -249,3 +249,10 @@ if(typeof encTick==='function'){const _etE=encTick;encTick=function(dt){_etE(dt)
   const dx=tx-h.sx,dz=tz-h.sz,d=Math.hypot(dx,dz),mx=7.5*dt,k=d>mx?mx/d:1;h.sx+=dx*k;h.sz+=dz*k;
   if(d>.02)h.syaw+=clamp(angD(h.syaw,Math.atan2(dx,dz)),-4.6*dt,4.6*dt);
   h.b.root.position.set(h.sx,0,h.sz);h.b.root.rotation.y=h.syaw;h.x=h.sx;h.z=h.sz}}}
+
+/* ---------------- destinos alcanzables ---------------- */
+// camino recto despejado para la res (cada 0,5 m)
+function clLinea(E,x0,z0,x1,z1){const L=Math.hypot(x1-x0,z1-z0),n=Math.max(1,Math.ceil(L/.5));for(let i=1;i<=n;i++){const t=i/n;if(!clFree(E,x0+(x1-x0)*t,z0+(z1-z0)*t,.7,true))return false}return true}
+// los destinos al azar nunca caen dentro de un cadafal, una talanquera o el refugio: siempre donde cabe la res
+if(typeof envCalle==='function'){const _ecF=envCalle;envCalle=function(){const E=_ecF.apply(this,arguments),r0=E.rand.bind(E);
+ E.rand=()=>{let q=r0();for(let k=0;k<24;k++){if(clFree(E,q.x,q.z,1.0,true))return q;q=r0()}return q};return E}}
