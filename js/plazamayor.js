@@ -165,7 +165,8 @@ buildCalle=function(night){
  if(PT.fondo==='iglesia'){house(-21,-8,-11,'x',1,{plaza:1,fl:FL});pmxIglesia(G,sc,-8,8,-11,PT,LAN);house(8,21,-11,'x',1,{plaza:1,fl:FL})}
  else if(PT.fondo==='ajuntament'){house(-21,-9,-11,'x',1,{plaza:1,fl:FL});pmxAjuntament(G,sc,-9,9,-11,PT,LAN);house(9,21,-11,'x',1,{plaza:1,fl:FL})}
  else house(-21,21,-11,'x',1,{arcade:1,plaza:1,fl:FL});
- house(-21,-3.5,11,'x',-1,{plaza:1,fl:FL});house(3.5,21,11,'x',-1,{plaza:1,fl:FL});
+ house(-21,-3.5,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});house(3.5,21,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});
+ if(PT.castell)pmxCastell(sc);
  house(-11,-4,14,'z',-1,{plaza:1,fl:FL});house(4,11,14,'z',-1,{plaza:1,fl:FL});house(-11,-4,-14,'z',1,{plaza:1,fl:FL});house(4,11,-14,'z',1,{plaza:1,fl:FL});
  house(21,64,4,'x',-1);house(21,64,-4,'x',1);house(-64,-21,4,'x',-1);house(-64,-21,-4,'x',1);house(18,46,3.5,'z',-1);house(18,46,-3.5,'z',1);house(-4,4,66,'z',-1);house(-4,4,-66,'z',1);
  // ---------- cadafales en los refugios de la plaza ----------
@@ -321,7 +322,7 @@ function pmxStair(G,sc,rf){const blue=[.1,.32,.72],alongX=rf.x1-rf.x0>rf.z1-rf.z
   m.position.set((a[0]+b[0])/2+nn[0]*.02,H/2+.55,(a[2]+b[2])/2+nn[2]*.02);m.rotation.order='YXZ';m.rotation.y=Math.atan2(nn[0],nn[2]);
   const lx=Math.cos(m.rotation.y)*ux-Math.sin(m.rotation.y)*uz;m.rotation.z=Math.atan2(H,run)*(lx>=0?1:-1);sc.add(m)}}
 /* refugio amarillo: muro octogonal con cuatro accesos, torre central con cornisa y farol */
-function pmxRefugio(G,c,LAN){const R_=c.r,n=12,h=1.1,th=.2,rf=(PMX.PT||{}).ref||'amarillo',RM=rf==='amarillo'?RM:rf==='fusta'?G.wood:G.paint,Y=rf==='blanco'?[.95,.95,.92]:rf==='rojo'?[.78,.1,.08]:rf==='fusta'?[.85,.75,.65]:[1,1,1];
+function pmxRefugio(G,c,LAN){const R_=c.r,n=12,h=1.1,th=.2,rf=(PMX.PT||{}).ref||'amarillo',RM=rf==='amarillo'?G.yellow:rf==='fusta'?G.wood:G.paint,Y=rf==='blanco'?[.95,.95,.92]:rf==='rojo'?[.78,.1,.08]:rf==='fusta'?[.85,.75,.65]:[1,1,1];
  const B2=rf==='blanco'?[.12,.32,.72]:rf==='rojo'?[.96,.95,.92]:null;
  for(let i=0;i<n;i++){if(i%3===1)continue;const a0=i/n*Math.PI*2,a1=(i+1)/n*Math.PI*2,p0=[c.x+Math.sin(a0)*R_,c.z+Math.cos(a0)*R_],p1=[c.x+Math.sin(a1)*R_,c.z+Math.cos(a1)*R_],am=(a0+a1)/2,nn=[Math.sin(am),Math.cos(am)],o=[nn[0]*th/2,nn[1]*th/2];
   RM.wall([p0[0]+o[0],p0[1]+o[1]],[p1[0]+o[0],p1[1]+o[1]],0,h,2,2,Y,nn);RM.wall([p1[0]-o[0],p1[1]-o[1]],[p0[0]-o[0],p0[1]-o[1]],0,h,2,2,Y,[-nn[0],-nn[1]]);
@@ -366,8 +367,13 @@ const PMX_PLAZAS={
  esglesia:{nom:"Plaça de l'Església",fondo:'iglesia',styles:['calA','calC','calA','calC','calB','calA'],fl:[2,3],terrat:.55,zocalo:[.16,.36,.72],gfTint:[1.32,1.3,1.24],ref:'blanco',centro:'palmera',azulejo:true,
   cad:[[.12,.3,.75],[.92,.92,.9],[.1,.45,.22],[.25,.55,.85],[.92,.92,.9]]},
  ajuntament:{nom:"Plaça de l'Ajuntament",fondo:'ajuntament',styles:['calB','calA','calB','calC'],fl:[3,4],ref:'rojo',centro:'fanal',cad:[[.85,.12,.08],[.95,.72,.08],[.92,.92,.9],[.72,.08,.06],[.95,.72,.08]]},
+ vilareal:{nom:'Plaça Major de Vila-real',fondo:'ajuntament',porxos:true,styles:['calA','calB','calA','calC','calB'],fl:[2,3],ref:'amarillo',centro:'fanal'},
+ nules:{nom:'Plaça Major de Nules',fondo:'iglesia',cupula:true,styles:['calA','calC','calA','calB'],fl:[2,3],terrat:.45,zocalo:[.16,.36,.72],gfTint:[1.3,1.28,1.22],ref:'blanco',centro:'palmera',cad:[[.12,.3,.75],[.92,.92,.9],[.1,.45,.22],[.85,.12,.08]]},
+ borriana:{nom:'Plaça Major de Borriana',fondo:'iglesia',gotic:true,styles:['calA','calB','calA','calC'],fl:[2,4],terrat:.35,gfTint:[1.25,1.22,1.16],ref:'amarillo',centro:'fanal'},
+ onda:{nom:"Plaça del Pla d'Onda",fondo:'iglesia',dosPortes:true,castell:true,styles:['calA','stone','calT','calB','stone'],fl:[2,3],ref:'amarillo',centro:'fuente'},
  vila:{nom:'Plaça de la Vila',fondo:'arcade',styles:['stone','stone','calT','stone','calT'],fl:[2,3],colWood:true,ref:'fusta',centro:'fuente',cad:[[.62,.45,.3],[.5,.36,.24],[.7,.55,.38],[.56,.42,.3]]}};
-function pmxTipo(){let k='major';try{const o=CL&&CL.o;if(o&&o.plaza&&PMX_PLAZAS[o.plaza])k=o.plaza;else{const c=typeof locComarca==='function'?locComarca():'interior';k=c==='costa'?'esglesia':c==='ribera'?'ajuntament':((typeof locSeed==='function'?locSeed():0)%2?'vila':'major')}}catch(e){}
+const PMX_PUEBLOS={'vila-real':'vilareal','villarreal':'vilareal','nules':'nules','burriana':'borriana','borriana':'borriana','onda':'onda'};
+function pmxTipo(){let k='major';try{const o=CL&&CL.o,pu=((o&&o.pueblo)||'').toLowerCase().trim();if(o&&o.plaza&&PMX_PLAZAS[o.plaza])k=o.plaza;else if(PMX_PUEBLOS[pu])k=PMX_PUEBLOS[pu];else{const c=typeof locComarca==='function'?locComarca():'interior';k=c==='costa'?'esglesia':c==='ribera'?'ajuntament':((typeof locSeed==='function'?locSeed():0)%2?'vila':'major')}}catch(e){}
  return Object.assign({k},PMX_PLAZAS[k])}
 const PMXC={};
 function pmxCanvas(key,w,h,draw){if(PMXC[key])return PMXC[key];const cv=document.createElement('canvas');cv.width=w;cv.height=h;draw(cv.getContext('2d'),w,h);const t=new THREE.CanvasTexture(cv);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;PMXC[key]=t;return t}
@@ -400,14 +406,19 @@ function pmxIglesia(G,sc,a0,a1,line,PT,LAN){const fz=line-1,D=16,W=a1-a0,cx=(a0+
  // escalinata
  for(let i=0;i<3;i++)G.granite.box(cx,.1+i*.17,fz+.85-i*.28,7.5-i*.6,.2,.6,1.5,[.86,.83,.78]);
  // campanario
- const tx=a1-2.6,tz=fz-2.4,T=2.1,TH=23;for(const [p0,p1,n] of [[[tx-T,tz+T],[tx+T,tz+T],[0,1]],[[tx+T,tz+T],[tx+T,tz-T],[1,0]],[[tx-T,tz-T],[tx-T,tz+T],[-1,0]],[[tx+T,tz-T],[tx-T,tz-T],[0,-1]]])G.granite.wall(p0,p1,0,TH,1.5,1.5,st,n);
+ const tx=a1-2.6,tz=fz-2.4,T=PT.gotic?2.4:2.1,TH=PT.gotic?31:23;for(const [p0,p1,n] of [[[tx-T,tz+T],[tx+T,tz+T],[0,1]],[[tx+T,tz+T],[tx+T,tz-T],[1,0]],[[tx-T,tz-T],[tx-T,tz+T],[-1,0]],[[tx+T,tz-T],[tx-T,tz-T],[0,-1]]])G.granite.wall(p0,p1,0,TH,1.5,1.5,st,n);
  for(const y of [Hn+.2,TH-4.4,TH])G.granite.box(tx,y,tz,T*2+.3,.3,T*2+.3,1.5,[.9,.86,.78]);
  for(const [nx,nz] of [[0,1],[1,0],[0,-1],[-1,0]]){G.iron.box(tx+nx*(T+.01),TH-2.4,tz+nz*(T+.01),nz?1.3:.04,2.8,nx?1.3:.04,1,[.04,.04,.05]);G.granite.box(tx+nx*(T+.04),TH-.95,tz+nz*(T+.04),nz?1.6:.12,.18,nx?1.6:.12,1.5,[.9,.86,.78])}
  const bell=new THREE.Mesh(new THREE.LatheGeometry([[0,.6],[.18,.58],[.28,.4],[.34,.1],[.44,0],[.4,-.02]].map(([r,y])=>new THREE.Vector2(r,y)),16),new THREE.MeshStandardMaterial({color:'#8a6a2a',metalness:.85,roughness:.35,side:THREE.DoubleSide}));bell.position.set(tx,TH-3.4,tz+T-.6);sc.add(bell);
- if(PT.azulejo){const az=pmxCanvas('azulejo',128,128,(c,w,h)=>{for(let y=0;y<8;y++)for(let x=0;x<8;x++){c.fillStyle=(x+y)%2?'#1f4fa8':'#e9eef5';c.fillRect(x*16,y*16,16,16)}c.globalAlpha=.25;c.fillStyle='#fff';for(let i=0;i<64;i++)c.fillRect((i%8)*16+2,Math.floor(i/8)*16+2,5,3)});az.wrapS=az.wrapT=THREE.RepeatWrapping;az.repeat.set(4,3);
+ if(PT.gotic){// campanario gótico de planta cuadrada: almenas y templete octogonal
+  for(let i=-2;i<=2;i++)for(const [nx,nz] of [[0,1],[1,0],[0,-1],[-1,0]]){const o=i*(T*2/5);G.granite.box(tx+nx*(T-.15)+(nz?o:0),TH+.75,tz+nz*(T-.15)+(nx?o:0),nz?.45:.3,.9,nx?.45:.3,1.5,st)}
+  pmxCyl(G.granite,tx,tz,TH+.2,3.2,1.25,1.1,st,8,3);G.granite.box(tx,TH+3.5,tz,2.8,.25,2.8,1.5,[.9,.86,.78]);for(let i=0;i<8;i++){const a=i/8*Math.PI*2;G.iron.box(tx+Math.sin(a)*1.13,TH+1.9,tz+Math.cos(a)*1.13,.5,1.6,.5,1,[.04,.04,.05])}
+  const cu=new THREE.Mesh(new THREE.SphereGeometry(1.2,12,8,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({map:PMX.T.roof.map,roughness:.8}));cu.position.set(tx,TH+3.6,tz);cu.castShadow=true;sc.add(cu)}
+ else if(PT.azulejo){const az=pmxCanvas('azulejo',128,128,(c,w,h)=>{for(let y=0;y<8;y++)for(let x=0;x<8;x++){c.fillStyle=(x+y)%2?'#1f4fa8':'#e9eef5';c.fillRect(x*16,y*16,16,16)}c.globalAlpha=.25;c.fillStyle='#fff';for(let i=0;i<64;i++)c.fillRect((i%8)*16+2,Math.floor(i/8)*16+2,5,3)});az.wrapS=az.wrapT=THREE.RepeatWrapping;az.repeat.set(4,3);
   const sp=new THREE.Mesh(new THREE.CylinderGeometry(.15,T+.05,5.2,8,1),new THREE.MeshStandardMaterial({map:az,roughness:.25,metalness:.1}));sp.position.set(tx,TH+2.75,tz);sp.castShadow=true;sc.add(sp)}
  else{const sp=new THREE.Mesh(new THREE.ConeGeometry(T*1.45,4.4,4),new THREE.MeshStandardMaterial({map:PMX.T.roof.map,roughness:.8}));sp.position.set(tx,TH+2.35,tz);sp.rotation.y=Math.PI/4;sp.castShadow=true;sc.add(sp)}
- G.iron.box(tx,TH+5.7,tz,.06,1.2,.06,1,[.1,.1,.1]);G.iron.box(tx,TH+6,tz,.5,.06,.06,1,[.1,.1,.1]);
+ const ct=PT.gotic?TH+5.3:TH+5.7;G.iron.box(tx,ct,tz,.06,1.2,.06,1,[.1,.1,.1]);G.iron.box(tx,ct+.3,tz,.5,.06,.06,1,[.1,.1,.1]);
+ pmxIglesiaExtra(G,sc,a0,a1,fz,D,Hn,cx,PT,st);
  LAN.push([cx-2.6,4.6,fz+.4,6]);LAN.push([cx+2.6,4.6,fz+.4,6]);
  for(let i=0;i<12;i++)CL.crowd.push([cx+R(-3.2,3.2),.15+(i%3)*.17,fz+.75-(i%3)*.28,0,0])}
 /* ---------- ayuntamiento con porches de arcos, balcón con banderas y reloj ---------- */
@@ -465,3 +476,28 @@ function pmxFanal(sc,G,c,LAN){G.granite.box(c.x,.5,c.z,1.3,1,1.3,1.5,[.9,.87,.8]
  G.glow.box(c.x,y+.55,c.z,.28,.5,.28,1,[1,.82,.5]);G.iron.box(c.x,y+.85,c.z,.42,.08,.42,1,[.08,.08,.09]);pmxAnilla(G,c,[.78,.1,.08])}
 /* nombre de la plaza en el rótulo de entrada */
 if(typeof irCalle==='function'){const _icP=irCalle;irCalle=function(){_icP.apply(this,arguments);try{if(CL&&!CL.plaza&&CL.plazaNom&&!CL.emb)banner(FEST[CL.o.tipo].n,`${CL.plazaNom} · ${CL.o.pueblo}`,3.6)}catch(e){}}}
+
+/* detalles de cada iglesia real: cúpula de teja vidriada (Nules), contrafuertes góticos (Borriana),
+   dos portadas y hornacina (Onda) */
+function pmxIglesiaExtra(G,sc,a0,a1,fz,D,Hn,cx,PT,st){
+ if(PT.cupula){const zc=fz-D*.62,az=pmxCanvas('vidriada',128,128,(c,w,h)=>{const g=['#1f4fa8','#2a62c4','#163c86','#e9eef5'];for(let y=0;y<16;y++)for(let x=0;x<16;x++){c.fillStyle=g[(x*7+y*3)%11<8?(x+y)%3:3];c.fillRect(x*8,y*8,8,8)}});az.wrapS=az.wrapT=THREE.RepeatWrapping;az.repeat.set(6,3);
+  pmxCyl(G.granite,cx,zc,Hn+2.4,2.6,3.6,3.6,st,24,5);G.granite.box(cx,Hn+5.05,zc,7.6,.25,7.6,1.5,[.9,.86,.78]);
+  const d=new THREE.Mesh(new THREE.SphereGeometry(3.55,28,14,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({map:az,roughness:.22,metalness:.15}));d.position.set(cx,Hn+5.1,zc);d.castShadow=true;sc.add(d);
+  pmxCyl(G.granite,cx,zc,Hn+8.6,1.1,.55,.45,st,12,2);const lt=new THREE.Mesh(new THREE.ConeGeometry(.6,1,12),new THREE.MeshStandardMaterial({map:az,roughness:.3}));lt.position.set(cx,Hn+10.2,zc);sc.add(lt);
+  for(let i=0;i<8;i++){const a=i/8*Math.PI*2;G.iron.box(cx+Math.sin(a)*3.62,Hn+3.7,zc+Math.cos(a)*3.62,.5,1.3,.5,1,[.06,.06,.08])}}
+ if(PT.gotic){for(const x of [a0+.2,a1-.2])for(let z=fz-2;z>fz-D;z-=3.6){G.granite.box(x+(x<cx?-.35:.35),Hn*.42,z,.7,Hn*.84,1,1.5,st);G.granite.q([x+(x<cx?-.7:.7),Hn*.84,z-.5],[x+(x<cx?-.7:.7),Hn*.84,z+.5],[x,Hn,z+.5],[x,Hn,z-.5],[0,0,1,0,1,1,0,1],st,[x<cx?-1:1,1,0])}
+  // portada apuntada: arquivoltas
+  for(let i=0;i<3;i++){const r=1.25+i*.3,a=new THREE.Mesh(new THREE.TorusGeometry(r,.11,6,24,Math.PI),new THREE.MeshStandardMaterial({map:PMX.T.granite.map,color:'#e3d6bd',roughness:.9}));a.scale.y=1.35;a.position.set(cx,4,fz+.55+i*.02);sc.add(a)}}
+ if(PT.dosPortes){const x2=a0+3.1;G.granite.box(x2,2.1,fz+.2,2.6,4.2,.4,1.5,[.92,.88,.8]);G.wood.wall([x2-.85,fz+.41],[x2+.85,fz+.41],.3,3.2,1.2,1.2,[.4,.3,.22],[0,1]);
+  const a=new THREE.Mesh(new THREE.RingGeometry(.85,1.15,20,1,0,Math.PI),new THREE.MeshStandardMaterial({map:PMX.T.granite.map,color:'#e6dccb',roughness:.9}));a.position.set(x2,3.2,fz+.42);sc.add(a);
+  // hornacina sobre la puerta principal
+  G.granite.box(cx,6.6,fz+.22,1.6,2.3,.3,1.5,[.92,.88,.8]);G.iron.box(cx,6.5,fz+.38,1.05,1.7,.04,1,[.18,.15,.13])}}
+/* el castillo sobre el cerro, al fondo (Onda: Castell de les 300 torres) */
+function pmxCastell(sc){const g=new THREE.Group();g.position.set(-10,0,-120);sc.add(g);
+ const hill=new THREE.Mesh(new THREE.SphereGeometry(60,24,12,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:'#8a7a58',roughness:1}));hill.scale.set(1.4,.42,.6);g.add(hill);
+ const wm=new THREE.MeshStandardMaterial({color:'#b59a72',roughness:.95}),n=34;
+ for(let i=0;i<n;i++){const a=-Math.PI*.8+i/(n-1)*Math.PI*1.6,x=Math.sin(a)*58,z=Math.cos(a)*14,y=Math.sqrt(Math.max(0,1-(x/84)**2-(z/36)**2))*25.2;
+  const t=new THREE.Mesh(new THREE.BoxGeometry(2.4,5+(i%3)*1.5,2.4),wm);t.position.set(x,y+2,z);g.add(t);
+  if(i<n-1){const a2=-Math.PI*.8+(i+1)/(n-1)*Math.PI*1.6,x2=Math.sin(a2)*58,z2=Math.cos(a2)*14,y2=Math.sqrt(Math.max(0,1-(x2/84)**2-(z2/36)**2))*25.2,L=Math.hypot(x2-x,z2-z);
+   const w=new THREE.Mesh(new THREE.BoxGeometry(L,3,1),wm);w.position.set((x+x2)/2,(y+y2)/2+.8,(z+z2)/2);w.rotation.y=-Math.atan2(z2-z,x2-x);g.add(w)}}
+ const k=new THREE.Mesh(new THREE.BoxGeometry(7,12,7),wm);k.position.set(4,31,6);g.add(k)}

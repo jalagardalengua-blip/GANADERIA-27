@@ -6,6 +6,12 @@
 - Plaça de l'Ajuntament (ribera): ayuntamiento con porches de arcos, balcón corrido con las banderas de España, la Comunitat y Europa, reloj y campana; casas más altas; farola monumental de hierro; refugio rojo y blanco; cadafales con los colores de la senyera.
 - Plaça de la Vila (interior): casas de piedra con galerías de madera, porches de madera, cadafales de madera natural y refugio de madera.
 - Las zonas de juego, los refugios y las físicas son las mismas en todas. El rótulo de entrada muestra el nombre de la plaza.
+- Plazas de pueblos reales, con los elementos documentados de la plaza donde se celebran sus fiestas (inspiradas, no copias exactas: el recinto de juego es el mismo):
+  - Plaça Major de Vila-real: plaza porticada con el Ajuntament en la propia plaza (allí se corre el bou embolat de Sant Pasqual).
+  - Plaça Major de Nules: cadafales junto a la iglesia de Sant Bartomeu i Sant Jaume, con cúpula de media naranja sobre tambor y teja vidriada.
+  - Plaça Major de Borriana: basílica gótica del Salvador con contrafuertes, portada apuntada y campanario de planta cuadrada («El Templat»).
+  - Plaça del Pla d'Onda: iglesia de la Asunción con dos portadas y hornacina, y el Castell de les 300 torres sobre el cerro al fondo.
+- Corregido un error que impedía construir las plazas con refugio amarillo.
 
 ## Menos tirones y toro más estable
 - Corrida en directo: un 40 % menos de llamadas de dibujo por fotograma (733.000 → 494.000 triángulos, 156 → 82 piezas con sombra). Los flecos de las hombreras son una sola malla por hombro, los adornos pequeños no proyectan sombra y en el móvil el público usa figuras más ligeras y sombras más baratas.
