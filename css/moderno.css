@@ -113,3 +113,14 @@ html body .mPh.mLogo .ganLogo{width:min(58%,230px);height:auto;aspect-ratio:1;bo
 @keyframes ganIn{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
 .ganLogoW{display:inline-grid;place-items:center;flex:none;border-radius:16%;overflow:hidden;box-shadow:0 0 0 1px rgba(230,187,85,.5),0 8px 18px -10px #000}
 .ganLogoW .ganLogo{width:100%;height:100%;display:block}
+
+/* ---------- mando táctil ---------- */
+#joy.flota{opacity:1;transition:none}
+#joy{transition:left .2s ease,top .2s ease,opacity .2s}
+html body #h3do{min-height:58px;font-size:1.08rem;padding:.85rem 1.25rem;border-radius:16px!important}
+html body #h3do.late{animation:h3late 1.1s ease-out 2}
+@keyframes h3late{0%{box-shadow:0 0 0 0 rgba(230,187,85,.75),0 10px 24px -10px rgba(230,187,85,.7)}100%{box-shadow:0 0 0 18px rgba(230,187,85,0),0 10px 24px -10px rgba(230,187,85,.7)}}
+.mkAct{position:absolute;left:0;top:0;z-index:5;pointer-events:none;white-space:nowrap;padding:.28rem .6rem .3rem;border-radius:999px;font:700 .72rem/1 var(--display,'Barlow Condensed',sans-serif);letter-spacing:.08em;text-transform:uppercase;
+ color:#f3d68b;background:rgba(12,13,17,.72);border:1px solid rgba(230,187,85,.45);box-shadow:0 6px 14px -8px #000;display:none}
+.mkAct.on{display:block}
+.mkAct::after{content:"";position:absolute;left:50%;bottom:-5px;width:8px;height:8px;margin-left:-4px;background:inherit;border-right:1px solid rgba(230,187,85,.45);border-bottom:1px solid rgba(230,187,85,.45);transform:rotate(45deg)}

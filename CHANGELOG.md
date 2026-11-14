@@ -1,5 +1,11 @@
 # Cambios
 
+## Finca más real, mando táctil moderno y realización de TV
+- Dehesa: encinas de copa ancha y redondeada con la línea de ramoneo, tronco gris pardo con ramas maestras; berrocales de granito con líquenes; sierra azulada en el horizonte; sol más cálido y suelo con más color.
+- Mando: joystick flotante en la mitad izquierda, correr al empujar a fondo, pellizco para el zoom y doble toque para poner la cámara a tu espalda. El botón de acción late y vibra cuando hay algo que hacer, y unas etiquetas flotantes señalan lo que tienes cerca (cortijo, mayoral, caballo, camioneta…).
+- Corrida en directo: una sola realización de televisión (cámara principal del tendido, tele cerrado y cámara baja del callejón), con cortes entre series y sin botón de cámara.
+- Tests nuevos: mando.js y tv.js.
+
 ## Ganadería de corro: nueva Plaza Mayor para ver tu hierro en directo
 - El pueblo de los bous al carrer se sustituye por una plaza de calidad (js/plazamayor.js): casas con planta baja de sillería de granito, fachadas encaladas o de entramado, balcones de forja con geranios, galerías de madera, soportales con columnas de piedra y terraza, tejados de teja árabe con aleros y chimeneas, y faroles de pared.
 - Texturas generadas con relieve y rugosidad (arena con huellas de pezuñas y pisadas en plaza y calles, enlosado de granito, sillería, teja, madera y pintura); de noche las ventanas y los faroles se encienden.

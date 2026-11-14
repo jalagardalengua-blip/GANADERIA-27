@@ -127,7 +127,7 @@ body.cine .bar{height:0}
   <div class="hud" id="hud"></div>
   <div id="ole">¡Olé!</div>
   <div id="res"><div class="resC"><span class="eyebrow" id="rEy"></span><h2 id="rT"></h2><div class="panu" id="rPa"></div><div class="trof" id="rTr"></div><p id="rD"></p><p class="muted" id="rM"></p><div class="acts"><button class="btnR oro" id="rSig">Siguiente toro</button></div></div></div>
-  <div class="bar2" id="panel"><button class="b2" id="bCam">Cámara: realizador</button><button class="b2" id="bVel">×1</button><button class="b2" id="bSig">Siguiente toro</button><button class="b2" id="bClas">Vista clásica</button><button class="b2" id="bSal">Salir</button></div></div>
+  <div class="bar2" id="panel"><button class="b2" id="bVel">×1</button><button class="b2" id="bSig">Siguiente toro</button><button class="b2" id="bClas">Vista clásica</button><button class="b2" id="bSal">Salir</button></div></div>
   <div id="loading"><img class="ldImg" src="img/carga.jpg" alt=""><div class="ldVig"></div><div class="ldInfo"><p>Hierro y Divisa</p><small>Preparando la plaza…</small><div class="ldBar"><i></i></div></div></div>
 </div>
 
@@ -812,10 +812,13 @@ function updateTorero(dt){const t=torero,sp=t.spec,sc=sp.h;const yawE=Tyaw+D.spi
 
 /* ---------- cámaras ---------- */
 const camS={pos:new V3(32,7,8),look:new V3(),fov:30,shot:'tendido',shotT:0,snap:true,callAng:SUN_AZ-.5,gruaA:0};
-const director={onPass(){if(ui.cam!=='cine')return;if(camS.shotT>1.6)cut(pick(['raso','raso','callejon','torero','grua','tendido']));},
- onPaseo(){if(ui.cam!=='cine')return;cut(pick(['tendido','grua','cenital','callejon']));}};
+/* realización de televisión: cámara principal del tendido, tele cerrado desde la misma posición y cámara baja del callejón.
+   Se corta entre series o tras varios segundos, nunca a mitad de un pase, y sin repetir plano. */
+const TV={plano:s=>({raso:'callejon',torero:'tele',toro:'tele',grua:'tendido',cenital:'tendido'}[s]||s)};
+const director={onPass(){if(camS.shotT<5.5)return;const r=Math.random();const s=r<.45?'tele':r<.72?'callejon':'tendido';if(s!==camS.shot)cut(s);},
+ onPaseo(){if(camS.shotT>2.5&&camS.shot!=='tendido')cut('tendido');}};
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
-function cut(shot){camS.shot=shot;camS.shotT=0;camS.snap=true;camS.callAng=SUN_AZ+(Math.random()-.5)*1.8;camS.gruaA=Math.random()*TAU;}
+function cut(shot){shot=TV.plano(shot);if(shot===camS.shot&&camS.shotT<4)return;camS.shot=shot;camS.shotT=0;camS.snap=true;camS.callAng=SUN_AZ+(Math.random()-.5)*1.8;camS.gruaA=Math.random()*TAU;}
 function shotPose(shot,o){const focus=T.clone().lerp(B,.38);focus.y=1.0;const sx=D.side;const f=new V3(Math.sin(Tyaw),0,Math.cos(Tyaw)),l=new V3(Math.cos(Tyaw),0,-Math.sin(Tyaw));
  const bh=new V3(Math.sin(Byaw),0,Math.cos(Byaw)),br=new V3(Math.cos(Byaw),0,-Math.sin(Byaw));const spread=T.distanceTo(B)+3.4;
  const frame=(pos,minF,maxF)=>clamp(2*Math.atan(spread*.5/pos.distanceTo(focus))*180/Math.PI*1.2,minF,maxF);o.shake=0;o.rate=3;o.lookRate=5;o.fovRate=2.5;o.fovMax=78;
@@ -823,7 +826,10 @@ function shotPose(shot,o){const focus=T.clone().lerp(B,.38);focus.y=1.0;const sx
   case'tendido':{/* cámara de televisión en la delantera del tendido de sombra: panorámica suave con zona muerta y zoom solo en cambios claros */
    const a=SUN_AZ+.3;o.pos.set(Math.cos(a)*(R+5),7.6,Math.sin(a)*(R+5));
    if(!camS.tL||camS.tL.distanceTo(focus)>1.1)camS.tL=(camS.tL||focus.clone()).lerp(focus,camS.tL?.35:1);o.look.copy(camS.tL);
-   const fw=frame(o.pos,11,34)*.88;if(!camS.tF||Math.abs(fw-camS.tF)/camS.tF>.2)camS.tF=fw;o.fov=camS.tF;o.shake=1;o.rate=1.2;o.lookRate=1.8;o.fovRate=.5;o.fovMax=50;break;}
+   const fw=frame(o.pos,9,30)*.74;if(!camS.tF||Math.abs(fw-camS.tF)/camS.tF>.2)camS.tF=fw;o.fov=camS.tF;o.shake=1;o.rate=1.2;o.lookRate=1.8;o.fovRate=.5;o.fovMax=50;break;}
+  case'tele':{const a=SUN_AZ+.3;o.pos.set(Math.cos(a)*(R+5),7.6,Math.sin(a)*(R+5));
+   if(!camS.eL||camS.eL.distanceTo(focus)>.6)camS.eL=(camS.eL||focus.clone()).lerp(focus,camS.eL?.4:1);o.look.copy(camS.eL);o.look.y=1.05;
+   const fw=frame(o.pos,5.5,18)*.62;if(!camS.eF||Math.abs(fw-camS.eF)/camS.eF>.22)camS.eF=fw;o.fov=camS.eF;o.shake=1;o.rate=1.2;o.lookRate=2.2;o.fovRate=.6;o.fovMax=30;break;}
   case'callejon':{const a=camS.callAng;o.pos.set(Math.cos(a)*(R+.5),2.45,Math.sin(a)*(R+.5));o.look.copy(focus);const fw=frame(o.pos,8,34);if(!camS.cF||Math.abs(fw-camS.cF)/camS.cF>.18)camS.cF=fw;o.fov=camS.cF;o.shake=1;o.rate=1.5;o.lookRate=2.4;o.fovRate=1;o.fovMax=56;break;}
   case'raso':{o.pos.copy(T).addScaledVector(l,-sx*3.3).addScaledVector(f,2.6);o.pos.y=.3;o.look.copy(T).setY(1.15).lerp(bull.foreW,.3);o.fov=44;o.rate=3.5;break;}
   case'torero':{o.pos.copy(T).addScaledVector(f,-2.3).addScaledVector(l,-sx*.75);o.pos.y=1.7;o.look.copy(B).setY(.9).lerp(T,.2);o.look.y=.95;o.fov=44;o.rate=4;break;}
@@ -832,10 +838,10 @@ function shotPose(shot,o){const focus=T.clone().lerp(B,.38);focus.y=1.0;const sx
   case'grua':{const a=camS.gruaA+simTime*.1;o.pos.set(focus.x+Math.cos(a)*9,3.4+1.2*Math.sin(simTime*.25),focus.z+Math.sin(a)*9);o.look.copy(focus);o.fov=34;o.rate=2;break;}}
  const rr=Math.hypot(o.pos.x,o.pos.z);if(shot!=='tendido'&&shot!=='callejon'&&shot!=='cenital'&&rr>R-.4){o.pos.x*=(R-.4)/rr;o.pos.z*=(R-.4)/rr;}o.pos.y=Math.max(o.pos.y,.15);return o;}
 const _pose={pos:new V3(),look:new V3(),fov:35,shake:0,rate:3};
-function updateCamera(dt){camS.shotT+=dt;if(camS.snap){camS.tL=null;camS.tF=null;camS.cF=null;}
+function updateCamera(dt){camS.shotT+=dt;if(camS.snap){camS.tL=null;camS.tF=null;camS.cF=null;camS.eL=null;camS.eF=null;}
  if(ui.cam==='libre'){const focus=T.clone().lerp(B,.38);focus.y=1;const delta=focus.clone().sub(controls.target).multiplyScalar(1-Math.exp(-3*dt));controls.target.add(delta);camera.position.add(delta);controls.update();
   camera.fov=damp(camera.fov,40,3,dt);camera.updateProjectionMatrix();return;}
- let shot=ui.cam;if(shot==='cine'){if(camS.shotT>7.5)cut(pick(['tendido','callejon','raso','grua','torero','toro','cenital']));shot=camS.shot;}
+ let shot=ui.cam;if(shot==='cine'){if(camS.shotT>(camS.shot==='tendido'?11:8)&&D.phase!=='pass')cut(camS.shot==='tendido'?(Math.random()<.6?'tele':'callejon'):'tendido');shot=camS.shot;}
  shotPose(shot,_pose);
  if(camS.snap){camS.pos.copy(_pose.pos);camS.look.copy(_pose.look);camS.fov=_pose.fov;camS.snap=false;}
  else{const k=1-Math.exp(-_pose.rate*dt),k2=1-Math.exp(-_pose.lookRate*dt);camS.pos.lerp(_pose.pos,k);camS.look.lerp(_pose.look,k2);camS.fov=damp(camS.fov,_pose.fov,_pose.fovRate,dt);}
@@ -1127,8 +1133,8 @@ function panelUI(){return;const $=id=>document.getElementById(id);
 const CAMN={cine:'realizador',libre:'libre',tendido:'tendido',callejon:'callejón',raso:'ras de arena',torero:'torero',toro:'toro',cenital:'cenital'};
 function initPanel(){const $=id=>document.getElementById(id);const msg=m=>parent.postMessage({ruedo:m,id:JUEGO.t&&JUEGO.t.id},'*');
  const cams=['cine','tendido','callejon','raso','torero','toro','cenital'],vels=[1,1.5,2,4,.5];
- const pinta=()=>{$('bCam').textContent='Cámara: '+(CAMN[ui.cam]||ui.cam);$('bVel').textContent='×'+String(ui.speed).replace('.',',');};
- $('bCam').onclick=()=>{setCam(cams[(cams.indexOf(ui.cam)+1)%cams.length]);document.body.classList.toggle('cine',ui.cam==='cine');pinta();};
+ const pinta=()=>{$('bVel').textContent='×'+String(ui.speed).replace('.',',');};
+ 
  $('bVel').onclick=()=>{ui.speed=vels[(vels.indexOf(ui.speed)+1)%vels.length];ui.paused=false;pinta();};
  $('bSig').onclick=()=>{hideRes();msg('siguiente');};$('rSig').onclick=()=>{hideRes();msg('siguiente');};$('bSal').onclick=()=>msg('salir');$('bClas').onclick=()=>msg('clasica');
  pinta();if(parent!==window)parent.postMessage({ruedo:'listo'},'*');}
@@ -1152,7 +1158,7 @@ function frame(now){requestAnimationFrame(frame);try{if(last)autoCalidad(Math.mi
  renderer.render(scene,camera);
 
  if(false){const d=gimg.data;for(let i=0;i<d.length;i+=4){const v=Math.random()*255;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}gctx.putImageData(gimg,0,0);}}
-window.__ruedo={D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},get tor(){return torero;},render:(c)=>renderer.render(scene,c),get canvas(){return renderer.domElement;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
+window.__ruedo={D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},get plano(){return camS.shot;},get tor(){return torero;},render:(c)=>renderer.render(scene,c),get canvas(){return renderer.domElement;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
 })();
 </script>
 
