@@ -1,5 +1,16 @@
 # Cambios
 
+## Personas y animales realistas (Microsoft Rocketbox, licencia MIT)
+- **16 personas realistas** con texturas fotográficas: 9 hombres y 7 mujeres con ropa de calle. Se mueven con **animaciones de captura de movimiento de actores reales**: parado, mirar alrededor, andar, trotar, correr, celebrar, aplaudir, sentado, saludar y agachado, con animaciones propias para hombre y para mujer.
+  - **Fiestas de pueblo**: los mozos que corren delante de la res.
+  - **Plaza Mayor del corro**: la primera fila de los tablados y los soportales (hasta 20 en calidad alta). Celebran, aplauden o saludan cuando embiste la res y miran alrededor en calma.
+  - **Finca**: el personal sin sombrero (veterinario, representante).
+  - El torero, los jinetes y los vaqueros con sombrero conservan su modelo.
+- **Caballo realista con montura y bridas**, que sustituye al de pocos polígonos en la finca, los paseos y los alguacilillos. Los caballos con peto de los picadores mantienen su modelo. Su animación se genera por código sobre su esqueleto real: reposo con orejas y cola, paso a cuatro tiempos, galope con columna y cuello, y pastar. El pelo se tiñe (castaño, tordo o negro) y los jinetes siguen bien sentados.
+- **Perros pastores** en la finca, que siguen al personal: andan, corren si se quedan atrás y descansan.
+- Se cargan en segundo plano tras arrancar el juego (≈8 MB, una sola vez). Hasta entonces se ven los modelos de siempre.
+- Los modelos 3D (`.glb`) se guardan en la caché del móvil y solo se renuevan al cambiar la versión, en lugar de descargarse en cada visita.
+
 ## Ganadería de corro: físicas de la res, bou embolat real y plaza rodeada de cadafales
 - Físicas: la res ya no atraviesa casas ni paredes ni se queda enganchada. Se comprueba el cuerpo entero (hocico, centro y grupa); resbala por las paredes, gira hacia el lado libre al chocar, se desencaja sola y va de la plaza a las calles por las bocacalles, también al recogerse y los cabestros. Los recortadores tampoco se meten en las fachadas al correr, esquivar o ser volteados (js/corro-fisicas.js).
 - Bou embolat como en la vida real: la res sale del cajón lazada por los cuernos, la soga pasa por la anilla del pilón y los emboladors la recogen a tirones hasta amarrarla; le protegen las astas con barro, le colocan el armazón de hierro con las bolas de estopa, las encienden con la antorcha, se apagan las luces de la calle, se corta la soga y queda libre. Soga con física, planos de cámara del ritual y bolas que se van consumiendo.
