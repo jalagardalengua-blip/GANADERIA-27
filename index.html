@@ -13,19 +13,71 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="img/icono-192.png">
 <link rel="apple-touch-icon" href="img/icono-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,600;1,700;1,800&family=Cinzel:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="css/fuentes.css">
 <link rel="stylesheet" href="css/estilo.css">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:0}html,body{margin:0}body{min-height:100vh}[hidden]{display:none!important}</style>
+<link rel="stylesheet" href="css/moderno.css">
+<link rel="stylesheet" href="css/carga.css">
+<link rel="preload" as="image" href="img/carga.jpg">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:0}html,body{margin:0}body{min-height:100vh}[hidden]{display:none!important}#app:not(.ready){visibility:hidden}body{background:#060507}</style>
 </head>
 <body>
+<div id="carga" class="on" role="status" aria-live="polite"><div class="cg-bg"></div><img class="cg-img" src="img/carga.jpg" alt="" decoding="async" fetchpriority="high"><div class="cg-vig"></div><div class="cg-info"><h1 class="cg-t">Hierro y Divisa</h1><p class="cg-d">Abriendo la ganadería</p><div class="cg-bar"><i style="width:15%"></i></div><p class="cg-tip"></p></div></div>
 <div id="app"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/libs/three.min.js"></script>
+<script src="js/libs/GLTFLoader.js"></script>
+<script src="js/libs/SkeletonUtils.js"></script>
+<script src="js/libs/BufferGeometryUtils.js"></script>
 <script src="js/mundo3d.js"></script>
 <script src="js/juego.js"></script>
 <script src="js/carrera.js"></script>
+<script src="js/corro.js"></script>
+<script src="js/calle.js"></script>
+<script src="js/calle2.js"></script>
+<script src="js/calle3.js"></script>
+<script src="js/plazamayor.js"></script>
+<script src="js/corro-fisicas.js"></script>
+<script src="js/corro-props.js"></script>
+<script src="js/corro-fuego.js"></script>
+<script src="js/localidades.js"></script>
+<script src="js/musica.js"></script>
+<script src="js/sonido.js"></script>
+<script src="js/gfx.js"></script>
+<script src="js/extras.js"></script>
+<script src="js/divisas.js"></script>
+<script src="js/casa.js"></script>
+<script src="js/finca2.js"></script>
+<script src="js/lidia.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/modelos.js"></script>
+<script src="js/toros3d.js"></script>
+<script src="js/toro3.js"></script>
+<script src="js/torero3d.js"></script>
+<script src="js/texturas.js"></script>
+<script src="js/hierros.js"></script>
+<script src="js/menu.js"></script>
+<script src="js/navbar.js"></script>
+<script src="js/calendario.js"></script>
+<script src="js/torero.js"></script>
+<script src="js/estabilidad.js"></script>
+<script src="js/panel.js"></script>
+<script src="js/clima.js"></script>
+<script src="js/finca3.js"></script>
+<script src="js/finca4.js"></script>
+<script src="js/jinetes.js"></script>
+<script src="js/ruedo.js"></script>
+<script src="js/movil.js"></script>
+<script src="js/genetica.js"></script>
+<script src="js/economia.js"></script>
+<script src="js/rendimiento.js"></script>
+<script src="js/uipro.js"></script>
+<script src="js/pulido.js"></script>
+<script src="js/dehesa.js"></script>
+<script src="js/mando.js"></script>
+<script src="js/calidad.js"></script>
+<script src="js/carga.js"></script>
+<script>try{render()}catch(e){}document.getElementById('app').classList.add('ready')</script>
 <script>
-if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+if('serviceWorker' in navigator&&location.protocol==='https:'&&!window.Capacitor){let rec=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(rec){rec=false;location.reload()}});window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{r.update();setInterval(()=>r.update(),30*60*1000)}).catch(()=>{})})}
 </script>
 </body>
 </html>
