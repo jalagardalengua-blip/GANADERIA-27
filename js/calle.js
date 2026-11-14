@@ -261,7 +261,7 @@ function resTick(r,dt){const E=CL.env,a=r.a,g=a.g;r.t+=dt;r.tt+=dt;r.pyaw=r.yaw;
    const wait=clamp(2.6-g.bra/40,.35,2.4);if(r.t>wait*.6&&g.bra<62)paw=true;
    if(tg&&r.t>wait){const d=Math.hypot(tg.x-r.x,tg.z-r.z);if(d<20&&Math.random()<clamp(g.bra/90,.2,1)){r.mode='embiste';r.t=0;r.st.emb++;bufido&&bufido(.4)}else if(r.t>wait+2.5){r.st.par++;r.mode='trota';r.t=0;const q=E.rand();r.wx=q.x;r.wz=q.z}}
    else if(!tg&&r.t>3){r.mode='trota';r.t=0;const q=E.rand();r.wx=q.x;r.wz=q.z}break}
-  case 'trota':{const wp=clWp(r.x,r.z,r.wx,r.wz),ex=wp[0]-r.x,ez=wp[1]-r.z,d=Math.hypot(r.wx-r.x,r.wz-r.z);r.yaw+=angD(r.yaw,Math.atan2(ex,ez)+clAvoid(r))*Math.min(1,dt*2.5);r.v+=(2.6-r.v)*Math.min(1,dt*2);cs=.55;if(d<1.5||r.t>5){r.mode='mira';r.t=0}const tg=pickT();if(tg&&Math.hypot(tg.x-r.x,tg.z-r.z)<6&&Math.random()<dt*2){r.tgt=tg;r.mode='embiste';r.t=0;r.st.emb++}break}
+  case 'trota':{const wp=clWp(r.x,r.z,r.wx,r.wz),ex=wp[0]-r.x,ez=wp[1]-r.z,d=Math.hypot(r.wx-r.x,r.wz-r.z);r.yaw+=angD(r.yaw,Math.atan2(ex,ez)+clAvoid(r))*Math.min(1,dt*2.5);r.v+=((r.trotV||2.6)-r.v)*Math.min(1,dt*2);cs=r.trotV?1.1:.55;if(d<1.5||r.t>5){r.mode='mira';r.t=0}const tg=pickT();if(tg&&Math.hypot(tg.x-r.x,tg.z-r.z)<6&&Math.random()<dt*2){r.tgt=tg;r.mode='embiste';r.t=0;r.st.emb++}break}
   case 'embiste':{const tg=r.tgt;if(!tg||tg.toss>0){r.mode='mira';r.t=0;break}const px=tg.x+(tg.vx||0)*.25,pz=tg.z+(tg.vz||0)*.25;const wq=clWp(r.x,r.z,px,pz),fy=Math.atan2(wq[0]-r.x,wq[1]-r.z)+clAvoid(r)*.6;r.yaw+=clamp(angD(r.yaw,fy),-turn*dt,turn*dt);
    r.v=Math.min(vmax,r.v+dt*7);cs=r.v>4.5?1.2:.9;head=.6;const d=Math.hypot(tg.x-r.x,tg.z-r.z);r.st.dist+=r.v*dt;if(r.v>5&&Math.random()<dt*5)dust(CL.plaza?CL.P.D:CL.D,r.x,0,r.z,.3);
    if(tg.safe){r.mode='remata';r.t=0;break}
