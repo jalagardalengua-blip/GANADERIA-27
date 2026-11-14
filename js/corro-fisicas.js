@@ -42,7 +42,10 @@ function clAvoid(r,signOnly){const E=CL&&CL.env;if(!E)return 0;const home=r.mode
 function clBullMove(r,dt,home){const E=CL.env,ok=(x,z,y)=>clBody(E,x,z,y,home);
  if(r.pyaw!=null){const dy=angD(r.pyaw,r.yaw),mx=4.6*dt;if(Math.abs(dy)>mx)r.yaw=r.pyaw+Math.sign(dy)*mx}
  // desencaje en curso: camina hasta el hueco libre sin saltos
- if(r.unst){const u=r.unst,dx=u[0]-r.x,dz=u[1]-r.z,d=Math.hypot(dx,dz),st=Math.min(d,2.4*dt);r.x+=dx/(d||1)*st;r.z+=dz/(d||1)*st;r.yaw+=clamp(angD(r.yaw,u[2]),-3*dt,3*dt);r.v=Math.max(r.v,1);if(d<.05||(CL.t-u[3])>3)r.unst=null;return false}
+ if(r.unst){const u=r.unst,dx=u[0]-r.x,dz=u[1]-r.z,d=Math.hypot(dx,dz),st=Math.min(d,2.4*dt),nx=r.x+dx/(d||1)*st,nz=r.z+dz/(d||1)*st,ny=r.yaw+clamp(angD(r.yaw,u[2]),-3*dt,3*dt);
+  // cada paso del desencaje se comprueba con el cuerpo entero: nunca atraviesa una pared ni una esquina
+  const libreAhora=ok(r.x,r.z,r.yaw);if(ok(nx,nz,ny)||!libreAhora){r.x=nx;r.z=nz;r.yaw=ny}else if(ok(r.x,r.z,ny))r.yaw=ny;else r.unst=null;
+  r.v=Math.max(r.v,1);if(r.unst&&(d<.05||(CL.t-u[3])>3))r.unst=null;return false}
  if(!ok(r.x,r.z,r.yaw)){const bx=r.x-Math.sin(r.yaw)*.25,bz=r.z-Math.cos(r.yaw)*.25;
   if(ok(bx,bz,r.yaw)){r.x=bx;r.z=bz}else if(r.pyaw!=null&&ok(r.x,r.z,r.pyaw))r.yaw=r.pyaw;
   else{const f=clFindFree(r,home);if(f)r.unst=[f[0],f[1],f[2],CL.t]}}
