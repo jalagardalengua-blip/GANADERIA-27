@@ -42,11 +42,12 @@ function clAvoid(r,signOnly){const E=CL&&CL.env;if(!E)return 0;const home=r.mode
 function clBullMove(r,dt,home){const E=CL.env,ok=(x,z,y)=>clBody(E,x,z,y,home);
  if(r.pyaw!=null){const dy=angD(r.pyaw,r.yaw),mx=4.6*dt;if(Math.abs(dy)>mx)r.yaw=r.pyaw+Math.sign(dy)*mx}
  // escapando de una pared: gira hacia el rumbo libre y sale por él (sin que la persecución lo vuelva a meter)
- if(r.esc&&CL.t<r.esc.until){const a=r.esc.a,dy=clamp(angD(r.yaw,a),-4.6*dt,4.6*dt),ny=r.yaw+dy;if(ok(r.x,r.z,ny))r.yaw=ny;
+ const y0=r.pyaw!=null?r.pyaw:r.yaw; // el giro total del fotograma siempre se mide desde la orientación de partida
+ if(r.esc&&CL.t<r.esc.until){const a=r.esc.a,ny=y0+clamp(angD(y0,a),-4.6*dt,4.6*dt);if(ok(r.x,r.z,ny))r.yaw=ny;
   if(Math.abs(angD(r.yaw,a))<.35){const sp2=Math.max(1.6,r.v)*dt,nx=r.x+Math.sin(r.yaw)*sp2,nz=r.z+Math.cos(r.yaw)*sp2;if(ok(nx,nz,r.yaw)){r.x=nx;r.z=nz}else r.esc=null}
   r.v=Math.max(r.v,1.6);r.stuck=0;return false}else if(r.esc)r.esc=null;
  // desencaje en curso: camina hasta el hueco libre sin saltos
- if(r.unst){const u=r.unst,dx=u[0]-r.x,dz=u[1]-r.z,d=Math.hypot(dx,dz),st=Math.min(d,2.4*dt),nx=r.x+dx/(d||1)*st,nz=r.z+dz/(d||1)*st,ny=r.yaw+clamp(angD(r.yaw,u[2]),-3*dt,3*dt);
+ if(r.unst){const u=r.unst,dx=u[0]-r.x,dz=u[1]-r.z,d=Math.hypot(dx,dz),st=Math.min(d,2.4*dt),nx=r.x+dx/(d||1)*st,nz=r.z+dz/(d||1)*st,ny=y0+clamp(angD(y0,u[2]),-3*dt,3*dt);
   // cada paso del desencaje se comprueba con el cuerpo entero: nunca atraviesa una pared ni una esquina
   const libreAhora=ok(r.x,r.z,r.yaw);if(ok(nx,nz,ny)||!libreAhora){r.x=nx;r.z=nz;r.yaw=ny}else if(ok(r.x,r.z,ny))r.yaw=ny;else r.unst=null;
   r.v=Math.max(r.v,1);if(r.unst&&(d<.05||(CL.t-u[3])>3))r.unst=null;return false}
