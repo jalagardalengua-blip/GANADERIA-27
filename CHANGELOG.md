@@ -1,5 +1,12 @@
 # Cambios
 
+## Bou embolat sin parones en el móvil
+- Al encender las bolas aparecía una luz nueva y el móvil recompilaba 18 sombreados de golpe: un parón de segundos justo cuando el toro iba a soltarse, y parecía enganchado al pilón. Ahora el número de luces no cambia (se apaga una farola lejana) y solo se compila el material del fuego.
+- Como mucho 4 luces puntuales en el móvil (antes 10), con las farolas más lejanas apagadas; las del toro y la antorcha siempre se quedan.
+- Paso fijo en los festejos: con fotogramas lentos la res, la soga y los emboladors avanzan en pasos de 1/30 s como mucho.
+- Las piezas pequeñas de la calle no proyectan sombra.
+- Tests nuevos: embolat-luces.js y embolat-movil.js (fotogramas irregulares de móvil).
+
 ## Ganadería de corro: físicas sin errores y pilón del embolat en medio de la plaza
 - El pilón del bou embolat está en medio de la plaza: el toro sale del cajón con la soga, baja la calle caminando con los emboladors, se resiste cerca del poste y queda amarrado en el centro.
 - Al cortar la soga el toro arranca y se aleja del pilón, y corre libre por toda la plaza y las calles. El pilón es un poste físico real (ya no un refugio con margen) y la res lo rodea por el lado con más espacio.
