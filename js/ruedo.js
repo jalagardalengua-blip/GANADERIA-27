@@ -11,12 +11,15 @@ function ruedoDatos(r,i){const t=r.toros[i];if(!t)return null;
   res:t.res,trof:t.trof||0,ent:t.ent,esto:t.esto,desc:t.desc,avisos:t.avisos,rajado:!!t.rajado,fell:!!t.fell,pases:t.pases,
   cogida:t.cogida?{parte:t.cogida.parte}:null,sust:t.sust?{n:t.sust.n}:null}}
 function ruedoEnviar(){if(!RD.fr||!RD.r)return;const d=ruedoDatos(RD.r,RD.i);if(d)RD.fr.contentWindow.postMessage({ruedo:'lidia',valor:d},'*')}
-function ruedoCerrar(resumen){const id=RD.r&&RD.r.id;RD.on=false;if(RD.el)RD.el.remove();RD.el=RD.fr=null;document.body.style.overflow='';try{render()}catch(e){}if(resumen&&id!=null)try{verCorrida(id)}catch(e){}}
+function ruedoCerrar(resumen){if(!RD.on)return;const id=RD.r&&RD.r.id;RD.on=false;try{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}catch(e){}
+ /* quita la entrada del historial que abrió la corrida (si no se salió con «atrás») */try{if(history.state&&history.state.ruedo){RD.volviendo=true;history.back()}}catch(e){}if(RD.el)RD.el.remove();RD.el=RD.fr=null;document.body.style.overflow='';try{render()}catch(e){}if(resumen&&id!=null)try{verCorrida(id)}catch(e){}}
 function ruedoAbrir(id){const r=S.hist.find(h=>h.id===id);if(!r||!r.toros||!r.toros.length)return false;
  S.porVer=(S.porVer||[]).filter(x=>x!==id);r.visto=true;save();
  if(typeof W3!=='undefined'&&W3.on){try{exit3D()}catch(e){}}
  RD.on=true;RD.r=r;RD.i=0;const el=document.createElement('div');el.id='ruedoOv';
- el.innerHTML='<iframe src="ruedo.html" title="Corrida en directo" allow="fullscreen; autoplay"></iframe>';document.body.appendChild(el);document.body.style.overflow='hidden';
+ el.innerHTML='<iframe src="ruedo.html" title="Corrida en directo" allow="fullscreen; autoplay"></iframe><button id="ruedoX" type="button" aria-label="Salir de la corrida">✕ Salir</button>';document.body.appendChild(el);
+ /* salida de respaldo fuera del marco: funciona aunque la corrida no responda */el.querySelector('#ruedoX').addEventListener('click',()=>ruedoCerrar(true));
+ /* el botón «atrás» del móvil cierra la corrida */try{history.pushState({ruedo:1},'')}catch(e){}document.body.style.overflow='hidden';
  RD.el=el;RD.fr=el.querySelector('iframe');try{el.requestFullscreen&&matchMedia('(pointer:coarse)').matches&&el.requestFullscreen().catch(()=>{})}catch(e){}
  try{navigator.wakeLock&&navigator.wakeLock.request('screen').catch(()=>{})}catch(e){}return true}
 addEventListener('message',e=>{const d=e.data;if(!RD.on||!d||typeof d.ruedo!=='string'||!RD.fr||e.source!==RD.fr.contentWindow)return;
@@ -27,3 +30,7 @@ addEventListener('message',e=>{const d=e.data;if(!RD.on||!d||typeof d.ruedo!=='s
 function ruedoPuede(){try{if(localStorage.getItem('hd-ruedo')==='clasica')return false}catch(e){}try{const c=document.createElement('canvas');return !!(c.getContext('webgl')||c.getContext('experimental-webgl'))}catch(e){return false}}
 const _enterPlazaRD=enterPlaza;
 enterPlaza=function(id){if(!RD.forzarClasica&&ruedoPuede()){try{if(ruedoAbrir(id))return}catch(e){try{errLog('ruedo: '+e.message,'ruedo')}catch(e2){}}}return _enterPlazaRD.apply(this,arguments)};
+
+/* «atrás» del navegador o del sistema (Android) y tecla Esc: salen de la corrida */
+addEventListener('popstate',()=>{if(RD.volviendo){RD.volviendo=false;return}if(RD.on)ruedoCerrar(true)});
+addEventListener('keydown',e=>{if(RD.on&&e.key==='Escape')ruedoCerrar(true)});

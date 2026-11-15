@@ -1,5 +1,13 @@
 # Cambios
 
+## Corrida en directo: más lidia, más rápida y salida que funciona
+- El botón «Salir» funciona en el móvil: la vista ya no se mete bajo la barra de gestos, hay una «✕ Salir» fija arriba a la derecha (fuera del marco de la corrida) y el botón «atrás» del móvil y la tecla Esc también salen.
+- Botones de la barra inferior más grandes (44 px) y más separados del borde.
+- Más rápida: velocidades ×1, ×2, ×4 y ×8 (se recuerdan) y botón «⏭ A matar» para ir directamente a la suerte suprema.
+- Tercio de banderillas: los peones salen del burladero, citan, se reúnen con el toro y clavan tres pares en el morrillo con los colores de la divisa; las banderillas se quedan puestas y se balancean el resto de la lidia.
+- La cuadrilla asoma tras los burladeros con los capotes colgados y sigue al toro con la mirada.
+- Rótulos de televisión en cada tercio (capa, banderillas, muleta y suerte suprema, cogida) y comentarista en directo que narra la salida del toro (nombre, número, kilos, pelo y ganadería), las tandas, los olés, los pares, la estocada y el arrastre.
+
 ## Bou embolat sin parones en el móvil
 - Al encender las bolas aparecía una luz nueva y el móvil recompilaba 18 sombreados de golpe: un parón de segundos justo cuando el toro iba a soltarse, y parecía enganchado al pilón. Ahora el número de luces no cambia (se apaga una farola lejana) y solo se compila el material del fuego.
 - Como mucho 4 luces puntuales en el móvil (antes 10), con las farolas más lejanas apagadas; las del toro y la antorcha siempre se quedan.
