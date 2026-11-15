@@ -103,9 +103,9 @@ body.cine .bar{height:0}
 
 #cartel{display:none!important}
 /* ---------- barra mínima (como en el corro) ---------- */
-.bar2{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:0 12px;opacity:.82;transition:opacity .25s;pointer-events:none}
+.bar2{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 12px;opacity:.82;transition:opacity .25s;pointer-events:none}
 .bar2:hover,.bar2:focus-within{opacity:1}
-.b2{pointer-events:auto;min-height:34px;padding:.3rem .8rem;font:700 12px/1 var(--ui);letter-spacing:.1em;text-transform:uppercase;color:#f3ead8;background:rgba(10,9,12,.55);border:1px solid rgba(230,187,85,.35);border-radius:999px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);cursor:pointer}
+.b2{pointer-events:auto;min-height:44px;padding:.35rem 1rem;touch-action:manipulation;font:700 12px/1 var(--ui);letter-spacing:.1em;text-transform:uppercase;color:#f3ead8;background:rgba(10,9,12,.55);border:1px solid rgba(230,187,85,.35);border-radius:999px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);cursor:pointer}
 .b2:focus-visible{outline:2px solid var(--oro);outline-offset:2px}
 #hud{display:none!important}
 .cartel{max-width:min(340px,calc(100% - 32px))}
@@ -113,7 +113,16 @@ body.cine .bar{height:0}
 .cartel .suit{font-size:13px}.cartel .toro{font-size:12px}
 .suerte{margin-top:8px!important}.suerte b{font-size:18px!important}
 body.cine .bar{height:0}
-@media (max-height:460px){.cartel .toro{display:none}.cartel{padding:8px 20px 8px 12px!important}.b2{min-height:30px;font-size:11px;padding:.25rem .65rem}}
+@media (max-height:460px){.cartel .toro{display:none}.cartel{padding:8px 20px 8px 12px!important}.b2{min-height:40px;font-size:11px;padding:.25rem .8rem}}
+#bSal{border-color:rgba(224,69,76,.7)}.b2:disabled{opacity:.45}
+#rot{position:absolute;left:50%;top:22%;transform:translate(-50%,-10px);opacity:0;pointer-events:none;text-align:center;transition:opacity .4s,transform .5s;padding:8px 34px 10px;background:linear-gradient(90deg,rgba(8,6,5,0),rgba(8,6,5,.8) 18%,rgba(8,6,5,.8) 82%,rgba(8,6,5,0));border-top:1px solid rgba(230,187,85,.6);border-bottom:1px solid rgba(230,187,85,.6);white-space:nowrap;max-width:92%}
+#rot.on{opacity:1;transform:translate(-50%,0)}
+#rot small{display:block;font:700 10px/1.3 var(--ui);letter-spacing:.28em;text-transform:uppercase;color:var(--oro)}
+#rot b{display:block;font-family:var(--display);font-style:italic;font-size:clamp(20px,3.6vw,34px);color:#f3ead8;overflow:hidden;text-overflow:ellipsis}
+#com{position:absolute;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 72px);max-width:min(470px,calc(100% - 24px));padding:7px 12px 8px 10px;border-left:3px solid #bf3a3f;background:rgba(10,9,12,.74);color:#f3ead8;font:500 13px/1.35 var(--ui);opacity:0;transform:translateY(6px);transition:opacity .35s,transform .35s;pointer-events:none;border-radius:0 8px 8px 0}
+#com.on{opacity:1;transform:none}
+#com i{font-style:normal;color:#e0454c;font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:10px;margin-right:7px}
+@media (max-width:560px){#com{bottom:calc(env(safe-area-inset-bottom,0px) + 128px)}}
 @media (max-width:640px){.row{grid-template-columns:62px minmax(0,1fr)}.hud{display:none}.cartel h1{font-size:26px}.suerte b{font-size:18px}.toro{display:none}}
 @media (prefers-reduced-motion:reduce){#grain{display:none}#ole{transition:opacity .3s}}
 </style>
@@ -127,7 +136,8 @@ body.cine .bar{height:0}
   <div class="hud" id="hud"></div>
   <div id="ole">¡Olé!</div>
   <div id="res"><div class="resC"><span class="eyebrow" id="rEy"></span><h2 id="rT"></h2><div class="panu" id="rPa"></div><div class="trof" id="rTr"></div><p id="rD"></p><p class="muted" id="rM"></p><div class="acts"><button class="btnR oro" id="rSig">Siguiente toro</button></div></div></div>
-  <div class="bar2" id="panel"><button class="b2" id="bVel">×1</button><button class="b2" id="bSig">Siguiente toro</button><button class="b2" id="bClas">Vista clásica</button><button class="b2" id="bSal">Salir</button></div></div>
+  <div id="rot"><small></small><b></b></div><div id="com"><i>En directo</i><span></span></div>
+  <div class="bar2" id="panel"><button class="b2" id="bVel" aria-label="Velocidad">×1</button><button class="b2" id="bSup">⏭ A matar</button><button class="b2" id="bSig">Siguiente toro</button><button class="b2" id="bClas">Vista clásica</button><button class="b2" id="bSal">Salir</button></div></div>
   <div id="loading"><img class="ldImg" src="img/carga.jpg" alt=""><div class="ldVig"></div><div class="ldInfo"><p>Hierro y Divisa</p><small>Preparando la plaza…</small><div class="ldBar"><i></i></div></div></div>
 </div>
 
@@ -878,8 +888,8 @@ function setupControls(){
  const wake=()=>{audio.init();if(audio.ctx){audio.ctx.resume();audio.on=true;audio.mur.gain.value=.12;}};
  addEventListener('pointerdown',wake,{once:true});addEventListener('keydown',wake,{once:true});
  addEventListener('keydown',e=>{const n=parseInt(e.key,10);if(n>=1&&n<=8)setCam(CAMS[n-1].id);else if(e.key===' '){e.preventDefault();ui.paused=!ui.paused;}
-  else if(e.key==='+'||e.key==='='){const sp=[.1,.25,.5,1,1.5,2];ui.speed=sp[Math.min(sp.length-1,sp.indexOf(ui.speed)+1)];}
-  else if(e.key==='-'){const sp=[.1,.25,.5,1,1.5,2];ui.speed=sp[Math.max(0,sp.indexOf(ui.speed)-1)];}
+  else if(e.key==='+'||e.key==='='){const sp=[.1,.25,.5,1,1.5,2,4,8];ui.speed=sp[Math.min(sp.length-1,sp.indexOf(ui.speed)+1)];}
+  else if(e.key==='-'){const sp=[.1,.25,.5,1,1.5,2,4,8];ui.speed=sp[Math.max(0,sp.indexOf(ui.speed)-1)];}
   else if(e.key==='l'||e.key==='L')ui.slow=!ui.slow;else if(e.key==='n'||e.key==='N')newCorrida();});
  const api={nuevaCorrida:s=>newCorrida(s),camara:id=>setCam(id),velocidad:v=>{ui.speed=+v||1;ui.paused=false;},pausa:b=>{ui.paused=b===undefined?!ui.paused:!!b;},
   lentaEmbroque:b=>{ui.slow=!!b;},luz:id=>{if(LUZ[id])setLight(id);},sonido:b=>{audio.init();audio.on=!!b;if(audio.ctx){audio.ctx.resume();audio.mur.gain.value=b?.12:0;}}};
@@ -1133,15 +1143,16 @@ finFaena=function(){const d=JUEGO.t;if(d&&(d.trof>=1||d.res==='indulto')&&!finFa
 function hideRes(){const r=document.getElementById('res');if(r)r.classList.remove('on');}
 function panelUI(){return;const $=id=>document.getElementById(id);
  $('chCam').innerHTML=CAMS.map(c=>`<button class="chip" data-c="${c.id}" aria-pressed="${ui.cam===c.id}">${c.name}</button>`).join('');
- $('chVel').innerHTML=[.25,.5,1,1.5,2].map(v=>`<button class="chip" data-v="${v}" aria-pressed="${ui.speed===v}">${String(v).replace('.',',')}×</button>`).join('');
+ $('chVel').innerHTML=[.25,.5,1,2,4,8].map(v=>`<button class="chip" data-v="${v}" aria-pressed="${ui.speed===v}">${String(v).replace('.',',')}×</button>`).join('');
  $('chCam').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;setCam(b.dataset.c);panelUI();};
  $('chVel').onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;ui.speed=+b.dataset.v;ui.paused=false;panelUI();};}
 const CAMN={cine:'realizador',libre:'libre',tendido:'tendido',callejon:'callejón',raso:'ras de arena',torero:'torero',toro:'toro',cenital:'cenital'};
 function initPanel(){const $=id=>document.getElementById(id);const msg=m=>parent.postMessage({ruedo:m,id:JUEGO.t&&JUEGO.t.id},'*');
- const cams=['cine','tendido','callejon','raso','torero','toro','cenital'],vels=[1,1.5,2,4,.5];
+ const cams=['cine','tendido','callejon','raso','torero','toro','cenital'],vels=[1,2,4,8,.5];
  const pinta=()=>{$('bVel').textContent='×'+String(ui.speed).replace('.',',');};
  
- $('bVel').onclick=()=>{ui.speed=vels[(vels.indexOf(ui.speed)+1)%vels.length];ui.paused=false;pinta();};
+ $('bVel').onclick=()=>{ui.speed=vels[(vels.indexOf(ui.speed)+1)%vels.length];ui.paused=false;pinta();try{localStorage.setItem('ruedoVel',ui.speed)}catch(e){}};
+ $('bSup').hidden=!JUEGO.on;setInterval(()=>{const b=$('bSup');b.hidden=!JUEGO.on||D.phase==='suprema'||D.phase==='fin';pinta();},500);
  $('bSig').onclick=()=>{hideRes();msg('siguiente');};$('rSig').onclick=()=>{hideRes();msg('siguiente');};$('bSal').onclick=()=>msg('salir');$('bClas').onclick=()=>msg('clasica');
  pinta();if(parent!==window)parent.postMessage({ruedo:'listo'},'*');}
 /* ---------- bucle ---------- */
@@ -1156,7 +1167,7 @@ function autoCalidad(dtR){AQ.acc+=dtR;AQ.n++;AQ.t+=dtR;if(AQ.t<2)return;const ms
 const SOMB={};
 function frame(now){requestAnimationFrame(frame);try{if(last)autoCalidad(Math.min(.2,(now-last)/1000));}catch(e){}if(!bull||!torero)return;const dtR=Math.min(.05,(now-last)/1000);last=now;
  const tgt=ui.paused?0:ui.speed*(ui.slow&&D.embroque?.6:1);timeScale=ui.paused?0:damp(timeScale,tgt,5,dtR);const dt=dtR*timeScale;
- {const nS=Math.min(4,Math.max(1,Math.ceil(dt/.05))),h=dt/nS;for(let s=0;s<nS;s++){if(h>0){simTime+=h;updateDirector(h);}updateBull(h);updateTorero(h);supremaPost(h);}}updateDust(dt);
+ {const nS=Math.min(8,Math.max(1,Math.ceil(dt/.05))),h=dt/nS;for(let s=0;s<nS;s++){if(h>0){simTime+=h;updateDirector(h);}updateBull(h);updateTorero(h);supremaPost(h);}}updateDust(dt);
  oleLevel=Math.max(0,oleLevel-dt*.45);PAN.t-=dtR;crowdU.uPan.value=damp(crowdU.uPan.value,PAN.t>0?1:0,1.6,dtR);crowdU.uOle.value=smooth(0,.6,oleLevel);crowdU.uTime.value=simTime;
  for(const fl of flags){const a=fl.m.geometry.attributes.position,b=fl.base;for(let i=0;i<a.count;i++){const x=b[i*3];a.array[i*3+2]=Math.sin(x*4-simTime*6+fl.ph)*.14*x+Math.sin(x*7-simTime*9)*.03*x;}a.needsUpdate=true;if((SOMB.f=(SOMB.f||0)+1)%3===0)fl.m.geometry.computeVertexNormals();}
  const focus=T.clone().lerp(B,.38);
@@ -1169,6 +1180,113 @@ function frame(now){requestAnimationFrame(frame);try{if(last)autoCalidad(Math.mi
  renderer.render(scene,camera);
 
  if(false){const d=gimg.data;for(let i=0;i<d.length;i+=4){const v=Math.random()*255;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}gctx.putImageData(gimg,0,0);}}
+/* ===================== MÁS LIDIA: tercios, banderillas, cuadrilla, comentarista y velocidad =====================
+   Rótulos de televisión en cada cambio de tercio, un comentarista que narra lo que pasa en el ruedo, la cuadrilla
+   asomada a los burladeros mirando al toro, el tercio de banderillas (tres pares que los peones clavan en el
+   morrillo con los colores de la divisa y que se quedan puestos el resto de la lidia), velocidades ×4 y ×8 y un
+   botón para ir directamente a la suerte suprema. */
+const XL={peones:null,ban:[],banTex:null,bandDone:false,band:null,salta:false,hitK:{},muere:false,com:{q:[],t:0,until:0}};
+const xlD=()=>JUEGO.t||{},xlMat=()=>xlD().mat||'El matador',xlToro=()=>xlD().name||'el toro';
+const xlPlural=n=>({Natural:'naturales',Delantal:'delantales'}[n]||n.toLowerCase()+'s');
+const xlPick=a=>a[Math.floor(Math.random()*a.length)];
+function rotulo(sup,tit){const el=document.getElementById('rot');if(!el)return;el.querySelector('small').textContent=sup;el.querySelector('b').textContent=tit;el.classList.add('on');clearTimeout(rotulo.t);rotulo.t=setTimeout(()=>el.classList.remove('on'),2800);}
+// comentarista: una frase cada vez; las importantes se adelantan a las demás
+function com(txt,prio){const C=XL.com;const now=performance.now();if(prio||now>C.until){xlComShow(txt);return;}if(C.q.length<2)C.q.push(txt);}
+function xlComShow(txt){const el=document.getElementById('com');if(!el)return;el.querySelector('span').textContent=txt;el.classList.add('on');const C=XL.com;C.until=performance.now()+Math.max(2600,txt.length*55)/Math.max(1,Math.sqrt(ui.speed||1));
+ clearTimeout(com.t);com.t=setTimeout(function nx(){const q=XL.com.q.shift();if(q){xlComShow(q);}else el.classList.remove('on');},C.until-performance.now());}
+/* ---------- la cuadrilla: tres peones de plata tras los burladeros ---------- */
+function xlPeon(suitC,capC){const g=new THREE.Group();const suit=std({color:suitC,roughness:.45,metalness:.25}),plata=std({color:'#d9dde2',metalness:.95,roughness:.28}),skin=std({color:'#c48d68',roughness:.62}),blk=std({color:'#121212',roughness:.55}),rosa=std({color:'#e9a9b3',roughness:.5});
+ const legG=new THREE.CylinderGeometry(.075,.055,.88,8);legG.translate(0,-.44,0);const armG=new THREE.CylinderGeometry(.05,.04,.6,8);armG.translate(0,-.3,0);
+ const lL=M(legG,suit),lR=M(legG,suit);lL.position.set(.1,.92,0);lR.position.set(-.1,.92,0);for(const l of [lL,lR]){const m=M(new THREE.CylinderGeometry(.052,.045,.34,8),rosa);m.position.y=-.62;l.add(m);const z=M(new THREE.BoxGeometry(.09,.06,.2),blk);z.position.set(0,-.86,.04);l.add(z);g.add(l);}
+ const torso=M(new THREE.CylinderGeometry(.18,.15,.6,12),suit);torso.position.y=1.22;g.add(torso);
+ const borda=M(new THREE.CylinderGeometry(.185,.183,.16,12,1,true),plata);borda.position.y=1.44;g.add(borda);
+ const faja=M(new THREE.CylinderGeometry(.155,.155,.08,12),std({color:'#7d1420',roughness:.6}));faja.position.y=.96;g.add(faja);
+ const head=M(new THREE.SphereGeometry(.11,14,10),skin);head.position.y=1.66;g.add(head);
+ const mont=M(new THREE.SphereGeometry(.12,12,8,0,TAU,0,Math.PI/2),blk);mont.scale.set(1.15,.62,.95);mont.position.y=1.71;g.add(mont);
+ const arm=s=>{const p=new THREE.Group();p.position.set(s*.23,1.48,0);const a=M(armG,suit);p.add(a);const h=M(new THREE.SphereGeometry(.045,8,6),skin);h.position.y=-.62;p.add(h);
+  const hb=M(new THREE.CylinderGeometry(.18,.18,.03,10),plata);hb.position.set(-s*.03,.03,0);hb.scale.set(.6,1,.55);p.add(hb);g.add(p);return p;};
+ const aL=arm(1),aR=arm(-1);
+ const cap=M(new THREE.BoxGeometry(.6,.42,.025),std({color:capC,roughness:.8,side:THREE.DoubleSide}));
+ return{g,aL,aR,lL,lR,cap,ph:Math.random()*TAU,st:'burl',pos:new V3(),yaw:0,t:0,path:[],hb:null};}
+// geometrías y materiales compartidos: los pares de cada toro no acumulan memoria
+function xlBanMesh(){if(!XL.g)XL.g={palo:new THREE.CylinderGeometry(.011,.011,.74,6),rizo:new THREE.CylinderGeometry(.034,.03,.5,10),arp:new THREE.ConeGeometry(.016,.07,6),
+  mPalo:std({color:'#e8dcc0',roughness:.6}),mArp:std({color:'#9aa0a6',metalness:.9,roughness:.3})};const G=XL.g;
+ if(!XL.mRizo)XL.mRizo=std({map:xlBanTex(),roughness:.85,side:THREE.DoubleSide});
+ const g=new THREE.Group();const palo=M(G.palo,G.mPalo,false,false);palo.position.y=.37;g.add(palo);
+ const rizo=M(G.rizo,XL.mRizo,false,false);rizo.position.y=.43;g.add(rizo);
+ const arp=M(G.arp,G.mArp,false,false);arp.rotation.x=Math.PI;arp.position.y=-.02;g.add(arp);return g;}
+function xlManos(P,on){if(P.hb){for(const m of P.hb)if(m.parent)m.parent.remove(m);P.hb=null;}if(!on)return;
+ P.hb=[P.aL,P.aR].map(a=>{const m=xlBanMesh();m.position.set(0,-.62,.03);m.rotation.x=-1.75;a.add(m);return m;});}
+// papel rizado con los colores de la divisa de la ganadería
+function xlBanTex(){if(XL.banTex)return XL.banTex;const d=xlD(),cs=(d.div&&d.div.length?d.div:['#b3122a','#f2efe6']).slice(0,3);const c=document.createElement('canvas');c.width=64;c.height=256;const x=c.getContext('2d');
+ for(let i=-8;i<40;i++){x.fillStyle=cs[((i%cs.length)+cs.length)%cs.length];x.beginPath();x.moveTo(0,i*12);x.lineTo(64,i*12-24);x.lineTo(64,i*12-12);x.lineTo(0,i*12+12);x.fill();}
+ x.fillStyle='rgba(0,0,0,.18)';for(let i=0;i<64;i+=4)x.fillRect(i,0,1,256);XL.banTex=new THREE.CanvasTexture(c);XL.banTex.encoding=THREE.sRGBEncoding;return XL.banTex;}
+const XL_BUR=[.9,2.4,3.9];
+function xlPeonesInit(){if(XL.peones)return;XL.peones=XL_BUR.map((a,i)=>{const P=xlPeon(['#213a5e','#4b1d2a','#1f3b2c'][i],i===1?'#d9b23a':'#d46c8c');
+  P.home=new V3(Math.cos(a)*(R-.3),0,Math.sin(a)*(R-.3));const tg=new V3(-Math.sin(a),0,Math.cos(a)),bd=new V3(Math.cos(a),0,Math.sin(a));
+  P.edge=new V3(Math.cos(a)*(R-.42),0,Math.sin(a)*(R-.42)).addScaledVector(tg,(i%2?-1:1)*1.25);P.pos.copy(P.home);
+  P.cap.position.set(Math.cos(a)*(R-.66),1.36,Math.sin(a)*(R-.66)).addScaledVector(tg,(i%2?1:-1)*.42);P.cap.lookAt(0,1.36,0);scene.add(P.cap);void bd;
+  scene.add(P.g);try{sombraSoloGrande(P.g)}catch(e){}return P;});}
+function xlPeonPose(P,dt,run,armsUp){P.ph+=dt*(run?11:1.2);const s=Math.sin(P.ph);const sw=run?.75*s:0;P.lL.rotation.x=sw;P.lR.rotation.x=-sw;
+ const up=armsUp?-2.75:run?-.25:-.05;P.aL.rotation.x=damp(P.aL.rotation.x,up+(armsUp?0:-sw*.8),10,dt);P.aR.rotation.x=damp(P.aR.rotation.x,up+(armsUp?0:sw*.8),10,dt);
+ P.aL.rotation.z=damp(P.aL.rotation.z,armsUp?.18:.08,8,dt);P.aR.rotation.z=damp(P.aR.rotation.z,armsUp?-.18:-.08,8,dt);
+ P.g.position.set(P.pos.x,run?Math.abs(s)*.05:.0,P.pos.z);P.g.rotation.y=P.yaw;}
+function xlPeonMove(P,tgt,v,dt){const dx=tgt.x-P.pos.x,dz=tgt.z-P.pos.z,d=Math.hypot(dx,dz);if(d<1e-3)return true;const ny=Math.atan2(dx,dz);P.yaw+=clamp(angDiff(P.yaw,ny),-8*dt,8*dt);const st=Math.min(d,v*dt);P.pos.x+=dx/d*st;P.pos.z+=dz/d*st;return d<.15;}
+function xlPeonesTick(dt){if(!XL.peones||!bull)return;for(const P of XL.peones){if(P.st==='burl'){P.yaw+=clamp(angDiff(P.yaw,Math.atan2(B.x-P.pos.x,B.z-P.pos.z)),-3*dt,3*dt);xlPeonPose(P,dt,false,false);}
+  else if(P.st==='vuelve'){if(P.path.length&&xlPeonMove(P,P.path[0],5,dt))P.path.shift();if(!P.path.length){P.st='burl';P.pos.copy(P.home);}xlPeonPose(P,dt,true,false);}}}
+/* ---------- banderillas clavadas en el morrillo ---------- */
+function xlClava(par){if(!bull)return;for(const s of [1,-1]){const g=xlBanMesh();g.position.set(s*(.07+Math.random()*.05),1.33,.52-par*.11+Math.random()*.04);
+  g.rotation.set(-(.32+Math.random()*.3),0,-s*(.16+Math.random()*.18));g.userData.b={x:g.rotation.x,z:g.rotation.z,ph:Math.random()*TAU};bull.body.add(g);XL.ban.push(g);}}
+function xlBanSway(){if(!XL.ban.length)return;const a=.05+Math.min(.12,bullSpeed*.02);for(const g of XL.ban){const u=g.userData.b;g.rotation.x=u.x+Math.sin(simTime*7.3+u.ph)*a;g.rotation.z=u.z+Math.sin(simTime*5.1+u.ph*1.7)*a*.8;}}
+/* ---------- tercio de banderillas ---------- */
+function xlBandStart(){XL.bandDone=true;xlPeonesInit();D.phase='band';D.t=0;D.embroque=false;XL.band={par:0,P:null,st:'espera',t:0};audio.clarin();
+ rotulo('Cambio de tercio','Tercio de banderillas');com(`Suena el clarín. Los banderilleros de ${xlMat()} van a poner tres pares a ${xlToro()}.`,true);if(ui.cam==='cine')cut('tendido');}
+function xlBandFin(){const b=XL.band;if(b&&b.P&&b.P.st!=='burl'){b.P.st='vuelve';b.P.path=[b.P.edge.clone(),b.P.home.clone()];xlManos(b.P,false);}XL.band=null;D.phase='cite';audio.clarin();rotulo('Tercio de muleta',`${xlMat()} brinda la faena`);
+ com(`Cambio de tercio. ${xlMat()} brinda al público y se va al centro con la muleta.`,true);_xlSS(false);}
+function xlBandTick(dt){const b=XL.band;if(!b)return;b.t+=dt;
+ // el matador espera al quite, siempre de cara al toro
+ const tYaw=Math.atan2(B.x-T.x,B.z-T.z);Tyaw+=clamp(angDiff(Tyaw,tYaw),-2*dt,2*dt);torero.walkV=0;
+ const bf=new V3(Math.sin(Byaw),0,Math.cos(Byaw));let P=b.P;
+ const toroA=(tx,tz,v,w)=>{const ny=Math.atan2(tx-B.x,tz-B.z),dd=angDiff(Byaw,ny);const st=clamp(dd,-w*dt,w*dt);Byaw+=st;bull.yawRate=dt>1e-5?st/dt:0;bullSpeed=damp(bullSpeed,v,v>bullSpeed?2.5:1.6,dt);B.x+=Math.sin(Byaw)*bullSpeed*dt;B.z+=Math.cos(Byaw)*bullSpeed*dt;};
+ if(b.st==='espera'){toroA(B.x+bf.x,B.z+bf.z,0,1);if(b.t>(b.par?.8:1.6)&&bullSpeed<.7){if(b.par>=3){xlBandFin();return;}
+   P=b.P=XL.peones[b.par%XL.peones.length];P.st='sale';const away=B.clone().sub(T).setY(0);if(away.lengthSq()<1e-4)away.set(1,0,0);away.normalize();
+   let C=null;for(const da of [.6,-.6,1.1,-1.1,0,1.7,-1.7]){const c=B.clone().addScaledVector(away.clone().applyAxisAngle(new V3(0,1,0),da),7);if(c.length()<R-3.2&&c.distanceTo(T)>4.5){C=c;break;}}
+   if(!C)C=B.clone().multiplyScalar(-.3);b.C=C;P.path=[P.edge.clone(),C];b.side=Math.random()<.5?1:-1;b.st='sale';b.t=0;
+   xlManos(P,true);
+   com(xlPick([`Sale el banderillero a cuerpo limpio a buscar a ${xlToro()}.`,`${b.par===0?'Primer':b.par===1?'Segundo':'Tercer'} par: el peón se planta en los medios y cita.`,`Cita de lejos el banderillero, de frente.`]));}
+  return;}
+ if(b.st==='sale'){toroA(P.pos.x,P.pos.z,0,1.4);if(P.path.length&&xlPeonMove(P,P.path[0],5.2,dt))P.path.shift();xlPeonPose(P,dt,true,false);if(!P.path.length){b.st='cita';b.t=0;}return;}
+ if(b.st==='cita'){P.yaw+=clamp(angDiff(P.yaw,Math.atan2(B.x-P.pos.x,B.z-P.pos.z)),-6*dt,6*dt);xlPeonPose(P,dt,false,true);toroA(P.pos.x,P.pos.z,b.t>.9?3:0,1.6);if(b.t>1.3){b.st='reunion';b.t=0;}return;}
+ if(b.st==='reunion'){const l=new V3(Math.cos(Byaw),0,-Math.sin(Byaw)),cara=B.clone().addScaledVector(bf,1.1);
+  const tg=cara.clone().addScaledVector(l,b.side*.75);xlPeonMove(P,tg,4.4,dt);xlPeonPose(P,dt,true,true);toroA(P.pos.x,P.pos.z,5.2,1.9);
+  if(P.pos.distanceTo(cara)<1.05||b.t>3.2){xlClava(b.par);xlManos(P,false);b.par++;ole(.82);
+   com(xlPick(['¡Qué par! Asomándose al balcón.','Clava arriba, en todo lo alto, y sale andando.','Reunión perfecta en la cara del toro: ¡olé!','Le cuesta, pero deja el par en buen sitio.']));
+   b.st='salida';b.t=0;b.out=P.yaw-b.side*1.25;}return;}
+ if(b.st==='salida'){P.yaw+=clamp(angDiff(P.yaw,b.out),-5*dt,5*dt);P.pos.x+=Math.sin(P.yaw)*4.6*dt;P.pos.z+=Math.cos(P.yaw)*4.6*dt;const rr=Math.hypot(P.pos.x,P.pos.z);if(rr>R-1.2){P.pos.multiplyScalar((R-1.2)/rr);}
+  xlPeonPose(P,dt,true,false);toroA(B.x+bf.x,B.z+bf.z,0,.6);if(b.t>1.1){P.st='vuelve';P.path=[P.edge.clone(),P.home.clone()];b.st='espera';b.t=0;}}}
+/* ---------- enganches con la lidia ---------- */
+const _xlRL=resetLidia;resetLidia=function(){XL.ban=[];XL.bandDone=false;XL.band=null;XL.hitK={};XL.muere=false;if(XL.banTex){XL.banTex.dispose();XL.banTex=null;}if(XL.mRizo){XL.mRizo.dispose();XL.mRizo=null;}
+ try{xlPeonesInit();for(const P of XL.peones){P.st='burl';P.pos.copy(P.home);P.path=[];xlManos(P,false);}}catch(e){console.warn('cuadrilla',e)}_xlRL();
+ const d=xlD();rotulo(d.i?`${d.i}º de la tarde`:'Tercio de capa','Tercio de capa');
+ com(d.name?`Sale ${d.name}${d.num!=null?', número '+d.num:''}: ${d.peso||'—'} kilos, ${d.pelo||'negro'}, de ${d.gan||'la ganadería'}. ${d.mat||'El matador'} lo recibe con el capote.`:'Sale el toro y el matador lo recibe con el capote.',true);};
+const _xlSS=startSerie;startSerie=function(first){const nm=D.prog[D.si%D.prog.length][0],s=SU[nm];
+ if(!first&&!XL.bandDone&&!XL.salta&&s&&s.tool==='muleta'){xlBandStart();return;}_xlSS(first);
+ if(!first&&s){const izq=D.hand==='L';com(s.tool==='capote'?`Otra vez de capa: ${xlPlural(s.name)}.`:nm==='natural'?`Se echa la muleta a la izquierda: tanda de naturales.`:nm==='derechazo'?`Por el pitón derecho, tanda de derechazos.`:`Cambia de mano: ${xlPlural(s.name)}${izq?' por el izquierdo':''}.`);}};
+const _xlOle=ole;ole=function(k){_xlOle(k);if(D.phase==='pass'&&k>.62&&SU[D.cur]){const n=SU[D.cur].name.toLowerCase(),t=xlToro();
+  com(xlPick([`¡Qué temple en ese ${n}!`,`Se lo pasa por la faja, muy cerca.`,`Mando y largura, la plaza se viene arriba.`,`Embiste con clase ${t}, humillando.`,`Templadísimo, a cámara lenta.`,`Bajando la mano, ¡olé!`]));}};
+const _xlCog=cogidaInicia;cogidaInicia=function(){_xlCog();rotulo('¡Cogida!',`${xlToro()} prende a ${xlMat()}`);com(`¡Cogida! ${xlToro()} prende a ${xlMat()}; corre la cuadrilla al quite con los capotes.`,true);};
+const _xlSup=suprema;suprema=function(){_xlSup();XL.hitK={};rotulo('Suerte suprema','La hora de la verdad');com(`${xlMat()} cambia el estoque simulado por el de verdad y se va a por ${xlToro()}.`,true);};
+const _xlUD=updateDirector;updateDirector=function(dt){
+ if(XL.salta&&(D.phase==='cite'||D.phase==='turn'||D.phase==='paseo'||D.phase==='band')){XL.salta=false;if(D.phase==='band'){const b=XL.band;if(b&&b.P&&b.P.st!=='burl'){b.P.st='vuelve';b.P.path=[b.P.edge.clone(),b.P.home.clone()];xlManos(b.P,false);}XL.band=null;D.phase='cite';}
+  if(JUEGO.on){suprema();}else{newCorrida();return;}}
+ if(D.phase==='band'){D.t+=dt;xlBandTick(dt);limitesRuedo();}else _xlUD(dt);
+ try{xlPeonesTick(dt);xlBanSway();}catch(e){}
+ if(D.phase==='suprema'&&SP.plan){const st=SP.plan[SP.k];if(SP.hit&&!XL.hitK[SP.k]){XL.hitK[SP.k]=1;
+   com({pinchazo:'Pinchazo: el acero toca hueso y sale despedido.',entera:'¡Estocada entera, hasta la bola!',media:'Media estocada, en buen sitio.',descabello:'Descabella…',indulto:'Simula la suerte con la mano: ¡indultado!'}[st]||'Entra a matar.',true);}
+  if(SP.st==='muere'&&!XL.muere){XL.muere=true;com(`Rueda ${xlToro()} sin puntilla. La plaza se llena de pañuelos.`,true);}}};
+/* ---------- velocidad, saltar a la estocada ---------- */
+try{const v=+localStorage.getItem('ruedoVel');if([.5,1,2,4,8].includes(v))ui.speed=v;}catch(e){}
+(function(){const bS=document.getElementById('bSup');if(!bS)return;bS.onclick=()=>{if(D.phase==='suprema'||D.phase==='fin')return;XL.salta=true;ui.paused=false;bS.disabled=true;setTimeout(()=>bS.disabled=false,1500);};})();
 window.__ruedo={D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},get plano(){return camS.shot;},get tor(){return torero;},render:(c)=>renderer.render(scene,c),get canvas(){return renderer.domElement;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
 })();
 </script>
