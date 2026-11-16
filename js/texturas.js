@@ -13,7 +13,9 @@ if(typeof buildCalle==='function'){const _bcTx=buildCalle;buildCalle=function(){
 function txrNatLoad(){if(!THREE.GLTFLoader||TXR.nat||TXR.loading)return;TXR.loading=1;
  new THREE.GLTFLoader().load((typeof MOD_BASE!=='undefined'?MOD_BASE:'')+'modelos/natura.gltf.json',g=>{TXR.nat=g.scene;g.scene.updateMatrixWorld(true);
   g.scene.traverse(o=>{if(o.isMesh){const m=o.material;if(/Leaves/.test(m.name)){m.color.set(m.name==='Leaves_NormalTree'?'#7e8c4c':'#8a9655');m.alphaTest=.45}if(/Bark/.test(m.name))m.color.set('#9b8f84');if(m.name==='Grass')m.color.set('#c9c07a');if(m.name==='Rocks')m.color.set('#cfc7b8')}});
-  try{if(W3&&W3.mode==='finca'&&!W3.ride&&S)rebuildFinca()}catch(e){}},undefined,e=>{TXR.err=e})}
+  try{if(typeof fincaRecargar==='function')fincaRecargar();else if(W3&&W3.mode==='finca'&&!W3.ride&&S)rebuildFinca()}catch(e){}},undefined,e=>{TXR.err=e})}
+/* la vegetación se descarga en segundo plano al abrir el juego: así no hay que rehacer la finca al entrar */
+try{const pre=()=>setTimeout(()=>{try{txrNatLoad()}catch(e){}},2500);if(document.readyState==='complete')pre();else addEventListener('load',pre,{once:true})}catch(e){}
 function txrInst(name,list,shadow){const src=TXR.nat&&TXR.nat.getObjectByName(name);if(!src||!list.length)return [];const out=[];const bb=new THREE.Box3().setFromObject(src);const base=bb.min.y,h=bb.max.y-bb.min.y||1;
  const T=new THREE.Matrix4(),Rm=new THREE.Matrix4(),Sm=new THREE.Matrix4(),O=new THREE.Matrix4().makeTranslation(-src.position.x,-base,-src.position.z);
  src.traverse(o=>{if(!o.isMesh)return;const im=new THREE.InstancedMesh(o.geometry,o.material,list.length);im.castShadow=!!shadow;im.receiveShadow=true;const loc=new THREE.Matrix4().multiplyMatrices(O,o.matrixWorld);

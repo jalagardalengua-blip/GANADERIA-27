@@ -12,7 +12,7 @@ function ruedoDatos(r,i){const t=r.toros[i];if(!t)return null;
   cogida:t.cogida?{parte:t.cogida.parte}:null,sust:t.sust?{n:t.sust.n}:null}}
 function ruedoEnviar(){if(!RD.fr||!RD.r)return;const d=ruedoDatos(RD.r,RD.i);if(d)RD.fr.contentWindow.postMessage({ruedo:'lidia',valor:d},'*')}
 function ruedoCerrar(resumen){if(!RD.on)return;const id=RD.r&&RD.r.id;RD.on=false;try{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}catch(e){}
- /* quita la entrada del historial que abrió la corrida (si no se salió con «atrás») */try{if(history.state&&history.state.ruedo){RD.volviendo=true;history.back()}}catch(e){}if(RD.el)RD.el.remove();RD.el=RD.fr=null;document.body.style.overflow='';try{render()}catch(e){}if(resumen&&id!=null)try{verCorrida(id)}catch(e){}}
+ /* quita la entrada del historial que abrió la corrida (si no se salió con «atrás») */try{if(history.state&&history.state.ruedo){RD.volviendo=true;history.back()}}catch(e){}if(RD.el)RD.el.remove();RD.el=RD.fr=null;document.body.style.overflow='';try{render()}catch(e){}if(resumen&&id!=null)try{typeof resultadoCorrida==='function'?resultadoCorrida(id):verCorrida(id)}catch(e){}}
 function ruedoAbrir(id){const r=S.hist.find(h=>h.id===id);if(!r||!r.toros||!r.toros.length)return false;
  S.porVer=(S.porVer||[]).filter(x=>x!==id);r.visto=true;save();
  if(typeof W3!=='undefined'&&W3.on){try{exit3D()}catch(e){}}
