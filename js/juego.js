@@ -8,7 +8,7 @@ function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random
 /* feedback unificado: vibración + sonido (si el motor de audio está activo) + pulso visual */
 function fxOn(){try{return localStorage.getItem('hd-fx')!=='0'}catch(e){return true}}
 function fx(tipo,el){const F=BAL.fx;
- try{if(fxOn()&&navigator.vibrate&&F[tipo]!=null)navigator.vibrate(F[tipo])}catch(e){}
+ try{const ua=navigator.userActivation;if(fxOn()&&navigator.vibrate&&F[tipo]!=null&&(!ua||ua.hasBeenActive))navigator.vibrate(F[tipo])}catch(e){}
  try{if(typeof AU!=='undefined'&&AU.ctx&&AU.on){
   if(tipo==='reto'&&typeof applause==='function')applause(1.4,.22);
   else if(tipo==='ole'&&typeof oleSnd==='function')oleSnd(false);
@@ -119,7 +119,7 @@ function upgrade(s){if(!validSave(s))return null;let v=s.v|0||1;if(v>SAVE_V)retu
 /* devuelve {s, src, err}: src 'main' | 'bak'; err 'corrupt' | 'newer' | null */
 function loadInfo(){let raw=null,bak=null;try{raw=localStorage.getItem(KEY);bak=localStorage.getItem(BAL.save.bak)}catch(e){}
  const m=parseSave(raw);if(m&&validSave(m)&&(m.v|0||1)>SAVE_V)return {s:null,src:null,err:'newer'};
- const um=m?upgrade(m):null;if(um)return {s:um,src:'main',err:null};
+ const from=m?(m.v|0||1):0,um=m?upgrade(m):null;if(um)return {s:um,src:'main',err:null,migrated:from<SAVE_V};
  const b=parseSave(bak),ub=b?upgrade(b):null;if(ub)return {s:ub,src:'bak',err:raw?'corrupt':null};
  return {s:null,src:null,err:raw?'corrupt':null}}
 function load(){return loadInfo().s}
@@ -387,7 +387,7 @@ function celebrar(o){
  const toros=[],hurt=new Set();
  o.toros.forEach((id,i)=>{const a=byId(id);if(!a)return;let mat=pool[i%3];if(hurt.has(mat.n))mat=pool.find(m=>!hurt.has(m.n))||SOBRE;
   const t=lidiar(a,o,mat);if(t.cogida){hurt.add(mat.n);const s=pool.find(m=>!hurt.has(m.n))||SOBRE;t.sust={n:s.n,t:s.t,e:s.e};t.trof=0;if(t.res==='indulto')t.res='vuelta'}toros.push(t)});
- let dp=0;for(const t of toros)dp+=RESPRES[t.res]*CATMUL[o.cat];
+ let dp=toros.length?(BAL.prestigio.porFestejo[o.cat]||0):0;for(const t of toros)dp+=RESPRES[t.res]*CATMUL[o.cat];
  const best=toros.reduce((m,t)=>t.score>m.score?t:m,toros[0]);
  let premio=null;
  if(best&&best.score>=80&&o.cat<=2&&Math.random()<.6){premio=best.name;dp+=3;S.money+=6000;S.stats.premios++}
@@ -560,6 +560,7 @@ function render(){
   <div class="st"><span class="it hm">${ICO.cal}<span class="l">${MESES[S.month]} ${S.year}</span><span class="s">${MESES[S.month].slice(0,3)} ${String(S.year).slice(2)}</span></span><span class="it">${ICO.monG}<b class="num">${eur(S.money)}</b></span><span class="it">${ICO.star}<span><span class="l">Prestigio </span><b class="num">${Math.round(S.pres)}</b></span></span></div>
   <button class="go" onclick="advance()" aria-label="Avanzar al mes siguiente">Avanzar ${ICO.chev}</button>
  </div></div>
+ ${typeof pasoHTML==='function'?pasoHTML():''}
  <main><div class="wrap" id="scr"></div></main>
  <nav class="tabs" aria-label="Secciones"><div class="wrap">${TABS.map(([k,l,i])=>{const b=k==='ofertas'?nuevas:k==='tareas'?pend:0;return `<button aria-current="${UI.tab===k}" onclick="go('${k}')">${ICO[i]}<span>${l}</span>${b?`<span class="bdg">${b}</span>`:''}</button>`}).join('')}</div></nav>`;
  const scr=$('#scr');
@@ -663,6 +664,7 @@ function startNew(){const n=NEWG.name.trim();if(!n){toast('Ponle nombre a tu gan
 /* carga, migra y valida la partida; lo usan «Continuar» y el arranque */
 function abrirPartida(){const L=loadInfo();
  if(!L.s){if(L.err==='newer')toast('Esta partida es de una versión más nueva del juego. Recarga la página para actualizar.');else if(L.err==='corrupt')toast('La partida guardada está dañada y no hay copia de seguridad.');return false}
+ if(L.migrated)backup();
  S=L.s;if(!S.mej)S.mej=S.g.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{};migrate(S);save();
  if(L.src==='bak')toast('La partida estaba dañada: se ha recuperado la copia del último mes.');
  UI.tab='inicio';render();if(S.over)gameOver();else if(S.prestamoOferta)ofrecerPrestamo();return true}
@@ -708,7 +710,7 @@ function renderFinca(el){
  <div class="card" style="padding:12px 14px"><div class="row" style="justify-content:space-between"><span class="lbl">Carga de la finca</span><b style="color:${cap.sobre>0?'var(--bad)':cap.carga>.9?'var(--warn)':'inherit'}">${cap.ug} / ${cap.max} UG</b></div><span class="meter big"><i style="width:${Math.min(100,cap.carga*100)}%;background:${cap.sobre>0?'var(--bad)':cap.carga>.9?'var(--warn)':'var(--good)'}"></i></span><small class="muted">${cap.sobre>0?`Sobrecargada: el pienso sale un ${Math.round(cap.sobre*BAL.capacidad.sobrecoste*100)} % más caro y la camada pierde salud. Vende o desecha animales.`:'Unidades ganaderas: un becerro come menos que un toro. Cercas, abrevaderos, nave y comederos amplían la capacidad.'}</small></div>
  <section class="sect"><header><h2>Tareas</h2></header><div class="list">${listaTareas().slice(0,3).map(tareaRow).join('')||'<div class="task"><span class="dot ok"></span><span class="t">Todo al día. El mayoral espera órdenes.</span></div>'}</div></section>
  ${prox.length?`<section class="sect"><header><h2>Carteles anunciados</h2></header><div class="list">${prox.map(o=>`<div class="task"><span class="dot ok"></span><span class="t"><b>${esc(o.plaza)}</b><br><small class="muted">${o.feria} · ${MESES[o.abs%12]} ${Math.floor(o.abs/12)} · ${o.toros.length} ${o.tipo==='novillada'?'novillos':'toros'}</small></span></div>`).join('')}</div></section>`:''}
- <section class="sect"><header><h2>Alimentación</h2><span class="sp"></span><small class="muted">por cabeza y mes</small></header>
+ <section class="sect"><header><h2>Alimentación</h2><span class="sp"></span><small class="muted">por unidad ganadera (UG) y mes</small></header>
   <div class="seg">${Object.entries(FEED).map(([k,f])=>`<button aria-pressed="${S.feed===k}" onclick="S.feed='${k}';save();render()"><b>${f.n}</b><span>${Math.round(f.c*feedMul())} €/UG · ${f.d}</span></button>`).join('')}</div>
 </section>
  <section class="sect"><header><h2>Cubrición</h2></header>
@@ -863,14 +865,21 @@ function vender(id,tipo){const a=byId(id);const p=Math.round(tipo==='pop'?700+a.
  S.money+=p;a.st='vendido';S.animals=S.animals.filter(x=>x.id!==id);if(S.semAct===id)S.semAct=(campo().find(x=>x.role==='semental')||{}).id??null;
  log(`Venta de ${a.name}${a.num!=null?' nº '+a.num:''}: ${eur(p)}`);save();closeModal();render();toast(`Vendido por ${eur(p)}`);fx('cobro')}
 
+/* sugerencia del mayoral: las mejores (nota mínima) que caben en la finca, con un mínimo de reposición */
+function tientaSugeridas(rows){const T=BAL.tienta,cap=capacidad(),ids=new Set(rows.map(a=>a.id));
+ const ugSin=campo().filter(a=>!ids.has(a.id)).reduce((t,a)=>t+ugDe(a),0);
+ const hueco=Math.floor((cap.max*T.cargaObjetivo-ugSin)/BAL.ug.vaca);
+ const buenas=rows.filter(a=>a.nota>=T.notaMin).sort((a,b)=>b.nota-a.nota);
+ return buenas.slice(0,Math.max(T.reposicionMin,Math.min(buenas.length,hueco))).map(a=>a.id)}
 function tientaLote(){
  const pend=campo().filter(a=>a.sex==='H'&&!a.tentado&&!a.role&&ageY(a)>=2);
  if(!pend.length)return;
  const cost=pend.length*tCost('H');if(!puedePagar(cost,'la tienta'))return;S.money-=cost;pend.forEach(tentar);save();render();
- const rows=pend.sort((a,b)=>b.nota-a.nota);
+ const rows=pend.sort((a,b)=>b.nota-a.nota),sug=new Set(tientaSugeridas(rows)),cap=capacidad();
  modal('Tienta de hembras',`<div class="stack">
   <p class="muted" style="margin:0">En la placita de tientas se mide la bravura de ${pend.length} hembras ante el caballo y la muleta (${eur(cost)}). Marca las que pasan a vacas de vientre; las demás van al matadero.</p>
-  <div class="list">${rows.map(a=>`<label class="chk"><input type="checkbox" id="tv-${a.id}" ${a.nota>=68?'checked':''}><span><b>${esc(a.name)}</b>${a.num!=null?` <span class="mono muted">${a.num}</span>`:''}<br><small class="muted">${a.pelo} · ${a.peso} kg · madre ${a.madre?esc(a.madre.name):'—'}</small></span><span style="text-align:right"><b class="num">${a.nota}</b><br><small class="muted">${notaTxt(a.nota)}</small></span></label>`).join('')}</div>
+  <small class="muted">El mayoral marca las buenas (nota ${BAL.tienta.notaMin} o más) que caben en la finca: ${cap.ug} de ${cap.max} UG ocupadas.</small>
+  <div class="list">${rows.map(a=>`<label class="chk"><input type="checkbox" id="tv-${a.id}" ${sug.has(a.id)?'checked':''}><span><b>${esc(a.name)}</b>${a.num!=null?` <span class="mono muted">${a.num}</span>`:''}<br><small class="muted">${a.pelo} · ${a.peso} kg · madre ${a.madre?esc(a.madre.name):'—'}</small></span><span style="text-align:right"><b class="num">${a.nota}</b><br><small class="muted">${notaTxt(a.nota)}</small></span></label>`).join('')}</div>
   <button class="btn pri adv" onclick="cerrarTienta([${rows.map(a=>a.id).join(',')}])">Confirmar selección</button></div>`);
 }
 function cerrarTienta(ids){let ap=0,ds=0,ing=0;for(const id of ids){const a=byId(id);if(!a)continue;const ck=$('#tv-'+id);if(ck&&ck.checked){a.role='vaca';ap++}else{ing+=a.peso*1.3;a.st='vendido';ds++}}

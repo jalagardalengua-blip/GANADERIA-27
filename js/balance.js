@@ -8,17 +8,20 @@ const BAL={
  // Arranque de partida
  inicio:{
   real:{money:260000,vacas:40,machos:12,hembras:10,sementales:2,maxEdadM:5,bonus:2},
-  fundada:{money:180000,pres:12,vacas:30,machos:7,hembras:7,sementales:1,maxEdadM:4,bonus:-5}
+  fundada:{money:180000,pres:12,vacas:30,machos:7,hembras:7,sementales:1,maxEdadM:4,bonus:-2}
  },
 
  // Unidades ganaderas (UG): lo que come y ocupa cada animal frente a un toro adulto
  ug:{becerro:.3,anojo:.5,eral:.7,utrero:.85,toro:1,hembraJoven:.6,vaca:.8,semental:1.2},
 
+ // Tienta de hembras: lo que el mayoral marca por defecto
+ tienta:{notaMin:68,cargaObjetivo:.9,reposicionMin:2},
+
  // Gastos mensuales
  gastos:{personalFijo:1500,personalCabeza:8,saneamientoCabeza:8,herradero:35},
 
  // Capacidad de la finca en UG y sobrecarga
- capacidad:{real:150,fundada:80,obras:{cercas:25,abrev:15,nave:10,comederos:5},sobrecoste:1.2,saludSobrecarga:-1.2},
+ capacidad:{real:150,fundada:100,obras:{cercas:25,abrev:15,nave:10,comederos:5},sobrecoste:1.2,saludSobrecarga:-1.2},
 
  // Ayudas anuales (enero): pago por vaca de vientre y pago básico de la explotación
  ayudas:{porVaca:110,fija:4000},
@@ -43,7 +46,7 @@ const BAL={
   prestamo:{importe:90000,meses:36,interes:.12,confianza:-10}},
 
  // Prestigio: rendimientos decrecientes y desgaste
- prestigio:{umbral:40,desgaste:.03,techo:115,minGanancia:.12},
+ prestigio:{umbral:40,desgaste:.03,techo:115,minGanancia:.12,porFestejo:{1:1,2:.6,3:.4}},
 
  // Confianza de la propiedad
  confianza:{inicial:60,porObjetivo:12,porFallo:10,rojos:2,ultimatum:20},

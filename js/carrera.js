@@ -1,7 +1,7 @@
 /* ============ MODO CARRERA: escalafón, confianza, retos, buzón ============ */
 const PTS={indulto:30,vuelta:12,ovacion:6,silencio:1,pitos:-3,devuelto:-5};
 const SPOTS={pienso:[31,20.5],hierro:[-14,-11.5],aperos:[-21,6],caballo:[-12,11.6],placita:[-30,33.5],corrales:[28,-16],casa:[0,9]};
-function migrate(s){if(!s)return s;s.conf=s.conf??60;s.news=s.news||[];s.xp=s.xp||0;s.mes=s.mes||{};s.trofeos=s.trofeos||[];
+function migrate(s){if(!s)return s;s.conf=s.conf??BAL.confianza.inicial;if(!s.cap)s.cap=s.g&&s.g.real?BAL.capacidad.real:BAL.capacidad.fundada;s.news=s.news||[];s.xp=s.xp||0;s.mes=s.mes||{};s.trofeos=s.trofeos||[];
  if(!s.rivals)s.rivals=GANADERIAS.filter(g=>g.name!==s.g.name).slice(0,9).map(g=>({name:g.name,enc:g.enc,pres:g.pres,pts:0,ore:0,ind:0,div:g.div}));
  if(s.season){s.season.pts=s.season.pts||0;s.season.ore=s.season.ore||0}
  if(!s.retos||s.retosM!==s.year*12+s.month)genRetos(s);return s}
@@ -16,19 +16,27 @@ function genRetos(s){const c=s.animals.filter(a=>a.st==='campo'),sin=c.filter(a=
   {id:'enc',n:1,txt:'Encierra un toro a caballo en los corrales',rw:1800,xp:20,need:()=>s.offers.some(o=>o.st==='nueva')},
   {id:'vista',n:1,txt:'Ve entera tu corrida en la plaza 3D',rw:1500,xp:20,need:()=>s.porVer&&s.porVer.length>0},
   {id:'cerca',n:1,txt:'Repara tú la cerca rota',rw:900,xp:12,need:()=>!!s.roto}];
- const ok=pool.filter(p=>!p.need||p.need()).sort(()=>Math.random()-.5);
+ const ok=shuffle(pool.filter(p=>!p.need||p.need()));
  const pri=ok.filter(p=>['vista','cerca','herr'].includes(p.id)),rest=ok.filter(p=>!pri.includes(p));
  s.retos=[...pri,...rest].slice(0,3).map(({need,...r})=>({...r,done:false}));s.retosM=s.year*12+s.month;s.mes={}}
 function retoProg(r){return r.id==='pienso'?(S.fedM||0):Math.floor((S.mes&&S.mes[r.id])||0)}
-function retosCheck(){if(!S||!S.retos)return;for(const r of S.retos){if(r.done||retoProg(r)<r.n)continue;r.done=true;S.money+=r.rw;S.xp=(S.xp||0)+r.xp;save();toast(`Reto cumplido · +${eur(r.rw)}`);try{navigator.vibrate&&navigator.vibrate([20,40,20])}catch(e){}}}
+function retosCheck(){if(!S||!S.retos)return;for(const r of S.retos){if(r.done||retoProg(r)<r.n)continue;r.done=true;S.money+=r.rw;S.xp=(S.xp||0)+r.xp;save();toast(`Reto cumplido · +${eur(r.rw)}`);fx('reto')}}
 function mesInc(k,v=1){if(!S)return;S.mes=S.mes||{};S.mes[k]=(S.mes[k]||0)+v;retosCheck()}
-function rivalsTick(){if(S.month<2||S.month>9)return;for(const r of S.rivals){if(Math.random()<r.pres/105){const n=Math.random()<.3?2:1;for(let k=0;k<n;k++){let p=0;for(let i=0;i<6;i++){const q=Math.random()*100;if(q<r.pres*.04){p+=30;r.ind++}else p+=q<r.pres*.25?12:q<r.pres*.75?6:q<92?1:-3}r.pts+=p;r.ore+=RI(0,4)}}r.pres=clamp(r.pres+R(-.6,.6),20,95)}}
+/* un toro rival puntúa con las mismas reglas que los tuyos: nota según prestigio, arrastre, orejas y categoría de plaza */
+function toroRival(pres){const sc=60+(pres-50)*.3+gauss()*8.5;if(Math.random()<.03)return {res:'devuelto',trof:0};
+ const res=sc>=87&&Math.random()<.3?'indulto':sc>=84?'vuelta':sc>=76.5?'ovacion':sc>=64?'silencio':'pitos';const q=sc+gauss()*8;
+ return {res,trof:res==='indulto'?2:q>86?2:q>77?1:0}}
+function rivalsTick(){const RV=BAL.rivales;if(S.month<RV.meses[0]||S.month>RV.meses[1])return;
+ for(const r of S.rivals){
+  if(Math.random()<RV.probLidia*r.pres/100){const n=Math.random()<RV.dobleProb?2:1,cm=r.pres>=55?1.5:r.pres>=35?1.2:1;
+   for(let k=0;k<n;k++)for(let i=0;i<RV.toros;i++){const t=toroRival(r.pres);r.pts+=Math.round((PTS[t.res]||0)*cm)+t.trof*4;r.ore+=t.trof;if(t.res==='indulto')r.ind++}}
+  r.pres=clamp(r.pres+R(-RV.deriva,RV.deriva),RV.presMin,RV.presMax)}}
 function ranking(){const me={name:S.g.name,pts:S.season.pts||0,ore:S.season.ore||0,ind:S.season.ind||0,me:true,div:S.g.div};return [...S.rivals.map(r=>({...r})),me].sort((a,b)=>b.pts-a.pts||b.ore-a.ore)}
 function miPos(){return ranking().findIndex(r=>r.me)+1}
 function finTemporada(rep,ok){
- S.conf=clamp(S.conf+ok*12-(3-ok)*10,0,100);
+ const CF=BAL.confianza;S.conf=clamp(S.conf+ok*CF.porObjetivo-(3-ok)*CF.porFallo,0,100);
  const pos=miPos();const prem=pos===1?40000:pos<=3?15000:pos<=5?5000:0;
- if(prem){S.money+=prem;rep.inc+=prem}S.pres=clamp(S.pres+(pos<=5?(6-pos)*.8:-1),0,100);
+ if(prem){S.money+=prem;rep.inc+=prem}presDelta(pos<=5?(6-pos)*.8:-1);
  rep.lines.push(`Escalafón ganadero ${S.year}: terminas ${pos}º de ${S.rivals.length+1}${prem?` (+${eur(prem)})`:''}. Confianza de la propiedad: ${Math.round(S.conf)} %.`);
  if(pos===1)S.trofeos.push({y:S.year,t:'Ganadería triunfadora de la temporada',k:'oro'});
  else if(pos<=3)S.trofeos.push({y:S.year,t:`${pos}º del escalafón ganadero`,k:'plata'});
@@ -49,7 +57,7 @@ function delegar(k){const c=campo();
  if(k==='cerca'){S.money-=600;S.roto=null;toast('El mayoral repara la cerca · −600 €')}
  if(k==='escapado'){S.money-=900;S.escapado=null;toast('Los vaqueros recogen la res · −900 €')}
  if(k==='curas'){const inj=c.filter(a=>a.salud<55);S.money-=inj.length*250;inj.forEach(a=>{a.salud=Math.min(100,a.salud+30);a.lesion=0});toast(`Veterinario · −${eur(inj.length*250)}`)}
- save();render()}
+ fx('ok');save();render()}
 
 /* ============ INICIO ============ */
 function temporadaStrip(){const acep=S.offers.filter(o=>o.st==='aceptada');
@@ -82,7 +90,7 @@ function listaTareas(){const c=campo(),T=[];
  if(S.porVer.length)T.push({t:'Corrida de tu hierro en la plaza',p:`enterPlaza(${S.porVer[0]})`,pl:'Ir a la plaza',d:`verCorrida(${S.porVer[0]})`,dl:'Resumen',oro:1});
  if(nuevas.length)T.push({t:`${nuevas.length} ${nuevas.length>1?'ofertas':'oferta'} sin responder`,p:`go('ofertas')`,pl:'Ver'});
  if(mk.length&&enc<mk.length)T.push({t:`Encerrar ${mk.length-enc} toros apartados`,p:`irA3D('caballo')`,pl:'Hacerlo yo',d:'ofertasModal()',dl:'Vaqueros'});
- if(S.month>=7&&sin)T.push({t:`Herrar ${sin} becerros`,p:`irA3D('hierro')`,pl:'Hacerlo yo',d:'herradero();render()',dl:`Mayoral · ${eur(sin*35)}`});
+ if(S.month>=7&&sin)T.push({t:`Herrar ${sin} becerros`,p:`irA3D('hierro')`,pl:'Hacerlo yo',d:'herradero();render()',dl:`Mayoral · ${eur(sin*BAL.gastos.herradero)}`});
  if(pendT)T.push({t:`Tentar ${pendT} hembras`,p:mej('placita')?`irA3D('placita')`:null,pl:'Hacerlo yo',d:'tientaLote()',dl:`Mayoral · ${eur(pendT*tCost('H'))}`});
  if(dec)T.push({t:`Decidir ${dec} hembras tentadas`,p:`UI.filter='hjov';go('camada')`,pl:'Decidir'});
  if(S.roto)T.push({t:`Reparar la cerca de ${RKN[S.roto.rk]}`,p:`irA3D('aperos')`,pl:'Hacerlo yo',d:`delegar('cerca')`,dl:'Mayoral · 600 €'});
@@ -90,12 +98,32 @@ function listaTareas(){const c=campo(),T=[];
  if(inj.length)T.push({t:`Curar ${inj.length>1?inj.length+' animales':'a '+inj[0].name}`,p:`irA3D('aperos')`,pl:'Hacerlo yo',d:`delegar('curas')`,dl:`Veterinario · ${eur(inj.length*250)}`});
  if((S.fedM||0)<4)T.push({t:`Echar pienso a mano (${S.fedM||0}/4)`,p:`irA3D('pienso')`,pl:'Hacerlo yo',opt:1});
  if(!sems.length)T.push({t:'Sin semental para la paridera',p:`go('mercado')`,pl:'Mercado'});
+ const cap=capacidad();if(cap.sobre>0)T.push({t:`Finca sobrecargada (${cap.ug}/${cap.max} UG): vende o desecha animales`,p:`go('mercado')`,pl:'Mercado'});
  return T}
+/* fila de tarea compartida por Tareas y Finca: botón principal (hacerlo yo) y delegado */
+function tareaRow(x){return `<div class="task"><span class="dot ${x.oro?'ok':''}"></span><span class="t">${esc(x.t)}</span><span class="tb">${x.p?`<button class="btn sm ${x.oro||x.pl==='Hacerlo yo'||x.pl==='A caballo'?'oro':''}" onclick="${x.p}">${x.pl}</button>`:''}${x.d?`<button class="btn sm" onclick="${x.d}">${x.dl}</button>`:''}</span></div>`}
+/* siguiente paso recomendado: {txt, spot, accion, boton}. spot es una clave de SPOTS para el 3D (o null) */
+function siguientePaso(){if(!S)return null;const c=campo(),cap=capacidad();
+ const nuevas=S.offers.filter(o=>o.st==='nueva').sort((a,b)=>a.abs-b.abs),aptas=o=>c.filter(a=>eligible(a,o)).length;
+ if(S.prestamoOferta)return {txt:'El banco espera tu respuesta sobre el préstamo',spot:'casa',accion:'ofrecerPrestamo()',boton:'Responder'};
+ if(S.porVer.length)return {txt:'Tus toros saltan hoy al ruedo: ve a la plaza',spot:'corrales',accion:`enterPlaza(${S.porVer[0]})`,boton:'Ir a la plaza'};
+ const ok=nuevas.find(o=>aptas(o)>=o.n);if(ok)return {txt:`Reseña ${ok.n} toros para ${ok.plaza} (${ok.feria})`,spot:'corrales',accion:`resena(${ok.id})`,boton:'Reseñar'};
+ if(S.escapado&&byId(S.escapado.id))return {txt:`${byId(S.escapado.id).name} se ha escapado: devuélvelo a caballo`,spot:'caballo',accion:`irA3D('caballo')`,boton:'Ir a caballo'};
+ if(cap.sobre>0)return {txt:`La finca está sobrecargada (${cap.ug}/${cap.max} UG): vende o desecha animales`,spot:null,accion:`go('mercado')`,boton:'Mercado'};
+ if(S.roto)return {txt:`Repara la cerca rota de ${RKN[S.roto.rk]} antes de que se escape una res`,spot:'aperos',accion:`irA3D('aperos')`,boton:'Ir'};
+ if(c.some(a=>a.salud<55))return {txt:'Hay animales lesionados: cúralos con el botiquín',spot:'aperos',accion:`irA3D('aperos')`,boton:'Ir'};
+ if(!c.some(a=>a.role==='semental'))return {txt:'Sin semental no habrá buena paridera: compra uno',spot:null,accion:`go('mercado')`,boton:'Mercado'};
+ if(S.month>=7&&c.some(a=>!a.herrado))return {txt:'Hierra los becerros en la corraleta',spot:'hierro',accion:`irA3D('hierro')`,boton:'Ir'};
+ if(c.some(a=>a.sex==='H'&&!a.tentado&&!a.role&&ageY(a)>=2))return {txt:'Tienta las hembras de dos años para elegir tus vacas',spot:mej('placita')?'placita':null,accion:mej('placita')?`irA3D('placita')`:'tientaLote()',boton:'Tentar'};
+ if((S.fedM||0)<BAL.pienso.sacos)return {txt:`Echa pienso a mano (${S.fedM||0}/${BAL.pienso.sacos} sacos): ahorras y mejora la salud`,spot:'pienso',accion:`irA3D('pienso')`,boton:'Ir'};
+ const r=S.retos&&S.retos.find(x=>!x.done);if(r)return {txt:`Reto del mes: ${r.txt}`,spot:null,accion:`go('tareas')`,boton:'Ver'};
+ return {txt:`Todo al día. Avanza a ${MESES[(S.month+1)%12]}`,spot:null,accion:'advance()',boton:'Avanzar'}}
+function pasoHTML(){const p=siguientePaso();if(!p)return '';return `<div class="wrap paso" style="padding-block:.4rem 0"><div class="task" role="status" style="gap:.6rem;flex-wrap:nowrap;align-items:center;padding-block:.45rem"><span class="t" style="flex:1;min-width:0;font-size:.88rem;line-height:1.25"><small class="muted">Siguiente paso · </small>${esc(p.txt)}</span><button class="btn sm oro" style="flex:none" onclick="${p.accion}">${esc(p.boton)}</button></div></div>`}
 function renderTareas(el){
  const T=listaTareas();
  el.innerHTML=`<div class="stack" style="gap:1rem">
  <section class="sect"><header><h2>Retos del mes</h2></header><div class="retos">${S.retos.map(r=>{const p=Math.min(r.n,retoProg(r));return `<div class="reto ${r.done?'ok':''}"><span class="rt">${esc(r.txt)}</span><span class="meter"><i style="width:${p/r.n*100}%"></i></span><span class="rr"><small>${r.id==='dist'?Math.round(p)+' / '+r.n+' m':p+' / '+r.n}</small><b>${r.done?'Cumplido':'+'+eur(r.rw)}</b></span></div>`}).join('')}</div></section>
- <section class="sect"><header><h2>Por hacer</h2></header><div class="list">${T.length?T.map(x=>`<div class="task"><span class="dot ${x.oro?'ok':''}"></span><span class="t">${esc(x.t)}</span><span class="tb">${x.p?`<button class="btn sm ${x.oro||x.pl==='Hacerlo yo'||x.pl==='A caballo'?'oro':''}" onclick="${x.p}">${x.pl}</button>`:''}${x.d?`<button class="btn sm" onclick="${x.d}">${x.dl}</button>`:''}</span></div>`).join(''):`<div class="task"><span class="dot ok"></span><span class="t">Todo al día.</span></div>`}</div></section>
+ <section class="sect"><header><h2>Por hacer</h2></header><div class="list">${T.length?T.map(tareaRow).join(''):`<div class="task"><span class="dot ok"></span><span class="t">Todo al día.</span></div>`}</div></section>
  <section class="sect"><header><h2>Objetivos ${S.year}</h2><span class="sp"></span><small class="muted">${eur(S.objs[0]?.reward||0)} c/u</small></header>
   <div class="card" style="padding:12px 14px"><div class="row" style="justify-content:space-between"><span class="lbl">Confianza de la propiedad</span><b>${Math.round(S.conf)}%</b></div><span class="meter big"><i style="width:${S.conf}%;background:${S.conf<30?'var(--bad)':S.conf<55?'var(--warn)':'var(--good)'}"></i></span></div>
   <div class="list">${S.objs.map(o=>{const ok=OBJCHK[o.id](S.season,o);return `<div class="task"><span class="dot ${ok?'ok':''}"></span><span class="t">${o.txt}</span><span class="badge ${ok?'ok':''}">${ok?'Hecho':'Pendiente'}</span></div>`}).join('')}</div></section>
@@ -118,6 +146,7 @@ function renderPalmares(el){
  if(tab==='trofeos')body=S.trofeos.length?`<div class="trofs">${S.trofeos.slice().reverse().map(t=>`<div class="trof ${t.k}">${ICO.copa}<span><b>${esc(t.t)}</b><small>Temporada ${t.y}</small></span></div>`).join('')}</div>`:'<div class="card muted">La vitrina está vacía. Termina entre los tres primeros del escalafón o cría el toro más bravo del año.</div>';
  if(tab==='hist')body=S.hist.length?`<div class="list">${S.hist.map(h=>`<button class="li" onclick="verCorrida(${h.id})"><span class="sw" style="background:${h.cat===1?'var(--gold-grad)':'#1d222c'}"></span><span class="t"><b>${esc(h.plaza)}</b><small>${h.feria} · ${MESES[h.m].slice(0,3)} ${h.y} · ${esc(h.resumen)}</small></span><span class="r"><b style="color:${h.dp>=0?'var(--good)':'var(--bad)'}">${h.dp>=0?'+':''}${h.dp}</b><br><small class="muted">${h.pts!=null?h.pts+' pts':'prestigio'}</small></span></button>`).join('')}</div>`:'<div class="card muted">Aún no has lidiado.</div>';
  if(tab==='ajustes')body=`<div class="field"><span class="lbl">Calidad gráfica 3D</span><div class="seg">${[['alta','Alta','Máxima nitidez'],['media','Media','Equilibrada'],['baja','Baja','Más fluida']].map(([k,n,d])=>`<button aria-pressed="${q===k}" onclick="setQual('${k}')"><b>${n}</b><span>${d}</span></button>`).join('')}</div></div>
+  <div class="field"><span class="lbl">Vibración y avisos</span><div class="seg">${[['1','Activados','Vibra al cobrar, en retos y golpes'],['0','Desactivados','Sin vibración']].map(([k,n,d])=>`<button aria-pressed="${(fxOn()?'1':'0')===k}" onclick="try{localStorage.setItem('hd-fx','${k}')}catch(e){}render();if('${k}'==='1')fx('ok')"><b>${n}</b><span>${d}</span></button>`).join('')}</div></div>
   <button class="btn" onclick="instalar()">Instalar en el móvil</button>
   <div id="reset"><button class="btn ghost" onclick="$('#reset').innerHTML='<div class=&quot;card stack&quot;><span>Se borrará esta partida.</span><div class=&quot;row&quot;><button class=&quot;btn pri&quot; onclick=&quot;resetGame()&quot;>Borrar</button><button class=&quot;btn&quot; onclick=&quot;render()&quot;>Cancelar</button></div></div>'">Nueva partida</button></div>`;
  el.innerHTML=`<div class="stack" style="gap:1rem">
@@ -128,4 +157,4 @@ function renderPalmares(el){
 ICO.copa='<svg class="ico" viewBox="0 0 24 24" fill="#e6bb55"><path d="M7 3h10v5a5 5 0 0 1-10 0zM5 4h2v2.5a3 3 0 0 1-3-3zM19 4h-2v2.5a3 3 0 0 0 3-3zM10.5 13h3v4h-3zM7.5 18h9v3h-9z"/></svg>';
 
 /* arranque */
-(function(){const sv=load();if(sv&&sv.animals&&sv.v===1){S=sv;if(!S.mej)S.mej=S.g.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{};migrate(S)}render()})();
+(function(){if(!abrirPartida())render()})();
