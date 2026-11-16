@@ -45,7 +45,7 @@ makePerson=function(st){
 /* ---------- color de cine: sRGB + ACES, con conversión de materiales ---------- */
 const GXC={on:true};
 function gxLinMat(m){if(!m||m.userData.lin)return;m.userData.lin=1;if(m.color&&!m.isShaderMaterial)m.color.convertSRGBToLinear();if(m.emissive)m.emissive.convertSRGBToLinear();
- for(const k of ['map','emissiveMap'])if(m[k]&&m[k].encoding!==THREE.sRGBEncoding){m[k].encoding=THREE.sRGBEncoding;m[k].needsUpdate=true}if(m.map)m.needsUpdate=true}
+ for(const k of ['map','emissiveMap'])if(m[k]&&m[k].encoding!==THREE.sRGBEncoding){m[k].encoding=THREE.sRGBEncoding;if(m[k].image!==undefined)m[k].needsUpdate=true}if(m.map)m.needsUpdate=true}
 function gxScene(sc){sc.traverse(o=>{const ge=o.geometry;if(ge&&ge.attributes&&ge.attributes.color&&!ge.userData.lin){ge.userData.lin=1;const a=ge.attributes.color.array,c=new THREE.Color(),k=ge.attributes.color.itemSize;for(let i=0;i<a.length;i+=k){c.setRGB(a[i],a[i+1],a[i+2]).convertSRGBToLinear();a[i]=c.r;a[i+1]=c.g;a[i+2]=c.b}ge.attributes.color.needsUpdate=true}
  if(o.material){if(Array.isArray(o.material))o.material.forEach(gxLinMat);else gxLinMat(o.material)}
   if(o.isInstancedMesh&&o.instanceColor&&!o.userData.linC){o.userData.linC=1;const a=o.instanceColor.array,c=new THREE.Color();for(let i=0;i<a.length;i+=3){c.setRGB(a[i],a[i+1],a[i+2]).convertSRGBToLinear();a[i]=c.r;a[i+1]=c.g;a[i+2]=c.b}o.instanceColor.needsUpdate=true}

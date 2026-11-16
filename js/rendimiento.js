@@ -7,7 +7,12 @@
 const PERF={t:0,n:0,fps:60,pr:null,base:null,on:(()=>{try{return localStorage.getItem('hd-fps')==='1'}catch(e){return false}})()};
 function perfTick(dt){if(!W3.on||!W3.R)return;const now=performance.now();if(!PERF.t0||now-PERF.t0>4000){PERF.t0=now;PERF.n=0;return}PERF.n++;const el=(now-PERF.t0)/1000;if(el<2)return;const f=PERF.n/el;PERF.fps=Math.round(f);PERF.t0=now;PERF.n=0;
  const R=W3.R;if(PERF.base==null){PERF.base=R.getPixelRatio();PERF.pr=PERF.base}
- if(f<26&&PERF.pr>.6){PERF.pr=Math.max(.6,PERF.pr-.15);R.setPixelRatio(PERF.pr)}else if(f>52&&PERF.pr<PERF.base){PERF.pr=Math.min(PERF.base,PERF.pr+.1);R.setPixelRatio(PERF.pr)}
+ /* cambiar la resolución cuesta (se rehace el lienzo): solo tras dos mediciones seguidas malas o buenas, como mucho cada 8 s
+    y nunca con la pantalla de carga puesta (los fotogramas lentos de la carga no cuentan) */
+ const cargando=typeof CG!=='undefined'&&CG.on;if(cargando){PERF.malo=PERF.bueno=0;PERF.tc=now;}
+ else{PERF.malo=f<26?(PERF.malo||0)+1:0;PERF.bueno=f>52?(PERF.bueno||0)+1:0;const libre=!PERF.tc||now-PERF.tc>8000;
+  if(libre&&PERF.malo>=2&&PERF.pr>.6){PERF.pr=Math.max(.6,+(PERF.pr-.2).toFixed(2));R.setPixelRatio(PERF.pr);PERF.tc=now;PERF.malo=0}
+  else if(libre&&PERF.bueno>=3&&PERF.pr<PERF.base){PERF.pr=Math.min(PERF.base,+(PERF.pr+.2).toFixed(2));R.setPixelRatio(PERF.pr);PERF.tc=now;PERF.bueno=0}}
  if(PERF.on){let e=$('#fpsT');if(!e){e=document.createElement('div');e.id='fpsT';e.className='fpsT';(W3.root||document.body).appendChild(e)}e.textContent=`${PERF.fps} FPS · ${PERF.pr.toFixed(2)}x`}}
 for(const n of ['fincaTick','plazaTick','calleTick','tientaTick','toreroTick']){if(typeof window[n]!=='function')continue;const f=window[n];window[n]=function(dt){const r=f.apply(this,arguments);try{perfTick(dt)}catch(e){}return r}}
 {const _sq=setQual;setQual=function(k){PERF.base=null;try{localStorage.removeItem('hd-qual-auto')}catch(e){}return _sq.apply(this,arguments)}}

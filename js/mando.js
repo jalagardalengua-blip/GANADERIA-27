@@ -50,3 +50,8 @@ function mkTick(){const on=typeof W3!=='undefined'&&W3.on&&W3.mode==='finca'&&!W
    out.push([c,x,y])}}
  for(let i=0;i<3;i++){const e=mkEl(i);const o=out[i];if(!o){e.classList.remove('on');continue}const [c,x,y]=o;if(e.textContent!==c.l)e.textContent=c.l;e.style.transform=`translate(${x.toFixed(0)}px,${y.toFixed(0)}px) translate(-50%,-100%)`;e.style.opacity=String(clamp(1.2-c.d/12,0,1));e.classList.add('on')}}
 {const f=window.fincaTick;window.fincaTick=function(dt){const r=f.apply(this,arguments);try{mkTick()}catch(e){}return r}}
+
+/* ---------- cámara en vertical: más campo de visión y algo más lejos (en un móvil en vertical se veía todo encima) ---------- */
+function mdCamVertical(){const c=W3.cam;if(!c)return;const v=innerHeight>innerWidth*1.1;const fov=v?72:60;if(Math.abs(c.fov-fov)>.1){c.fov=fov;c.updateProjectionMatrix()}
+ if(v&&W3.zoom==null)W3.zoom=1.18}
+{const f=window.fincaTick;window.fincaTick=function(dt){const r=f.apply(this,arguments);try{mdCamVertical()}catch(e){}return r}}

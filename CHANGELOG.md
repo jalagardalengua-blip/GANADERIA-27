@@ -1,5 +1,16 @@
 # Cambios
 
+## Resultados de la corrida, tres vistas de cámara y finca sin tirones
+- Pantalla de resultados nueva al acabar la corrida: cabecera con el logo de la ganadería, cifras de la tarde (prestigio, ingresos, orejas, nota media) y una tarjeta por toro con el resultado, las orejas, la nota en un anillo y el juicio. El toro de la tarde va destacado. Desde ahí: ver otra vez en directo, repetición en dibujo o compartir.
+- La repetición en dibujo tiene un aspecto renovado, con el progreso por toros arriba y los mandos agrupados.
+- Tres vistas en la corrida en directo (botón «Vista»): realización de TV, desde el tendido y a pie de ruedo. Se recuerda la elegida.
+- La cámara encuadra a los banderilleros durante el tercio de banderillas y abre el plano cuando la acción se acerca al tendido.
+- Toro: el paso y el galope van sincronizados (sin patinar las patas al cambiar de aire) y levanta polvo con las pezuñas al galopar.
+- Finca: en el móvil en vertical la cámara tiene más campo de visión, el texto de arriba ya no se monta y las tareas salen recogidas.
+- Finca sin tirones: si un modelo o la vegetación terminan de descargarse con la finca abierta, se rehace tapado por la pantalla de carga (antes se congelaba); la vegetación se descarga antes. La resolución dinámica solo cambia tras varias mediciones seguidas y como mucho cada 8 s (cada cambio rehace el lienzo y daba tirones).
+- Quitado el aviso «Texture marked for update but image is undefined».
+- Test nuevo: vistas.js.
+
 ## Corrida en directo: más lidia, más rápida y salida que funciona
 - El botón «Salir» funciona en el móvil: la vista ya no se mete bajo la barra de gestos, hay una «✕ Salir» fija arriba a la derecha (fuera del marco de la corrida) y el botón «atrás» del móvil y la tecla Esc también salen.
 - Botones de la barra inferior más grandes (44 px) y más separados del borde.

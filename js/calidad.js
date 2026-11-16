@@ -10,6 +10,7 @@ function calTexturas(sc){const a=calAniso();if(a<=1)return;const vistos=new Set(
   for(const m of ms){if(!m||vistos.has(m))continue;vistos.add(m);
    for(const k of ['map','normalMap','roughnessMap','aoMap','bumpMap']){const t=m[k];if(!t||t.anisotropy>=a)continue;
     if(t.generateMipmaps===false||t.minFilter===THREE.LinearFilter||t.minFilter===THREE.NearestFilter)continue;   // sin mipmaps: no aporta y puede emborronar
+    const im=t.image;if(!im||im.complete===false||!(im.width||im.videoWidth||(im.data&&im.data.length)))continue;   // aún sin descargar: se mira en la próxima pasada
     t.anisotropy=a;t.needsUpdate=true}}})}
 /* resolución dinámica con techo más alto que el ajuste base cuando sobra rendimiento */
 function calTecho(){const q=W3.q||'media',dpr=window.devicePixelRatio||1;return Math.min(dpr,q==='alta'?2:q==='media'?1.6:1)}
@@ -17,7 +18,7 @@ function calTick(){if(!W3.on||!W3.scene||!W3.R)return;const now=performance.now(
  if(now-CAL.scan>1500){CAL.scan=now;try{calTexturas(W3.scene)}catch(e){}}
  if(typeof PERF==='undefined'||PERF.pr==null)return;
  if(!CAL.t0||now-CAL.t0>5000){CAL.t0=now;return}if(now-CAL.t0<3000)return;CAL.t0=now;
- const top=calTecho();if(PERF.fps>55&&PERF.base<top&&PERF.pr>=PERF.base-.01){PERF.base=Math.min(top,+(PERF.base+.2).toFixed(2));PERF.pr=PERF.base;W3.R.setPixelRatio(PERF.pr)}}
+ const top=calTecho();if(PERF.fps>55&&PERF.base<top&&PERF.pr>=PERF.base-.01&&!(typeof CG!=='undefined'&&CG.on)&&(!PERF.tc||now-PERF.tc>8000)&&(PERF.bueno||0)>=2){PERF.tc=now;PERF.bueno=0;PERF.base=Math.min(top,+(PERF.base+.2).toFixed(2));PERF.pr=PERF.base;W3.R.setPixelRatio(PERF.pr)}}
 for(const n of ['fincaTick','plazaTick','calleTick','tientaTick','toreroTick']){if(typeof window[n]!=='function')continue;const f=window[n];window[n]=function(dt){const r=f.apply(this,arguments);try{calTick()}catch(e){}return r}}
 /* ---------- mulillas con el caballo animado ---------- */
 function calPompones(H,cols){const sc=H.root;sc.updateMatrixWorld(true);let hb=null,nb=null;sc.traverse(o=>{if(o.isBone&&o.name==='Head')hb=o;if(o.isBone&&o.name==='Neck')nb=o});

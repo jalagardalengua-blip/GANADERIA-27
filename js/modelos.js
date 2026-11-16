@@ -5,7 +5,7 @@
 const MOD={per:null,hor:null,err:null,reg:null};
 const MOD_BASE=(()=>{try{const s=document.currentScript&&document.currentScript.src;if(s&&/\/js\/modelos\.js/.test(s))return s.replace(/js\/modelos\.js.*$/,'')}catch(e){}return ''})();
 function modLoad(){if(!THREE.GLTFLoader||!THREE.SkeletonUtils){MOD.err='sin cargador';return}
- const L=new THREE.GLTFLoader();let n=0;const fin=()=>{if(++n<2)return;try{if(W3&&W3.mode==='finca'&&!W3.ride&&S)rebuildFinca()}catch(e){}};
+ const L=new THREE.GLTFLoader();let n=0;const fin=()=>{if(++n<2)return;try{if(typeof fincaRecargar==='function')fincaRecargar();else if(W3&&W3.mode==='finca'&&!W3.ride&&S)rebuildFinca()}catch(e){}};
  /* .glb en la web; si el servidor no lo sirve, la misma escena en glTF incrustado (.gltf.json) */
  const ld=(n,ok)=>L.load(MOD_BASE+'modelos/'+n+'.glb',ok,undefined,()=>L.load(MOD_BASE+'modelos/'+n+'.gltf.json',ok,undefined,e=>{MOD.err=e;fin()}));
  ld('persona',g=>{MOD.per=g;modRegions();fin()});L.load(MOD_BASE+'modelos/persona2.gltf.json',g=>{MOD.per2=g},undefined,()=>{});ld('caballo',g=>{MOD.hor=g;fin()})}

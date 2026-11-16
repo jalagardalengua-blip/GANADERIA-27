@@ -52,3 +52,9 @@ document.addEventListener('click',e=>{if(!e.isTrusted||CG.on||e.__cg)return;cons
  if(document.readyState==='complete')paso();else addEventListener('load',paso,{once:true});
  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(paso,paso);
  setTimeout(()=>{if(CG.on&&CG.id===1)cargaOcultar(0)},6000)})();
+
+/* si un modelo o la vegetación terminan de descargarse con la finca ya abierta, se rehace tapado por la pantalla de carga
+   (antes la imagen se quedaba congelada unos segundos y los objetos aparecían de golpe); si llegan dos seguidos, una sola vez */
+const FREC={t:null};
+function fincaRecargar(){if(!(typeof W3!=='undefined'&&W3.on&&W3.mode==='finca'&&!W3.ride&&!W3.drive&&typeof S!=='undefined'&&S))return;clearTimeout(FREC.t);
+ FREC.t=setTimeout(()=>{if(!(W3.on&&W3.mode==='finca'))return;cargaMostrar(cgDestino('enterFinca',[]));requestAnimationFrame(()=>requestAnimationFrame(()=>{try{rebuildFinca()}catch(e){console.warn(e)}cargaTrasEscena()}))},300)}
