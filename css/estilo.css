@@ -521,3 +521,6 @@ nav.tabs .bdg{background:linear-gradient(180deg,#ff5a7a,#e02f6b);box-shadow:0 0 
 @media (max-width:380px){nav.tabs button svg.tico{width:26px;height:26px}}
 .tico .n{fill:#2c2333;stroke:#5a4c63;stroke-width:.8}
 nav.tabs button[aria-current="true"] .tico .n{fill:#1a0f1c;stroke:#ff7a3d}
+/* Barra «Siguiente paso» (objetivo activo, estilo indicador de misión) */
+.paso .task{background:linear-gradient(90deg,rgba(255,122,61,.16),rgba(224,47,107,.06) 60%,transparent);border-left:3px solid var(--sol2);border-radius:8px}
+.paso .task b,.paso .task strong{font-family:var(--display);font-style:italic;letter-spacing:.02em}
