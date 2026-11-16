@@ -4,6 +4,19 @@ const R=(a,b)=>a+Math.random()*(b-a), RI=(a,b)=>Math.floor(R(a,b+1)), pick=a=>a[
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const gauss=()=>(Math.random()+Math.random()+Math.random()+Math.random()-2)*1.73;
 const r100=v=>Math.round(v/100)*100;
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+/* feedback unificado: vibración + sonido (si el motor de audio está activo) + pulso visual */
+function fxOn(){try{return localStorage.getItem('hd-fx')!=='0'}catch(e){return true}}
+function fx(tipo,el){const F=BAL.fx;
+ try{if(fxOn()&&navigator.vibrate&&F[tipo]!=null)navigator.vibrate(F[tipo])}catch(e){}
+ try{if(typeof AU!=='undefined'&&AU.ctx&&AU.on){
+  if(tipo==='reto'&&typeof applause==='function')applause(1.4,.22);
+  else if(tipo==='ole'&&typeof oleSnd==='function')oleSnd(false);
+  else if(tipo==='golpe'&&typeof bufido==='function')bufido(.6);
+  else if(tipo==='cobro'||tipo==='ok'||tipo==='error'){const c=AU.ctx,t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type=tipo==='error'?'square':'triangle';
+   o.frequency.setValueAtTime(tipo==='error'?180:tipo==='cobro'?880:660,t);if(tipo!=='error')o.frequency.exponentialRampToValueAtTime(tipo==='cobro'?1320:990,t+.09);
+   g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.08,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+.18);o.connect(g);g.connect(AU.master||c.destination);o.start(t);o.stop(t+.2)}}}catch(e){}
+ try{const e=el===undefined?document.querySelector(tipo==='cobro'||tipo==='reto'||tipo==='error'?'.sbar .st':'.sbar'):el;if(e&&e.classList){e.classList.remove('fx-pulse');void e.offsetWidth;e.classList.add('fx-pulse');setTimeout(()=>e.classList.remove('fx-pulse'),F.pulso)}}catch(e){}}
 const eur=v=>(v<0?'−':'')+Math.abs(Math.round(v)).toLocaleString('es-ES')+' €';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -86,9 +99,30 @@ const CATMUL={1:1.4,2:1,3:0.6};
 /* ============ estado ============ */
 let S=null;
 const UI={tab:'inicio',filter:'toros',deh:false};
-const KEY='hierro-divisa-v1';
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-function load(){try{const s=localStorage.getItem(KEY);return s?JSON.parse(s):null}catch(e){return null}}
+const KEY=BAL.save.key, SAVE_V=BAL.save.version;
+let SAVE_ERR=false;
+function save(){if(!S)return false;try{localStorage.setItem(KEY,JSON.stringify(S));SAVE_ERR=false;return true}
+ catch(e){if(!SAVE_ERR){SAVE_ERR=true;try{toast('No se ha podido guardar la partida: el almacenamiento del navegador está lleno o bloqueado.')}catch(e2){}}return false}}
+/* copia de seguridad: se hace al avanzar de mes, antes de sobrescribir */
+function backup(){try{const cur=localStorage.getItem(KEY);if(cur)localStorage.setItem(BAL.save.bak,cur)}catch(e){}}
+/* migraciones: MIGR[v] convierte una partida de la versión v a la v+1 */
+const MIGR={
+ 1:s=>{s.over=!!s.over;s.wx=s.wx||null;s.prestamo=s.prestamo||null;s.prestamoUsado=!!s.prestamoUsado;s.ultimatum=!!s.ultimatum;
+  s.cap=s.cap||(s.g&&s.g.real?BAL.capacidad.real:BAL.capacidad.fundada);
+  const now=(s.year||2027)*12+(s.month||0);if(Array.isArray(s.offers))s.offers=s.offers.filter(o=>o.st!=='lidiada'||now-o.abs<BAL.ofertas.purgaMeses);
+  return s}
+};
+function parseSave(raw){try{return raw?JSON.parse(raw):null}catch(e){return null}}
+function validSave(s){return !!(s&&typeof s==='object'&&s.g&&Array.isArray(s.animals)&&Array.isArray(s.offers)&&typeof s.year==='number')}
+function upgrade(s){if(!validSave(s))return null;let v=s.v|0||1;if(v>SAVE_V)return null;
+ while(v<SAVE_V){const f=MIGR[v];if(!f)return null;s=f(s);v++;s.v=v}return s}
+/* devuelve {s, src, err}: src 'main' | 'bak'; err 'corrupt' | 'newer' | null */
+function loadInfo(){let raw=null,bak=null;try{raw=localStorage.getItem(KEY);bak=localStorage.getItem(BAL.save.bak)}catch(e){}
+ const m=parseSave(raw);if(m&&validSave(m)&&(m.v|0||1)>SAVE_V)return {s:null,src:null,err:'newer'};
+ const um=m?upgrade(m):null;if(um)return {s:um,src:'main',err:null};
+ const b=parseSave(bak),ub=b?upgrade(b):null;if(ub)return {s:ub,src:'bak',err:raw?'corrupt':null};
+ return {s:null,src:null,err:raw?'corrupt':null}}
+function load(){return loadInfo().s}
 const absNow=()=>S.year*12+S.month;
 const ageM=a=>(S.year-a.born)*12+S.month-2;
 const ageY=a=>Math.floor(ageM(a)/12);
@@ -118,10 +152,11 @@ const lidiable=a=>a.sex==='M'&&a.st==='campo'&&!a.tentado&&!a.role&&a.res==null;
 
 /* ============ nueva partida ============ */
 function newGame(cfg){
- S={v:1,g:cfg,year:2027,month:0,money:cfg.real?260000:180000,pres:cfg.real?cfg.pres:12,feed:'nor',animals:[],nid:1,nums:{},offers:[],oid:1,
+ const I=cfg.real?BAL.inicio.real:BAL.inicio.fundada;
+ S={v:SAVE_V,g:cfg,year:2027,month:0,money:I.money,pres:cfg.real?cfg.pres:I.pres,feed:'nor',over:false,wx:null,prestamo:null,prestamoUsado:false,ultimatum:false,cap:cfg.real?BAL.capacidad.real:BAL.capacidad.fundada,animals:[],nid:1,nums:{},offers:[],oid:1,
   hist:[],presHist:[],semAct:null,mej:cfg.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{},season:null,objs:[],porVer:[],mkt:null,log:[],stats:{corridas:0,toros:0,indultos:0,vueltas:0,orejas:0,premios:0,ingresos:0}};
- const real=cfg.real, enc=cfg.enc, b=real?2:-5;
- const nV=real?40:20, nM=real?12:5, nH=real?10:5, nS=real?2:1, maxM=real?5:4;
+ const enc=cfg.enc, b=I.bonus;
+ const nV=I.vacas, nM=I.machos, nH=I.hembras, nS=I.sementales, maxM=I.maxEdadM;
  const vacas=[];
  for(let i=0;i<nV;i++){const v=mk({sex:'H',born:S.year-RI(4,12),enc,bonus:b+2,role:'vaca'});tentar(v);vacas.push(v);S.animals.push(v)}
  for(let i=0;i<nS;i++){const s=mk({sex:'M',born:S.year-RI(5,7),enc,bonus:b+6,role:'semental'});tentar(s);if(s.nota<70){s.g.bra=Math.max(s.g.bra,78);tentar(s)}S.animals.push(s)}
@@ -132,6 +167,7 @@ function newGame(cfg){
  for(let y=1;y<=2;y++)for(let i=0;i<nH;i++)S.animals.push(kid('H',y));
  newSeason();regenMkt();
  for(let k=2;k<=4;k++)genOffers(k,true);
+ if(!cfg.real)ofertaTutorial();
  log(`Comienza la temporada ${S.year} en ${cfg.name}.`);
  migrate(S);save();UI.tab='inicio';render();
 }
@@ -140,16 +176,28 @@ function newSeason(){
  const p=S.pres, pool=[
   {id:'lid',n:p<30?6:12,txt:n=>`Lidiar ${n} toros o novillos`,chk:(s,o)=>s.lid>=o.n},
   {id:'ov',n:2,txt:()=>'Conseguir 2 ovaciones o mejor',chk:s=>s.ov>=2},
-  {id:'cash',n:r100(S.money*0.9/1000)*1000,txt:n=>`Cerrar el año con ${eur(n)} o más`,chk:(s,o)=>S.money>=o.n}];
+  {id:'cash',n:Math.round(Math.max(BAL.objetivos.cashMin,S.money*BAL.objetivos.cashFrac)/1000)*1000,txt:n=>`Cerrar el año con ${eur(n)} o más`,chk:(s,o)=>S.money>=o.n}];
  if(p>=35)pool.push({id:'c1',n:1,txt:()=>'Lidiar en una plaza de primera',chk:s=>s.c1>=1});
  if(p>=50)pool.push({id:'vu',n:1,txt:()=>'Lograr una vuelta al ruedo o un indulto',chk:s=>s.vu+s.ind>=1});
- pool.sort(()=>Math.random()-.5);
- S.objs=pool.slice(0,3).map(o=>({id:o.id,n:o.n,txt:o.txt(o.n),reward:r100(8000+p*120)}));
+ shuffle(pool);
+ S.objs=pool.slice(0,3).map(o=>({id:o.id,n:o.n,txt:o.txt(o.n),reward:r100(BAL.objetivos.premioBase+p*BAL.objetivos.premioPres)}));
 }
 const OBJCHK={lid:(s,o)=>s.lid>=o.n,ov:s=>s.ov>=2,cash:(s,o)=>S.money>=o.n,c1:s=>s.c1>=1,vu:s=>s.vu+s.ind>=1};
 
 /* ============ ofertas y mercado ============ */
-function priceFor(cat,tipo){const p=S.pres;let v=cat===1?6000+p*95:cat===2?3400+p*45:1800+p*22;if(tipo==='novillada')v*=.45;return r100(v*R(.9,1.1))}
+function priceFor(cat,tipo){const P=BAL.precio[cat]||BAL.precio[3];let v=P.base+S.pres*P.k;if(tipo==='novillada')v*=BAL.precio.novillada;return r100(v*R(BAL.precio.azar[0],BAL.precio.azar[1]))}
+/* oferta tutorial: las ganaderías nuevas tienen un primer cartel asegurado en tercera */
+function ofertaTutorial(){const T=BAL.ofertas.tutorial;const abs=absNow()+T.meses;if(S.offers.some(o=>o.tut))return;
+ addOffer({plaza:T.plaza,feria:T.feria,cat:T.cat,tipo:'corrida',abs,n:T.n,tut:true,precio:r100(priceFor(T.cat,'corrida')*T.precioExtra)})}
+/* unidades ganaderas y capacidad de la finca */
+function ugDe(a){const U=BAL.ug;if(a.role==='semental')return U.semental;if(a.role==='vaca')return U.vaca;const y=ageY(a);
+ if(y<=0)return U.becerro;if(a.sex==='H')return y===1?U.anojo:U.hembraJoven;return [U.becerro,U.anojo,U.eral,U.utrero][y]??U.toro}
+function capacidad(){const C=BAL.capacidad;let max=S.cap||(S.g.real?C.real:C.fundada);for(const k in C.obras)if(mej(k))max+=C.obras[k];
+ const ug=campo().reduce((t,a)=>t+ugDe(a),0);return {ug:Math.round(ug*10)/10,max,carga:ug/max,sobre:Math.max(0,ug/max-1)}}
+function cargaMul(){return 1+capacidad().sobre*BAL.capacidad.sobrecoste}
+function gastoMes(){const c=campo(),ug=c.reduce((t,a)=>t+ugDe(a),0),G=BAL.gastos;
+ return {pienso:Math.round(ug*FEED[S.feed].c*feedMul()*cargaMul()),personal:Math.round(G.personalFijo+G.personalCabeza*c.length)}}
+function puedePagar(c,que){if(S.money>=c)return true;toast(`Saldo insuficiente${que?' para '+que:''}: necesitas ${eur(c)}.`);fx('error');return false}
 function genOffers(ahead,init){
  const tgt=absNow()+ahead, tm=tgt%12;
  for(const f of FERIAS){
@@ -160,8 +208,9 @@ function genOffers(ahead,init){
   if(Math.random()<ch)addOffer({fid:f.id,plaza:f.plaza,feria:f.feria,cat:f.cat,tipo:f.tipo,abs:tgt,n:6});
  }
  if(!init||ahead===2){
-  if(tm>=3&&tm<=9&&Math.random()<.5){const s=pick(SMALL.filter(x=>x.cat===3));addOffer({...s,tipo:Math.random()<.3?'novillada':'corrida',abs:tgt,n:Math.random()<.5?4:6})}
-  if(tm>=5&&tm<=8&&S.pres>=15&&Math.random()<.35){const s=pick(SMALL.filter(x=>x.cat===2));addOffer({...s,tipo:'corrida',abs:tgt,n:6})}
+  const O=BAL.ofertas,nov=S.pres<O.tercera.presNovato;
+  if(tm>=3&&tm<=9&&Math.random()<(nov?O.tercera.probNovato:O.tercera.prob)){const s=pick(SMALL.filter(x=>x.cat===3));addOffer({...s,tipo:Math.random()<.3?'novillada':'corrida',abs:tgt,n:Math.random()<(nov?O.tercera.nCuatroNovato:.5)?4:6})}
+  if(tm>=5&&tm<=8&&S.pres>=O.segunda.presMin&&Math.random()<O.segunda.prob){const s=pick(SMALL.filter(x=>x.cat===2));addOffer({...s,tipo:'corrida',abs:tgt,n:6})}
  }
 }
 function addOffer(o){o.id=S.oid++;o.precio=o.precio||priceFor(o.cat,o.tipo);o.st='nueva';o.toros=[];o.nuevo=true;S.offers.push(o)}
@@ -190,33 +239,49 @@ function est(a){
 
 /* ============ avance de mes ============ */
 function log(t){S.log.unshift({d:`${MESES[S.month].slice(0,3)} ${S.year}`,t});S.log=S.log.slice(0,60)}
+/* ganancia de prestigio con rendimientos decrecientes (las pérdidas se aplican enteras) */
+function presDelta(dp){if(dp>0){const P=BAL.prestigio;dp*=Math.max(P.minGanancia,1-S.pres/P.techo)}S.pres=clamp(S.pres+dp,0,100);return dp}
 function advance(){
+ if(!S)return;
+ if(S.over){gameOver();return}
+ if(S.prestamoOferta){ofrecerPrestamo();return}
+ backup();
  const rep={lines:[],corridas:[],cost:0,inc:0};
  const n=campo().length;
  // fin de año
  if(S.month===11){
   const sin=campo().filter(a=>!a.herrado);
-  if(sin.length){herradero(true);rep.lines.push(`Herradero obligatorio de fin de año: ${sin.length} becerros marcados con el hierro.`)}
+  if(sin.length){const c=herradero(true)*BAL.gastos.herradero;rep.cost+=c;rep.lines.push(`Herradero obligatorio de fin de año: ${sin.length} becerros marcados con el hierro (${eur(c)}).`)}
   let ok=0;for(const o of S.objs){o.done=OBJCHK[o.id](S.season,o);if(o.done){ok++;S.money+=o.reward;rep.inc+=o.reward}}
-  S.pres=clamp(S.pres+ok*1-(3-ok)*.8,0,100);
+  presDelta(ok*1-(3-ok)*.8);
   rep.lines.push(`Balance de la temporada: ${ok} de 3 objetivos cumplidos${ok?` (+${eur(ok*S.objs[0].reward)})`:''}.`);
   S.presHist.push({y:S.year,p:Math.round(S.pres)});
   finTemporada(rep,ok);
  }
  if(typeof finTareas==='function')finTareas(rep);
- // gastos
- let feedMod=1;const aMano=(S.fedM||0)>=4;if(aMano){feedMod*=.9;rep.lines.push('Has echado de comer tú mismo: la camada está más tranquila y ahorras un 10 % de pienso.')}S.fedM=0;S.feedSpots=[0,0,0];for(const a of S.animals)if(a.mark&&!S.offers.some(o=>o.id===a.mark&&o.st==='nueva')){a.mark=null;a.encd=false}
- const ev=Math.random()<.42?pick(['pelea','lluvia','sequia','veedor','visita','cojera']):null;
- if(ev==='lluvia'&&[1,2,3,9,10].includes(S.month))feedMod=.72;
- if(ev==='sequia'&&[5,6,7,8].includes(S.month))feedMod=1.35;
- const fc=Math.round(n*FEED[S.feed].c*feedMod*feedMul()), pc=2500+10*n;
+ // clima y pienso a mano: factores independientes que se multiplican
+ const E=BAL.eventos,PM=BAL.pienso;
+ const aMano=(S.fedM||0)>=PM.sacos;
+ S.fedM=0;S.feedSpots=[0,0,0];for(const a of S.animals)if(a.mark&&!S.offers.some(o=>o.id===a.mark&&o.st==='nueva')){a.mark=null;a.encd=false}
+ const ev=Math.random()<E.prob?pick(['pelea','lluvia','sequia','veedor','visita','cojera']):null;
+ const lluvia=ev==='lluvia'&&E.lluvia.meses.includes(S.month),sequia=ev==='sequia'&&E.sequia.meses.includes(S.month);
+ const wxMul=lluvia?E.lluvia.mul:sequia?E.sequia.mul:1,feedMod=(aMano?PM.ahorro:1)*wxMul;
+ if(aMano)rep.lines.push(`Has echado de comer tú mismo: la camada está más tranquila y ahorras un ${Math.round((1-PM.ahorro)*100)} % de pienso.`);
+ // gastos por unidades ganaderas (UG), con sobrecoste si la finca está sobrecargada
+ const G=gastoMes(),cap=capacidad();
+ const fc=Math.round(G.pienso*feedMod), pc=G.personal;
  S.money-=fc+pc;rep.cost+=fc+pc;
  rep.lines.push(`Alimentación ${FEED[S.feed].n.toLowerCase()}: ${eur(fc)} · Personal y finca: ${eur(pc)}`);
+ if(cap.sobre>0)rep.lines.push(`Finca sobrecargada: ${cap.ug} UG para ${cap.max} de capacidad. El pienso sale un ${Math.round(cap.sobre*BAL.capacidad.sobrecoste*100)} % más caro y la camada pierde salud. Vende o desecha animales.`);
+ // intereses del descubierto y cuota del préstamo
+ if(S.money<0){const i=Math.round(-S.money*BAL.deuda.interesMensual);S.money-=i;rep.cost+=i;rep.lines.push(`Intereses del descubierto bancario: ${eur(i)}.`)}
+ if(S.prestamo&&S.prestamo.meses>0){const q=S.prestamo.cuota;S.money-=q;rep.cost+=q;S.prestamo.meses--;rep.lines.push(`Cuota del préstamo: ${eur(q)}${S.prestamo.meses?` (quedan ${S.prestamo.meses})`:' (última)'}.`);if(!S.prestamo.meses)S.prestamo=null}
  // avanzar calendario
  S.month++;if(S.month>11){S.month=0;S.year++;newSeason();rep.lines.push(`Empieza la temporada ${S.year}. Nuevos objetivos de la propiedad.`)}
- if(S.money<0)S.conf=clamp(S.conf-2,0,100);
- if(S.month===1){const c=8*n;S.money-=c;rep.cost+=c;rep.lines.push(`Campaña de saneamiento ganadero: ${eur(c)}.`)}
- // envejecimiento
+ S.wx={abs:absNow(),ev,lluvia,sequia};
+ if(S.money<0)S.conf=clamp(S.conf-BAL.confianza.rojos,0,100);
+ if(S.month===1){const c=BAL.gastos.saneamientoCabeza*n;S.money-=c;rep.cost+=c;rep.lines.push(`Campaña de saneamiento ganadero: ${eur(c)}.`)}
+ // envejecimiento y ayudas anuales
  if(S.month===0){
   let viejos=0,vv=0,ing=0;
   for(const a of campo()){
@@ -225,13 +290,15 @@ function advance(){
    if(a.role==='vaca'&&y>=18){a.st='vendido';ing+=a.peso*1.3;vv++}
   }
   if(viejos||vv){S.money+=ing;rep.inc+=ing;rep.lines.push(`Salen al matadero ${viejos} machos que pasaron de edad y ${vv} vacas muy viejas: +${eur(ing)}.`)}
+  const nv=campo().filter(a=>a.role==='vaca').length,ay=Math.round(BAL.ayudas.fija+BAL.ayudas.porVaca*nv);
+  if(ay>0){S.money+=ay;rep.inc+=ay;rep.lines.push(`Ayudas a la ganadería extensiva (${nv} vacas de vientre): +${eur(ay)}.`)}
  }
  // crecimiento y salud
- const f=FEED[S.feed];
+ const f=FEED[S.feed],sal=(lluvia?E.lluvia.salud:0)+(sequia?E.sequia.salud:0)+(cap.sobre>0?BAL.capacidad.saludSobrecarga:0);
  for(const a of campo()){
   const m=ageM(a);if(m<0)continue;
   a.peso=Math.round(Math.min(capPeso(a),a.peso+rate(m,a)*f.m*R(.85,1.15)));
-  a.salud=clamp(a.salud+f.s+R(-1.2,1.4)+(a.lesion>0?4:0)+(ev==='lluvia'?1.5:0)+(mej('abrev')?.5:0)+(aMano?.6:0),5,100);
+  a.salud=clamp(a.salud+f.s+R(-1.2,1.4)+(a.lesion>0?4:0)+sal+(mej('abrev')?.5:0)+(aMano?PM.salud:0),5,100);
   if(a.lesion>0)a.lesion--;
  }
  // paridera
@@ -252,12 +319,12 @@ function advance(){
   }
   rep.lines.push(`Paridera: nacen ${nb} becerros (${hm} machos y ${nb-hm} hembras)${p?`, hijos de ${p.name} nº ${p.num}`:' con un semental prestado; asigna uno propio para mejorar la reata'}.`);
  }
- if(S.pres>40)S.pres-=(S.pres-40)*.006;
+ if(S.pres>BAL.prestigio.umbral)S.pres-=(S.pres-BAL.prestigio.umbral)*BAL.prestigio.desgaste;
  // evento
  const males=campo().filter(a=>a.sex==='M'&&ageY(a)>=3&&!a.role);
  if(ev==='pelea'&&males.length>=2&&!(mej('cercas')&&Math.random()<.5)){const v=pick(males);const d=RI(22,50);v.salud=clamp(v.salud-d,5,100);v.lesion=3;rep.lines.push(`Pelea en el cercado: ${v.name} nº ${v.num} sale herido (salud ${Math.round(v.salud)}).`)}
- else if(ev==='lluvia'&&feedMod<1)rep.lines.push('Buenas lluvias: el pasto rebrota, baja el gasto en pienso y mejora la salud de la camada.');
- else if(ev==='sequia'&&feedMod>1)rep.lines.push('Sequía en la dehesa: hay que suplementar más y el pienso sale un 35 % más caro.');
+ else if(lluvia)rep.lines.push(`Buenas lluvias: el pasto rebrota, el pienso baja un ${Math.round((1-E.lluvia.mul)*100)} % y mejora la salud de la camada.`);
+ else if(sequia)rep.lines.push(`Sequía en la dehesa: hay que suplementar más, el pienso sale un ${Math.round((E.sequia.mul-1)*100)} % más caro y la camada se resiente.`);
  else if(ev==='veedor'){const s=pick(SMALL);addOffer({...s,tipo:'corrida',abs:absNow()+2,n:s.cat===3?4:6,precio:r100(priceFor(s.cat,'corrida')*1.1)});rep.lines.push(`Un veedor visita la finca y deja una oferta para ${s.plaza}.`)}
  else if(ev==='visita'){S.money+=1500;rep.inc+=1500;rep.lines.push('Visita de aficionados a la finca: +1.500 €.')}
  else if(ev==='cojera'){const a=pick(campo());if(a){a.salud=clamp(a.salud-18,5,100);a.lesion=2;rep.lines.push(`${a.name} nº ${a.num??'s/n'} aparece cojo; el mayoral lo aparta para curarlo.`)}}
@@ -266,16 +333,20 @@ function advance(){
  for(const o of S.offers.filter(o=>o.st==='aceptada'&&o.abs===absNow())){const r=celebrar(o);rep.corridas.push(r);rep.inc+=r.ingreso}
  // ofertas
  for(const o of S.offers)if(o.st==='nueva'&&absNow()>=o.abs){o.st='caducada'}
- S.offers=S.offers.filter(o=>!(o.st==='caducada'||o.st==='rechazada')||absNow()-o.abs<3);
+ S.offers=S.offers.filter(o=>!['caducada','rechazada','lidiada'].includes(o.st)||absNow()-o.abs<BAL.ofertas.purgaMeses);
  for(const o of S.offers)o.nuevo=false;
  const before=S.offers.length;genOffers(3);genOffers(2);
  const nuevas=S.offers.length-before;if(nuevas)rep.lines.push(`${nuevas} ${nuevas>1?'nuevas ofertas':'nueva oferta'} de empresas. Míralas en Ofertas.`);
  regenMkt();rivalsTick();
  S.animals=S.animals.filter(a=>a.st==='campo');genRetos(S);
  log(rep.lines[0]);for(const r of rep.corridas)log(`${r.plaza}: ${r.resumen}`);
+ if(S.conf<=0&&!S.ultimatum){S.ultimatum=true;S.conf=BAL.confianza.ultimatum;rep.lines.push(`La propiedad pierde la paciencia: te da una última oportunidad con la confianza al ${BAL.confianza.ultimatum} %. Si vuelve a cero, se acabó.`);log('Ultimátum de la propiedad.')}
+ else if(S.money<BAL.deuda.aviso&&S.money>=BAL.deuda.limite)rep.lines.push(`Aviso del banco: tu descubierto se acerca al límite de ${eur(BAL.deuda.limite)}.`);
+ if(S.money<BAL.deuda.limite&&!S.prestamo&&!S.prestamoUsado)S.prestamoOferta=true;
  save();render();
- if(S.money<-90000||S.conf<=0)return gameOver();
- newsToast(rep);
+ newsToast(rep);fx(rep.inc-rep.cost>=0?'cobro':'tap');
+ if(S.prestamoOferta)return ofrecerPrestamo();
+ if(S.money<BAL.deuda.limite||S.conf<=0)return gameOver();
 }
 function herradero(auto){
  const sin=campo().filter(a=>!a.herrado);
@@ -312,7 +383,7 @@ function lidiar(a,o,mat){
  return t;
 }
 function celebrar(o){
- const pool=[...(o.tipo==='novillada'?NOVILLEROS:MATADORES)].sort(()=>Math.random()-.5).slice(0,3);
+ const pool=shuffle([...(o.tipo==='novillada'?NOVILLEROS:MATADORES)]).slice(0,3);
  const toros=[],hurt=new Set();
  o.toros.forEach((id,i)=>{const a=byId(id);if(!a)return;let mat=pool[i%3];if(hurt.has(mat.n))mat=pool.find(m=>!hurt.has(m.n))||SOBRE;
   const t=lidiar(a,o,mat);if(t.cogida){hurt.add(mat.n);const s=pool.find(m=>!hurt.has(m.n))||SOBRE;t.sust={n:s.n,t:s.t,e:s.e};t.trof=0;if(t.res==='indulto')t.res='vuelta'}toros.push(t)});
@@ -322,7 +393,7 @@ function celebrar(o){
  if(best&&best.score>=80&&o.cat<=2&&Math.random()<.6){premio=best.name;dp+=3;S.money+=6000;S.stats.premios++}
  const ingreso=o.precio*toros.length+(premio?6000:0);
  S.money+=o.precio*toros.length;S.stats.ingresos+=ingreso;
- S.pres=clamp(S.pres+dp,0,100);
+ dp=presDelta(dp);
  for(const t of toros){
   const a=byId(t.id);
   if(t.res==='indulto'){a.res=null;a.role='semental';a.tentado=true;a.known='lidia';a.rev={bra:a.g.bra,cas:a.g.cas};a.nota=Math.round(.65*a.g.bra+.35*a.g.cas);a.salud=45;a.lesion=4;a.indultado=`${o.plaza}, ${S.year}`;S.stats.indultos++;S.season.ind++}
@@ -495,7 +566,7 @@ function render(){
  ({inicio:renderInicio,finca:renderFinca,camada:renderCamada,ofertas:renderOfertas,mercado:renderMercado,tareas:renderTareas,palmares:renderPalmares})[UI.tab](scr);
 }
 const TABS=[['inicio','Inicio','casa'],['finca','Finca','finca'],['camada','Ganadería','toro'],['ofertas','Ofertas','mon'],['mercado','Mercado','bolsa'],['tareas','Tareas','tareas'],['palmares','Perfil','perfil']];
-function go(t){UI.tab=t;const nt=document.getElementById('newsT');if(nt)nt.hidden=true;try{navigator.vibrate&&navigator.vibrate(6)}catch(e){}render();window.scrollTo(0,0)}
+function go(t){UI.tab=t;const nt=document.getElementById('newsT');if(nt)nt.hidden=true;fx('tap',null);render();window.scrollTo(0,0)}
 const ICO={
  casa:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5.5 10v10h5v-6h3v6h5V10"/></svg>',
  finca:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M2 20h20M4 20v-8l5-4 5 4v8M9 20v-4h0M14 12l4-3 4 3v8M7 13h4M17 13h2"/></svg>',
@@ -560,13 +631,13 @@ function startScreen(){
  const sv=load();
  return `<main style="padding-block:max(14px,env(safe-area-inset-top,0px)) 40px"><div class="wrap stack" style="gap:1.1rem">
  <div class="hero2"><div class="img" style="background-image:url(img/hero.jpg)"></div><div class="txt"><div class="k">Modo carrera · ganadero de bravo</div><h1>Hierro y Divisa</h1><div class="tag">Tradición<i>·</i>Pasión<i>·</i>Toros</div></div></div>
- ${sv&&sv.g?`<button class="btn oro adv" onclick="continuar()">Continuar · ${esc(sv.g.name)} · ${MESES[sv.month]} ${sv.year}</button>`:''}
+ ${sv&&sv.g?`<button class="btn oro adv" onclick="continuar()">${sv.over?'Ver el final':'Continuar'} · ${esc(sv.g.name)} · ${MESES[sv.month]} ${sv.year}</button>`:''}
  <section class="sect"><header><h2>Ganaderías históricas</h2></header>
   <div class="list">${GANADERIAS.map((g,i)=>`<button class="gan" onclick="startReal(${i})">${emblem({hierro:{l:g.name[0]}},44)}
    <span style="min-width:0"><b>${esc(g.name)}</b><br><small class="muted">Encaste ${g.enc} · prestigio ${g.pres}</small><div class="pres"><i style="width:${g.pres}%"></i></div></span>${divisa(g.div)}</button>`).join('')}</div>
  </section>
  <section class="sect card goldline"><header><h2>Funda tu ganadería</h2></header>
-  <small class="muted">20 vacas, un semental y plazas de tercera para empezar.</small>
+  <small class="muted">${BAL.inicio.fundada.vacas} vacas, ${BAL.inicio.fundada.sementales>1?BAL.inicio.fundada.sementales+' sementales':'un semental'} y plazas de tercera para empezar. Una empresa ya cuenta contigo para la primavera.</small>
   <div class="field"><label class="lbl" for="ng-name">Nombre</label><input type="text" id="ng-name" maxlength="32" placeholder="Ej.: Hermanos Valdeolmos" value="${esc(NEWG.name)}" oninput="NEWG.name=this.value;updPrev()"></div>
   <div class="two">
    <div class="field"><label class="lbl" for="ng-l">Letras del hierro</label><input type="text" id="ng-l" maxlength="2" placeholder="VH" value="${esc(NEWG.l)}" oninput="NEWG.l=this.value;updPrev()"></div>
@@ -589,7 +660,13 @@ function rerStart(){const y=window.scrollY;render();window.scrollTo(0,y)}
 function startReal(i){const g=GANADERIAS[i];newGame({real:true,name:g.name,enc:g.enc,pres:g.pres,div:g.div,hierro:{l:g.name[0],a:'none'},prov:''})}
 function startNew(){const n=NEWG.name.trim();if(!n){toast('Ponle nombre a tu ganadería');$('#ng-name').focus();return}
  newGame({real:false,name:n,enc:NEWG.enc,div:[NEWG.c1,NEWG.c2],hierro:{l:(NEWG.l.trim()||n[0]),a:NEWG.a},prov:NEWG.prov,fund:2027})}
-function continuar(){S=load();if(!S.animals){S=null;return}migrate(S);if(!S.mej)S.mej=S.g.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{};UI.tab='inicio';render()}
+/* carga, migra y valida la partida; lo usan «Continuar» y el arranque */
+function abrirPartida(){const L=loadInfo();
+ if(!L.s){if(L.err==='newer')toast('Esta partida es de una versión más nueva del juego. Recarga la página para actualizar.');else if(L.err==='corrupt')toast('La partida guardada está dañada y no hay copia de seguridad.');return false}
+ S=L.s;if(!S.mej)S.mej=S.g.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{};migrate(S);save();
+ if(L.src==='bak')toast('La partida estaba dañada: se ha recuperado la copia del último mes.');
+ UI.tab='inicio';render();if(S.over)gameOver();else if(S.prestamoOferta)ofrecerPrestamo();return true}
+function continuar(){abrirPartida()}
 
 /* ============ INICIO ============ */
 function offerCard(o){
@@ -615,7 +692,7 @@ function renderFinca(el){
  const c=campo();
  const lid=c.filter(a=>lidiable(a)&&ageY(a)>=4&&ageY(a)<=5).length;
  const vacas=c.filter(a=>a.role==='vaca').length;
- const coste=Math.round(c.length*FEED[S.feed].c*feedMul())+2500+10*c.length;
+ const G=gastoMes(),coste=G.pienso+G.personal,cap=capacidad();
  const prox=S.offers.filter(o=>o.st==='aceptada').sort((a,b)=>a.abs-b.abs);
  const sems=c.filter(a=>a.role==='semental');
  el.innerHTML=`<div class="stack" style="gap:1rem">
@@ -628,10 +705,11 @@ function renderFinca(el){
   <div class="tile">${ICO.vaca}<div><div class="lbl">Vacas</div><div class="v">${vacas}</div></div></div>
   <div class="tile">${ICO.monG.replace('<svg','<svg class="ti"')}<div><div class="lbl">Gasto/mes</div><div class="v">${eur(coste)}</div></div></div>
  </div>
- <section class="sect"><header><h2>Tareas</h2></header><div class="list">${listaTareas().slice(0,3).map(x=>`<div class="task"><span class="dot ${x.oro?'ok':''}"></span><span class="t">${esc(x.t)}</span><button class="btn sm ${x.oro?'oro':''}" ${x.dis?'disabled':''} onclick="${x.fn}">${x.b}</button></div>`).join('')||'<div class="task"><span class="dot ok"></span><span class="t">Todo al día. El mayoral espera órdenes.</span></div>'}</div></section>
+ <div class="card" style="padding:12px 14px"><div class="row" style="justify-content:space-between"><span class="lbl">Carga de la finca</span><b style="color:${cap.sobre>0?'var(--bad)':cap.carga>.9?'var(--warn)':'inherit'}">${cap.ug} / ${cap.max} UG</b></div><span class="meter big"><i style="width:${Math.min(100,cap.carga*100)}%;background:${cap.sobre>0?'var(--bad)':cap.carga>.9?'var(--warn)':'var(--good)'}"></i></span><small class="muted">${cap.sobre>0?`Sobrecargada: el pienso sale un ${Math.round(cap.sobre*BAL.capacidad.sobrecoste*100)} % más caro y la camada pierde salud. Vende o desecha animales.`:'Unidades ganaderas: un becerro come menos que un toro. Cercas, abrevaderos, nave y comederos amplían la capacidad.'}</small></div>
+ <section class="sect"><header><h2>Tareas</h2></header><div class="list">${listaTareas().slice(0,3).map(tareaRow).join('')||'<div class="task"><span class="dot ok"></span><span class="t">Todo al día. El mayoral espera órdenes.</span></div>'}</div></section>
  ${prox.length?`<section class="sect"><header><h2>Carteles anunciados</h2></header><div class="list">${prox.map(o=>`<div class="task"><span class="dot ok"></span><span class="t"><b>${esc(o.plaza)}</b><br><small class="muted">${o.feria} · ${MESES[o.abs%12]} ${Math.floor(o.abs/12)} · ${o.toros.length} ${o.tipo==='novillada'?'novillos':'toros'}</small></span></div>`).join('')}</div></section>`:''}
  <section class="sect"><header><h2>Alimentación</h2><span class="sp"></span><small class="muted">por cabeza y mes</small></header>
-  <div class="seg">${Object.entries(FEED).map(([k,f])=>`<button aria-pressed="${S.feed===k}" onclick="S.feed='${k}';save();render()"><b>${f.n}</b><span>${Math.round(f.c*feedMul())} € · ${f.d}</span></button>`).join('')}</div>
+  <div class="seg">${Object.entries(FEED).map(([k,f])=>`<button aria-pressed="${S.feed===k}" onclick="S.feed='${k}';save();render()"><b>${f.n}</b><span>${Math.round(f.c*feedMul())} €/UG · ${f.d}</span></button>`).join('')}</div>
 </section>
  <section class="sect"><header><h2>Cubrición</h2></header>
   <div class="field"><label class="lbl" for="semsel">Semental que cubre a las vacas</label>
@@ -650,7 +728,7 @@ function startDehesa(){
  const H=Math.round(Math.min(300,Math.max(200,cv.clientWidth*.55)));
  let {c,w}=fitCanvas(cv,H);
  const cmp=campo();
- const pickN=(arr,n)=>[...arr].sort(()=>Math.random()-.5).slice(0,n);
+ const pickN=(arr,n)=>shuffle([...arr]).slice(0,n);
  const sel=[...pickN(cmp.filter(a=>a.sex==='M'&&!a.role&&ageY(a)>=3),6),...pickN(cmp.filter(a=>a.role==='semental'),1),...pickN(cmp.filter(a=>a.role==='vaca'),4),...pickN(cmp.filter(a=>ageY(a)===0),2)];
  const rnd=mulberry(S.g.name.length*31+7);
  const trees=[];for(let i=0;i<14;i++)trees.push({x:rnd(),z:rnd()*.95,r:.7+rnd()*.6});
@@ -777,18 +855,18 @@ function openFicha(id){
   requestAnimationFrame(loop)};requestAnimationFrame(loop);
 }
 function tCost(sex){return sex==='H'?(mej('placita')?250:450):(mej('placita')?800:1200)}
-function tentarUno(id){const a=byId(id);const cost=tCost(a.sex);S.money-=cost;tentar(a);save();
+function tentarUno(id){const a=byId(id);if(!a)return;const cost=tCost(a.sex);if(!puedePagar(cost,'la tienta'))return;S.money-=cost;fx('ok');tentar(a);save();
  toast(`Tienta de ${a.name}: nota ${a.nota} (${notaTxt(a.nota)})`);openFicha(id);render()}
 function aprobarVaca(id){const a=byId(id);a.role='vaca';save();closeModal();render();toast(`${a.name} pasa a vaca de vientre`)}
 function aprobarSemental(id){const a=byId(id);a.role='semental';if(!byId(S.semAct)||byId(S.semAct).role!=='semental')S.semAct=a.id;save();closeModal();render();toast(`${a.name} queda como semental`)}
 function vender(id,tipo){const a=byId(id);const p=Math.round(tipo==='pop'?700+a.peso*2.2:a.peso*(a.sex==='H'?1.3:1.5));
  S.money+=p;a.st='vendido';S.animals=S.animals.filter(x=>x.id!==id);if(S.semAct===id)S.semAct=(campo().find(x=>x.role==='semental')||{}).id??null;
- log(`Venta de ${a.name}${a.num!=null?' nº '+a.num:''}: ${eur(p)}`);save();closeModal();render();toast(`Vendido por ${eur(p)}`)}
+ log(`Venta de ${a.name}${a.num!=null?' nº '+a.num:''}: ${eur(p)}`);save();closeModal();render();toast(`Vendido por ${eur(p)}`);fx('cobro')}
 
 function tientaLote(){
  const pend=campo().filter(a=>a.sex==='H'&&!a.tentado&&!a.role&&ageY(a)>=2);
  if(!pend.length)return;
- const cost=pend.length*tCost('H');S.money-=cost;pend.forEach(tentar);save();render();
+ const cost=pend.length*tCost('H');if(!puedePagar(cost,'la tienta'))return;S.money-=cost;pend.forEach(tentar);save();render();
  const rows=pend.sort((a,b)=>b.nota-a.nota);
  modal('Tienta de hembras',`<div class="stack">
   <p class="muted" style="margin:0">En la placita de tientas se mide la bravura de ${pend.length} hembras ante el caballo y la muleta (${eur(cost)}). Marca las que pasan a vacas de vientre; las demás van al matadero.</p>
@@ -844,9 +922,9 @@ function renderMercado(el){
   </div></section>
  </div>`;
 }
-function comprarSem(i){const s=S.mkt.sem[i];S.money-=s.precio;const a=mk({sex:'M',born:S.year-s.age,enc:s.enc,g:s.g,pelo:s.pelo,name:s.name,role:'semental'});a.tentado=true;a.known='tienta';a.rev=s.rev;a.nota=s.nota;S.animals.push(a);
+function comprarSem(i){const s=S.mkt.sem[i];if(!s||!puedePagar(s.precio,'el semental'))return;S.money-=s.precio;fx('ok');const a=mk({sex:'M',born:S.year-s.age,enc:s.enc,g:s.g,pelo:s.pelo,name:s.name,role:'semental'});a.tentado=true;a.known='tienta';a.rev=s.rev;a.nota=s.nota;S.animals.push(a);
  if(!byId(S.semAct))S.semAct=a.id;S.mkt.sem.splice(i,1);log(`Compra del semental ${s.name} (${s.enc}).`);save();render();toast(`${s.name} llega a la finca`)}
-function comprarLote(i){const l=S.mkt.lotes[i];S.money-=l.precio;for(const v of l.vacas){const a=mk({sex:'H',born:S.year-v.age,enc:l.enc,g:v.g,pelo:v.pelo,name:v.name,role:'vaca'});a.tentado=true;a.known='tienta';a.rev=v.rev;a.nota=v.nota;S.animals.push(a)}
+function comprarLote(i){const l=S.mkt.lotes[i];if(!l||!puedePagar(l.precio,'el lote'))return;S.money-=l.precio;fx('ok');for(const v of l.vacas){const a=mk({sex:'H',born:S.year-v.age,enc:l.enc,g:v.g,pelo:v.pelo,name:v.name,role:'vaca'});a.tentado=true;a.known='tienta';a.rev=v.rev;a.nota=v.nota;S.animals.push(a)}
  S.mkt.lotes.splice(i,1);log(`Compra de 5 vacas de ${l.enc}.`);save();render();toast('5 vacas nuevas en el cercado')}
 function bloque(k){let ing=0,n=0;for(const a of campo()){if(k==='viejas'&&a.role==='vaca'&&ageY(a)>=14){ing+=a.peso*1.3;a.st='vendido';n++}if(k==='tent'&&a.sex==='M'&&a.tentado&&!a.role){ing+=700+a.peso*2.2;a.st='vendido';n++}}
  S.animals=S.animals.filter(a=>a.st==='campo');S.money+=Math.round(ing);save();render();toast(`${n} vendidos por ${eur(ing)}`)}
@@ -861,8 +939,19 @@ function spark(){const d=S.presHist;const W=600,H=120,p=24;const xs=i=>p+i*(W-2*
  return `<svg viewBox="0 0 ${W} ${H}" class="spark" role="img" aria-label="Prestigio por temporada"><line x1="${p}" x2="${W-p}" y1="${ys(50)}" y2="${ys(50)}" stroke="var(--line)" stroke-dasharray="4 4"/><text x="${p}" y="${ys(50)-4}" fill="var(--muted)" font-size="11">50</text>
  <polygon points="${xs(0)},${H-p} ${pts} ${xs(d.length-1)},${H-p}" fill="rgba(230,187,85,.15)"/><polyline points="${pts}" fill="none" stroke="var(--oro)" stroke-width="2.5"/>
  ${d.map((x,i)=>`<circle cx="${xs(i)}" cy="${ys(x.p)}" r="${i===d.length-1?5:3}" fill="var(--oro)"/><text x="${xs(i)}" y="${H-6}" fill="var(--muted)" font-size="11" text-anchor="middle">${x.y}</text>`).join('')}</svg>`}
-function resetGame(){try{localStorage.removeItem(KEY)}catch(e){}S=null;render()}
-function gameOver(){modal('Bancarrota',`<div class="stack"><p style="margin:0">El banco ejecuta la deuda y la finca sale a subasta. ${esc(S.g.name)} cierra con ${S.stats.toros} toros lidiados y ${S.stats.indultos} indultos.</p><button class="btn pri adv" onclick="closeModal();resetGame()">Empezar otra carrera</button></div>`)}
+function resetGame(){try{const cur=localStorage.getItem(KEY);if(cur)localStorage.setItem(BAL.save.bak,cur);localStorage.removeItem(KEY)}catch(e){}S=null;closeModal(true,true);render()}
+function gameOver(){if(!S)return;S.over=true;S.prestamoOferta=false;save();fx('error');
+ const conf=S.conf<=0,t=conf?'Despedido por la propiedad':'Bancarrota';
+ modal(t,`<div class="stack"><p style="margin:0">${conf?'La propiedad ha perdido la confianza en tu gestión y te releva al frente de la ganadería.':'El banco ejecuta la deuda y la finca sale a subasta.'} ${esc(S.g.name)} cierra con ${S.stats.toros} toros lidiados, ${S.stats.indultos} indultos y ${S.trofeos.length} trofeos.</p><button class="btn pri adv" onclick="resetGame()">Empezar otra carrera</button></div>`,null,{lock:true})}
+/* salida antes de la quiebra: el banco refinancia una sola vez por partida */
+function ofrecerPrestamo(){if(!S)return;const P=BAL.deuda.prestamo,cuota=Math.round(P.importe*(1+P.interes)/P.meses);S.prestamoOferta=true;save();fx('error');
+ modal('El banco te llama',`<div class="stack"><p style="margin:0">Tu descubierto (${eur(S.money)}) ha pasado el límite de ${eur(BAL.deuda.limite)}. El director de la sucursal te ofrece refinanciar la deuda una única vez.</p>
+ <div class="kv"><span>Préstamo <b>${eur(P.importe)}</b></span><span>Cuota <b>${eur(cuota)}</b>/mes</span><span>Plazo <b>${P.meses} meses</b></span><span>Confianza <b>${P.confianza}</b></span></div>
+ <p class="muted" style="margin:0">Si lo rechazas, el banco ejecuta la deuda y la finca sale a subasta. Si vuelves a pasar el límite, no habrá otra oportunidad.</p>
+ <div class="row"><button class="btn pri" onclick="aceptarPrestamo()">Aceptar el préstamo</button><button class="btn" onclick="gameOver()">Rechazar</button></div></div>`,null,{lock:true})}
+function aceptarPrestamo(){const P=BAL.deuda.prestamo;if(!S||S.prestamoUsado)return;S.money+=P.importe;S.prestamo={cuota:Math.round(P.importe*(1+P.interes)/P.meses),meses:P.meses};S.prestamoUsado=true;S.prestamoOferta=false;
+ S.conf=clamp(S.conf+P.confianza,0,100);log(`Préstamo bancario de ${eur(P.importe)} a ${P.meses} meses.`);save();closeModal(true,true);render();toast(`Préstamo concedido: +${eur(P.importe)}`);fx('cobro');
+ if(S.conf<=0)gameOver()}
 
 /* ============ informe mensual ============ */
 function showReport(rep){if(!rep)return;if(!rep.corridas)rep={...rep,corridas:(rep.cor||[]).map(id=>S.hist.find(h=>h.id===id)).filter(Boolean)};
@@ -993,10 +1082,11 @@ function endCorrida(){
 
 /* ============ modal y avisos ============ */
 let onClose=null;
-function modal(title,html,cb){closeModal(true);onClose=cb||null;const d=document.createElement('div');d.className='ov';d.id='ov';
- d.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="sh"><div class="wrap"><h2 style="flex:1;min-width:0">${esc(title)}</h2><button class="x" aria-label="Cerrar" onclick="closeModal()">✕</button></div></div><div class="bd"><div class="wrap">${html}</div></div></div>`;
- d.addEventListener('click',e=>{if(e.target===d)closeModal()});document.body.appendChild(d);document.body.style.overflow='hidden'}
-function closeModal(silent){const d=$('#ov');if(d)d.remove();document.body.style.overflow='';if(onClose&&!silent){const f=onClose;onClose=null;f()}else if(!silent)onClose=null}
+function modal(title,html,cb,opt){closeModal(true,true);onClose=cb||null;const lock=!!(opt&&opt.lock);const d=document.createElement('div');d.className='ov';d.id='ov';if(lock)d.dataset.lock='1';
+ d.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="sh"><div class="wrap"><h2 style="flex:1;min-width:0">${esc(title)}</h2>${lock?'':'<button class="x" aria-label="Cerrar" onclick="closeModal()">✕</button>'}</div></div><div class="bd"><div class="wrap">${html}</div></div></div>`;
+ if(!lock)d.addEventListener('click',e=>{if(e.target===d)closeModal()});document.body.appendChild(d);document.body.style.overflow='hidden'}
+/* un modal bloqueado (quiebra, préstamo) no se cierra con la X, el fondo ni Escape: solo con closeModal(x,true) desde sus botones */
+function closeModal(silent,force){const d=$('#ov');if(d&&d.dataset.lock&&!force)return false;if(d)d.remove();document.body.style.overflow='';if(onClose&&!silent){const f=onClose;onClose=null;f()}else if(!silent)onClose=null;return true}
 let tt=null;function toast(m){let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2600)}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
