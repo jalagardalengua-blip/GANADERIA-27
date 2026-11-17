@@ -562,7 +562,7 @@ function render(){
  </div></div>
  ${typeof pasoHTML==='function'?pasoHTML():''}
  <main><div class="wrap" id="scr"></div></main>
- <nav class="tabs" aria-label="Secciones"><div class="wrap">${TABS.map(([k,l,i])=>{const b=k==='ofertas'?nuevas:k==='tareas'?pend:0;return `<button aria-current="${UI.tab===k}" onclick="go('${k}')">${ICO[i]}<span>${l}</span>${b?`<span class="bdg">${b}</span>`:''}</button>`}).join('')}</div></nav>`;
+ <nav class="tabs" aria-label="Secciones"><div class="wrap">${TABS.map(([k,l,i])=>{const b=k==='ofertas'?nuevas:k==='tareas'?pend:0;return `<button aria-current="${UI.tab===k}" onclick="go('${k}')"><img class="ti3" src="img/ui/tab-${k}.png" alt="" width="34" height="34" decoding="async"><span>${l}</span>${b?`<span class="bdg">${b}</span>`:''}</button>`}).join('')}</div></nav>`;
  const scr=$('#scr');
  ({inicio:renderInicio,finca:renderFinca,camada:renderCamada,ofertas:renderOfertas,mercado:renderMercado,tareas:renderTareas,palmares:renderPalmares})[UI.tab](scr);
 }

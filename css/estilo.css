@@ -398,3 +398,8 @@ html,body{overflow-x:hidden}
 /* Barra «Siguiente paso» */
 .paso .task{background:linear-gradient(90deg,rgba(230,187,85,.12),transparent);border-left:3px solid var(--oro)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+/* Barra inferior: iconos 3D renderizados (tools/iconos3d). Gris si inactiva, color si activa. */
+nav.tabs button .ti3{width:34px;height:34px;object-fit:contain;filter:grayscale(1) brightness(.62) contrast(1.05);opacity:.85;transition:filter .2s,transform .2s,opacity .2s}
+nav.tabs button[aria-current="true"] .ti3{filter:drop-shadow(0 3px 8px rgba(230,187,85,.45));opacity:1;transform:translateY(-2px) scale(1.12)}
+nav.tabs button:active .ti3{transform:scale(.92)}
+@media (max-width:380px){nav.tabs button .ti3{width:30px;height:30px}}
