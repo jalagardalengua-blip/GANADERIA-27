@@ -6,7 +6,7 @@ const LC=c=>new THREE.Color(c).convertSRGBToLinear();
 if(typeof THREE!=='undefined'&&!THREE.CanvasTexture.__srgb){const _CT=THREE.CanvasTexture;THREE.CanvasTexture=class extends _CT{constructor(...a){super(...a);this.encoding=THREE.sRGBEncoding;this.anisotropy=4}};THREE.CanvasTexture.__srgb=true}
 // Recursos cacheados que no se liberan al cambiar de escena
 const SHARED=new WeakSet();const shr=o=>{if(o)SHARED.add(o);return o};
-function disposeTree(root){if(!root)return;root.traverse(o=>{const g=o.geometry;if(g&&!SHARED.has(g))g.dispose();
+function disposeTree(root){if(!root)return;root.traverse(o=>{if(o.isSkinnedMesh&&o.skeleton&&o.skeleton.dispose)o.skeleton.dispose();const g=o.geometry;if(g&&!SHARED.has(g))g.dispose();
  for(const m of [].concat(o.material||[])){if(!m||SHARED.has(m))continue;if(m.map&&!SHARED.has(m.map))m.map.dispose();m.dispose()}})}
 const lerp=(a,b,v)=>a+(b-a)*v,ease=v=>v<.5?2*v*v:1-Math.pow(-2*v+2,2)/2,angD=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 const ga=(t,c,w)=>Math.exp(-((t-c)*(t-c))/(2*w*w));
@@ -109,7 +109,7 @@ function makeBull(spec){
  const G=geos(),kind=spec.kind||'toro',cow=kind==='vaca'||kind==='becerro',calf=kind==='becerro',cab=kind==='cabestro';
  const m=spec.m||{len:1,alt:1,morr:cow?.25:.9,leg:1,girth:1,papada:1,horn:cab?'cab':cow?'lira':'veleto',hl:calf?.25:cab?1.25:1,ht:cow?.03:.05,hc:'#e2d6bc'};
  const mat=peloMat(spec.pelo),dk=M('#110d0a',.9),wh=M('#efe8dc',.8);
- const P=bprof(m,cow,calf),Le=m.leg*(calf?1.12:1),hipY=1.0*Le*P.A,by=hipY+.24*P.A;
+ const SPEC={...spec,m};const P=bprof(m,cow,calf),Le=m.leg*(calf?1.12:1),hipY=1.0*Le*P.A,by=hipY+.24*P.A;
  const root=new THREE.Group(),b=new THREE.Group();root.add(b);
  const body=new THREE.Mesh(bodyGeo(P),mat);body.position.y=by;body.castShadow=true;body.receiveShadow=true;b.add(body);
  const topY=t=>by+P.cy(t)+P.top(t)*P.e(t);
@@ -137,7 +137,7 @@ function makeBull(spec){
  for(let i=0;i<6;i++){const s=new THREE.Group();s.position.set((i%2?.12:-.12),0,(Math.floor(i/2)-1)*.18);s.rotation.set(-.5,0,(i%2?-.3:.3));
   mesh(G.cyl,M('#efe6d2'),.018,.75,.018,0,.37,0,s,true);for(let j=0;j<3;j++)mesh(G.box,M(cols[(i+j)%6],.6),.07,.12,.07,0,.5+j*.12,0,s,true);s.visible=false;bg.add(s)}
  root.scale.setScalar(calf?.44:kind==='vaca'?.72:cab?.84:.78);
- return {root,b,hp,legs,tp,bg,ph:Math.random()*6,kind,hipY,t:Math.random()*10,cruz:{y:topY(.3),z:.3*P.L}}}
+ return {root,b,hp,legs,tp,bg,ph:Math.random()*6,kind,hipY,t:Math.random()*10,cruz:{y:topY(.3),z:.3*P.L},spec:SPEC}}
 function animBull(B,dt,o){
  const sp=o.speed||0;B.t+=dt;B.ph+=dt*(sp>.03?4+sp*8:0);
  const gal=sp>1.05,off=gal?[0,.55,Math.PI,Math.PI+.55]:[0,Math.PI,Math.PI,0],amp=Math.min(1.25,sp)*.5,k=o.kneel||0;
@@ -280,7 +280,7 @@ function show3D(){if(typeof THREE==='undefined'){toast('No se pudo cargar el mot
 function enter3D(){if(!show3D())return;W3.from='2d';enterFinca()}
 function exit3D(){try{W3.wl&&W3.wl.release();W3.wl=null}catch(e){}W3.on=false;W3.mode=null;W3.drive=false;W3.ride=false;musicStop();crowdStop();ambStop();W3.root.hidden=true;document.body.style.overflow='';render()}
 function hudInfo(){const h=Math.floor(W3.tod*24),mi=Math.floor((W3.tod*24-h)*60);$('#h3info').innerHTML=`<b>${MESES[S.month]} ${S.year}</b>${W3.mode==='finca'?` · ${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`:''} · ${eur(S.money)} · prestigio ${Math.round(S.pres)}`}
-function hudMode(m){$('#h3plaza').hidden=m!=='plaza';$('#h3tt').hidden=m!=='tienta';$('#h3cap').hidden=m==='finca';$('#h3toro').hidden=m==='finca';$('#h3tasks').hidden=m!=='finca';
+function hudMode(m){{const hh=$('#h3help');if(hh)hh.hidden=m!=='finca'}$('#h3plaza').hidden=m!=='plaza';$('#h3tt').hidden=m!=='tienta';$('#h3cap').hidden=m==='finca';$('#h3toro').hidden=m==='finca';$('#h3tasks').hidden=m!=='finca';
  $('#joy').hidden=m==='plaza';$('.h3act').hidden=m!=='finca';$('#h3adv').hidden=m!=='finca';$('#h3dim').hidden=true;$('#h3carry').hidden=true;$('#h3ban').hidden=true}
 function ole(txt){const o=$('#h3ole');if(!o||!o.appendChild)return;const s=document.createElement('span');s.textContent=txt;s.style.left=(15+Math.random()*60)+'%';o.appendChild(s);setTimeout(()=>s.remove(),1600)}
 function banner(txt,sub,dur){const e=$('#h3ban');e.innerHTML=`${esc(txt)}${sub?`<small>${esc(sub)}</small>`:''}`;e.hidden=false;clearTimeout(W3.banT);W3.banT=setTimeout(()=>{e.hidden=true},(dur||3.2)*1000)}
@@ -478,7 +478,8 @@ function rebuildFinca(){
  W3.tools=new THREE.Group();mesh(G.cyl,M('#6b5640'),.03,.9,.03,0,-.1,.2,W3.tools,true).rotation.x=1.3;mesh(G.box,M('#555',.4,.6),.22,.1,.05,0,-.05,.62,W3.tools,true);pl.arms[1].hand.add(W3.tools);
  W3.garr=mesh(G.cyl,M('#a88b5a',.7),.025,3.8,.025,0,-.1,.5,null);W3.garr.rotation.x=1.25;pl.arms[1].hand.add(W3.garr);
  setCarry();
- W3.scene=sc;hudInfo();ambStart(W3.rainOn);W3.tasksKey=''}
+ W3.scene=sc;hudInfo();ambStart(W3.rainOn);W3.tasksKey='';
+ if(GLBM.st==='ok'){W3.herd.forEach(h=>glbSkinBull(h.B));glbSkinPerson(W3.pl)}else glbLoad()}
 function setCarry(){const c=W3.F.carry;if(W3.sack)W3.sack.visible=c==='saco';if(W3.iron)W3.iron.visible=c==='hierro';if(W3.kit)W3.kit.visible=c==='botiquin';if(W3.tools)W3.tools.visible=c==='herr';if(W3.garr)W3.garr.visible=!!W3.ride;
  if(W3.pl){const ar=W3.pl.arms;ar[0].lock=c==='saco'?1:0;ar[1].lock=c||W3.ride?1:0;if(c==='saco'){ar[0].sh.rotation.set(-2.5,0,-.2);ar[1].sh.rotation.set(-.3,0,0)}if(c&&c!=='saco'){ar[1].sh.rotation.set(-.7,0,0);ar[1].el.rotation.x=-.4}if(W3.ride&&!c){ar[1].sh.rotation.set(-.5,0,0);ar[1].el.rotation.x=-.3}}
  const p=$('#h3carry');if(p){p.hidden=!c;p.textContent={saco:'Llevas un saco de pienso (25 kg)',hierro:'Llevas el hierro al rojo',botiquin:`Llevas el botiquín (${W3.F.uses} curas)`,herr:'Llevas las herramientas'}[c]||''}}
@@ -531,8 +532,8 @@ function fincaTick(dt){
   if(F.toss<=0)pl.root.rotation.x=0;pl.root.position.x=F.p.x;pl.root.position.z=F.p.z}
  else if(L>.08){const v=(W3.run&&F.carry!=='saco'?7.5:F.carry==='saco'?2.6:3.6)*L;F.p.x+=mx/ml*v*dt;F.p.z+=mz/ml*v*dt;collide(F.p);F.yaw+=angD(F.yaw,Math.atan2(mx,mz))*Math.min(1,dt*10);sp=L*(W3.run?1.5:1)}
  const HM=W3.horseM;HM.root.position.set(Hh.x,gH(Hh.x,Hh.z),Hh.z);HM.root.rotation.y=Hh.yaw;animHorse(HM,dt,W3.ride?Hh.v/4.5:0);
- if(W3.ride){pl.root.visible=true;pl.root.position.set(Hh.x,gH(Hh.x,Hh.z)+.98+HM.body.position.y,Hh.z);pl.root.position.x-=Math.sin(Hh.yaw)*.05;pl.root.position.z-=Math.cos(Hh.yaw)*.05;pl.root.rotation.set(0,Hh.yaw,0);animPerson(pl,dt,0)}
- else if(!W3.drive){pl.root.visible=true;if(!(F.toss>0)){F.p.y=gH(F.p.x,F.p.z);pl.root.position.copy(F.p);pl.root.rotation.y=F.yaw;animPerson(pl,dt,sp)}}
+ if(W3.ride){pl.root.visible=true;pl.root.position.set(Hh.x,gH(Hh.x,Hh.z)+.98+HM.body.position.y,Hh.z);pl.root.position.x-=Math.sin(Hh.yaw)*.05;pl.root.position.z-=Math.cos(Hh.yaw)*.05;pl.root.rotation.set(0,Hh.yaw,0);if(pl.gl)glbAnimPerson(pl,dt,0,true);else animPerson(pl,dt,0)}
+ else if(!W3.drive){pl.root.visible=true;if(!(F.toss>0)){F.p.y=gH(F.p.x,F.p.z);pl.root.position.copy(F.p);pl.root.rotation.y=F.yaw;if(pl.gl)glbAnimPerson(pl,dt,sp);else animPerson(pl,dt,sp)}}
  const tm=W3.truckM.g;tm.position.set(T.x,gH(T.x,T.z),T.z);tm.rotation.y=T.yaw;
  if(W3.may)animPerson(W3.may,dt,0);
  if(W3.flames)W3.flames.forEach((f,i)=>{f.scale.y=.8+Math.sin(performance.now()/90+i*2)*.25;f.rotation.y+=dt*3});
@@ -659,7 +660,7 @@ function herdTick(dt){
  for(let i=0;i<H.length;i++)for(let j=i+1;j<H.length;j++){const a=H[i],b=H[j];if(a.rk!==b.rk&&!a.free&&!b.free)continue;const dx=b.x-a.x,dz=b.z-a.z,d=Math.hypot(dx,dz),m=(a.kind==='becerro'||b.kind==='becerro')?1.1:1.8;
   if(d<m&&d>1e-4&&!(a.foe===b&&a.contact)){const p=(m-d)/2;a.x-=dx/d*p;a.z-=dz/d*p;b.x+=dx/d*p;b.z+=dz/d*p}}
  for(const h of H){const dd=Math.hypot(h.x-px,h.z-pz);const fl=h.mode==='derribado'?Math.min(1,(2.2-h.dT)*4)*Math.min(1,h.dT*2.5):0;h.B.root.position.set(h.x,gH(h.x,h.z)+(h.jump>0?Math.sin(h.jump/.6*Math.PI)*.5:0)+fl*.22,h.z);h.B.root.rotation.set(0,h.yaw,-(h.fallSide||1)*fl*1.4);
-  h.B.root.visible=dd<200;if(dd<110)animBull(h.B,dt,h.anim)}}
+  h.B.root.visible=dd<200;if(h.B.gl){if(dd<110)glbAnimBull(h.B,dt,h.anim,dd)}else if(dd<110)animBull(h.B,dt,h.anim)}}
 
 /* ---------- menús ---------- */
 function despacho(){modal('Despacho del cortijo',`<div class="stack">
@@ -1167,3 +1168,42 @@ function camPlaza(dt){const C=CP,cam=W3.cam;if(!C)return;const Z=C.s||freshState
  if(C.cut){cam.position.set(p[0],p[1],p[2]);W3.look.set(l[0],l[1],l[2]);C.cut=false}
  else{cam.position.x+=(p[0]-cam.position.x)*k;cam.position.y+=(p[1]-cam.position.y)*k;cam.position.z+=(p[2]-cam.position.z)*k;W3.look.x+=(l[0]-W3.look.x)*k;W3.look.y+=(l[1]-W3.look.y)*k;W3.look.z+=(l[2]-W3.look.z)*k}
  cam.lookAt(W3.look)}
+
+/* ---------- Modelos GLB animados (CC0, ver modelos/CREDITOS.md) ----------
+   Sustituyen a la geometría procedural en la finca: toros, vacas y becerros, y el jugador a pie.
+   La geometría procedural sigue existiendo como esqueleto lógico y como respaldo si la carga falla.
+   En la plaza se mantienen los toros procedurales (banderillas, divisa y encornadura en primer plano). */
+const GLBM={st:'idle',m:{},mats:{}};
+function glbLoad(){if(GLBM.st!=='idle'||typeof THREE.GLTFLoader==='undefined'||typeof THREE.SkeletonUtils==='undefined')return;GLBM.st='loading';
+ const L=new THREE.GLTFLoader(),get=n=>new Promise((ok,ko)=>L.load('modelos/'+n+'.glb',g=>{g.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.frustumCulled=false}});
+  g.size=new THREE.Box3().setFromObject(g.scene).getSize(new THREE.Vector3());GLBM.m[n]=g;ok(g)},undefined,ko));
+ Promise.all(['toro','vaca','vaquero'].map(get)).then(()=>{GLBM.st='ok';if(W3.mode==='finca'&&W3.herd){W3.herd.forEach(h=>glbSkinBull(h.B));if(W3.pl)glbSkinPerson(W3.pl)}})
+  .catch(e=>{GLBM.st='error';console.warn('Modelos GLB no disponibles; se usa la geometría procedural',e)})}
+// material recoloreado por capa (pelo); cacheado y compartido
+function glbMat(name,pelo,hc){const k=name+'|'+pelo+'|'+(hc||'');if(GLBM.mats[k])return GLBM.mats[k];const [base,hi]=PELO[pelo]||PELO.negro;
+ const c={Main:base,Main_Light:hi,Muzzle:shade(base,-.25),Hooves:'#15110e',Eye_Black:'#050404',Eye_White:'#d9d1c2',Horns:hc||'#e2d6bc'}[name]||base;
+ return GLBM.mats[k]=shr(new THREE.MeshStandardMaterial({color:LC(c),skinning:true,roughness:name==='Horns'?.4:name.startsWith('Eye')?.25:.62}))}
+// Un solo esqueleto por clon: los trozos de la malla comparten huesos (menos cálculo por fotograma y menos texturas)
+function glbShareSkel(o){let sk=null;o.traverse(n=>{if(!n.isSkinnedMesh)return;if(!sk){sk=n.skeleton;return}if(n.skeleton!==sk){n.skeleton.dispose&&n.skeleton.dispose();n.bind(sk,n.bindMatrix)}})}
+function glbHideProc(group){group.traverse(o=>{if(o.isMesh)o.visible=false})}
+function glbSkinBull(B){if(GLBM.st!=='ok'||B.gl||!B.spec)return;const sp=B.spec,cow=sp.kind==='vaca'||sp.kind==='becerro';const g=GLBM.m[cow?'vaca':'toro'];if(!g)return;
+ const bb=new THREE.Box3().setFromObject(B.b).getSize(new THREE.Vector3());const len=Math.max(bb.z,.5);
+ const o=THREE.SkeletonUtils.clone(g.scene);glbShareSkel(o);const s=len/g.size.z*1.02;o.scale.set(s,s*((sp.m&&sp.m.alt)||1),s);
+ o.traverse(n=>{if(n.isMesh)n.material=glbMat(n.material.name,sp.pelo,sp.m&&sp.m.hc)});
+ glbHideProc(B.b);B.root.add(o);const mx=new THREE.AnimationMixer(o);const A={};for(const c of g.animations)A[c.name]=mx.clipAction(c);
+ B.gl={o,mx,A,cur:null,cow,acc:0};glbPlay(B.gl,'Idle',0)}
+function glbPlay(G,name,fade=.3,ts=1){const a=G.A[name];if(!a)return;a.timeScale=ts;if(G.cur===name)return;const prev=G.cur&&G.A[G.cur];
+ a.reset().setEffectiveWeight(1).play();if(prev)prev.crossFadeTo(a,fade,false);G.cur=name}
+// LOD de animación: cerca, cada fotograma; a media distancia, a 15 fps; lejos, congelado
+function glbAnimBull(B,dt,o,dist){const G=B.gl,sp=o.speed||0;
+ if(sp>1.05)glbPlay(G,'Gallop',.25,clamp(sp/1.6,.8,1.4));else if(sp>.05)glbPlay(G,'Walk',.3,clamp(sp*1.4,.6,1.6));
+ else glbPlay(G,G.cow&&(o.head??.3)<.1?'Eating':'Idle',.5);
+ G.acc+=dt;const step=dist<35?0:dist<80?1/15:1e9;if(G.acc>=step){G.mx.update(G.acc);G.acc=0}}
+function glbSkinPerson(P){if(GLBM.st!=='ok'||P.gl)return;const g=GLBM.m.vaquero;if(!g)return;
+ const o=THREE.SkeletonUtils.clone(g.scene);glbShareSkel(o);const s=1.78/g.size.y;o.scale.setScalar(s);
+ const keep=new Set([W3.sack,W3.iron,W3.kit].filter(Boolean));P.b.traverse(n=>{if(!n.isMesh)return;let p=n;while(p&&p!==P.b){if(keep.has(p))return;p=p.parent}n.visible=false});
+ const RC={Skin:'#c08a63',Jacket:'#5a3b25',Top:'#f0ebe0',Scarf:'#7a1c24',HatBrown:'#2a2420',HatLightBrown:'#3a2c22',Pants:'#3a3530',Hair:'#2a1d14'};
+ o.traverse(n=>{if(n.isMesh&&RC[n.material.name]){const k='pj|'+n.material.name;n.material=GLBM.mats[k]||(GLBM.mats[k]=shr(Object.assign(n.material.clone(),{color:LC(RC[n.material.name])})))}});
+ P.root.add(o);const mx=new THREE.AnimationMixer(o);const A={};for(const c of g.animations)A[c.name]=mx.clipAction(c);
+ if(A.SitDown){A.SitDown.setLoop(THREE.LoopOnce);A.SitDown.clampWhenFinished=true}P.gl={o,mx,A,cur:null,acc:0};glbPlay(P.gl,'Idle',0)}
+function glbAnimPerson(P,dt,sp,riding){const G=P.gl;if(riding)glbPlay(G,'SitDown',.2);else if(sp>.75)glbPlay(G,'Run',.2,clamp(sp*.9,.8,1.3));else if(sp>.05)glbPlay(G,'Walk',.25,clamp(sp*1.6,.7,1.4));else glbPlay(G,'Idle',.35);G.mx.update(dt)}
