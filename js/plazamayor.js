@@ -158,7 +158,7 @@ buildCalle=function(night){
  sandRect(-14.2,14.2,-11.2,11.2);sandRect(14.2,CL.o&&CL.o.tipo==='mar'&&typeof MAR!=='undefined'?MAR.x:64,-4,4);sandRect(-64,-14.2,-4,4);sandRect(-3.5,3.5,11.2,47);
  // ---------- casas ----------
  const PT=PMX.PT=pmxTipo();CL.plazaNom=PT.nom;
- const PAL=typeof locPal==='function'?locPal():FACOL,styles=PT.styles;
+ const PAL=PT.pal||(typeof locPal==='function'?locPal():FACOL),styles=PT.styles;
  const house=(a0,a1,line,axis,face,o={})=>{let a=a0;while(a<a1-.1){let w=[5.6,8.4,8.4,11.2][(rnd()*4)|0];if(a1-(a+w)<4.5)w=a1-a;pmxHouse(G,MT,T,rnd,a,a+w,line,axis,face,styles[(rnd()*styles.length)|0],pmxHex(PAL[(rnd()*PAL.length)|0]),o,LAN);a+=w}};
  // plaza: fondo con soportales (antes la iglesia), frente con salida al cajón y laterales con las calles
  const FL=PT.fl;
@@ -263,7 +263,7 @@ function pmxHouse(G,MT,T,rnd,a0,a1,line,axis,face,style,tint,o,LAN){const d=7,fl
   fc.box(G.glow,s-.1,s+.1,t+.42,t+.62,y+.2,y+.52,[1,.8,.5]);fc.box(G.iron,s-.13,s+.13,t+.39,t+.65,y+.16,y+.2,ir);const [lx,lz]=fc.pt(s,t+.52);LAN.push([lx,y+.36,lz,6])}}
 function pmxColumn(Gr,x,z,y0,h){const g=new THREE.CylinderGeometry(.16,.19,h,14,1),p=g.attributes.position,nr=g.attributes.normal,uv=g.attributes.uv,idx=g.index.array,b=Gr.n;
  for(let i=0;i<p.count;i++){Gr.pos.push(p.getX(i)+x,p.getY(i)+y0+h/2,p.getZ(i)+z);Gr.nor.push(nr.getX(i),nr.getY(i),nr.getZ(i));Gr.uv.push(uv.getX(i)*.8,uv.getY(i)*h/1.5);Gr.col.push(.86,.84,.8)}for(let i=0;i<idx.length;i++)Gr.idx.push(b+idx[i]);Gr.n+=p.count}
-function pmxRoofGable(G,x0,z0,x1,z1,H,axis,ov,rnd){const R_=G.roof,W=G.wood,pitch=.42,g=.25,col=[.92+rnd()*.1,.92,.92],C=G.calA,uv=[.22,0,.28,0,.25,.45,.25,.45],gc=[.95,.94,.92];
+function pmxRoofGable(G,x0,z0,x1,z1,H,axis,ov,rnd){const R_=G.roof,W=G.wood,pitch=.42,g=.25,tj=(PMX.PT&&PMX.PT.teja)||[1,1,1],col=[(.92+rnd()*.1)*tj[0],.92*tj[1],.92*tj[2]],C=G.calA,uv=[.22,0,.28,0,.25,.45,.25,.45],gc=[.95,.94,.92];
  if(axis==='x'){const zm=(z0+z1)/2,rise=(z1-z0)/2*pitch,yR=H+rise,yE=H-ov*pitch,len=x1-x0+2*g,sl=Math.hypot((z1-z0)/2+ov,rise+ov*pitch);
   R_.q([x0-g,yE,z1+ov],[x1+g,yE,z1+ov],[x1+g,yR,zm],[x0-g,yR,zm],[0,0,len/3,0,len/3,sl/3,0,sl/3],col,[0,1,1]);R_.q([x1+g,yE,z0-ov],[x0-g,yE,z0-ov],[x0-g,yR,zm],[x1+g,yR,zm],[0,0,len/3,0,len/3,sl/3,0,sl/3],col,[0,1,-1]);
   for(const [ze,zw] of [[z1+ov,z1],[z0-ov,z0]])W.q([x0-g,yE-.02,ze],[x1+g,yE-.02,ze],[x1+g,H,zw],[x0-g,H,zw],[0,0,len/1.5,0,len/1.5,.5,0,.5],[.7,.7,.7],[0,-1,0]);
@@ -481,7 +481,7 @@ function pmxFanal(sc,G,c,LAN){G.granite.box(c.x,.5,c.z,1.3,1,1.3,1.5,[.9,.87,.8]
   G.iron.box(ax,y-.48,az,.34,.06,.34,1,[.08,.08,.09]);G.glow.box(ax,y-.25,az,.24,.42,.24,1,[1,.82,.5]);G.iron.box(ax,y,az,.38,.08,.38,1,[.08,.08,.09]);G.iron.box(ax,y+.1,az,.12,.12,.12,1,[.08,.08,.09]);LAN.push([ax,y-.25,az,9])}
  G.glow.box(c.x,y+.55,c.z,.28,.5,.28,1,[1,.82,.5]);G.iron.box(c.x,y+.85,c.z,.42,.08,.42,1,[.08,.08,.09]);pmxAnilla(G,c,[.78,.1,.08])}
 /* nombre de la plaza en el rótulo de entrada */
-if(typeof irCalle==='function'){const _icP=irCalle;irCalle=function(){_icP.apply(this,arguments);try{if(CL&&!CL.plaza&&CL.plazaNom&&!CL.emb)banner(FEST[CL.o.tipo].n,`${CL.plazaNom} · ${CL.o.pueblo}`,3.6)}catch(e){}}}
+if(typeof irCalle==='function'){const _icP=irCalle;irCalle=function(){_icP.apply(this,arguments);try{if(CL&&!CL.plaza&&CL.plazaNom&&!CL.emb)banner(FEST[CL.o.tipo].n,`${CL.plazaNom}${typeof PP_DESC!=='undefined'&&PMX.PT&&PP_DESC[PMX.PT.k]?' · '+PP_DESC[PMX.PT.k]:' · '+CL.o.pueblo}`,5.2)}catch(e){}}}
 
 /* detalles de cada iglesia real: cúpula de teja vidriada (Nules), contrafuertes góticos (Borriana),
    dos portadas y hornacina (Onda) */
@@ -500,7 +500,8 @@ function pmxIglesiaExtra(G,sc,a0,a1,fz,D,Hn,cx,PT,st){
   G.granite.box(cx,6.6,fz+.22,1.6,2.3,.3,1.5,[.92,.88,.8]);G.iron.box(cx,6.5,fz+.38,1.05,1.7,.04,1,[.18,.15,.13])}}
 /* el castillo sobre el cerro, al fondo (Onda: Castell de les 300 torres) */
 function pmxCastell(sc,o){o=typeof o==='object'?o:{};const g=new THREE.Group();g.position.set(o.x??-10,0,o.z??-120);g.rotation.y=o.ry||0;g.scale.setScalar(o.s||1);sc.add(g);
- const hill=new THREE.Mesh(new THREE.SphereGeometry(60,24,12,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:o.hill||'#8a7a58',roughness:1}));hill.scale.set(1.4,.42,.6);g.add(hill);
+ const hg=new THREE.SphereGeometry(60,32,14,0,Math.PI*2,0,Math.PI/2),hp=hg.attributes.position,hr=mulberry((o.seed||7)+3);for(let i=0;i<hp.count;i++){const y=hp.getY(i);if(y>1){const k=1+(hr()-.5)*.16;hp.setXYZ(i,hp.getX(i)*k,y*(1+(hr()-.5)*.22),hp.getZ(i)*k)}}hg.computeVertexNormals();
+ const hill=new THREE.Mesh(hg,new THREE.MeshStandardMaterial({color:o.hill||'#8a7a58',roughness:1,flatShading:true}));hill.scale.set(1.4,.42,.6);g.add(hill);
  const wm=new THREE.MeshStandardMaterial({color:o.col||'#b59a72',roughness:.95}),n=o.n||34,rr=mulberry(o.seed||7);
  for(let i=0;i<n;i++){if(o.ruina&&rr()<.35)continue;const a=-Math.PI*.8+i/(n-1)*Math.PI*1.6,x=Math.sin(a)*58,z=Math.cos(a)*14,y=Math.sqrt(Math.max(0,1-(x/84)**2-(z/36)**2))*25.2;
   const t=new THREE.Mesh(new THREE.BoxGeometry(2.4,(5+(i%3)*1.5)*(o.ruina?.4+rr()*.7:1),2.4),wm);t.position.set(x,y+2,z);g.add(t);

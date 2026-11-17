@@ -181,7 +181,7 @@ function ppTerreno(sc,night,mar){const g=new THREE.RingGeometry(0,420,48,12);g.r
  const p=g.attributes.position,col=[],a=new THREE.Color(night?'#161c17':'#8c8660'),b=new THREE.Color(night?'#1b2232':'#b9bfa8'),c=new THREE.Color();
  for(let i=0;i<p.count;i++){const r=Math.hypot(p.getX(i),p.getZ(i));c.copy(a).lerp(b,Math.min(1,Math.max(0,(r-70)/260)));col.push(c.r,c.g,c.b)}g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
  const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,fog:false}));m.position.y=mar?-1:-.06;m.receiveShadow=false;sc.add(m)}
-function pmxHitos(sc,G,PT,LAN){const night=!!(CL&&CL.night),st=PT.st||PP_ST.piedra;ppTerreno(sc,night,PT.mar&&!(CL&&CL.o&&CL.o.tipo==='mar'));
+function pmxHitos(sc,G,PT,LAN){const night=!!(CL&&CL.night),st=PT.st||PP_ST.piedra;try{ppCampo(sc,PT,night);ppSuelo(sc,PT,night)}catch(e){console.warn('campo',e)}if(CL)CL.ppIntro=0;
  // campanario propio: exento en el hueco junto a la iglesia, o en la esquina de la nave en lugar del genérico
  if(PT.camp){const c=Object.assign({},PT.camp);if(c.exent){c.x=c.side*10.6;c.z=-14.4}else if(c.x===undefined){c.x=5.4;c.z=-14.4;c.w=Math.min(c.w||2.1,2.1)}ppCampanar(sc,G,c,st)}
  if(PT.campLejos)ppCampanar(sc,G,PT.campLejos,st);
@@ -206,3 +206,42 @@ const PP_DESC={vilareal:'Plaça Major porticada y ayuntamiento',nules:'Iglesia d
 // plaza de un pueblo (sin festejo cargado): clave, nombre, descripción e imagen
 function ppPlaza(pueblo){const pu=String(pueblo||'').toLowerCase().trim();let k=PMX_PUEBLOS[pu],gen=false;if(!k){k=PMX_TIPO_PUEBLO[pu];gen=true}if(!k||!PMX_PLAZAS[k])return null;
  const T_=PMX_PLAZAS[k];return {k,nom:gen?pmxNomPueblo(T_.nom,pueblo):T_.nom,desc:gen?'':(PP_DESC[k]||''),img:gen?null:'img/plazas/'+k+'.jpg'}}
+
+/* ---------- identidad visible durante el festejo ----------
+   Fachadas, tejados y terrados según cómo se construye en cada zona, y a qué mira la cámara de presentación
+   (lo que hace reconocible la plaza: iglesia, campanario, castillo, palacio…). */
+const PP_PAL={
+ blanc:['#f7f4ec','#f4efe4','#eef2f3','#f6f3ea','#f1ece0','#e9eef0'],
+ mar:['#f7f4ec','#f1ece0','#e8eef2','#f3e6c4','#dfe9ef','#f6f3ea','#f2dcc0'],
+ pedra:['#cdb38e','#c2a77f','#d9c09a','#bda47e','#d3c3a5','#b89c74'],
+ ocre:['#e3b778','#e8c78f','#d9a86a','#efd6a6','#e2bd8a','#f0dfbd'],
+ horta:['#f2d7b8','#e9c6a0','#f4e2c4','#e6cfe0','#f0d1c2','#e7dcb8','#d9e3d0'],
+ tosca:['#d8b98a','#e2c79c','#cfae7e','#f1e8d6','#e9dcc0']};
+const PP_TEJA={costa:[1.06,1.02,.97],interior:[.82,.76,.72],horta:[1,.9,.82]};
+const PP_ID={
+ vilareal:['ocre','horta'],nules:['blanc','costa'],borriana:['ocre','horta'],onda:['pedra','interior',[-5,14,-70]],
+ almassora:['ocre','horta'],cabanes:['pedra','interior'],torreblanca:['blanc','costa'],benicarlo:['blanc','costa'],vinaros:['mar','costa'],
+ peniscola:['blanc','costa',[34,9,-24]],segorbe:['pedra','interior'],moncofa:['blanc','costa'],lavall:['ocre','interior',[-30,14,-70]],betxi:['pedra','interior'],
+ lalcora:['ocre','interior'],borriol:['pedra','interior',[-18,12,-70]],alcala:['pedra','interior',[10,22,-16]],benicassim:['mar','costa'],
+ meliana:['horta','horta'],museros:['horta','horta'],pucol:['horta','horta'],massamagrell:['horta','horta'],foios:['horta','horta'],alboraia:['horta','horta'],
+ lliria:['ocre','interior'],chiva:['pedra','interior',[16,12,-70]],ontinyent:['ocre','interior',[-18,22,-34]],sueca:['horta','horta'],elpuig:['ocre','horta'],
+ sagunt:['ocre','interior',[-10,16,-80]],denia:['mar','costa',[-28,12,-55]],pedreguer:['blanc','costa'],xabia:['tosca','costa'],laromana:['blanc','interior']};
+// terrados (cubierta plana) en la costa: desde arriba se distingue enseguida un pueblo del litoral
+const PP_TERRAT={costa:.6,horta:.25,interior:.1};
+for(const [k,[pal,zona,foco]] of Object.entries(PP_ID)){const T_=PMX_PLAZAS[k];if(!T_)continue;T_.pal=PP_PAL[pal];T_.teja=PP_TEJA[zona];if(T_.terrat===undefined)T_.terrat=PP_TERRAT[zona];if(foco)T_.foco=foco;T_.zona=zona}
+// el suelo empedrado solo dentro del pueblo; alrededor, campo (secano, huerta o monte según la zona)
+function ppSuelo(sc,PT,night){for(const o of sc.children)if(o.isMesh&&o.geometry&&o.geometry.parameters&&o.geometry.parameters.height===120&&(o.geometry.parameters.width===200||o.geometry.parameters.width===174)){
+  const x1=PT.mar?74:76,x0=-76,z0=-38,z1=56,mp=o.material.map;o.geometry.dispose();o.geometry=new THREE.PlaneGeometry(x1-x0,z1-z0);o.position.set((x0+x1)/2,0,(z0+z1)/2);
+  if(mp){mp.repeat.set((x1-x0)/4,(z1-z0)/4);if(o.material.normalMap)o.material.normalMap.repeat.copy(mp.repeat);if(o.material.roughnessMap)o.material.roughnessMap.repeat.copy(mp.repeat)}break}}
+function ppCampo(sc,PT,night){const zona=PT.zona||'horta',g=new THREE.PlaneGeometry(840,840,84,84);g.rotateX(-Math.PI/2);const p=g.attributes.position,col=[],c=new THREE.Color(),N=pmxNoise(77);
+ const base={costa:['#a59a6a','#8e8a58','#b3a676'],interior:['#8a7d58','#7b7a4e','#9a8a62'],horta:['#6f8a4a','#86964f','#a0965e']}[zona],cs=base.map(x=>new THREE.Color(x)),haze=new THREE.Color(night?'#1b2232':'#b9bfa8');
+ for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i),r=Math.hypot(x,z);
+  // parcelas: bancales de huerta o campos de secano y olivos
+  const pa=Math.floor(x/(zona==='horta'?14:22))*7+Math.floor(z/(zona==='horta'?9:18))*13,k=Math.abs(Math.sin(pa*12.9898)*43758.5453)%1,n=N.fbm(x/90+.3,z/90+.7,3,3);
+  c.copy(cs[(k*3)|0]).multiplyScalar(.82+n*.35);if(night)c.multiplyScalar(.18);c.lerp(haze,Math.min(1,Math.max(0,(r-80)/300)));col.push(c.r,c.g,c.b)}
+ g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,fog:false}));m.position.y=PT.mar?-1:-.08;sc.add(m)}
+// plano de presentación al empezar el festejo: la plaza y lo que la distingue, desde lo alto
+if(typeof camCalle==='function'){const _ccPP=camCalle;camCalle=function(dt){
+ if(CL&&CL.ppIntro!=null&&!CL.plaza&&CL.cam==='tv'&&PMX.PT){const now=performance.now();if(!CL.ppIntro)CL.ppIntro=now;const s=(now-CL.ppIntro)/1000;if(s>=5.5){CL.ppIntro=null;return _ccPP(dt)}const u=s/5.5,e=u*u*(3-2*u),f=PMX.PT.foco||[0,10,-20];
+  W3.cam.position.set(9-15*e,19-7*e,30-16*e);W3.cam.lookAt(f[0],f[1]-2*e,f[2]);return}
+ return _ccPP(dt)}}

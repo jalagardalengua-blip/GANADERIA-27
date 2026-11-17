@@ -1,5 +1,14 @@
 # Cambios
 
+## Ganadería de corro: cada plaza se reconoce durante el festejo
+- Al empezar el festejo, la cámara presenta la plaza desde lo alto durante unos segundos, con su nombre y lo que la distingue: campanario, castillo, palacio, monasterio, mar o sierra. Después sigue a la res.
+- Cada pueblo tiene los colores y tejados de su zona:
+  - costa encalada, con zócalos y muchos terrados;
+  - piedra y teja oscura en el interior;
+  - ocres y pasteles en l'Horta.
+- El empedrado acaba en el pueblo: alrededor se ven campos de huerta, de secano o monte según la zona, en vez de un suelo de baldosas hasta el horizonte.
+- Los cerros de los castillos tienen relieve de roca.
+
 ## Ganadería de corro: la plaza de cada pueblo en todo el juego
 - Las ofertas de festejos muestran la foto de la plaza del pueblo (en penumbra si el festejo es de noche), con su nombre y lo que la distingue.
 - Al crear la ganadería, el selector de pueblo enseña «La plaza de tus fiestas».
