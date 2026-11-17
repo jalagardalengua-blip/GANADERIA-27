@@ -152,10 +152,11 @@ function ppFortif(G,st){const y=12.5;ppMerlets(G,-8.1,-11.9,8.1,-11.9,y,st);ppMe
  for(const x of [-8.1,8.1]){G.granite.box(x,y-1.2,-12.2,1.3,2.4,1.3,1.5,st);G.granite.box(x,y-2.6,-12.2,.9,.6,.9,1.5,[.9,.86,.78])}
  G.granite.box(0,y-2.2,-11.6,2.4,1.4,.9,1.5,st)}// matacán sobre la puerta
 // sierras del horizonte (lejos: no tapan nada de la plaza; se ven por las calles y desde lo alto de los cadafales)
-function ppSerra(sc,lista,night){const m=new THREE.MeshStandardMaterial({color:night?'#1d2433':'#7d8a74',roughness:1,flatShading:true});
- for(const [a,d,h,w] of lista){const g=new THREE.SphereGeometry(1,22,10,0,Math.PI*2,0,Math.PI/2),p=g.attributes.position,r=mulberry((a*7+d)|0);
-  for(let i=0;i<p.count;i++){const y=p.getY(i);if(y>.02){const k=1+(r()-.5)*.28*y;p.setXYZ(i,p.getX(i)*k,y*(1+(r()-.5)*.3),p.getZ(i)*k)}}g.computeVertexNormals();
-  const mm=new THREE.Mesh(g,m),ar=a*Math.PI/180;mm.scale.set(w,h,w*.45);mm.position.set(Math.sin(ar)*d,-2,Math.cos(ar)*d);mm.rotation.y=ar+Math.PI/2;mm.matrixAutoUpdate=false;mm.updateMatrix();sc.add(mm)}}
+function ppSerra(sc,lista,night){const m=new THREE.MeshStandardMaterial({color:night?'#1d2433':'#6f7b70',roughness:1,flatShading:true});
+ for(const [a,d,h,w] of lista){const g=new THREE.SphereGeometry(1,40,12,0,Math.PI*2,0,Math.PI/2),p=g.attributes.position,r=mulberry((a*7+d)|0);
+  // cresta: picos y collados a lo largo de la sierra
+  for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i);if(y>.02){const cr=.75+.25*Math.sin(x*7.3+a)*Math.sin(x*3.1+d)+(r()-.5)*.12;p.setY(i,Math.pow(y,1.25)*cr)}}g.computeVertexNormals();
+  const mm=new THREE.Mesh(g,m),ar=a*Math.PI/180;mm.scale.set(w*1.3,h*.62,w*.3);mm.position.set(Math.sin(ar)*(d+25),-1.5,Math.cos(ar)*(d+25));mm.rotation.y=ar;mm.matrixAutoUpdate=false;mm.updateMatrix();sc.add(mm)}}
 // el mar al final de la calle de levante: paseo con barandilla, agua, barcas y faro
 function ppMar(sc,G,night){// el suelo de la escena acaba en el paseo: a partir de ahí, agua
  for(const o of sc.children)if(o.isMesh&&o.geometry&&o.geometry.parameters&&o.geometry.parameters.width===200&&o.geometry.parameters.height===120){o.geometry.dispose();o.geometry=new THREE.PlaneGeometry(174,120);o.position.x=-13;break}
@@ -175,7 +176,12 @@ G.paving.top(62,-4.6,74,4.6,.02,1.2,[.95,.92,.86]);
 function ppRoca(sc,r){const g=new THREE.SphereGeometry(1,20,10,0,Math.PI*2,0,Math.PI/2),p=g.attributes.position,rr=mulberry(11);
  for(let i=0;i<p.count;i++){const k=1+(rr()-.5)*.35;p.setXYZ(i,p.getX(i)*k,p.getY(i)*(1+(rr()-.5)*.25),p.getZ(i)*k)}g.computeVertexNormals();
  const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:'#a8987a',roughness:1,flatShading:true}));m.scale.set(46,24,30);m.position.set(r.x,-3,r.z);sc.add(m)}
-function pmxHitos(sc,G,PT,LAN){const night=!!(CL&&CL.night),st=PT.st||PP_ST.piedra;
+function ppTerreno(sc,night,mar){const g=new THREE.RingGeometry(0,420,48,12);g.rotateX(-Math.PI/2);
+ // campo cerca y bruma de tierra en el horizonte (sin niebla azul, que lo haría parecer mar)
+ const p=g.attributes.position,col=[],a=new THREE.Color(night?'#161c17':'#8c8660'),b=new THREE.Color(night?'#1b2232':'#b9bfa8'),c=new THREE.Color();
+ for(let i=0;i<p.count;i++){const r=Math.hypot(p.getX(i),p.getZ(i));c.copy(a).lerp(b,Math.min(1,Math.max(0,(r-70)/260)));col.push(c.r,c.g,c.b)}g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+ const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,fog:false}));m.position.y=mar?-1:-.06;m.receiveShadow=false;sc.add(m)}
+function pmxHitos(sc,G,PT,LAN){const night=!!(CL&&CL.night),st=PT.st||PP_ST.piedra;ppTerreno(sc,night,PT.mar&&!(CL&&CL.o&&CL.o.tipo==='mar'));
  // campanario propio: exento en el hueco junto a la iglesia, o en la esquina de la nave en lugar del genérico
  if(PT.camp){const c=Object.assign({},PT.camp);if(c.exent){c.x=c.side*10.6;c.z=-14.4}else if(c.x===undefined){c.x=5.4;c.z=-14.4;c.w=Math.min(c.w||2.1,2.1)}ppCampanar(sc,G,c,st)}
  if(PT.campLejos)ppCampanar(sc,G,PT.campLejos,st);
