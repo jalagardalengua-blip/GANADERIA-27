@@ -398,8 +398,25 @@ html,body{overflow-x:hidden}
 /* Barra «Siguiente paso» */
 .paso .task{background:linear-gradient(90deg,rgba(230,187,85,.12),transparent);border-left:3px solid var(--oro)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-/* Barra inferior: iconos 3D renderizados (tools/iconos3d). Gris si inactiva, color si activa. */
-nav.tabs button .ti3{width:34px;height:34px;object-fit:contain;filter:grayscale(1) brightness(.62) contrast(1.05);opacity:.85;transition:filter .2s,transform .2s,opacity .2s}
-nav.tabs button[aria-current="true"] .ti3{filter:drop-shadow(0 3px 8px rgba(230,187,85,.45));opacity:1;transform:translateY(-2px) scale(1.12)}
-nav.tabs button:active .ti3{transform:scale(.92)}
-@media (max-width:380px){nav.tabs button .ti3{width:30px;height:30px}}
+/* Barra inferior «atardecer»: celdas ilustradas, marco violeta biselado y línea de luz */
+nav.tabs{background:transparent;border-top:0;padding:0 6px env(safe-area-inset-bottom,0px);backdrop-filter:none;-webkit-backdrop-filter:none}
+nav.tabs .wrap{position:relative;padding:6px 10px 9px;gap:4px;
+  background:linear-gradient(180deg,#5b2a6e 0%,#3a1748 45%,#24102e 100%);
+  clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,14px 100%,0 50%);
+  box-shadow:inset 0 1px 0 rgba(255,170,220,.35)}
+nav.tabs .wrap::before{content:"";position:absolute;inset:0;pointer-events:none;
+  clip-path:inherit;background:linear-gradient(90deg,rgba(255,110,150,.0),rgba(255,140,90,.18) 50%,rgba(255,110,150,0)),
+  radial-gradient(60% 120% at 50% 0%,rgba(255,170,120,.25),transparent 70%)}
+nav.tabs .wrap::after{content:"";position:absolute;left:12%;right:12%;bottom:3px;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,transparent,#ff4fa0 25%,#ffb35a 50%,#ff4fa0 75%,transparent);box-shadow:0 0 10px #ff6a8a}
+nav.tabs button{min-height:0;padding:0;gap:2px;color:#e8d3ee;font-weight:600;font-size:.66rem;letter-spacing:.02em;text-shadow:0 1px 2px #000}
+nav.tabs button .ti3{width:100%;max-width:48px;height:auto;aspect-ratio:1;border-radius:9px;object-fit:cover;
+  border:1px solid rgba(255,190,230,.25);box-shadow:0 2px 6px rgba(0,0,0,.55);filter:saturate(.85) brightness(.82);transition:filter .2s,transform .2s,box-shadow .2s}
+nav.tabs button[aria-current="true"]{color:#fff}
+nav.tabs button[aria-current="true"] .ti3{filter:none;transform:translateY(-2px) scale(1.06);border-color:#ffc46b;
+  box-shadow:0 0 0 1px #ff6aa8,0 0 14px rgba(255,120,150,.75),0 4px 10px rgba(0,0,0,.6)}
+nav.tabs button[aria-current="true"]::after{display:none}
+nav.tabs button:active .ti3{transform:scale(.93)}
+nav.tabs .bdg{top:-3px;left:calc(50% + 12px);background:linear-gradient(180deg,#ff4f6e,#c3102a);box-shadow:0 0 0 2px #3a1748}
+main{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+@media (max-width:380px){nav.tabs button{font-size:.58rem}nav.tabs .wrap{padding:5px 8px 8px}}
