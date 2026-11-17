@@ -1,5 +1,10 @@
 # Cambios
 
+## Ganadería de corro: la plaza de cada pueblo en todo el juego
+- Las ofertas de festejos muestran la foto de la plaza del pueblo (en penumbra si el festejo es de noche), con su nombre y lo que la distingue.
+- Al crear la ganadería, el selector de pueblo enseña «La plaza de tus fiestas».
+- La plaza aparece también en Contratados, en Últimos festejos, en el aviso del calendario el día del festejo y en la pantalla de resultados.
+
 ## Ganadería de corro: la plaza de fiestas de cada pueblo
 - Los 30 pueblos del selector que aún usaban una plaza genérica tienen ahora su plaza propia, con nombre y elementos reconocibles. Junto con Vila-real, Nules, Burriana y Onda, son ya los 34.
 - Castellón:
