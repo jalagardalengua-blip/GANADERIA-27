@@ -238,6 +238,7 @@ function init3D(){
  document.body.appendChild(d);W3.root=d;
  const cv=$('#c3d');const R3=new THREE.WebGLRenderer({canvas:cv,antialias:true,powerPreference:'high-performance'});
  const Q=typeof getQual==='function'?getQual():'alta';W3.q=Q;R3.setPixelRatio(Math.min({alta:1.6,media:1.2,baja:.9}[Q]||1.2,window.devicePixelRatio||1));R3.shadowMap.enabled=Q!=='baja';R3.shadowMap.type=THREE.PCFSoftShadowMap;
+ cv.addEventListener('webglcontextlost',e=>{e.preventDefault();W3.lost=true;try{toast('Gráficos en pausa: vuelve a la app para continuar')}catch(_){}},false);cv.addEventListener('webglcontextrestored',()=>{W3.lost=false},false);
  R3.outputEncoding=THREE.sRGBEncoding;R3.toneMapping=THREE.ACESFilmicToneMapping;R3.toneMappingExposure=1.0;R3.physicallyCorrectLights=false;
  W3.R=R3;W3.cam=new THREE.PerspectiveCamera(60,1,.1,700);W3.look=V3(0,1,0);
  const rs=()=>{const w=d.clientWidth,h=d.clientHeight;R3.setSize(w,h,false);W3.cam.aspect=w/h;W3.cam.updateProjectionMatrix()};W3.resize=rs;window.addEventListener('resize',rs);
@@ -267,13 +268,13 @@ function init3D(){
  $('#h3exit').onclick=()=>{if(W3.mode==='tienta')ttExit();else exit3D()};
  $('#pv').onclick=()=>{const v=['tv','tendido','callejon','toro'],n={tv:'TV',tendido:'tendido',callejon:'callejón',toro:'junto al toro'};CP.view=v[(v.indexOf(CP.view)+1)%4];CP.cut=true;$('#pv').textContent='Cámara: '+n[CP.view]};
  $('#ps').onclick=()=>{CP.spd=CP.spd===1?2:CP.spd===2?4:1;$('#ps').textContent='×'+CP.spd};
- $('#pn').onclick=()=>cpNext();$('#px').onclick=exitPlaza;$('#psal').onclick=saludar;
+ $('#pn').onclick=()=>{if(CP)CP.skipped=true;cpNext()};$('#px').onclick=exitPlaza;$('#psal').onclick=saludar;
  $('#ttcita').onclick=ttCitar;$('#tttemp').addEventListener('pointerdown',e=>{e.preventDefault();ttTemplar()});$('#ttend').onclick=ttEndVaca;
  let last=performance.now();
- const loop=now=>{requestAnimationFrame(loop);if(!W3.on)return;const dt=Math.min(.05,(now-last)/1000);last=now;
+ const loop=now=>{requestAnimationFrame(loop);if(!W3.on)return;const dt=Math.min(.1,(now-last)/1000);last=now;if(document.hidden)return;
   if(W3.mode==='finca')fincaTick(dt);else if(W3.mode==='plaza')plazaTick(dt);else if(W3.mode==='tienta')tientaTick(dt);
   if(W3.holding&&W3.act&&W3.act.hold){W3.hold+=dt;const p=Math.min(1,W3.hold/W3.act.dur);doBtn.style.backgroundImage=`linear-gradient(90deg,rgba(191,58,63,.85) ${p*100}%,transparent ${p*100}%)`;if(p>=1){const f=W3.act.fn;W3.holding=false;W3.hold=0;doBtn.style.backgroundImage='';f()}}
-  if(W3.scene)R3.render(W3.scene,W3.cam)};
+  if(W3.scene&&!W3.lost)R3.render(W3.scene,W3.cam)};
  requestAnimationFrame(loop)}
 function show3D(){if(typeof THREE==='undefined'){toast('No se pudo cargar el motor 3D en este dispositivo');return false}
  if(!W3.R)init3D();auInit();W3.root.hidden=false;W3.on=true;document.body.style.overflow='hidden';W3.resize();return true}
@@ -338,7 +339,7 @@ function rebuildFinca(){
  if(W3.scene&&W3.scene.userData.finca)disposeTree(W3.scene);
  const sc=new THREE.Scene();sc.userData.finca=true;const m=S.month;
  const skyC=m>=11||m<=1?'#a9c3d6':m>=5&&m<=7?'#9fc4e3':'#92bde0';sc.background=new THREE.Color(skyC);sc.fog=new THREE.Fog(skyC,90,260);W3.skyDay=new THREE.Color(skyC);
- W3.rainOn=mulberry(S.year*13+m*7)()<([0,1,2,3,9,10,11].includes(m)?.45:.06);
+ W3.rainOn=S.wx&&typeof absNow==='function'&&S.wx.abs===absNow()?!!S.wx.lluvia:mulberry(S.year*13+m*7)()<([0,1,2,3,9,10,11].includes(m)?.45:.06);
  const hemi=new THREE.HemisphereLight('#dce9f5','#6b5a3a',.75);sc.add(hemi);W3.hemi=hemi;
  const sun=new THREE.DirectionalLight('#fff0d4',1.15);sun.position.set(40,70,25);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
  Object.assign(sun.shadow.camera,{left:-40,right:40,top:40,bottom:-40,near:1,far:200});sun.shadow.bias=-.0006;sc.add(sun);sc.add(sun.target);W3.sun=sun;sun.shadow.normalBias=.03;W3.dome=skyDome();sc.add(W3.dome);
@@ -854,7 +855,7 @@ function throwFlower(x,z){const P=W3.P;const f=P.flw.find(q=>!q.act)||P.flw[Math
 function flowersTick(dt){for(const f of W3.P.flw){if(!f.act||f.st>=1)continue;f.st=Math.min(1,f.st+dt/1.3);const v=f.st;f.m.position.set(lerp(f.from.x,f.to.x,v),lerp(f.from.y,.04,v)+Math.sin(v*Math.PI)*4,lerp(f.from.z,f.to.z,v));f.m.rotation.set(v*9,v*5,0);if(v>=1)f.m.rotation.set(0,R(0,3),0)}}
 function mkTorero(col,plata){return makePerson({traje:col,plata,hat:'montera'})}
 function enterPlaza(id){
- const r=S.hist.find(h=>h.id===id);if(!r)return;
+ const r=S.hist.find(h=>h.id===id);if(!r)return;const replay=!S.porVer.includes(id);
  if(!W3.on){if(!show3D())return;W3.from='2d'}else W3.from=W3.mode==='finca'?'finca':'2d';
  try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(l=>W3.wl=l).catch(()=>{})}catch(e){}W3.drive=false;W3.ride=false;ambStop();S.porVer=S.porVer.filter(x=>x!==id);r.visto=true;save();
  const P=buildPlaza();W3.mode='plaza';W3.scene=P.sc;hudMode('plaza');crowdStart();
@@ -878,7 +879,7 @@ function enterPlaza(id){
  rows.push([{o:team,kind:'team'}]);
  rows.forEach(rw=>rw.forEach(a=>{if(a.kind!=='team'){P.sc.add(a.o.root);actors.push(a.o.root)}a.o.root.visible=false}));
  const sword=makeEstoque();
- CP={r,i:-1,spd:1,view:'tv',ban,pe,hor,me,cab,team,sword,pas:rows,actors,bull:null,saludo:false,exc:0,cut:true};
+ CP={replay,skipped:false,r,i:-1,spd:1,view:'tv',ban,pe,hor,me,cab,team,sword,pas:rows,actors,bull:null,saludo:false,exc:0,cut:true};
  W3.yaw=-.4;W3.pitch=.35;W3.cam.fov=46;W3.cam.updateProjectionMatrix();
  $('#pv').textContent='Cámara: TV';$('#ps').textContent='×1';
  cpNext();CP.paused=true;const dm=$('#h3dim');dm.hidden=false;dm.style.opacity=1;dm.dataset.k='cartel';dm.innerHTML=cartelHTML(CP)}
@@ -905,7 +906,7 @@ function freshState(){const T=()=>({x:0,z:3,yaw:Math.PI,pose:'stand',cape:null,h
   pe:[{x:Math.sin(1.4)*(PR-2.5),z:Math.cos(1.4)*(PR-2.5),vis:true,sw:0,sp:0,yaw:null},{x:Math.sin(-1.1)*(PR-2.5),z:Math.cos(-1.1)*(PR-2.5),vis:true,sw:0,sp:0,yaw:null}],
   hor:{vis:false,fall:0,x:-13,z:-6,yaw:.87},cab:{vis:false,x:0,z:-PR,yaw:0,sp:0},team:{vis:false,x:DOOR.x,z:DOOR.z,yaw:0,sp:0},toril:0,palco:null,cam:null}}
 function nota10(t){return t.res==='devuelto'?'—':(clamp((t.score||60)/10+(t.trof||0)*.3,0,10)).toFixed(1)}
-function cpEnd(){const C=CP;C.done=true;const r=C.r;musicStop();applause(3,.25);mesInc('vista');
+function cpEnd(){const C=CP;C.done=true;const r=C.r;musicStop();applause(3,.25);if(!C.replay&&!C.skipped)mesInc('vista');
  const mvp=r.toros.filter(t=>t.res!=='devuelto').sort((a,b)=>(b.score||0)-(a.score||0))[0],ore=r.toros.reduce((s,t)=>s+(t.trof||0),0);
  $('#h3dim').hidden=false;$('#h3dim').style.opacity=1;$('#h3dim').dataset.k='fin';$('#h3dim').innerHTML=`<div class="cartel"><span class="lbl">Fin del festejo · ${esc(r.feria)}</span><h2>${esc(r.plaza)}</h2>
  <div class="kpis"><div><b>${ore}</b><small>orejas</small></div><div><b>${r.pts!=null?(r.pts>=0?'+':'')+r.pts:'—'}</b><small>pts escalafón</small></div><div><b>${r.dp>=0?'+':''}${r.dp}</b><small>prestigio</small></div><div><b>${eur(r.ingreso)}</b><small>ingresos</small></div></div>
@@ -914,7 +915,7 @@ function cpEnd(){const C=CP;C.done=true;const r=C.r;musicStop();applause(3,.25);
  <button class="btn oro adv" onclick="exitPlaza()">Salir de la plaza</button></div>`;$('#h3cap').textContent=''}
 function exitPlaza(){if(CP&&CP.actors)for(const a of CP.actors)W3.P.sc.remove(a);if(CP&&CP.sword&&CP.sword.parent)CP.sword.parent.remove(CP.sword);$('#h3dim').hidden=true;W3.cam.fov=60;W3.cam.updateProjectionMatrix();musicStop();crowdStop();
  if(W3.from==='finca')enterFinca();else exit3D();render()}
-function saludar(){const C=CP;if(!C||C.saludo||C.salDone)return;C.saludo=true;C.salT=0;$('#psal').hidden=true;S.pres=clamp(S.pres+.5,0,100);save();ole('¡Ganadero!');applause(3,.35)}
+function saludar(){const C=CP;if(!C||C.saludo||C.salDone)return;C.saludo=true;C.salT=0;$('#psal').hidden=true;const r=C.r;r.sal=r.sal||[];if(!C.replay&&!r.sal.includes(C.i)){r.sal.push(C.i);if(typeof presDelta==='function')presDelta(.5);else S.pres=clamp(S.pres+.5,0,100)}save();ole('¡Ganadero!');applause(3,.35)}
 function oleP(txt,big){ole(txt);oleSnd(big);if(CP)CP.exc=Math.min(1,(CP.exc||0)+(big?.6:.35))}
 
 /* ---------- guion de la lidia ---------- */
