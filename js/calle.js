@@ -290,7 +290,7 @@ function camCalle(dt){if(CL.cam==='fix')return;const c=W3.cam.position,me=CL.me,
 function calleFin(){const o=CL.o,ev=CL.ev;ev.an=CL.an;const r=cResolver(o,ev);const C=S.corro;
  let premio=0;if(CL.plaza){const rivals=Array.from({length:5},()=>RI(120,420));const mejor=Math.max(...rivals);if(CL.pts>mejor){premio=r100(R(900,1800));S.money+=premio;C.st.trofeos.push({t:'Ganas el concurso de recortadores',a:'tú',p:o.pueblo,y:S.year})}CL.rank=1+rivals.filter(x=>x>CL.pts).length}
  save();const m=CL.mine;
- $('#h3dim').hidden=false;$('#h3dim').style.opacity=1;$('#h3dim').innerHTML=`<div class="stack" style="max-width:480px;width:100%"><h2>${esc(FEST[o.tipo].n)} · ${esc(o.pueblo)}</h2>
+ $('#h3dim').hidden=false;$('#h3dim').style.opacity=1;$('#h3dim').innerHTML=`<div class="stack" style="max-width:480px;width:100%"><h2>${esc(FEST[o.tipo].n)} · ${esc(o.pueblo)}</h2>${CL.plazaNom&&!CL.plaza?`<small class="muted">${esc(CL.plazaNom)}</small>`:''}
  <div>${r?`Lucimiento del corro: <b>${r.media}</b> (${LUCTXT(r.media)})`:''}</div>
  <div class="clFin">${r?r.res.map(x=>`<div><span><b>${esc(x.name)}</b> <small class="muted">${TIPOTXT[x.tipo]} · ${LUCTXT(x.luc)}</small></span><b>${x.luc}</b></div>`).join(''):''}</div>
  <small class="muted">Tus puntos: ${CL.pts} · quiebros ${m.q} · recortes ${m.r} · saltos ${m.s}${CL.plaza?` · anillas ${m.a} · puesto ${CL.rank}º de 6`:''} · cogidas ${ev.cog}</small>

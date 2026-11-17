@@ -191,3 +191,18 @@ function pmxHitos(sc,G,PT,LAN){const night=!!(CL&&CL.night),st=PT.st||PP_ST.pied
  if(PT.roca)ppRoca(sc,PT.roca);
  if(PT.mar&&!(CL&&CL.o&&CL.o.tipo==='mar'))ppMar(sc,G,night);
  if(PT.serra&&PP_SERRA[PT.serra])ppSerra(sc,PP_SERRA[PT.serra],night)}
+
+/* ---------- la plaza de cada pueblo fuera del 3D: fichas de festejos, selector y calendario ---------- */
+const PP_DESC={vilareal:'Plaça Major porticada y ayuntamiento',nules:'Iglesia de cúpula azul y palmeras',borriana:"Iglesia gótica de El Salvador",onda:'Bajo el castillo de las 300 torres',
+ almassora:"Recinto de La Vila, cuna de los toros cerriles",cabanes:'Iglesia de piedra al pie de la sierra',torreblanca:'Iglesia blanca y la torre del pueblo',
+ benicarlo:'Campanario octogonal exento junto a Sant Bartomeu',vinaros:'Arxiprestal fortificada y campanario exento, junto al mar',peniscola:'Castillo del Papa Luna sobre el peñón',
+ segorbe:'Torres medievales y campanario de la catedral',moncofa:'Cúpula azul, casas encaladas y el mar',lavall:"Ayuntamiento bajo la Serra d'Espadà",betxi:'Palau-Castell renacentista',
+ lalcora:'Iglesia con chapitel de azulejo, tierra de cerámica',borriol:'Castillo en ruinas sobre el pueblo',alcala:'El campanario más alto de la provincia',
+ benicassim:"Iglesia blanca, palmeras y el Desert de les Palmes",meliana:"Ayuntamiento de l'Horta Nord",museros:'Iglesia con campanario de azulejo',pucol:'El Palau dels Arquebisbes',
+ massamagrell:'Iglesia de cúpula azul',foios:'La torre medieval de Foios',alboraia:"Iglesia de l'Horta y su campanario",lliria:"Ayuntamiento y la Assumpció en lo alto",
+ chiva:'Castillo en ruinas sobre la villa',ontinyent:'El campanario más alto de la Comunitat',sueca:'Ayuntamiento y campanario de Sant Pere',elpuig:'Monasterio de las cuatro torres',
+ sagunt:'Santa Maria gótica y el castillo sobre el cerro',denia:'Castillo, Montgó y puerto',pedreguer:'Iglesia bajo la Serra de Segària',xabia:'Iglesia-fortaleza de piedra tosca bajo el Montgó',
+ laromana:'Iglesia y casas blancas del Vinalopó'};
+// plaza de un pueblo (sin festejo cargado): clave, nombre, descripción e imagen
+function ppPlaza(pueblo){const pu=String(pueblo||'').toLowerCase().trim();let k=PMX_PUEBLOS[pu],gen=false;if(!k){k=PMX_TIPO_PUEBLO[pu];gen=true}if(!k||!PMX_PLAZAS[k])return null;
+ const T_=PMX_PLAZAS[k];return {k,nom:gen?pmxNomPueblo(T_.nom,pueblo):T_.nom,desc:gen?'':(PP_DESC[k]||''),img:gen?null:'img/plazas/'+k+'.jpg'}}
