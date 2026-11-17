@@ -162,13 +162,13 @@ buildCalle=function(night){
  const house=(a0,a1,line,axis,face,o={})=>{let a=a0;while(a<a1-.1){let w=[5.6,8.4,8.4,11.2][(rnd()*4)|0];if(a1-(a+w)<4.5)w=a1-a;pmxHouse(G,MT,T,rnd,a,a+w,line,axis,face,styles[(rnd()*styles.length)|0],pmxHex(PAL[(rnd()*PAL.length)|0]),o,LAN);a+=w}};
  // plaza: fondo con soportales (antes la iglesia), frente con salida al cajón y laterales con las calles
  const FL=PT.fl;
- if(PT.fondo==='iglesia'){house(-21,-8,-11,'x',1,{plaza:1,fl:FL});pmxIglesia(G,sc,-8,8,-11,PT,LAN);house(8,21,-11,'x',1,{plaza:1,fl:FL})}
+ if(PT.fondo==='iglesia'){const cs=PT.camp&&PT.camp.exent?PT.camp.side:0;house(-21,cs<0?-13.2:-8,-11,'x',1,{plaza:1,fl:FL});pmxIglesia(G,sc,-8,8,-11,PT,LAN);house(cs>0?13.2:8,21,-11,'x',1,{plaza:1,fl:FL})}
  else if(PT.fondo==='ajuntament'){house(-21,-9,-11,'x',1,{plaza:1,fl:FL});pmxAjuntament(G,sc,-9,9,-11,PT,LAN);house(9,21,-11,'x',1,{plaza:1,fl:FL})}
  else house(-21,21,-11,'x',1,{arcade:1,plaza:1,fl:FL});
  house(-21,-3.5,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});house(3.5,21,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});
- if(PT.castell)pmxCastell(sc);
+ if(PT.castell)pmxCastell(sc,PT.castell);if(typeof pmxHitos==='function')try{pmxHitos(sc,G,PT,LAN)}catch(e){console.warn('hitos',e)}
  house(-11,-4,14,'z',-1,{plaza:1,fl:FL});house(4,11,14,'z',-1,{plaza:1,fl:FL});house(-11,-4,-14,'z',1,{plaza:1,fl:FL});house(4,11,-14,'z',1,{plaza:1,fl:FL});
- house(21,64,4,'x',-1);house(21,64,-4,'x',1);house(-64,-21,4,'x',-1);house(-64,-21,-4,'x',1);house(18,46,3.5,'z',-1);house(18,46,-3.5,'z',1);house(-4,4,66,'z',-1);house(-4,4,-66,'z',1);
+ house(21,64,4,'x',-1);house(21,64,-4,'x',1);house(-64,-21,4,'x',-1);house(-64,-21,-4,'x',1);house(18,46,3.5,'z',-1);house(18,46,-3.5,'z',1);if(!PT.mar)house(-4,4,66,'z',-1);house(-4,4,-66,'z',1);
  // ---------- cadafales en los refugios de la plaza ----------
  const PNT=[[.12,.3,.75],[.1,.45,.22],[.72,.08,.06],[.95,.72,.08],[.92,.92,.9],[.9,.35,.05],[.25,.55,.85]];
  const PEN=['PENYA EL BOU','LA TRONADA','ELS XICS','EL RACÓ','PENYA MIGJORN','LA CORDA','ELS DE SEMPRE','PENYA LA TRACA','EL CORRAL','ELS BOUERS'];let pi=(typeof locSeed==='function'?locSeed():0)%PEN.length;
@@ -391,7 +391,7 @@ function pmxTerrat(G,x0,z0,x1,z1,H,rnd){const wc=[1.3,1.28,1.22],t=.22,h=.95;G.p
  G.roof.box((x0+x1)/2,H+h+.04,z0+t/2,x1-x0+.06,.08,t+.08,3,[.95,.9,.9]);G.roof.box((x0+x1)/2,H+h+.04,z1-t/2,x1-x0+.06,.08,t+.08,3,[.95,.9,.9]);
  if(rnd()<.5){const cx=x0+(x1-x0)*(.3+rnd()*.4),cz=z0+(z1-z0)*(.3+rnd()*.4);G.granite.box(cx,H+1.3,cz,1.8,2.6,1.8,1.5,wc);G.roof.box(cx,H+2.66,cz,2,.1,2,3,[.9,.9,.9])}}
 /* ---------- iglesia con portada, rosetón y campanario ---------- */
-function pmxIglesia(G,sc,a0,a1,line,PT,LAN){const fz=line-1,D=16,W=a1-a0,cx=(a0+a1)/2,Hn=12.5,st=[1.06,.99,.88],z0=fz-D;
+function pmxIglesia(G,sc,a0,a1,line,PT,LAN){const fz=line-1,D=16,W=a1-a0,cx=(a0+a1)/2,Hn=12.5,st=PT.st||[1.06,.99,.88],z0=fz-D;
  // nave
  for(const [p0,p1,n] of [[[a0,fz],[a1,fz],[0,1]],[[a1,fz],[a1,z0],[1,0]],[[a0,z0],[a0,fz],[-1,0]],[[a1,z0],[a0,z0],[0,-1]]])G.granite.wall(p0,p1,0,Hn,1.5,1.5,st,n);
  pmxRoofGable(G,a0,z0,a1,fz,Hn,'z',.4,()=>.5);
@@ -411,8 +411,8 @@ function pmxIglesia(G,sc,a0,a1,line,PT,LAN){const fz=line-1,D=16,W=a1-a0,cx=(a0+
  const rr=new THREE.Mesh(new THREE.RingGeometry(1.35,1.75,32),new THREE.MeshStandardMaterial({map:PMX.T.granite.map,color:'#e6dccb',roughness:.9}));rr.position.set(cx,9,fz+.04);sc.add(rr);
  // escalinata
  for(let i=0;i<3;i++)G.granite.box(cx,.1+i*.17,fz+.85-i*.28,7.5-i*.6,.2,.6,1.5,[.86,.83,.78]);
- // campanario
- const tx=a1-2.6,tz=fz-2.4,T=PT.gotic?2.4:2.1,TH=PT.gotic?31:23;for(const [p0,p1,n] of [[[tx-T,tz+T],[tx+T,tz+T],[0,1]],[[tx+T,tz+T],[tx+T,tz-T],[1,0]],[[tx-T,tz-T],[tx-T,tz+T],[-1,0]],[[tx+T,tz-T],[tx-T,tz-T],[0,-1]]])G.granite.wall(p0,p1,0,TH,1.5,1.5,st,n);
+ // campanario (si el pueblo tiene campanario exento o singular lo dibuja pmxHitos)
+ if(!PT.sinTorre){const tx=a1-2.6,tz=fz-2.4,T=PT.gotic?2.4:2.1,TH=PT.gotic?31:23;for(const [p0,p1,n] of [[[tx-T,tz+T],[tx+T,tz+T],[0,1]],[[tx+T,tz+T],[tx+T,tz-T],[1,0]],[[tx-T,tz-T],[tx-T,tz+T],[-1,0]],[[tx+T,tz-T],[tx-T,tz-T],[0,-1]]])G.granite.wall(p0,p1,0,TH,1.5,1.5,st,n);
  for(const y of [Hn+.2,TH-4.4,TH])G.granite.box(tx,y,tz,T*2+.3,.3,T*2+.3,1.5,[.9,.86,.78]);
  for(const [nx,nz] of [[0,1],[1,0],[0,-1],[-1,0]]){G.iron.box(tx+nx*(T+.01),TH-2.4,tz+nz*(T+.01),nz?1.3:.04,2.8,nx?1.3:.04,1,[.04,.04,.05]);G.granite.box(tx+nx*(T+.04),TH-.95,tz+nz*(T+.04),nz?1.6:.12,.18,nx?1.6:.12,1.5,[.9,.86,.78])}
  const bell=new THREE.Mesh(new THREE.LatheGeometry([[0,.6],[.18,.58],[.28,.4],[.34,.1],[.44,0],[.4,-.02]].map(([r,y])=>new THREE.Vector2(r,y)),16),new THREE.MeshStandardMaterial({color:'#8a6a2a',metalness:.85,roughness:.35,side:THREE.DoubleSide}));bell.position.set(tx,TH-3.4,tz+T-.6);sc.add(bell);
@@ -423,7 +423,7 @@ function pmxIglesia(G,sc,a0,a1,line,PT,LAN){const fz=line-1,D=16,W=a1-a0,cx=(a0+
  else if(PT.azulejo){const az=pmxCanvas('azulejo',128,128,(c,w,h)=>{for(let y=0;y<8;y++)for(let x=0;x<8;x++){c.fillStyle=(x+y)%2?'#1f4fa8':'#e9eef5';c.fillRect(x*16,y*16,16,16)}c.globalAlpha=.25;c.fillStyle='#fff';for(let i=0;i<64;i++)c.fillRect((i%8)*16+2,Math.floor(i/8)*16+2,5,3)});az.wrapS=az.wrapT=THREE.RepeatWrapping;az.repeat.set(4,3);
   const sp=new THREE.Mesh(new THREE.CylinderGeometry(.15,T+.05,5.2,8,1),new THREE.MeshStandardMaterial({map:az,roughness:.25,metalness:.1}));sp.position.set(tx,TH+2.75,tz);sp.castShadow=true;sc.add(sp)}
  else{const sp=new THREE.Mesh(new THREE.ConeGeometry(T*1.45,4.4,4),new THREE.MeshStandardMaterial({map:PMX.T.roof.map,roughness:.8}));sp.position.set(tx,TH+2.35,tz);sp.rotation.y=Math.PI/4;sp.castShadow=true;sc.add(sp)}
- const ct=PT.gotic?TH+5.3:TH+5.7;G.iron.box(tx,ct,tz,.06,1.2,.06,1,[.1,.1,.1]);G.iron.box(tx,ct+.3,tz,.5,.06,.06,1,[.1,.1,.1]);
+ const ct=PT.gotic?TH+5.3:TH+5.7;G.iron.box(tx,ct,tz,.06,1.2,.06,1,[.1,.1,.1]);G.iron.box(tx,ct+.3,tz,.5,.06,.06,1,[.1,.1,.1]);}
  pmxIglesiaExtra(G,sc,a0,a1,fz,D,Hn,cx,PT,st);
  LAN.push([cx-2.6,4.6,fz+.4,6]);LAN.push([cx+2.6,4.6,fz+.4,6]);
  for(let i=0;i<12;i++)CL.crowd.push([cx+R(-3.2,3.2),.15+(i%3)*.17,fz+.75-(i%3)*.28,0,0])}
@@ -499,11 +499,11 @@ function pmxIglesiaExtra(G,sc,a0,a1,fz,D,Hn,cx,PT,st){
   // hornacina sobre la puerta principal
   G.granite.box(cx,6.6,fz+.22,1.6,2.3,.3,1.5,[.92,.88,.8]);G.iron.box(cx,6.5,fz+.38,1.05,1.7,.04,1,[.18,.15,.13])}}
 /* el castillo sobre el cerro, al fondo (Onda: Castell de les 300 torres) */
-function pmxCastell(sc){const g=new THREE.Group();g.position.set(-10,0,-120);sc.add(g);
- const hill=new THREE.Mesh(new THREE.SphereGeometry(60,24,12,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:'#8a7a58',roughness:1}));hill.scale.set(1.4,.42,.6);g.add(hill);
- const wm=new THREE.MeshStandardMaterial({color:'#b59a72',roughness:.95}),n=34;
- for(let i=0;i<n;i++){const a=-Math.PI*.8+i/(n-1)*Math.PI*1.6,x=Math.sin(a)*58,z=Math.cos(a)*14,y=Math.sqrt(Math.max(0,1-(x/84)**2-(z/36)**2))*25.2;
-  const t=new THREE.Mesh(new THREE.BoxGeometry(2.4,5+(i%3)*1.5,2.4),wm);t.position.set(x,y+2,z);g.add(t);
+function pmxCastell(sc,o){o=typeof o==='object'?o:{};const g=new THREE.Group();g.position.set(o.x??-10,0,o.z??-120);g.rotation.y=o.ry||0;g.scale.setScalar(o.s||1);sc.add(g);
+ const hill=new THREE.Mesh(new THREE.SphereGeometry(60,24,12,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:o.hill||'#8a7a58',roughness:1}));hill.scale.set(1.4,.42,.6);g.add(hill);
+ const wm=new THREE.MeshStandardMaterial({color:o.col||'#b59a72',roughness:.95}),n=o.n||34,rr=mulberry(o.seed||7);
+ for(let i=0;i<n;i++){if(o.ruina&&rr()<.35)continue;const a=-Math.PI*.8+i/(n-1)*Math.PI*1.6,x=Math.sin(a)*58,z=Math.cos(a)*14,y=Math.sqrt(Math.max(0,1-(x/84)**2-(z/36)**2))*25.2;
+  const t=new THREE.Mesh(new THREE.BoxGeometry(2.4,(5+(i%3)*1.5)*(o.ruina?.4+rr()*.7:1),2.4),wm);t.position.set(x,y+2,z);g.add(t);
   if(i<n-1){const a2=-Math.PI*.8+(i+1)/(n-1)*Math.PI*1.6,x2=Math.sin(a2)*58,z2=Math.cos(a2)*14,y2=Math.sqrt(Math.max(0,1-(x2/84)**2-(z2/36)**2))*25.2,L=Math.hypot(x2-x,z2-z);
-   const w=new THREE.Mesh(new THREE.BoxGeometry(L,3,1),wm);w.position.set((x+x2)/2,(y+y2)/2+.8,(z+z2)/2);w.rotation.y=-Math.atan2(z2-z,x2-x);g.add(w)}}
- const k=new THREE.Mesh(new THREE.BoxGeometry(7,12,7),wm);k.position.set(4,31,6);g.add(k)}
+   const w=new THREE.Mesh(new THREE.BoxGeometry(L,o.ruina?1+rr()*2:3,1),wm);w.position.set((x+x2)/2,(y+y2)/2+.8,(z+z2)/2);w.rotation.y=-Math.atan2(z2-z,x2-x);g.add(w)}}
+ if(o.torre!==false){const k=new THREE.Mesh(new THREE.BoxGeometry(7,o.ruina?6:12,7),wm);k.position.set(4,o.ruina?28:31,6);g.add(k)}}

@@ -1,5 +1,33 @@
 # Cambios
 
+## Ganadería de corro: la plaza de fiestas de cada pueblo
+- Los 30 pueblos del selector que aún usaban una plaza genérica tienen ahora su plaza propia, con nombre y elementos reconocibles. Junto con Vila-real, Nules, Burriana y Onda, son ya los 34.
+- Castellón:
+  - Benicarló: campanario octogonal exento junto a Sant Bartomeu.
+  - Vinaròs: Plaça Parroquial con la Arxiprestal fortificada y su campanario exento.
+  - Peñíscola: castillo sobre el peñón en el mar.
+  - Segorbe: torres medievales y campanario de la catedral.
+  - Betxí: Palau-Castell renacentista.
+  - Alcalà de Xivert: el campanario más alto de la provincia.
+  - Borriol: castillo en ruinas.
+  - Benicàssim, Moncofa y Torreblanca: costa, palmeras y zócalos azules.
+  - La Vall d'Uixó, L'Alcora, Cabanes y Almassora: sierras, azulejo o piedra.
+- Valencia:
+  - Ontinyent: el campanario más alto de la Comunitat, sobre la Plaça Major porticada.
+  - Sagunt: Santa Maria gótica, plaza porticada y el castillo sobre el cerro.
+  - El Puig: monasterio de cuatro torres.
+  - Foios: su torre.
+  - Puçol: el palacio.
+  - Llíria: la Assumpció en lo alto.
+  - Chiva: castillo en ruinas.
+  - Sueca, Meliana, Museros, Massamagrell y Alboraia: plaza del ayuntamiento o de la iglesia, con cúpulas y campanarios de teja vidriada.
+- Alicante:
+  - Dénia: castillo, Montgó y puerto.
+  - Xàbia: Sant Bertomeu, iglesia-fortaleza de piedra tosca bajo el Montgó.
+  - Pedreguer y La Romana: sierras e iglesias.
+- Los pueblos de costa abren la calle de levante al paseo marítimo, con el mar, barcas y faro.
+- Todo lo nuevo queda tras las fachadas o en el horizonte: los recorridos y los refugios de la res no cambian.
+
 ## Resultados de la corrida, tres vistas de cámara y finca sin tirones
 - Pantalla de resultados nueva al acabar la corrida: cabecera con el logo de la ganadería, cifras de la tarde (prestigio, ingresos, orejas, nota media) y una tarjeta por toro con el resultado, las orejas, la nota en un anillo y el juicio. El toro de la tarde va destacado. Desde ahí: ver otra vez en directo, repetición en dibujo o compartir.
 - La repetición en dibujo tiene un aspecto renovado, con el progreso por toros arriba y los mandos agrupados.
