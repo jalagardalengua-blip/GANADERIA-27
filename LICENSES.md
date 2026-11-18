@@ -11,4 +11,8 @@
 
 Texto de la licencia MIT de three.js: Copyright © 2010-2021 three.js authors. Se concede permiso, libre de cargos, a cualquier persona que obtenga una copia de este software… (ver el repositorio original).
 
+Datos de mapas: los edificios y calles de las plazas de la ganadería de corro (`datos/plazas/*.json`) provienen de OpenStreetMap.
+© colaboradores de OpenStreetMap, disponibles bajo la Open Database License (ODbL): https://www.openstreetmap.org/copyright.
+Los datos derivados se distribuyen bajo la misma licencia ODbL. Herramientas de generación: `tools/plazas/`.
+
 Recursos con origen pendiente de confirmar: ver `docs/ASSET_CREDITS.md` (R-09, R-10).

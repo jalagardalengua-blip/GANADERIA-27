@@ -1,5 +1,14 @@
 # Cambios
 
+## Ganadería de corro: la plaza real de cada pueblo, edificio a edificio
+- Cada uno de los 34 pueblos se construye con los edificios reales que rodean su plaza de fiestas, sacados de OpenStreetMap: planta exacta, número de plantas o altura, iglesias y torres.
+  - La iglesia o el ayuntamiento real queda al fondo de la arena.
+  - Las calles que salen de la plaza son las de verdad.
+- En los pueblos donde OpenStreetMap no tiene dibujados los edificios (Nules, la Vall d'Uixó, El Puig, Moncofa…), las casas se levantan en fila sobre las manzanas reales que forman sus calles.
+- Fachadas con planta baja de piedra y zócalo, pisos con balcones y gente en las que dan a la plaza, faroles, cornisas, tejados a cuatro aguas o terrados.
+- Solo se carga el pueblo del festejo (≤ 22 KB). La arena, el recorrido y el cajón no cambian, así que las físicas de la res son las mismas.
+- Datos © colaboradores de OpenStreetMap (ODbL).
+
 ## Modo hiperrealista en la corrida en directo
 - Botón «HD» en la barra de la corrida (encendido por defecto donde el móvil lo admite; se recuerda).
 - La plaza se pinta en alto rango dinámico (HDR) con antialiasing 4× y pasa por un revelado de cine/TV: resplandor real de las luces, del sol y de los brillos del traje de luces (bloom), curva de color ACES, gradación cálida de tarde de toros, nitidez, viñeta suave, una pizca de aberración de lente y grano fino.

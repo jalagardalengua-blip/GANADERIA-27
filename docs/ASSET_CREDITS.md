@@ -27,3 +27,9 @@
 - `modelos/corro/*.glb`: modelos fotoescaneados de **Poly Haven** (polyhaven.com), licencia **CC0 1.0**: `plastic_monobloc_chair_01` → `silla-plastico`, `gallinera_chair` → `silla-gallinera`, `outdoor_table_chair_set_01` → `mesa-terraza`, `painted_wooden_bench` → `banco`, `planter_box_02` → `jardinera`, `wine_barrel_01` → `barrica`, `wooden_crate_01` → `caja-madera`.
 - Modificación: mallas simplificadas con meshoptimizer (600–5.800 triángulos), texturas reducidas a 512 px en JPEG y mallas unidas por material (glTF-Transform). Se dibujan con instancias en `js/corro-props.js`.
 - Plaza, casas, cadafales, refugio, fuente, pilón y soga: generados por código (`js/plazamayor.js`, `js/corro-fisicas.js`).
+
+
+## Plazas reales de los pueblos (ganadería de corro)
+- `datos/plazas/*.json`: planta y altura de los edificios alrededor de la plaza de fiestas de 34 pueblos, y manzanas derivadas de sus calles.
+  - © colaboradores de OpenStreetMap, ODbL 1.0 (https://www.openstreetmap.org/copyright).
+  - Generado con `tools/plazas/osm_get.py` y `tools/plazas/osm_build.py`.

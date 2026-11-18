@@ -158,18 +158,20 @@ function ppSerra(sc,lista,night){const m=new THREE.MeshStandardMaterial({color:n
   for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i);if(y>.02){const cr=.75+.25*Math.sin(x*7.3+a)*Math.sin(x*3.1+d)+(r()-.5)*.12;p.setY(i,Math.pow(y,1.25)*cr)}}g.computeVertexNormals();
   const mm=new THREE.Mesh(g,m),ar=a*Math.PI/180;mm.scale.set(w*1.3,h*.62,w*.3);mm.position.set(Math.sin(ar)*(d+25),-1.5,Math.cos(ar)*(d+25));mm.rotation.y=ar;mm.matrixAutoUpdate=false;mm.updateMatrix();sc.add(mm)}}
 // el mar al final de la calle de levante: paseo con barandilla, agua, barcas y faro
-function ppMar(sc,G,night){// el suelo de la escena acaba en el paseo: a partir de ahí, agua
+function ppMar(sc,G,night,PT){const OX=PT&&PT.osm?40:0;
+ if(!OX){// el suelo de la escena acaba en el paseo: a partir de ahí, agua
  for(const o of sc.children)if(o.isMesh&&o.geometry&&o.geometry.parameters&&o.geometry.parameters.width===200&&o.geometry.parameters.height===120){o.geometry.dispose();o.geometry=new THREE.PlaneGeometry(174,120);o.position.x=-13;break}
 G.paving.top(62,-4.6,74,4.6,.02,1.2,[.95,.92,.86]);
  for(let z=-8;z<=8;z+=.9)G.iron.box(73.6,.55,z,.06,1.1,.06,1,[.85,.85,.82]);G.iron.box(73.6,1.1,0,.08,.08,16.4,1,[.85,.85,.82]);
+ }
  const wm=new THREE.MeshStandardMaterial({color:night?'#0b1a2e':'#2f6f9a',roughness:.12,metalness:.35});
- const w=new THREE.Mesh(new THREE.PlaneGeometry(420,420),wm);w.rotation.x=-Math.PI/2;w.position.set(285,-.6,0);sc.add(w);
- G.granite.box(74,-.25,0,.8,.9,22,1.5,[.86,.83,.78]);
+ const w=new THREE.Mesh(new THREE.PlaneGeometry(420,420),wm);w.rotation.x=-Math.PI/2;w.position.set(285+OX,-.6,0);sc.add(w);
+ if(!OX)G.granite.box(74,-.25,0,.8,.9,22,1.5,[.86,.83,.78]);
  const boat=(x,z,c,ry)=>{const b=new THREE.Group();b.position.set(x,-.45,z);b.rotation.y=ry;sc.add(b);const hm=new THREE.MeshStandardMaterial({color:'#f1ece0',roughness:.6});
   const hull=new THREE.Mesh(new THREE.BoxGeometry(2.2,.7,6),hm);b.add(hull);const st=new THREE.Mesh(new THREE.BoxGeometry(2.25,.18,6.05),new THREE.MeshStandardMaterial({color:c,roughness:.6}));st.position.y=.36;b.add(st);
   const ms=new THREE.Mesh(new THREE.CylinderGeometry(.05,.06,5,6),hm);ms.position.set(0,2.8,-.6);b.add(ms)};
- boat(92,-9,'#2b5aa0',.4);boat(118,7,'#bf3a3f',-.3);boat(150,-16,'#2b7a3d',.9);
- const far=new THREE.Group();far.position.set(170,-.6,26);sc.add(far);const fm=new THREE.MeshStandardMaterial({color:'#f2efe8',roughness:.5});
+ boat(92+OX,-9,'#2b5aa0',.4);boat(118+OX,7,'#bf3a3f',-.3);boat(150+OX,-16,'#2b7a3d',.9);
+ const far=new THREE.Group();far.position.set(170+OX,-.6,26);sc.add(far);const fm=new THREE.MeshStandardMaterial({color:'#f2efe8',roughness:.5});
  const t=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.6,14,14),fm);t.position.y=7;far.add(t);const bnd=new THREE.Mesh(new THREE.CylinderGeometry(1.25,1.25,2,14),new THREE.MeshStandardMaterial({color:'#bf3a3f'}));bnd.position.y=10;far.add(bnd);
  const lp=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,1.6,10),new THREE.MeshStandardMaterial({color:'#fff7d6',emissive:'#ffd98a',emissiveIntensity:night?2.2:.2}));lp.position.y=15;far.add(lp)}
 // peñón de Peñíscola: roca en el mar bajo el castillo
@@ -189,7 +191,7 @@ function pmxHitos(sc,G,PT,LAN){const night=!!(CL&&CL.night),st=PT.st||PP_ST.pied
  if(PT.palau)ppPalau(sc,G,PT.palau);
  if(PT.fortif&&PT.fondo==='iglesia')ppFortif(G,st);
  if(PT.roca)ppRoca(sc,PT.roca);
- if(PT.mar&&!(CL&&CL.o&&CL.o.tipo==='mar'))ppMar(sc,G,night);
+ if(PT.mar&&!(CL&&CL.o&&CL.o.tipo==='mar'))ppMar(sc,G,night,PT);
  if(PT.serra&&PP_SERRA[PT.serra])ppSerra(sc,PP_SERRA[PT.serra],night)}
 
 /* ---------- la plaza de cada pueblo fuera del 3D: fichas de festejos, selector y calendario ---------- */
@@ -233,7 +235,7 @@ const PP_TERRAT={costa:.6,horta:.25,interior:.1};
 for(const [k,[pal,zona,foco]] of Object.entries(PP_ID)){const T_=PMX_PLAZAS[k];if(!T_)continue;T_.pal=PP_PAL[pal];T_.teja=PP_TEJA[zona];if(T_.terrat===undefined)T_.terrat=PP_TERRAT[zona];if(foco)T_.foco=foco;T_.zona=zona}
 // el suelo empedrado solo dentro del pueblo; alrededor, campo (secano, huerta o monte según la zona)
 function ppSuelo(sc,PT,night){for(const o of sc.children)if(o.isMesh&&o.geometry&&o.geometry.parameters&&o.geometry.parameters.height===120&&(o.geometry.parameters.width===200||o.geometry.parameters.width===174)){
-  const x1=PT.mar?74:76,x0=-76,z0=-38,z1=56,mp=o.material.map;o.geometry.dispose();o.geometry=new THREE.PlaneGeometry(x1-x0,z1-z0);o.position.set((x0+x1)/2,0,(z0+z1)/2);
+  const R_=PT.osm?104:0,x1=R_||(PT.mar?74:76),x0=-(R_||76),z0=-(R_||38),z1=R_||56,mp=o.material.map;o.geometry.dispose();o.geometry=new THREE.PlaneGeometry(x1-x0,z1-z0);o.position.set((x0+x1)/2,0,(z0+z1)/2);
   if(mp){mp.repeat.set((x1-x0)/4,(z1-z0)/4);if(o.material.normalMap)o.material.normalMap.repeat.copy(mp.repeat);if(o.material.roughnessMap)o.material.roughnessMap.repeat.copy(mp.repeat)}break}}
 function ppCampo(sc,PT,night){const zona=PT.zona||'horta',g=new THREE.PlaneGeometry(840,840,84,84);g.rotateX(-Math.PI/2);const p=g.attributes.position,col=[],c=new THREE.Color(),N=pmxNoise(77);
  const base={costa:['#a59a6a','#8e8a58','#b3a676'],interior:['#8a7d58','#7b7a4e','#9a8a62'],horta:['#6f8a4a','#86964f','#a0965e']}[zona],cs=base.map(x=>new THREE.Color(x)),haze=new THREE.Color(night?'#1b2232':'#b9bfa8');
@@ -265,3 +267,45 @@ function ppNorte(G,sc,PT,LAN){const tipo=PT.norte;
 for(const [k,n] of Object.entries({vinaros:'ajuntament',xabia:'ajuntament',nules:'ajuntament',borriana:'ajuntament',denia:'ajuntament',sueca:'iglesia'}))if(PMX_PLAZAS[k])PMX_PLAZAS[k].norte=n;
 // Peníscola: la plaza de Santa Maria está al pie del castillo, en lo alto del peñón
 if(PMX_PLAZAS.peniscola){Object.assign(PMX_PLAZAS.peniscola,{castell:{x:2,z:-64,s:.42,ry:0,col:'#d6c4a0',hill:'#a8987a',n:20},roca:{x:0,z:-62},foco:[2,18,-60]})}
+
+/* ===================== LA PLAZA REAL DE CADA PUEBLO (OpenStreetMap) =====================
+   datos/plazas/<pueblo>.json: los edificios que rodean la plaza de fiestas, con su planta y altura reales
+   (© colaboradores de OpenStreetMap, licencia ODbL). Donde OSM no tiene dibujados los edificios, las casas se
+   levantan en fila sobre las manzanas reales que forman sus calles. Los datos ya vienen girados para que la
+   iglesia (o el ayuntamiento) real quede al fondo, y recortados donde estaría la arena, el recorrido o el cajón:
+   las físicas de la res no cambian. */
+const PP_OSM={};
+function ppOsmCargar(k){if(k in PP_OSM)return PP_OSM[k];let d=null;
+ try{const x=new XMLHttpRequest();x.open('GET','datos/plazas/'+k+'.json',false);x.send();if((x.status===200||x.status===0)&&x.responseText)d=JSON.parse(x.responseText)}catch(e){console.warn('plaza real',k,e)}
+ return PP_OSM[k]=d}
+function ppOsmEdificios(G,sc,PT,LAN,rnd,PAL){const D=PT.osm;if(!D||!D.b)return;const T=PMX.T,styles=PT.styles||['calA','calB'],st=PT.st||PP_ST.piedra,terr=PT.terrat||0;
+ const tri=(Gm,a,b,c,s,col)=>Gm.q([a[0],a[1],a[2]],[b[0],b[1],b[2]],[c[0],c[1],c[2]],[c[0],c[1],c[2]],[a[0]/s,-a[2]/s,b[0]/s,-b[2]/s,c[0]/s,-c[2]/s,c[0]/s,-c[2]/s],col,[0,1,0]);
+ for(const b of D.b){const kind=b[0],H=Math.max(3,b[1]/10),n=(b.length-2)/2;if(n<3)continue;const P=[];for(let i=0;i<n;i++)P.push([b[2+i*2]/10,b[3+i*2]/10]);
+  let A=0,cx=0,cz=0;for(let i=0;i<n;i++){const p=P[i],q=P[(i+1)%n];A+=p[0]*q[1]-q[0]*p[1];cx+=p[0];cz+=p[1]}cx/=n;cz/=n;const sg=A>0?1:-1;
+  const h=((Math.abs(b[2]*7+b[3]*13))%997)/997,style=styles[(h*styles.length)|0],tint=kind===0?pmxHex(PAL[((h*977)|0)%PAL.length]):kind===3?[1.05,.92,.8]:[1,1,1];
+  const dist=Math.hypot(cx,cz),GF=kind===0?3.3:0;
+  for(let i=0;i<n;i++){let p0=P[i],p1=P[(i+1)%n];const dx=p1[0]-p0[0],dz=p1[1]-p0[1],L=Math.hypot(dx,dz);if(L<.2)continue;const nrm=[sg*dz/L,-sg*dx/L];
+   if(kind===1||kind===2)G.granite.wall(p0,p1,0,H,1.5,1.5,st,nrm);
+   else if(kind===4)G.stone.wall(p0,p1,0,H,T.stone.tw,T.stone.th,[.95,.92,.88],nrm,h*3,0);
+   else{G.stone.wall(p0,p1,.02,GF+.02,T.stone.tw,T.stone.th,PT.gfTint||[1,1,1],nrm,h*5,.02);
+    if(PT.zocalo&&L>1){const e=[nrm[0]*.04,nrm[1]*.04];G.paint.wall([p0[0]+e[0],p0[1]+e[1]],[p1[0]+e[0],p1[1]+e[1]],.02,.85,1,1,PT.zocalo,nrm)}
+    const sty=kind===3?'calB':style;G[sty].wall(p0,p1,GF+.02,H,T[sty].tw,T[sty].th,sty==='stone'?[1.08,1,.9]:tint,nrm,h*7+i*.37,GF+.02);
+    // cornisa
+    if(L>1.5)G.granite.wall([p0[0]+nrm[0]*.12,p0[1]+nrm[1]*.12],[p1[0]+nrm[0]*.12,p1[1]+nrm[1]*.12],H-.18,H,1.5,1.5,[.85,.83,.79],nrm);
+    // fachadas que dan a la plaza: balcones con gente y faroles
+    const mx=(p0[0]+p1[0])/2,mz=(p0[1]+p1[1])/2,md=Math.hypot(mx,mz);
+    if(md<48&&L>3&&(nrm[0]*-mx+nrm[1]*-mz)>.55*md&&(Math.abs(nrm[0])>.96||Math.abs(nrm[1])>.96)){
+     let a=p0,bb=p1;if(dx*nrm[1]-dz*nrm[0]<0){a=p1;bb=p0}const fc=new PmxFace(a[0],a[1],nrm[0],nrm[1]),fl=Math.max(0,Math.round((H-GF)/2.9));
+     for(let k=0;k<fl;k++){const yb=GF+.02+k*2.9;for(let s=1.4;s<L-.7;s+=2.8){if(rnd()<.25)continue;pmxBalcony(G,fc,s,yb,rnd()<.3?2.2:1.5,rnd);if(rnd()<.5){const [bx,bz]=fc.pt(s,.35);CL.balc.push([bx,yb+.1,bz,fc.yaw()])}}}
+     if(md<32&&rnd()<.6){const s=L/2,[lx,lz]=fc.pt(s,.5);fc.box(G.iron,s-.03,s+.03,0,.55,GF+.6,GF+.64,[.06,.06,.065]);fc.box(G.glow,s-.1,s+.1,.42,.62,GF+.2,GF+.52,[1,.8,.5]);LAN.push([lx,GF+.36,lz,6])}}}}
+  // cubierta: a cuatro aguas en casas pequeñas y convexas, terrado o teja plana en las grandes
+  const conv=(()=>{let s0=0;for(let i=0;i<n;i++){const a=P[i],b2=P[(i+1)%n],c=P[(i+2)%n],cr=(b2[0]-a[0])*(c[1]-b2[1])-(b2[1]-a[1])*(c[0]-b2[0]);if(Math.abs(cr)<1e-6)continue;const s1=Math.sign(cr);if(s0&&s1!==s0)return false;s0=s1}return true})();
+  const area=Math.abs(A)/2,col=PMX.PT&&PMX.PT.teja||[1,1,1];
+  if(kind===2){const r=Math.sqrt(area)/2;const sp=new THREE.Mesh(new THREE.ConeGeometry(r*1.3,r*2.4,4),new THREE.MeshStandardMaterial({map:T.roof.map,roughness:.8}));sp.position.set(cx,H+r*1.2,cz);sp.rotation.y=Math.PI/4;sp.castShadow=true;sc.add(sp);continue}
+  const flat=kind===4||(kind===0&&((h*31)%1)<terr)||area>420||!conv||n>8;
+  if(flat){let tris=[];try{tris=THREE.ShapeUtils.triangulateShape(P.map(p=>new THREE.Vector2(p[0],p[1])),[])}catch(e){}
+   const Gm=kind===0||kind===4?G.paving:G.roof;for(const t of tris)tri(Gm,[P[t[0]][0],H,P[t[0]][1]],[P[t[1]][0],H,P[t[1]][1]],[P[t[2]][0],H,P[t[2]][1]],kind===0?1.2:3,kind===0?[1.15,.72,.55]:col);
+   if(kind===0)for(let i=0;i<n;i++){const p0=P[i],p1=P[(i+1)%n],dx=p1[0]-p0[0],dz=p1[1]-p0[1],L=Math.hypot(dx,dz);if(L<.3)continue;const nrm=[sg*dz/L,-sg*dx/L];G[style].wall(p0,p1,H,H+.9,T[style].tw,T[style].th,tint,nrm,0,H-2)}}
+  else{const ap=Math.min(2.4,Math.sqrt(area)*.22),apex=[cx,H+ap,cz];for(let i=0;i<n;i++){const p0=P[i],p1=P[(i+1)%n];tri(G.roof,[p0[0],H,p0[1]],[p1[0],H,p1[1]],apex,3,[col[0]*.95,col[1]*.92,col[2]*.92])}}}}
+// nada de casas genéricas en el perímetro de la plaza: ahí van los edificios reales
+function ppOsmActiva(PT){if(!PT||!PT.k||typeof PMX_PLAZAS==='undefined')return false;if(PT.osm!==undefined)return !!PT.osm;PT.osm=ppOsmCargar(PT.k);return !!PT.osm}
