@@ -1,5 +1,9 @@
 # Cambios
 
+## Ganadería de corro: los edificios de cada plaza en su sitio
+- La iglesia y el ayuntamiento, frente a frente como en la plaza real: Vinaròs, Xàbia, Nules, Borriana y Dénia. En Sueca preside el ayuntamiento y enfrente queda Sant Pere con su cúpula azul.
+- Peñíscola: la plaza de Santa Maria al pie del castillo, en lo alto del peñón.
+
 ## Ganadería de corro: cada plaza se reconoce durante el festejo
 - Al empezar el festejo, la cámara presenta la plaza desde lo alto durante unos segundos, con su nombre y lo que la distingue: campanario, castillo, palacio, monasterio, mar o sierra. Después sigue a la res.
 - Cada pueblo tiene los colores y tejados de su zona:

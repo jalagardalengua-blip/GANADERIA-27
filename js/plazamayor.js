@@ -165,7 +165,7 @@ buildCalle=function(night){
  if(PT.fondo==='iglesia'){const cs=PT.camp&&PT.camp.exent?PT.camp.side:0;house(-21,cs<0?-13.2:-8,-11,'x',1,{plaza:1,fl:FL});pmxIglesia(G,sc,-8,8,-11,PT,LAN);house(cs>0?13.2:8,21,-11,'x',1,{plaza:1,fl:FL})}
  else if(PT.fondo==='ajuntament'){house(-21,-9,-11,'x',1,{plaza:1,fl:FL});pmxAjuntament(G,sc,-9,9,-11,PT,LAN);house(9,21,-11,'x',1,{plaza:1,fl:FL})}
  else house(-21,21,-11,'x',1,{arcade:1,plaza:1,fl:FL});
- house(-21,-3.5,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});house(3.5,21,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});
+ house(-21,-3.5,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});if(PT.norte&&typeof ppNorte==='function')ppNorte(G,sc,PT,LAN);else house(3.5,21,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});
  if(PT.castell)pmxCastell(sc,PT.castell);if(typeof pmxHitos==='function')try{pmxHitos(sc,G,PT,LAN)}catch(e){console.warn('hitos',e)}
  house(-11,-4,14,'z',-1,{plaza:1,fl:FL});house(4,11,14,'z',-1,{plaza:1,fl:FL});house(-11,-4,-14,'z',1,{plaza:1,fl:FL});house(4,11,-14,'z',1,{plaza:1,fl:FL});
  house(21,64,4,'x',-1);house(21,64,-4,'x',1);house(-64,-21,4,'x',-1);house(-64,-21,-4,'x',1);house(18,46,3.5,'z',-1);house(18,46,-3.5,'z',1);if(!PT.mar)house(-4,4,66,'z',-1);house(-4,4,-66,'z',1);
