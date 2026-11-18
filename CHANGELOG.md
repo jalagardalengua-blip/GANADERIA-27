@@ -1,5 +1,11 @@
 # Cambios
 
+## Modo hiperrealista en la corrida en directo
+- Botón «HD» en la barra de la corrida (encendido por defecto donde el móvil lo admite; se recuerda).
+- La plaza se pinta en alto rango dinámico (HDR) con antialiasing 4× y pasa por un revelado de cine/TV: resplandor real de las luces, del sol y de los brillos del traje de luces (bloom), curva de color ACES, gradación cálida de tarde de toros, nitidez, viñeta suave, una pizca de aberración de lente y grano fino.
+- Si el móvil va justo, el resplandor se apaga solo antes de bajar la resolución; en móviles sin WebGL2 sigue el modo normal.
+- Test nuevo: hiper.js.
+
 ## Ganadería de corro: los edificios de cada plaza en su sitio
 - La iglesia y el ayuntamiento, frente a frente como en la plaza real: Vinaròs, Xàbia, Nules, Borriana y Dénia. En Sueca preside el ayuntamiento y enfrente queda Sant Pere con su cúpula azul.
 - Peñíscola: la plaza de Santa Maria al pie del castillo, en lo alto del peñón.

@@ -137,7 +137,7 @@ body.cine .bar{height:0}
   <div id="ole">¡Olé!</div>
   <div id="res"><div class="resC"><span class="eyebrow" id="rEy"></span><h2 id="rT"></h2><div class="panu" id="rPa"></div><div class="trof" id="rTr"></div><p id="rD"></p><p class="muted" id="rM"></p><div class="acts"><button class="btnR oro" id="rSig">Siguiente toro</button></div></div></div>
   <div id="rot"><small></small><b></b></div><div id="com"><i>En directo</i><span></span></div>
-  <div class="bar2" id="panel"><button class="b2" id="bVel" aria-label="Velocidad">×1</button><button class="b2" id="bVista">Vista: TV</button><button class="b2" id="bSup">⏭ A matar</button><button class="b2" id="bSig">Siguiente toro</button><button class="b2" id="bClas">Vista clásica</button><button class="b2" id="bSal">Salir</button></div></div>
+  <div class="bar2" id="panel"><button class="b2" id="bVel" aria-label="Velocidad">×1</button><button class="b2" id="bVista">Vista: TV</button><button class="b2" id="bHD" aria-label="Modo hiperrealista">HD: sí</button><button class="b2" id="bSup">⏭ A matar</button><button class="b2" id="bSig">Siguiente toro</button><button class="b2" id="bClas">Vista clásica</button><button class="b2" id="bSal">Salir</button></div></div>
   <div id="loading"><img class="ldImg" src="img/carga.jpg" alt=""><div class="ldVig"></div><div class="ldInfo"><p>Hierro y Divisa</p><small>Preparando la plaza…</small><div class="ldBar"><i></i></div></div></div>
 </div>
 
@@ -367,12 +367,13 @@ function init(){
  scene.add(sword,stick);
  const sd=seedFromHash();const lr=rng(sd||((Math.random()*4294967295)>>>0));const lt=lr();ui.luz=lt<.6?'tarde':lt<.9?'ocaso':'noche';
  setLight(ui.luz);
+ HI.ok=hiSoporta();{let v=null;try{v=localStorage.getItem('hd-hiper')}catch(e){}hiPon(HI.ok&&v!=='0');}
  setupControls();
  onResize();addEventListener('resize',onResize);
  const start=()=>{const inGame=parent!==window;if(!inGame)newCorrida(sd);else{JUEGO.on=true;}document.body.classList.toggle('cine',ui.cam==='cine');initPanel();requestAnimationFrame(frame);};
  if(THREE.GLTFLoader){const ok=g=>{let mesh=null;g.scene.traverse(o=>{if(o.isMesh&&!mesh)mesh=o;});if(mesh)prepGLB(mesh);L.load('modelos/toro-tripo.glb',g2=>{try{prepRig(g2);}catch(e){console.warn('rig',e);}start();},undefined,()=>start());};const L=new THREE.GLTFLoader();L.load('modelos/toro-ruedo.glb',ok,undefined,()=>start());}else start();
 }
-function onResize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+function onResize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();try{hiResize()}catch(e){}}
 
 /* ---------- luz ---------- */
 function sunDirFor(elevDeg){const e=elevDeg*Math.PI/180;return new V3(Math.cos(e)*Math.cos(SUN_AZ),Math.sin(e),Math.cos(e)*Math.sin(SUN_AZ));}
@@ -1166,6 +1167,7 @@ const CAMN={cine:'realizador',libre:'libre',tendido:'tendido',callejon:'callejó
 function initPanel(){const $=id=>document.getElementById(id);const msg=m=>parent.postMessage({ruedo:m,id:JUEGO.t&&JUEGO.t.id},'*');
  {const VIS=[['cine','Vista: TV'],['tendido','Vista: tendido'],['cerca','Vista: a pie de ruedo']];const bv=$('bVista');
   const pon=id=>{setCam(id);if(id==='cine')cut(camS.shot&&camS.shot!=='cerca'?camS.shot:'tendido');else camS.snap=true;bv.textContent=(VIS.find(v=>v[0]===id)||VIS[0])[1];try{localStorage.setItem('hd-vista',id)}catch(e){}};
+  {const bh=$('bHD');if(bh){bh.hidden=!HI.ok;bh.textContent=HI.on?'HD: sí':'HD: no';bh.classList.toggle('on',HI.on);bh.onclick=()=>hiPon(!HI.on);}}
   let ini='cine';try{const g=localStorage.getItem('hd-vista');if(VIS.some(v=>v[0]===g))ini=g}catch(e){}if(bv){pon(ini);bv.onclick=()=>{const i=VIS.findIndex(v=>v[0]===ui.cam);pon(VIS[(i+1)%VIS.length][0]);}}}
  const cams=['cine','tendido','callejon','raso','torero','toro','cenital'],vels=[1,2,4,8,.5];
  const pinta=()=>{$('bVel').textContent='×'+String(ui.speed).replace('.',',');};
@@ -1174,12 +1176,74 @@ function initPanel(){const $=id=>document.getElementById(id);const msg=m=>parent
  $('bSup').hidden=!JUEGO.on;setInterval(()=>{const b=$('bSup');b.hidden=!JUEGO.on||D.phase==='suprema'||D.phase==='fin';pinta();},500);
  $('bSig').onclick=()=>{hideRes();msg('siguiente');};$('rSig').onclick=()=>{hideRes();msg('siguiente');};$('bSal').onclick=()=>msg('salir');$('bClas').onclick=()=>msg('clasica');
  pinta();if(parent!==window)parent.postMessage({ruedo:'listo'},'*');}
+/* ===================== MODO HIPERREALISTA =====================
+   La plaza se pinta primero en una imagen de alto rango (HDR, con antialiasing 4×) y después pasa por un
+   revelado de cine/TV: resplandor real de las luces y los brillos del traje (bloom), curva ACES, gradación
+   de color cálida de tarde de toros, nitidez, viñeta suave, una pizca de aberración de lente y grano fino.
+   Se enciende y apaga con el botón «HD»; si el móvil no puede, queda el modo normal de siempre. */
+const HI={on:false,ok:false,rt:null,b:[],q:null,cam:null,m:{},n:5,t:0,bloom:true};
+function hiSoporta(){try{const c=renderer.capabilities;if(!c.isWebGL2||!THREE.WebGLMultisampleRenderTarget)return false;const e=renderer.extensions;return !!(e.get('EXT_color_buffer_float')||e.get('EXT_color_buffer_half_float'))}catch(e){return false}}
+function hiMat(fs,u){return new THREE.ShaderMaterial({uniforms:u,vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:fs,depthTest:false,depthWrite:false,toneMapped:false})}
+function hiMontar(){if(HI.q)return;HI.cam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);HI.q=new THREE.Mesh(new THREE.PlaneGeometry(2,2));HI.q.frustumCulled=false;HI.sc=new THREE.Scene();HI.sc.add(HI.q);
+ const brillo=`uniform sampler2D tS;uniform vec2 px;uniform float th,ex;varying vec2 vUv;
+  void main(){vec3 c=.25*(texture2D(tS,vUv+px*vec2(-1,-1)).rgb+texture2D(tS,vUv+px*vec2(1,-1)).rgb+texture2D(tS,vUv+px*vec2(-1,1)).rgb+texture2D(tS,vUv+px*vec2(1,1)).rgb);
+   c=min(c*ex,vec3(24.));float br=max(c.r,max(c.g,c.b)),k=th*.6;float s=clamp(br-th+k,0.,2.*k);s=s*s/(4.*k+1e-4);c*=max(s,br-th)/max(br,1e-4);gl_FragColor=vec4(c,1.);}`;
+ HI.m.pre=hiMat(brillo,{tS:{value:null},px:{value:new THREE.Vector2()},th:{value:1.05},ex:{value:1}});
+ HI.m.down=hiMat(`uniform sampler2D tS;uniform vec2 px;varying vec2 vUv;void main(){vec3 c=texture2D(tS,vUv).rgb*.5+.125*(texture2D(tS,vUv+px*vec2(-1,-1)).rgb+texture2D(tS,vUv+px*vec2(1,-1)).rgb+texture2D(tS,vUv+px*vec2(-1,1)).rgb+texture2D(tS,vUv+px*vec2(1,1)).rgb);gl_FragColor=vec4(c,1.);}`,{tS:{value:null},px:{value:new THREE.Vector2()}});
+ HI.m.up=hiMat(`uniform sampler2D tS;uniform vec2 px;uniform float k;varying vec2 vUv;void main(){vec3 c=texture2D(tS,vUv).rgb*4.;
+   c+=2.*(texture2D(tS,vUv+vec2(px.x,0.)).rgb+texture2D(tS,vUv-vec2(px.x,0.)).rgb+texture2D(tS,vUv+vec2(0.,px.y)).rgb+texture2D(tS,vUv-vec2(0.,px.y)).rgb);
+   c+=texture2D(tS,vUv+px).rgb+texture2D(tS,vUv-px).rgb+texture2D(tS,vUv+vec2(px.x,-px.y)).rgb+texture2D(tS,vUv+vec2(-px.x,px.y)).rgb;gl_FragColor=vec4(c/16.*k,1.);}`,{tS:{value:null},px:{value:new THREE.Vector2()},k:{value:1}});
+ HI.m.up.blending=THREE.AdditiveBlending;HI.m.up.transparent=true;
+ HI.m.fin=hiMat(`uniform sampler2D tS,tB;uniform vec2 px;uniform float ex,bl,tm,vig,ca,sh,sat,con,gr,useB;uniform vec3 calido,frio;varying vec2 vUv;
+  vec3 fit(vec3 v){vec3 a=v*(v+.0245786)-.000090537;vec3 b=v*(.983729*v+.4329510)+.238081;return a/b;}
+  vec3 aces(vec3 c){const mat3 I=mat3(vec3(.59719,.07600,.02840),vec3(.35458,.90834,.13383),vec3(.04823,.01566,.83777));const mat3 O=mat3(vec3(1.60475,-.10208,-.00327),vec3(-.53108,1.10813,-.07276),vec3(-.07367,-.00605,1.07602));
+   c*=ex/.6;c=I*c;c=fit(c);c=O*c;return clamp(c,0.,1.);}
+  vec3 srgb(vec3 c){return mix(c*12.92,1.055*pow(c,vec3(1./2.4))-.055,step(vec3(.0031308),c));}
+  float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
+  void main(){vec2 d=vUv-.5;float r2=dot(d,d);vec2 o=d*ca*r2;
+   vec3 c=texture2D(tS,vUv).rgb;c.r=texture2D(tS,vUv-o).r;c.b=texture2D(tS,vUv+o).b;
+   vec3 n=texture2D(tS,vUv+vec2(px.x,0.)).rgb+texture2D(tS,vUv-vec2(px.x,0.)).rgb+texture2D(tS,vUv+vec2(0.,px.y)).rgb+texture2D(tS,vUv-vec2(0.,px.y)).rgb;
+   c=max(c+(c*4.-n)*sh,vec3(0.));
+   if(useB>.5)c+=texture2D(tB,vUv).rgb*bl/max(ex,.05);
+   c=aces(c);vec3 s=srgb(c);
+   float l=dot(s,vec3(.2126,.7152,.0722));
+   s=mix(vec3(l),s,sat);
+   s=mix(s,s*s*(3.-2.*s),con);
+   s+=frio*(1.-smoothstep(.0,.45,l))+calido*smoothstep(.45,1.,l);
+   s*=1.-vig*smoothstep(.12,.62,r2*1.6);
+   float g=h(vUv*vec2(1731.,977.)+tm)-.5;s+=g*gr*(1.-l*.6);
+   s+=(h(vUv*911.+tm*1.3)-.5)/255.;
+   gl_FragColor=vec4(clamp(s,0.,1.),1.);}`,
+  {tS:{value:null},tB:{value:null},px:{value:new THREE.Vector2()},ex:{value:1},bl:{value:.55},tm:{value:0},vig:{value:.32},ca:{value:.012},sh:{value:.12},sat:{value:1.08},con:{value:.22},gr:{value:.035},useB:{value:1},
+   calido:{value:new THREE.Vector3(.018,.008,-.012)},frio:{value:new THREE.Vector3(-.008,.002,.012)}})}
+function hiResize(){if(!HI.on)return;const v=renderer.getDrawingBufferSize(new THREE.Vector2()),w=Math.max(2,v.x|0),h=Math.max(2,v.y|0);
+ const op={type:THREE.HalfFloatType,format:THREE.RGBAFormat,minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,depthBuffer:false,stencilBuffer:false};
+ if(!HI.rt){HI.rt=new THREE.WebGLMultisampleRenderTarget(w,h,{type:THREE.HalfFloatType,format:THREE.RGBAFormat,minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,depthBuffer:true,stencilBuffer:false});HI.rt.samples=4}else HI.rt.setSize(w,h);
+ let bw=w>>1,bh=h>>1;for(let i=0;i<HI.n;i++){if(!HI.b[i])HI.b[i]=new THREE.WebGLRenderTarget(Math.max(1,bw),Math.max(1,bh),op);else HI.b[i].setSize(Math.max(1,bw),Math.max(1,bh));bw>>=1;bh>>=1}
+ HI.m.fin.uniforms.px.value.set(1/w,1/h)}
+function hiPaso(m,dst){HI.q.material=m;renderer.setRenderTarget(dst);renderer.render(HI.sc,HI.cam)}
+/* las sombras de los materiales ya compilados se rehacen al cambiar de modo (la curva de color pasa a hacerse aquí) */
+function hiMateriales(){scene.traverse(o=>{const ms=o.material?(Array.isArray(o.material)?o.material:[o.material]):[];for(const m of ms)m.needsUpdate=true})}
+function hiPon(on){on=!!on&&HI.ok;if(on===HI.on&&HI.q)return;HI.on=on;try{localStorage.setItem('hd-hiper',on?'1':'0')}catch(e){}
+ if(on){hiMontar();renderer.toneMapping=THREE.NoToneMapping;hiResize()}else{renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.setRenderTarget(null)}
+ hiMateriales();const b=document.getElementById('bHD');if(b){b.textContent=on?'HD: sí':'HD: no';b.classList.toggle('on',on)}}
+function hiRender(dt){if(!HI.on){renderer.render(scene,camera);return}
+ const ex=renderer.toneMappingExposure;HI.t=(HI.t+dt)%100;
+ renderer.setRenderTarget(HI.rt);renderer.clear();renderer.render(scene,camera);
+ const fu=HI.m.fin.uniforms;fu.tS.value=HI.rt.texture;fu.ex.value=ex;fu.tm.value=HI.t;fu.useB.value=HI.bloom?1:0;
+ if(HI.bloom){const B=HI.b;const pu=HI.m.pre.uniforms;pu.tS.value=HI.rt.texture;pu.px.value.set(.5/HI.rt.width,.5/HI.rt.height);pu.ex.value=ex;hiPaso(HI.m.pre,B[0]);
+  const du=HI.m.down.uniforms;for(let i=1;i<HI.n;i++){du.tS.value=B[i-1].texture;du.px.value.set(1/B[i-1].width,1/B[i-1].height);hiPaso(HI.m.down,B[i])}
+  const uu=HI.m.up.uniforms;const ac=renderer.autoClear;renderer.autoClear=false;
+  for(let i=HI.n-1;i>0;i--){uu.tS.value=B[i].texture;uu.px.value.set(1/B[i].width,1/B[i].height);uu.k.value=.9;hiPaso(HI.m.up,B[i-1])}
+  renderer.autoClear=ac;fu.tB.value=B[0].texture}
+ hiPaso(HI.m.fin,null)}
 /* ---------- bucle ---------- */
 const grain=document.getElementById('grain'),gctx=grain.getContext('2d'),gimg=gctx.createImageData(160,100);let gTick=0;
 let last=performance.now();
 const AQ={acc:0,n:0,t:0,lvl:0};
 function autoCalidad(dtR){AQ.acc+=dtR;AQ.n++;AQ.t+=dtR;if(AQ.t<2)return;const ms=AQ.acc/AQ.n*1000;AQ.acc=AQ.n=AQ.t=0;
  if(ms>26&&AQ.lvl<3){AQ.lvl++;const pr=renderer.getPixelRatio();renderer.setPixelRatio(Math.max(.75,pr-.25));onResize();
+  if(AQ.lvl>=2)HI.bloom=false;
   if(AQ.lvl===2){sun.shadow.mapSize.set(1024,1024);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null;}}
   if(AQ.lvl===3&&crowd){crowd.hm.visible=false;}}
  else if(ms<17.8&&AQ.lvl===0&&!AQ.max){const pr=renderer.getPixelRatio(),top=Math.min(devicePixelRatio||1,mobile?1.75:2);if(pr<top-.01){renderer.setPixelRatio(Math.min(top,pr+.25));onResize();}else AQ.max=1;}}
@@ -1196,7 +1260,7 @@ function frame(now){requestAnimationFrame(frame);try{if(last)autoCalidad(Math.mi
  sun.position.copy(focus).addScaledVector(sun.userData.dir,110);sun.target.position.copy(focus);
  updateCamera(dtR);
  dust.mat.uniforms.uScale.value=renderer.domElement.height/(2*Math.tan(camera.fov*Math.PI/360));
- renderer.render(scene,camera);
+ hiRender(dtR);
 
  if(false){const d=gimg.data;for(let i=0;i<d.length;i+=4){const v=Math.random()*255;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}gctx.putImageData(gimg,0,0);}}
 /* ===================== MÁS LIDIA: tercios, banderillas, cuadrilla, comentarista y velocidad =====================
@@ -1308,7 +1372,7 @@ try{const v=+localStorage.getItem('ruedoVel');if([.5,1,2,4,8].includes(v))ui.spe
 (function(){const bS=document.getElementById('bSup');if(!bS)return;bS.onclick=()=>{if(D.phase==='suprema'||D.phase==='fin')return;XL.salta=true;ui.paused=false;bS.disabled=true;setTimeout(()=>bS.disabled=false,1500);};})();
 /* ayuda de pruebas: avanza la lidia sin depender de los fotogramas */
 const xlAvanza=seg=>{for(let t=0;t<seg&&bull&&torero;t+=.05){simTime+=.05;updateDirector(.05);updateBull(.05);updateTorero(.05);supremaPost(.05);}return D.phase;};
-window.__ruedo={avanza:xlAvanza,get xl(){return XL;},D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},banda:()=>xlBandStart(),get xl(){return XL;},vista:(v)=>{const b=document.getElementById('bVista');while(ui.cam!==v)b.click();},get plano(){return camS.shot;},get tor(){return torero;},render:(c)=>renderer.render(scene,c),get canvas(){return renderer.domElement;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
+window.__ruedo={avanza:xlAvanza,get xl(){return XL;},D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},banda:()=>xlBandStart(),get xl(){return XL;},vista:(v)=>{const b=document.getElementById('bVista');while(ui.cam!==v)b.click();},get plano(){return camS.shot;},get tor(){return torero;},render:(c)=>{if(HI.on&&c===camera)hiRender(0);else{const t=renderer.toneMapping;renderer.render(scene,c)}},hi:(v)=>hiPon(v),get HI(){return HI},get canvas(){return renderer.domElement;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
 })();
 </script>
 
