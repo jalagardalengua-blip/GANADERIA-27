@@ -1,5 +1,9 @@
 # Cambios
 
+## Banderillas mejor realizadas
+- Segunda cámara de tendido: si el peón sale del burladero justo debajo de la cámara principal, se corta a la del otro tendido en vez de quedarse mirando en picado sin encuadrar a nadie.
+- Durante el tercio de banderillas el realizador normal ya no pisa los planos del peón.
+
 ## Ganadería de corro: la plaza real de cada pueblo, edificio a edificio
 - Cada uno de los 34 pueblos se construye con los edificios reales que rodean su plaza de fiestas, sacados de OpenStreetMap: planta exacta, número de plantas o altura, iglesias y torres.
   - La iglesia o el ayuntamiento real queda al fondo de la arena.

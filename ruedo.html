@@ -835,18 +835,23 @@ const TV={plano:s=>({raso:'callejon',torero:'tele',toro:'tele',grua:'tendido',ce
 const BANCAM={st:null};
 function bandDirector(){const b=typeof XL!=='undefined'&&XL.band;const st=b?b.st:null;if(st===BANCAM.st)return;BANCAM.st=st;if(ui.cam!=='cine'||!st)return;
  if(st==='sale')cut('tendido');else if(st==='cita')cut(Math.random()<.7?'tele':'callejon');else if(st==='salida'&&camS.shotT>1.5)cut('tendido');}
-const director={onPass(){if(camS.shotT<5.5)return;const r=Math.random();const s=r<.45?'tele':r<.72?'callejon':'tendido';if(s!==camS.shot)cut(s);},
- onPaseo(){if(camS.shotT>2.5&&camS.shot!=='tendido')cut('tendido');}};
+const enBanda=()=>sujeto()!==T;   /* con el peón en el ruedo manda la realización de banderillas */
+const director={onPass(){if(camS.shotT<5.5||enBanda())return;const r=Math.random();const s=r<.45?'tele':r<.72?'callejon':'tendido';if(s!==camS.shot)cut(s);},
+ onPaseo(){if(enBanda())return;if(camS.shotT>2.5&&camS.shot!=='tendido')cut('tendido');}};
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
 function cut(shot){shot=TV.plano(shot);if(shot===camS.shot&&camS.shotT<4)return;camS.shot=shot;camS.shotT=0;camS.snap=true;camS.callAng=SUN_AZ+(Math.random()-.5)*1.8;camS.gruaA=Math.random()*TAU;}
 /* a quién encuadra la cámara: en banderillas, el peón que sale a poner el par; si no, el matador */
 function sujeto(){const b=typeof XL!=='undefined'&&XL.band;if(b&&b.P&&(b.st==='sale'||b.st==='cita'||b.st==='reunion'||b.st==='salida'))return b.P.pos;return T;}
+/* dos cámaras de tendido, como en la tele: si la acción se mete justo debajo de la principal (un peón que sale del burladero de
+   ese lado), se corta a la del otro tendido en vez de mirar en picado sin encuadrar a nadie */
+function camTendidoA(focus){const a1=SUN_AZ+.3,a2=a1+2.1;const d1=Math.hypot(focus.x-Math.cos(a1)*(R+5),focus.z-Math.sin(a1)*(R+5)),d2=Math.hypot(focus.x-Math.cos(a2)*(R+5),focus.z-Math.sin(a2)*(R+5));
+ const alt=camS.tAlt?d2>13&&!(d1>17):d1<14&&d2>d1+3;if(!!alt!==!!camS.tAlt){camS.tAlt=alt;camS.snap=true;camS.tL=camS.eL=null;}return camS.tAlt?a2:a1;}
 function shotPose(shot,o){const SJ=sujeto();const focus=SJ.clone().lerp(B,.38);focus.y=1.0;const sx=D.side;const f=new V3(Math.sin(Tyaw),0,Math.cos(Tyaw)),l=new V3(Math.cos(Tyaw),0,-Math.sin(Tyaw));
  const bh=new V3(Math.sin(Byaw),0,Math.cos(Byaw)),br=new V3(Math.cos(Byaw),0,-Math.sin(Byaw));const spread=SJ.distanceTo(B)+3.4;
  const frame=(pos,minF,maxF)=>clamp(2*Math.atan(spread*.5/pos.distanceTo(focus))*180/Math.PI*1.2,minF,maxF);o.shake=0;o.rate=3;o.lookRate=5;o.fovRate=2.5;o.fovMax=78;
  switch(shot){
   case'tendido':{/* cámara de televisión en la delantera del tendido de sombra: panorámica suave con zona muerta y zoom solo en cambios claros */
-   const a=SUN_AZ+.3;o.pos.set(Math.cos(a)*(R+5),7.6,Math.sin(a)*(R+5));
+   const a=camTendidoA(SJ);o.pos.set(Math.cos(a)*(R+5),7.6,Math.sin(a)*(R+5));
    const cerca0=o.pos.distanceTo(focus)<20;if(!camS.tL||cerca0||camS.tL.distanceTo(focus)>1.1)camS.tL=(camS.tL||focus.clone()).lerp(focus,!camS.tL||cerca0?1:.35);o.look.copy(camS.tL);   /* de cerca, sin zona muerta */
    const dC=o.pos.distanceTo(focus),fw=frame(o.pos,9,dC<20?46:30)*(dC<20?.95:.74);   /* si la acción se acerca a la cámara, abre más */if(!camS.tF||Math.abs(fw-camS.tF)/camS.tF>.2)camS.tF=fw;o.fov=camS.tF;o.shake=1;o.rate=1.2;o.lookRate=dC<20?2.6:1.8;o.fovRate=dC<20?1:.5;o.fovMax=56;break;}
   case'cerca':{const ax=B.clone().sub(SJ).setY(0);if(ax.lengthSq()<1e-4)ax.set(1,0,0);ax.normalize();const pp=new V3(-ax.z,0,ax.x);
@@ -855,7 +860,7 @@ function shotPose(shot,o){const SJ=sujeto();const focus=SJ.clone().lerp(B,.38);f
    if(Math.hypot(c.x,c.z)>R-1.6){const k=(R-1.6)/Math.hypot(c.x,c.z);c.x*=k;c.z*=k;}
    o.pos.set(c.x,1.75,c.z);o.look.copy(focus);o.look.y=1.05;const fw=frame(o.pos,30,62);if(!camS.kF||Math.abs(fw-camS.kF)/camS.kF>.15)camS.kF=fw;o.fov=camS.kF;
    o.shake=1;o.rate=1.6;o.lookRate=3;o.fovRate=1;o.fovMax=74;break;}
-  case'tele':{const a=SUN_AZ+.3;o.pos.set(Math.cos(a)*(R+5),7.6,Math.sin(a)*(R+5));
+  case'tele':{const a=camTendidoA(SJ);o.pos.set(Math.cos(a)*(R+5),7.6,Math.sin(a)*(R+5));
    if(!camS.eL||camS.eL.distanceTo(focus)>.6)camS.eL=(camS.eL||focus.clone()).lerp(focus,camS.eL?.4:1);o.look.copy(camS.eL);o.look.y=1.05;
    const fw=frame(o.pos,5.5,24)*(spread>9?.98:spread>6?.8:.62);   /* cerrado con torero y toro juntos; si están lejos (cite de banderillas) cabe todo */if(!camS.eF||Math.abs(fw-camS.eF)/camS.eF>.22)camS.eF=fw;o.fov=camS.eF;o.shake=1;o.rate=1.2;o.lookRate=2.2;o.fovRate=.6;o.fovMax=30;break;}
   case'callejon':{const a=camS.callAng;o.pos.set(Math.cos(a)*(R+.5),2.45,Math.sin(a)*(R+.5));o.look.copy(focus);const fw=frame(o.pos,8,34);if(!camS.cF||Math.abs(fw-camS.cF)/camS.cF>.18)camS.cF=fw;o.fov=camS.cF;o.shake=1;o.rate=1.5;o.lookRate=2.4;o.fovRate=1;o.fovMax=56;break;}

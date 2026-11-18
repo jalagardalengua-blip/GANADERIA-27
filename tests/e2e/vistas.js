@@ -12,5 +12,5 @@ for(const v of ['cine','tendido','cerca']){await fr().evaluate(v=>__ruedo.vista(
  for(let i=0;i<90;i++){const st=await fr().evaluate(()=>__ruedo.xl.band&&__ruedo.xl.band.st);if(st==='cita'||st==='reunion')break;if(!st){await fr().evaluate(()=>__ruedo.banda());}await p.waitForTimeout(500)}
  await p.waitForTimeout(700);
  const enc=await fr().evaluate(()=>{const P=__ruedo.xl.band&&__ruedo.xl.band.P;if(!P)return null;const c=__ruedo.cam;const q=P.pos.clone().setY(1.2).project(c);return {x:+q.x.toFixed(2),y:+q.y.toFixed(2),dentro:Math.abs(q.x)<.92&&Math.abs(q.y)<.92&&q.z<1,etiqueta:document.getElementById('bVista').textContent,plano:__ruedo.plano,camPos:__ruedo.cam.position.toArray().map(v=>+v.toFixed(1)),peon:P.pos.toArray().map(v=>+v.toFixed(1))}});
- R.vistas.push([v,enc]);await p.screenshot({path:`/tmp/vista-${v}.png`,timeout:120000})}
+ R.vistas.push([v,enc,await fr().evaluate(()=>[__ruedo.xl.band&&__ruedo.xl.band.st,__ruedo.HI.on])]);await p.screenshot({path:`/tmp/vista-${v}.png`,timeout:120000})}
 console.log(JSON.stringify(R));const ok=R.vistas.every(([v,e])=>e&&e.dentro);console.log(errs.length?'ERRORES '+JSON.stringify(errs):ok?'VISTAS OK':'VISTAS MAL');await b.close()})();
