@@ -203,9 +203,11 @@ const PP_DESC={vilareal:'Plaça Major porticada y ayuntamiento',nules:'Iglesia d
  chiva:'Castillo en ruinas sobre la villa',ontinyent:'El campanario más alto de la Comunitat',sueca:'Ayuntamiento y campanario de Sant Pere',elpuig:'Monasterio de las cuatro torres',
  sagunt:'Santa Maria gótica y el castillo sobre el cerro',denia:'Castillo, Montgó y puerto',pedreguer:'Iglesia bajo la Serra de Segària',xabia:'Iglesia-fortaleza de piedra tosca bajo el Montgó',
  laromana:'Iglesia y casas blancas del Vinalopó'};
+// fotos de plaza que existen en img/plazas
+const PP_FOTOS=['almassora','benicarlo','borriana','cabanes','nules','onda','peniscola','torreblanca','vilareal','vinaros'];
 // plaza de un pueblo (sin festejo cargado): clave, nombre, descripción e imagen
 function ppPlaza(pueblo){const pu=String(pueblo||'').toLowerCase().trim();let k=PMX_PUEBLOS[pu],gen=false;if(!k){k=PMX_TIPO_PUEBLO[pu];gen=true}if(!k||!PMX_PLAZAS[k])return null;
- const T_=PMX_PLAZAS[k];return {k,nom:gen?pmxNomPueblo(T_.nom,pueblo):T_.nom,desc:gen?'':(PP_DESC[k]||''),img:gen?null:'img/plazas/'+k+'.jpg'}}
+ const T_=PMX_PLAZAS[k];return {k,nom:gen?pmxNomPueblo(T_.nom,pueblo):T_.nom,desc:gen?'':(PP_DESC[k]||''),img:gen||!PP_FOTOS.includes(k)?null:'img/plazas/'+k+'.jpg'}}
 
 /* ---------- identidad visible durante el festejo ----------
    Fachadas, tejados y terrados según cómo se construye en cada zona, y a qué mira la cámara de presentación
@@ -245,3 +247,21 @@ if(typeof camCalle==='function'){const _ccPP=camCalle;camCalle=function(dt){
  if(CL&&CL.ppIntro!=null&&!CL.plaza&&CL.cam==='tv'&&PMX.PT){const now=performance.now();if(!CL.ppIntro)CL.ppIntro=now;const s=(now-CL.ppIntro)/1000;if(s>=5.5){CL.ppIntro=null;return _ccPP(dt)}const u=s/5.5,e=u*u*(3-2*u),f=PMX.PT.foco||[0,10,-20];
   W3.cam.position.set(9-15*e,19-7*e,30-16*e);W3.cam.lookAt(f[0],f[1]-2*e,f[2]);return}
  return _ccPP(dt)}}
+
+/* ---------- el segundo edificio de la plaza, en su lado real ----------
+   En muchas plazas la iglesia y el ayuntamiento están frente a frente (Vinaròs, Xàbia, Nules, Borriana, Dénia) o el
+   ayuntamiento preside y la iglesia queda enfrente (Sueca). Se construyen con los mismos edificios del fondo,
+   girados media vuelta, en el tramo derecho del lado del cajón. */
+function ppEspejo(G,sc,LAN,fn){const G2={};for(const k in G)G2[k]=new PmxGeo();const n0=sc.children.length,l0=LAN.length,c0=CL.crowd.length;fn(G2);
+ for(const k in G2){const a=G2[k],b=G[k];if(!a.n)continue;const base=b.n;
+  for(let i=0;i<a.pos.length;i+=3){b.pos.push(-a.pos[i],a.pos[i+1],-a.pos[i+2]);b.nor.push(-a.nor[i],a.nor[i+1],-a.nor[i+2])}
+  for(const v of a.col)b.col.push(v);for(const v of a.uv)b.uv.push(v);for(const j of a.idx)b.idx.push(j+base);b.n+=a.n}
+ const g=new THREE.Group();g.rotation.y=Math.PI;for(const o of sc.children.slice(n0)){sc.remove(o);g.add(o)}sc.add(g);
+ for(let i=l0;i<LAN.length;i++){LAN[i][0]*=-1;LAN[i][2]*=-1}
+ for(let i=c0;i<CL.crowd.length;i++){const c=CL.crowd[i];c[0]*=-1;c[2]*=-1;c[3]=(c[3]||0)+Math.PI}}
+function ppNorte(G,sc,PT,LAN){const tipo=PT.norte;
+ if(tipo==='ajuntament')ppEspejo(G,sc,LAN,G2=>pmxAjuntament(G2,sc,-21,-3.5,-11,PT,LAN));
+ else if(tipo==='iglesia')ppEspejo(G,sc,LAN,G2=>pmxIglesia(G2,sc,-21,-5,-11,Object.assign({},PT,{sinTorre:false,camp:null,gotic:false,dosPortes:false,cupula:true,azulejo:true}),LAN))}
+for(const [k,n] of Object.entries({vinaros:'ajuntament',xabia:'ajuntament',nules:'ajuntament',borriana:'ajuntament',denia:'ajuntament',sueca:'iglesia'}))if(PMX_PLAZAS[k])PMX_PLAZAS[k].norte=n;
+// Peníscola: la plaza de Santa Maria está al pie del castillo, en lo alto del peñón
+if(PMX_PLAZAS.peniscola){Object.assign(PMX_PLAZAS.peniscola,{castell:{x:2,z:-64,s:.42,ry:0,col:'#d6c4a0',hill:'#a8987a',n:20},roca:{x:0,z:-62},foco:[2,18,-60]})}
