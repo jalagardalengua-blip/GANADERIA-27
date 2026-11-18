@@ -203,9 +203,11 @@ const PP_DESC={vilareal:'Plaça Major porticada y ayuntamiento',nules:'Iglesia d
  chiva:'Castillo en ruinas sobre la villa',ontinyent:'El campanario más alto de la Comunitat',sueca:'Ayuntamiento y campanario de Sant Pere',elpuig:'Monasterio de las cuatro torres',
  sagunt:'Santa Maria gótica y el castillo sobre el cerro',denia:'Castillo, Montgó y puerto',pedreguer:'Iglesia bajo la Serra de Segària',xabia:'Iglesia-fortaleza de piedra tosca bajo el Montgó',
  laromana:'Iglesia y casas blancas del Vinalopó'};
+// fotos de plaza que existen en img/plazas
+const PP_FOTOS=['almassora','benicarlo','borriana','cabanes','nules','onda','peniscola','torreblanca','vilareal','vinaros'];
 // plaza de un pueblo (sin festejo cargado): clave, nombre, descripción e imagen
 function ppPlaza(pueblo){const pu=String(pueblo||'').toLowerCase().trim();let k=PMX_PUEBLOS[pu],gen=false;if(!k){k=PMX_TIPO_PUEBLO[pu];gen=true}if(!k||!PMX_PLAZAS[k])return null;
- const T_=PMX_PLAZAS[k];return {k,nom:gen?pmxNomPueblo(T_.nom,pueblo):T_.nom,desc:gen?'':(PP_DESC[k]||''),img:gen?null:'img/plazas/'+k+'.jpg'}}
+ const T_=PMX_PLAZAS[k];return {k,nom:gen?pmxNomPueblo(T_.nom,pueblo):T_.nom,desc:gen?'':(PP_DESC[k]||''),img:gen||!PP_FOTOS.includes(k)?null:'img/plazas/'+k+'.jpg'}}
 
 /* ---------- identidad visible durante el festejo ----------
    Fachadas, tejados y terrados según cómo se construye en cada zona, y a qué mira la cámara de presentación
