@@ -18,11 +18,12 @@ OUTJS = sys.argv[1] if len(sys.argv) > 1 else '/home/user/ganaderia-27/js/plazas
 FONDO = {k: 'iglesia' for k in ['nules', 'borriana', 'onda', 'almassora', 'cabanes', 'torreblanca', 'benicarlo', 'vinaros', 'peniscola', 'moncofa', 'lalcora', 'borriol',
                                 'alcala', 'benicassim', 'museros', 'massamagrell', 'alboraia', 'sagunt', 'denia', 'pedreguer', 'xabia', 'laromana']}
 FONDO.update({k: 'ajuntament' for k in ['vilareal', 'lavall', 'betxi', 'meliana', 'pucol', 'foios', 'lliria', 'ontinyent', 'sueca', 'elpuig']})
-FONDO.update({k: 'arcade' for k in ['segorbe', 'chiva']})
-EXENT = {'benicarlo': -1, 'vinaros': 1, 'alcala': 1}
+FONDO.update({k: 'arcade' for k in ['chiva']})
+FONDO['segorbe'] = 'iglesia'  # guía de plazas: la catedral al fondo
+EXENT = {'torreblanca': 1, 'vinaros': 1, 'alcala': 1}
 NORTE = {'vinaros': 10.5, 'xabia': 10.5, 'nules': 10.5, 'borriana': 10.5, 'denia': 10.5, 'sueca': 16.5}
-PALAU = {'betxi', 'pucol'}
-TORRES = {'torreblanca': [(-17.5, 17)], 'segorbe': [(-18, -17), (18, 17.5), (-34, -48)], 'foios': [(18, -17), (-24, -32)], 'lavall': [(22, -34)],
+PALAU = {'pucol'}
+TORRES = {'betxi': [(0, -19)], 'segorbe': [(-18, -17), (18, 17.5), (-34, -48)], 'foios': [(18, -17), (-24, -32)], 'lavall': [(22, -34)],
           'meliana': [(-24, -30)], 'pucol': [(-26, -32)], 'lliria': [(6, -44)], 'ontinyent': [(-20, -36)], 'sueca': [(22, -30)]}
 
 
