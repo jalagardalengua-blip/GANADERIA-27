@@ -1,5 +1,21 @@
 # Cambios
 
+## Ganadería de corro: las 14 plazas de Castellón según la guía de entornos 3D
+- Vila-real: cuatro alas porticadas alrededor de la plaza y torre-reloj del ayuntamiento.
+- Nules: fuente-monumento en el eje entre la iglesia de cúpula azul y el ayuntamiento.
+- Borriana: campanario de ladrillo, El Templat.
+- Onda: el castillo domina justo detrás de la plaza, rodeada de soportales.
+- Almassora: recinto porticado con barreras y cadafales de madera.
+- Cabanes: iglesia de mampostería parda, campanario octogonal y sierra de bancales.
+- Torreblanca: iglesia encalada y torre de piedra almenada exenta.
+- Benicarló: campanario octogonal aislado en la explanada, que se rodea entero.
+- Peníscola: el peñón rodeado de mar con el castillo encima.
+- Segorbe: la catedral al fondo y torres medievales de piedra oscura.
+- La Vall d'Uixó: la Serra d'Espadà escarpada y verde, justo detrás.
+- Betxí: torreón central del Palau.
+- Vinaròs y Moncofa ya seguían la guía.
+- Las «torres» grandes del mapa ya no llevan un chapitel desproporcionado.
+
 ## Menús más cómodos
 - La barra con la fecha, el dinero, el prestigio y «Avanzar» se queda fija arriba al bajar por cualquier pantalla.
 - Tareas en una sola fila (punto, texto y botón); antes cada una ocupaba tres líneas.

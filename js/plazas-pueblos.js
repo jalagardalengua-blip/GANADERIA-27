@@ -152,7 +152,7 @@ function ppFortif(G,st){const y=12.5;ppMerlets(G,-8.1,-11.9,8.1,-11.9,y,st);ppMe
  for(const x of [-8.1,8.1]){G.granite.box(x,y-1.2,-12.2,1.3,2.4,1.3,1.5,st);G.granite.box(x,y-2.6,-12.2,.9,.6,.9,1.5,[.9,.86,.78])}
  G.granite.box(0,y-2.2,-11.6,2.4,1.4,.9,1.5,st)}// matacán sobre la puerta
 // sierras del horizonte (lejos: no tapan nada de la plaza; se ven por las calles y desde lo alto de los cadafales)
-function ppSerra(sc,lista,night){const m=new THREE.MeshStandardMaterial({color:night?'#1d2433':'#6f7b70',roughness:1,flatShading:true});
+function ppSerra(sc,lista,night,col){const m=new THREE.MeshStandardMaterial({color:night?'#1d2433':(col||'#6f7b70'),roughness:1,flatShading:true});
  for(const [a,d,h,w] of lista){const g=new THREE.SphereGeometry(1,40,12,0,Math.PI*2,0,Math.PI/2),p=g.attributes.position,r=mulberry((a*7+d)|0);
   // cresta: picos y collados a lo largo de la sierra
   for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i);if(y>.02){const cr=.75+.25*Math.sin(x*7.3+a)*Math.sin(x*3.1+d)+(r()-.5)*.12;p.setY(i,Math.pow(y,1.25)*cr)}}g.computeVertexNormals();
@@ -192,7 +192,7 @@ function pmxHitos(sc,G,PT,LAN){const night=!!(CL&&CL.night),st=PT.st||PP_ST.pied
  if(PT.fortif&&PT.fondo==='iglesia')ppFortif(G,st);
  if(PT.roca)ppRoca(sc,PT.roca);
  if(PT.mar&&!(CL&&CL.o&&CL.o.tipo==='mar'))ppMar(sc,G,night,PT);
- if(PT.serra&&PP_SERRA[PT.serra])ppSerra(sc,PP_SERRA[PT.serra],night)}
+ if(PT.serra&&PP_SERRA[PT.serra])ppSerra(sc,PP_SERRA[PT.serra],night,PT.serraCol)}
 
 /* ---------- la plaza de cada pueblo fuera del 3D: fichas de festejos, selector y calendario ---------- */
 const PP_DESC={vilareal:'Plaça Major porticada y ayuntamiento',nules:'Iglesia de cúpula azul y palmeras',borriana:"Iglesia gótica de El Salvador",onda:'Bajo el castillo de las 300 torres',
@@ -237,7 +237,9 @@ for(const [k,[pal,zona,foco]] of Object.entries(PP_ID)){const T_=PMX_PLAZAS[k];i
 function ppSuelo(sc,PT,night){for(const o of sc.children)if(o.isMesh&&o.geometry&&o.geometry.parameters&&o.geometry.parameters.height===120&&(o.geometry.parameters.width===200||o.geometry.parameters.width===174)){
   const R_=PT.osm?104:0,x1=R_||(PT.mar?74:76),x0=-(R_||76),z0=-(R_||38),z1=R_||56,mp=o.material.map;o.geometry.dispose();o.geometry=new THREE.PlaneGeometry(x1-x0,z1-z0);o.position.set((x0+x1)/2,0,(z0+z1)/2);
   if(mp){mp.repeat.set((x1-x0)/4,(z1-z0)/4);if(o.material.normalMap)o.material.normalMap.repeat.copy(mp.repeat);if(o.material.roughnessMap)o.material.roughnessMap.repeat.copy(mp.repeat)}break}}
-function ppCampo(sc,PT,night){const zona=PT.zona||'horta',g=new THREE.PlaneGeometry(840,840,84,84);g.rotateX(-Math.PI/2);const p=g.attributes.position,col=[],c=new THREE.Color(),N=pmxNoise(77);
+function ppCampo(sc,PT,night){if(PT.isla){const g=new THREE.RingGeometry(108,700,64,1);g.rotateX(-Math.PI/2);const w=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:night?'#0b1a2e':'#2f6f9a',roughness:.12,metalness:.35}));w.position.y=-.6;sc.add(w);
+  const r=new THREE.Mesh(new THREE.CylinderGeometry(108,118,14,48,1,true),new THREE.MeshStandardMaterial({color:'#a8987a',roughness:1,flatShading:true,side:THREE.DoubleSide}));r.position.y=-7;sc.add(r);return}
+const zona=PT.zona||'horta',g=new THREE.PlaneGeometry(840,840,84,84);g.rotateX(-Math.PI/2);const p=g.attributes.position,col=[],c=new THREE.Color(),N=pmxNoise(77);
  const base={costa:['#a59a6a','#8e8a58','#b3a676'],interior:['#8a7d58','#7b7a4e','#9a8a62'],horta:['#6f8a4a','#86964f','#a0965e']}[zona],cs=base.map(x=>new THREE.Color(x)),haze=new THREE.Color(night?'#1b2232':'#b9bfa8');
  for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i),r=Math.hypot(x,z);
   // parcelas: bancales de huerta o campos de secano y olivos
@@ -280,7 +282,10 @@ function ppOsmCargar(k){if(k in PP_OSM)return PP_OSM[k];let d=null;
  return PP_OSM[k]=d}
 function ppOsmEdificios(G,sc,PT,LAN,rnd,PAL){const D=PT.osm;if(!D||!D.b)return;const T=PMX.T,styles=PT.styles||['calA','calB'],st=PT.st||PP_ST.piedra,terr=PT.terrat||0;
  const tri=(Gm,a,b,c,s,col)=>Gm.q([a[0],a[1],a[2]],[b[0],b[1],b[2]],[c[0],c[1],c[2]],[c[0],c[1],c[2]],[a[0]/s,-a[2]/s,b[0]/s,-b[2]/s,c[0]/s,-c[2]/s,c[0]/s,-c[2]/s],col,[0,1,0]);
- for(const b of D.b){const kind=b[0],H=Math.max(3,b[1]/10),n=(b.length-2)/2;if(n<3)continue;const P=[];for(let i=0;i<n;i++)P.push([b[2+i*2]/10,b[3+i*2]/10]);
+ for(const b of D.b){let kind=b[0];const H=Math.max(3,b[1]/10),n=(b.length-2)/2;if(n<3)continue;const P=[];for(let i=0;i<n;i++)P.push([b[2+i*2]/10,b[3+i*2]/10]);
+  if(PT.perim&&P.some(p=>Math.abs(p[0])<21.6&&Math.abs(p[1])<18.6))continue;
+  // una «torre» grande en el mapa (iglesia, castillo…) no lleva chapitel: se trata como edificio público
+  if(kind===2){let A2=0;for(let i=0;i<n;i++){const p=P[i],q=P[(i+1)%n];A2+=p[0]*q[1]-q[0]*p[1]}if(Math.abs(A2)/2>70)kind=3}
   let A=0,cx=0,cz=0;for(let i=0;i<n;i++){const p=P[i],q=P[(i+1)%n];A+=p[0]*q[1]-q[0]*p[1];cx+=p[0];cz+=p[1]}cx/=n;cz/=n;const sg=A>0?1:-1;
   const h=((Math.abs(b[2]*7+b[3]*13))%997)/997,style=styles[(h*styles.length)|0],tint=kind===0?pmxHex(PAL[((h*977)|0)%PAL.length]):kind===3?[1.05,.92,.8]:[1,1,1];
   const dist=Math.hypot(cx,cz),GF=kind===0?3.3:0;
@@ -301,7 +306,7 @@ function ppOsmEdificios(G,sc,PT,LAN,rnd,PAL){const D=PT.osm;if(!D||!D.b)return;c
   // cubierta: a cuatro aguas en casas pequeñas y convexas, terrado o teja plana en las grandes
   const conv=(()=>{let s0=0;for(let i=0;i<n;i++){const a=P[i],b2=P[(i+1)%n],c=P[(i+2)%n],cr=(b2[0]-a[0])*(c[1]-b2[1])-(b2[1]-a[1])*(c[0]-b2[0]);if(Math.abs(cr)<1e-6)continue;const s1=Math.sign(cr);if(s0&&s1!==s0)return false;s0=s1}return true})();
   const area=Math.abs(A)/2,col=PMX.PT&&PMX.PT.teja||[1,1,1];
-  if(kind===2){const r=Math.sqrt(area)/2;const sp=new THREE.Mesh(new THREE.ConeGeometry(r*1.3,r*2.4,4),new THREE.MeshStandardMaterial({map:T.roof.map,roughness:.8}));sp.position.set(cx,H+r*1.2,cz);sp.rotation.y=Math.PI/4;sp.castShadow=true;sc.add(sp);continue}
+  if(kind===2){const r=Math.min(3.2,Math.sqrt(area)/2);const sp=new THREE.Mesh(new THREE.ConeGeometry(r*1.3,r*2.4,4),new THREE.MeshStandardMaterial({map:T.roof.map,roughness:.8}));sp.position.set(cx,H+r*1.2,cz);sp.rotation.y=Math.PI/4;sp.castShadow=true;sc.add(sp);continue}
   const flat=kind===4||(kind===0&&((h*31)%1)<terr)||area>420||!conv||n>8;
   if(flat){let tris=[];try{tris=THREE.ShapeUtils.triangulateShape(P.map(p=>new THREE.Vector2(p[0],p[1])),[])}catch(e){}
    const Gm=kind===0||kind===4?G.paving:G.roof;for(const t of tris)tri(Gm,[P[t[0]][0],H,P[t[0]][1]],[P[t[1]][0],H,P[t[1]][1]],[P[t[2]][0],H,P[t[2]][1]],kind===0?1.2:3,kind===0?[1.15,.72,.55]:col);
@@ -309,3 +314,24 @@ function ppOsmEdificios(G,sc,PT,LAN,rnd,PAL){const D=PT.osm;if(!D||!D.b)return;c
   else{const ap=Math.min(2.4,Math.sqrt(area)*.22),apex=[cx,H+ap,cz];for(let i=0;i<n;i++){const p0=P[i],p1=P[(i+1)%n];tri(G.roof,[p0[0],H,p0[1]],[p1[0],H,p1[1]],apex,3,[col[0]*.95,col[1]*.92,col[2]*.92])}}}}
 // nada de casas genéricas en el perímetro de la plaza: ahí van los edificios reales
 function ppOsmActiva(PT){if(!PT||!PT.k||typeof PMX_PLAZAS==='undefined')return false;if(PT.osm!==undefined)return !!PT.osm;PT.osm=ppOsmCargar(PT.k);return !!PT.osm}
+
+
+/* ===================== GUÍA DE PLAZAS DE CASTELLÓN (biblia de entornos 3D del propietario) =====================
+   Cada ficha de la guía, aplicada a su plaza. */
+Object.assign(PP_SERRA,{
+ espadà_a:[[-175,118,120,150],[-145,128,105,120],[-112,140,88,105],[160,135,70,90]],   // la Serra d'Espadà, escarpada y cerca
+ cabanes_b:[[-160,112,58,150],[170,118,52,120],[-125,125,48,100]]});                     // laderas abancaladas
+const PP_GUIA={
+ vilareal:{porxos:true,porxosTot:true,perim:true},                                           // cuatro alas porticadas y torre-reloj
+ nules:{centro:'fuente'},                                                                    // fuente-monumento en el eje entre iglesia y ayuntamiento
+ borriana:{camp:{h:34,w:2.3,col:[1.28,.72,.52],cap:'pinacle'}},                              // El Templat, campanario de ladrillo
+ onda:{porxos:true,castell:{x:-6,z:-96,s:.82,ry:.1,col:'#b9a07a',hill:'#8b7a58',n:36},foco:[-6,22,-90]},  // castillo dominando la plaza
+ almassora:{porxos:true,porxosTot:true,perim:true,ref:'fusta',cad:PP_CAD.fusta,colWood:true},  // recinto porticado con barreras de madera
+ cabanes:{st:[.92,.78,.6],camp:{h:28,w:2.1,oct:true,cap:'teja',col:[.92,.78,.6]},serra:'cabanes_b',serraCol:'#5f7a4c'},  // mampostería parda
+ torreblanca:{st:PP_ST.blanca,camp:{exent:true,side:1,h:27,w:2.3,cap:'pinacle',col:[.8,.73,.62]},torreMed:null},  // iglesia encalada y torre almenada
+ benicarlo:{camp:null,centro:'campanar'},                                                    // campanario octogonal aislado en la explanada
+ peniscola:{isla:true,castell:{x:0,z:-56,s:.5,ry:0,col:'#d6c4a0',hill:'#a8987a',n:22},foco:[0,16,-52]},  // el peñón rodeado de mar
+ segorbe:{fondo:'iglesia',gotic:true,st:PP_ST.ocre,torreMed:[{x:-18,z:-17,h:20,w:2.7,col:[.72,.66,.58]},{x:18,z:17.5,h:17,w:2.4,col:[.72,.66,.58]}],campLejos:{x:-34,z:-48,h:34,w:2.6,cap:'teja'}},  // catedral y torres oscuras
+ lavall:{serra:'espadà_a',serraCol:'#5c7350'},                                               // Serra d'Espadà con pinares
+ betxi:{palau:null,torreMed:[{x:0,z:-19,h:21,w:3,col:PP_ST.ocre}]}};                       // torreón central del Palau
+for(const [k,o] of Object.entries(PP_GUIA)){const T_=PMX_PLAZAS[k];if(!T_)continue;Object.assign(T_,o);if(T_.camp&&T_.fondo==='iglesia')T_.sinTorre=true;if(k==='benicarlo')T_.sinTorre=true}

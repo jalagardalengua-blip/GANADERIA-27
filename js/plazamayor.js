@@ -159,15 +159,15 @@ buildCalle=function(night){
  // ---------- casas ----------
  const PT=PMX.PT=pmxTipo();CL.plazaNom=PT.nom;
  // plaza real (OpenStreetMap): los edificios del perímetro son los de verdad
- const OSMR=typeof ppOsmActiva==='function'&&ppOsmActiva(PT);
+ const OSMR=typeof ppOsmActiva==='function'&&ppOsmActiva(PT),PER=OSMR&&!PT.perim;
  const PAL=PT.pal||(typeof locPal==='function'?locPal():FACOL),styles=PT.styles;
  const house=(a0,a1,line,axis,face,o={})=>{let a=a0;while(a<a1-.1){let w=[5.6,8.4,8.4,11.2][(rnd()*4)|0];if(a1-(a+w)<4.5)w=a1-a;pmxHouse(G,MT,T,rnd,a,a+w,line,axis,face,styles[(rnd()*styles.length)|0],pmxHex(PAL[(rnd()*PAL.length)|0]),o,LAN);a+=w}};
  // plaza: fondo con soportales (antes la iglesia), frente con salida al cajón y laterales con las calles
  const FL=PT.fl;
- if(PT.fondo==='iglesia'){const cs=PT.camp&&PT.camp.exent?PT.camp.side:0;if(!OSMR)house(-21,cs<0?-13.2:-8,-11,'x',1,{plaza:1,fl:FL});pmxIglesia(G,sc,-8,8,-11,PT,LAN);if(!OSMR)house(cs>0?13.2:8,21,-11,'x',1,{plaza:1,fl:FL})}
- else if(PT.fondo==='ajuntament'){if(!OSMR)house(-21,-9,-11,'x',1,{plaza:1,fl:FL});pmxAjuntament(G,sc,-9,9,-11,PT,LAN);if(!OSMR)house(9,21,-11,'x',1,{plaza:1,fl:FL})}
- else if(!OSMR)house(-21,21,-11,'x',1,{arcade:1,plaza:1,fl:FL});
- house(OSMR?-10.6:-21,-3.5,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});if(PT.norte&&typeof ppNorte==='function')ppNorte(G,sc,PT,LAN);else house(3.5,OSMR?10.6:21,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});
+ if(PT.fondo==='iglesia'){const cs=PT.camp&&PT.camp.exent?PT.camp.side:0;if(!PER)house(-21,cs<0?-13.2:-8,-11,'x',1,{plaza:1,fl:FL,arcade:PT.porxosTot?1:0});pmxIglesia(G,sc,-8,8,-11,PT,LAN);if(!PER)house(cs>0?13.2:8,21,-11,'x',1,{plaza:1,fl:FL,arcade:PT.porxosTot?1:0})}
+ else if(PT.fondo==='ajuntament'){if(!PER)house(-21,-9,-11,'x',1,{plaza:1,fl:FL,arcade:PT.porxosTot?1:0});pmxAjuntament(G,sc,-9,9,-11,PT,LAN);if(!PER)house(9,21,-11,'x',1,{plaza:1,fl:FL,arcade:PT.porxosTot?1:0})}
+ else if(!PER)house(-21,21,-11,'x',1,{arcade:1,plaza:1,fl:FL});
+ house(PER?-10.6:-21,-3.5,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});if(PT.norte&&typeof ppNorte==='function')ppNorte(G,sc,PT,LAN);else house(3.5,PER?10.6:21,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});
  if(PT.castell)pmxCastell(sc,PT.castell);if(typeof pmxHitos==='function')try{pmxHitos(sc,G,PT,LAN)}catch(e){console.warn('hitos',e)}
  house(-11,-4,14,'z',-1,{plaza:1,fl:FL});house(4,11,14,'z',-1,{plaza:1,fl:FL});house(-11,-4,-14,'z',1,{plaza:1,fl:FL});house(4,11,-14,'z',1,{plaza:1,fl:FL});
  house(21,64,4,'x',-1);house(21,64,-4,'x',1);house(-64,-21,4,'x',-1);house(-64,-21,-4,'x',1);house(18,46,3.5,'z',-1);house(18,46,-3.5,'z',1);if(!PT.mar||OSMR)house(-4,4,66,'z',-1);house(-4,4,-66,'z',1);
@@ -193,7 +193,8 @@ buildCalle=function(night){
   for(let t=.02;t<=L;t+=.26)at(t,1,.05,2,.05);for(const y of [.35,1.2,2])at(L/2,y,L,.07,.08);for(let t=0;t<=L+.01;t+=1.2)at(Math.min(t,L-.05),1.05,.09,2.1,.09);
   if(vert)for(let i=0;i<22;i++)CL.crowd.push([ln+(rf.x0>0?1:-1)*R(.6,3.2),0,R(rf.z0+.3,rf.z1-.3),rf.x0>0?-Math.PI/2:Math.PI/2,0])}
  // ---------- refugio amarillo y fuente de granito (CLCIRC) ----------
- pmxRefugio(G,CLCIRC[0],LAN);if(PT.centro==='palmera')pmxPalmera(sc,G,CLCIRC[1]);else if(PT.centro==='fanal')pmxFanal(sc,G,CLCIRC[1],LAN);else pmxFuente(sc,G,CLCIRC[1],MT,T);
+ pmxRefugio(G,CLCIRC[0],LAN);if(PT.centro==='campanar'&&typeof ppCampanar==='function'){const c=CLCIRC[1];ppCampanar(sc,G,{x:c.x,z:c.z,h:36,w:1.55,oct:true,cos:3,cap:'teja'},PT.st||[1.06,.99,.88]);G.granite.box(c.x,.25,c.z,3.6,.5,3.6,1.5,[.86,.83,.78])}
+ else if(PT.centro==='palmera')pmxPalmera(sc,G,CLCIRC[1]);else if(PT.centro==='fanal')pmxFanal(sc,G,CLCIRC[1],LAN);else pmxFuente(sc,G,CLCIRC[1],MT,T);
  // ---------- cajón ----------
  const cj=new THREE.Group();cj.position.set(0,0,43.6);sc.add(cj);mesh(G0.box,M('#e6e2d6',.7),5.2,3.4,7,0,2.2,3,cj);mesh(G0.box,M('#2d2d2d'),5.2,.8,7,0,.4,3,cj,true);mesh(G0.box,M('#bf3a3f',.6),5.25,.5,7.05,0,3.2,3,cj,true);
  const door=mesh(G0.box,M('#4a4f55',.5,.5),2.2,2.6,.1,0,1.9,-.55,cj);CL.door=door;for(const s of [-1,1])mesh(G0.box,M('#4a4f55',.5,.5),.12,3,.12,s*1.2,1.5,-.55,cj);mesh(G0.box,M('#4a4f55',.5,.5),7,2.2,.12,0,1.1,6.8,cj);
