@@ -1,5 +1,13 @@
 # Cambios
 
+## Menús más cómodos
+- La barra con la fecha, el dinero, el prestigio y «Avanzar» se queda fija arriba al bajar por cualquier pantalla.
+- Tareas en una sola fila (punto, texto y botón); antes cada una ocupaba tres líneas.
+- Listas largas plegadas: en la finca las obras salen de cuatro en cuatro con «Ver N más» (la pantalla pasa de unos 7.000 a unos 3.900 píxeles de alto).
+- Las cifras del resumen ya no parten palabras («ESCALAFÓ-N», «CONFIANZ-A»); la cabecera de inicio es más baja.
+- En la cabecera se lee el encaste («Encaste Albaserrada») en vez de cortarse.
+- Botones desactivados legibles, toques sin retardo y aparición suave al cambiar de pestaña.
+
 ## Banderillas mejor realizadas
 - Segunda cámara de tendido: si el peón sale del burladero justo debajo de la cámara principal, se corta a la del otro tendido en vez de quedarse mirando en picado sin encuadrar a nadie.
 - Durante el tercio de banderillas el realizador normal ya no pisa los planos del peón.
