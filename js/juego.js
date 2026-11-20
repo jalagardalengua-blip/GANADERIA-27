@@ -34,14 +34,14 @@ const ENC={
 };
 const PELO={negro:['#171310','#3a302a',0],'cárdeno':['#4f5156','#86888c',1],entrepelado:['#25231f','#5f5c57',1],colorado:['#74351c','#a15631',0],'castaño':['#4a2a18','#73452a',0],jabonero:['#c6ab7c','#e6d4ab',0],salinero:['#8a6a57','#c0a793',1],burraco:['#171310','#3a302a',2]};
 const GANADERIAS=[
- {name:'Miura',enc:'Miura',pres:78,div:['#1f6b3a','#141414']},
- {name:'Victorino Martín',enc:'Albaserrada',pres:82,div:['#1f3f8a','#bf3a3f']},
- {name:'Juan Pedro Domecq',enc:'Domecq',pres:74,div:['#c8a02e','#7a1b2a']},
- {name:'Garcigrande',enc:'Domecq',pres:80,div:['#2c4f9e','#f1ece0']},
- {name:'Victoriano del Río',enc:'Domecq',pres:79,div:['#5b2a6e','#e6bb55']},
- {name:'Fuente Ymbro',enc:'Domecq',pres:73,div:['#bf3a3f','#f1ece0']},
+ {name:'Miura',enc:'Miura',pres:78,div:['#1f6b3a','#8d1420']},
+ {name:'Victorino Martín',enc:'Albaserrada',pres:82,div:['#1f3f8a','#c41f2f']},
+ {name:'Juan Pedro Domecq',enc:'Domecq',pres:74,div:['#c41f2f','#f1ece0']},
+ {name:'Garcigrande',enc:'Domecq',pres:80,div:['#f1ece0','#c41f2f']},
+ {name:'Victoriano del Río',enc:'Domecq',pres:79,div:['#141414','#f2c230']},
+ {name:'Fuente Ymbro',enc:'Domecq',pres:73,div:['#1f7a3a','#1f7a3a']},
  {name:'Adolfo Martín',enc:'Albaserrada',pres:70,div:['#3a78b8','#f1ece0']},
- {name:'La Quinta',enc:'Santa Coloma',pres:62,div:['#2d6b4b','#e6bb55']},
+ {name:'La Quinta',enc:'Santa Coloma',pres:62,div:['#c41f2f','#f2c230']},
  {name:'Cuadri',enc:'Cuadri',pres:60,div:['#141414','#c9402f']},
  {name:'Dolores Aguirre',enc:'Atanasio',pres:56,div:['#6b1d2b','#3a78b8']}
 ];

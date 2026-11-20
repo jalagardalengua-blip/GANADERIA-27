@@ -1,7 +1,7 @@
 /* ============ MODO CARRERA: escalafón, confianza, retos, buzón ============ */
 const PTS={indulto:30,vuelta:12,ovacion:6,silencio:1,pitos:-3,devuelto:-5};
 const SPOTS={pienso:[31,20.5],hierro:[-14,-11.5],aperos:[-21,6],caballo:[-12,11.6],placita:[-30,33.5],corrales:[28,-16],casa:[0,9]};
-function migrate(s){if(!s)return s;s.conf=s.conf??BAL.confianza.inicial;if(!s.cap)s.cap=s.g&&s.g.real?BAL.capacidad.real:BAL.capacidad.fundada;s.news=s.news||[];s.xp=s.xp||0;s.mes=s.mes||{};s.trofeos=s.trofeos||[];
+function migrate(s){if(!s)return s;if(s.g&&s.g.real){const G=GANADERIAS.find(x=>x.name===s.g.name);if(G)s.g.div=[...G.div]}s.conf=s.conf??BAL.confianza.inicial;if(!s.cap)s.cap=s.g&&s.g.real?BAL.capacidad.real:BAL.capacidad.fundada;s.news=s.news||[];s.xp=s.xp||0;s.mes=s.mes||{};s.trofeos=s.trofeos||[];
  if(!s.rivals)s.rivals=GANADERIAS.filter(g=>g.name!==s.g.name).slice(0,9).map(g=>({name:g.name,enc:g.enc,pres:g.pres,pts:0,ore:0,ind:0,div:g.div}));
  if(s.season){s.season.pts=s.season.pts||0;s.season.ore=s.season.ore||0}
  if(!s.retos||s.retosM!==s.year*12+s.month)genRetos(s);return s}

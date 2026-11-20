@@ -85,3 +85,6 @@ h2::before{content:"";width:5px;height:1.05em;border-radius:2px;background:var(-
 .fx-banner b{background:var(--neon)!important;-webkit-background-clip:text!important;background-clip:text!important}
 
 ::selection{background:var(--rosa);color:#fff}
+
+/* Franjas de la divisa visibles aunque sean negras */
+.div i{box-shadow:0 0 0 1px rgba(255,255,255,.28)}
