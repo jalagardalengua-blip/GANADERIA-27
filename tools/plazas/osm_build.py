@@ -187,7 +187,8 @@ def main():
             dz = max(-25, min(25, -11.6 - maxz)); dx = max(-10, min(10, -tg.centroid.x))
             polys = [(affinity.translate(pg, dx, dz), t) for pg, t in polys]
         # zonas reservadas del juego
-        keep = [box(-14.6, -11.6, 14.6, 11.6), box(14, -11.6, 82, 11.6), box(-82, -11.6, -14, 11.6), box(-10.6, 11, 10.6, 58)]
+        keep = [box(-14.6, -11.6, 14.6, 11.6), box(14, -4.4, 82, 4.4), box(-82, -4.4, -14, 4.4), box(-3.9, 11, 3.9, 58)]
+        CALLES = [box(14, -4.4, 82, 4.4), box(-82, -4.4, -14, 4.4), box(-3.9, 11, 3.9, 58)]
         if fondo == 'iglesia':
             keep.append(box(-8.6, -28.6, 8.6, -11))
         elif fondo == 'ajuntament':
@@ -203,6 +204,19 @@ def main():
         for (tx, tz) in TORRES.get(k, []):
             keep.append(Point(tx, tz).buffer(3.6))
         KO = unary_union(keep)
+        ocup = unary_union([pg for pg, _ in polys]).buffer(.3) if polys else Polygon()
+        filas = []
+        for (ax, az, bx, bz, nx, nz) in [(14.6, 4.4, 82, 4.4, 0, 1), (14.6, -4.4, 82, -4.4, 0, -1), (-82, 4.4, -14.6, 4.4, 0, 1), (-82, -4.4, -14.6, -4.4, 0, -1),
+                                         (3.9, 11.6, 3.9, 58, 1, 0), (-3.9, 11.6, -3.9, 58, -1, 0)]:
+            L = math.hypot(bx - ax, bz - az); ux, uz = (bx - ax) / L, (bz - az) / L; t = 0.0
+            while t < L - 2:
+                w = min(L - t, rnd.uniform(5, 9)); dep = rnd.uniform(8, 11)
+                a = (ax + ux * t, az + uz * t); b = (ax + ux * (t + w), az + uz * (t + w))
+                pc = Polygon([a, b, (b[0] + nx * dep, b[1] + nz * dep), (a[0] + nx * dep, a[1] + nz * dep)]).difference(ocup).difference(KO)
+                if pc.geom_type == 'Polygon' and pc.area > 14:
+                    filas.append((pc, {'building': 'house', 'building:levels': str(rnd.choice([2, 3, 3, 3, 4]))}))
+                t += w
+        polys = polys + filas
         res = []
         for pg, t in polys:
             if pg.centroid.distance(Point(0, 0)) > 100:

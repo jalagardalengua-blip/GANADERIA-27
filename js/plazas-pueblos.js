@@ -299,7 +299,8 @@ function ppOsmEdificios(G,sc,PT,LAN,rnd,PAL){const D=PT.osm;if(!D||!D.b)return;c
     if(L>1.5)G.granite.wall([p0[0]+nrm[0]*.12,p0[1]+nrm[1]*.12],[p1[0]+nrm[0]*.12,p1[1]+nrm[1]*.12],H-.18,H,1.5,1.5,[.85,.83,.79],nrm);
     // fachadas que dan a la plaza: balcones con gente y faroles
     const mx=(p0[0]+p1[0])/2,mz=(p0[1]+p1[1])/2,md=Math.hypot(mx,mz);
-    if(md<48&&L>3&&(nrm[0]*-mx+nrm[1]*-mz)>.55*md&&(Math.abs(nrm[0])>.96||Math.abs(nrm[1])>.96)){
+    const calle=(Math.abs(mx)>14&&Math.abs(mx)<84&&Math.abs(mz)<5.5&&nrm[1]*-mz>.5*Math.abs(mz))||(Math.abs(mx)<5.5&&mz>11&&mz<60&&nrm[0]*-mx>.5*Math.abs(mx));
+    if(L>3&&(calle||(md<48&&(nrm[0]*-mx+nrm[1]*-mz)>.55*md))&&(Math.abs(nrm[0])>.96||Math.abs(nrm[1])>.96)){
      let a=p0,bb=p1;if(dx*nrm[1]-dz*nrm[0]<0){a=p1;bb=p0}const fc=new PmxFace(a[0],a[1],nrm[0],nrm[1]),fl=Math.max(0,Math.round((H-GF)/2.9));
      for(let k=0;k<fl;k++){const yb=GF+.02+k*2.9;for(let s=1.4;s<L-.7;s+=2.8){if(rnd()<.25)continue;pmxBalcony(G,fc,s,yb,rnd()<.3?2.2:1.5,rnd);if(rnd()<.5){const [bx,bz]=fc.pt(s,.35);CL.balc.push([bx,yb+.1,bz,fc.yaw()])}}}
      if(md<32&&rnd()<.6){const s=L/2,[lx,lz]=fc.pt(s,.5);fc.box(G.iron,s-.03,s+.03,0,.55,GF+.6,GF+.64,[.06,.06,.065]);fc.box(G.glow,s-.1,s+.1,.42,.62,GF+.2,GF+.52,[1,.8,.5]);LAN.push([lx,GF+.36,lz,6])}}}}
@@ -335,3 +336,9 @@ const PP_GUIA={
  lavall:{serra:'espadà_a',serraCol:'#5c7350'},                                               // Serra d'Espadà con pinares
  betxi:{palau:null,torreMed:[{x:0,z:-19,h:21,w:3,col:PP_ST.ocre}]}};                       // torreón central del Palau
 for(const [k,o] of Object.entries(PP_GUIA)){const T_=PMX_PLAZAS[k];if(!T_)continue;Object.assign(T_,o);if(T_.camp&&T_.fondo==='iglesia')T_.sinTorre=true;if(k==='benicarlo')T_.sinTorre=true}
+
+// estilo de la fachada de cada iglesia (rosetón gótico solo donde corresponde)
+const PP_FACHADA={gotica:['borriana','sagunt','segorbe','xabia','peniscola','onda','lavall'],
+ barroca:['benicarlo','vinaros','alcala','denia','lliria','ontinyent','cabanes','almassora','pedreguer','laromana','borriol','lalcora','chiva','torreblanca','sueca'],
+ neoclasica:['nules','moncofa','benicassim','massamagrell','alboraia','museros','meliana','pucol','foios','elpuig','betxi','vilareal']};
+for(const [f,L] of Object.entries(PP_FACHADA))for(const k of L)if(PMX_PLAZAS[k])PMX_PLAZAS[k].fachada=f;
