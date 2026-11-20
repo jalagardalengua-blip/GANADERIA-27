@@ -1,0 +1,50 @@
+/* ===================== INTERFAZ · PULIDO DE MENÚS =====================
+   Barra de estado fija arriba, tareas en una fila, listas largas plegadas, cifras que no se parten
+   y botones desactivados que se leen. */
+
+/* la barra con la fecha, el dinero y «Avanzar» se queda arriba al bajar por la pantalla */
+.sbar{position:sticky !important;top:env(safe-area-inset-top,0px);z-index:6;background:rgba(7,8,11,.86) !important;
+ backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);transition:box-shadow .25s,border-color .25s}
+body.ifScroll .sbar{box-shadow:0 10px 24px -14px #000;border-bottom-color:rgba(230,187,85,.28)}
+body.ifScroll .sbar .wrap{padding-block:.3rem}
+.ifNom{display:none;align-items:center;gap:8px;min-width:0;max-width:34%;font:700 .78rem/1.1 var(--fT,inherit);letter-spacing:.06em;text-transform:uppercase;color:#f3d68b}
+.ifNom span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ifNom svg,.ifNom img{width:26px;height:26px;flex:none;border-radius:6px}
+@media (min-width:520px){body.ifScroll .ifNom{display:flex}}
+
+/* tareas: punto, texto y botón en una sola fila (antes se apilaban en tres líneas) */
+.task:has(>.dot){display:grid !important;grid-template-columns:10px minmax(0,1fr) auto;align-items:center;gap:.6rem .8rem !important;padding:.8rem 1rem !important;min-height:56px}
+.task:has(>.dot) .t{flex-basis:auto !important;font-size:.9rem;line-height:1.3}
+.task:has(>.dot) .tb{width:auto !important;padding-left:0 !important;justify-content:flex-end !important;flex-wrap:nowrap}
+.task:has(>.dot) .tb .btn{flex:none !important}
+.task:has(.tb .btn+.btn) .tb{grid-column:2/-1;justify-content:flex-start !important}
+.task:has(>.dot)>.btn{justify-self:end;white-space:nowrap}
+
+/* cifras de los resúmenes: las palabras no se parten por la mitad («ESCALAFÓ-N») */
+.wid .lbl,.tile .lbl,.wid .wd .lbl{word-break:keep-all;overflow-wrap:normal;hyphens:none;letter-spacing:.06em !important;font-size:.64rem !important;line-height:1.2}
+.wid .wd{min-width:0}
+
+/* cabecera de la pantalla de inicio: más baja, para que lo importante quepa sin bajar */
+.hero2{min-height:150px !important}
+.hero2 .txt{padding:16px 16px 14px !important}
+
+/* listas largas plegadas */
+.ifOc{display:none !important}
+.ifMas{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:12px 14px;border-radius:12px;
+ border:1px solid rgba(230,187,85,.35);background:linear-gradient(180deg,rgba(230,187,85,.10),rgba(230,187,85,.03));color:#f3d68b;
+ font:700 .8rem/1 inherit;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;min-height:44px}
+.ifMas:active{transform:scale(.98)}
+.ifMas svg{width:14px;height:14px;transition:transform .2s}
+.ifMas.ab svg{transform:rotate(180deg)}
+
+/* botones desactivados: se ve que no se pueden pulsar, pero se lee lo que dicen */
+.btn:disabled,.btn[disabled]{opacity:1 !important;color:#8d93a0 !important;background:#14171d !important;border-color:#2a2f3a !important;box-shadow:none !important;filter:none !important}
+
+/* toques: respuesta inmediata y zonas de toque cómodas */
+.btn,button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.btn.sm{min-height:36px}
+nav.tabs button span{font-size:max(.58rem,9.5px)}
+
+/* aparición suave al cambiar de pestaña */
+@media (prefers-reduced-motion:no-preference){#scr.ifIn>*{animation:ifIn .32s cubic-bezier(.2,.7,.2,1) both}#scr.ifIn>*:nth-child(2){animation-delay:.04s}#scr.ifIn>*:nth-child(3){animation-delay:.08s}}
+@keyframes ifIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
