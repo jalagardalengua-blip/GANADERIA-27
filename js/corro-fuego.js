@@ -14,8 +14,8 @@ function fuegoPool(n,additive){const g=new THREE.BufferGeometry(),pos=new Float3
   fragmentShader:additive?'uniform sampler2D map;varying vec4 vC;void main(){float a=texture2D(map,gl_PointCoord).a*vC.a;gl_FragColor=vec4(vC.rgb*a,a);}':'uniform sampler2D map;varying vec4 vC;void main(){float a=texture2D(map,gl_PointCoord).a*vC.a;if(a<.01)discard;gl_FragColor=vec4(vC.rgb,a);}'});
  const p=new THREE.Points(g,m);p.frustumCulled=false;p.renderOrder=additive?6:5;return {p,pos,size,col,v:Array.from({length:n},()=>({x:0,y:-99,z:0,vx:0,vy:0,vz:0,l:0,L:1,s:0})),i:0,n}}
 function fuegoSys(){if(!CL||!CL.sc)return null;if(FUEGO.sys&&FUEGO.sys.sc===CL.sc)return FUEGO.sys;const q=W3&&W3.q||'media',mul=q==='alta'?1:q==='media'?.65:.4;
- const S2={sc:CL.sc,fl:fuegoPool(Math.round(420*mul),true),sm:fuegoPool(Math.round(200*mul),false),objs:[],mul,w:new THREE.Vector3()};
- for(const P of [S2.sm,S2.fl]){CL.sc.add(P.p);if(CL.added)CL.added.push(P.p)}FUEGO.sys=S2;return S2}
+ const S2={sc:CL.sc,fl:fuegoPool(Math.round(420*mul),true),sm:fuegoPool(Math.round(200*mul),false),sp:fuegoPool(Math.round(220*mul),true),objs:[],mul,w:new THREE.Vector3()};
+ for(const P of [S2.sm,S2.fl,S2.sp]){CL.sc.add(P.p);if(CL.added)CL.added.push(P.p)}FUEGO.sys=S2;return S2}
 // bolas de estopa con armazón: misma interfaz que antes ({fires,L}) y además las bolas que arden
 embolar=function(b){const S2=fuegoSys(),balls=[],G=geos();
  for(const s of [1,-1]){const m=new THREE.MeshStandardMaterial({color:'#2a1a0e',roughness:.95,emissive:'#ff5a10',emissiveIntensity:0});const ball=mesh(G.sph,m,.1,.1,.1,s*.62,.62,.2,b.hp,true);
@@ -41,7 +41,15 @@ function fuegoTick(dt){const S2=FUEGO.sys;if(!S2||!CL||S2.sc!==CL.sc)return;cons
    const r=1,g=t<.2?.95-t*1.2:Math.max(.12,.71-(t-.2)*.9),bl=t<.15?.7-t*3.5:.05;fl.col.set([r,g,bl,(t<.1?t*10:1)*(1-t)*.9],i*4)}else if(fl.pos[i*3+1]>-90){fl.pos[i*3+1]=-99;fl.col[i*4+3]=0}}
  for(let i=0;i<sm.n;i++){const p=sm.v[i];if(p.l>0){p.l-=dt;p.vy*=.995;p.vx+=R(-.2,.2)*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;const t=1-p.l/p.L;
    sm.pos[i*3]=p.x;sm.pos[i*3+1]=p.y;sm.pos[i*3+2]=p.z;sm.size[i]=p.s*(1+t*2.6);const c=.07+t*.08;sm.col.set([c,c*.95,c*.9,(t<.15?t/.15:1)*(1-t)*.4],i*4)}else if(sm.pos[i*3+1]>-90){sm.pos[i*3+1]=-99;sm.col[i*4+3]=0}}
- for(const P of [fl,sm]){const g=P.p.geometry;g.attributes.position.needsUpdate=g.attributes.size.needsUpdate=g.attributes.col.needsUpdate=true}}
+ // chispas y pavesas: saltan, caen con la gravedad y se apagan
+ const sp=S2.sp;if(sp){for(const F of S2.objs){if(F.torch||!F.lit||(F.k??1)<.3||!F.balls.length)continue;const r=CL&&CL.res,vel=r&&r.v?Math.min(1,r.v/6):0;
+   if(Math.random()<dt*(4+18*vel)*S2.mul){const b=F.balls[(Math.random()*F.balls.length)|0];b.getWorldPosition(w);fuegoChispa(sp,w,1)}}
+  for(let i=0;i<sp.n;i++){const p=sp.v[i];if(p.l>0){p.l-=dt;p.vy-=dt*7.5;p.vx*=.985;p.vz*=.985;p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;if(p.y<.03){p.y=.03;p.vy*=-.25;p.vx*=.5;p.vz*=.5}
+    const t=1-p.l/p.L;sp.pos[i*3]=p.x;sp.pos[i*3+1]=p.y;sp.pos[i*3+2]=p.z;sp.size[i]=p.s*(1-t*.6);sp.col.set([1,.75-t*.45,.3-t*.25,(1-t)*.95],i*4)}else if(sp.pos[i*3+1]>-90){sp.pos[i*3+1]=-99;sp.col[i*4+3]=0}}}
+ for(const P of [fl,sm,sp].filter(Boolean)){const g=P.p.geometry;g.attributes.position.needsUpdate=g.attributes.size.needsUpdate=g.attributes.col.needsUpdate=true}}
+function fuegoChispa(sp,w,n){for(let j=0;j<n;j++){const p=sp.v[sp.i++%sp.n];p.x=w.x+R(-.05,.05);p.y=w.y+R(0,.08);p.z=w.z+R(-.05,.05);const a=Math.random()*6.283,v=R(1,3.4);p.vx=Math.sin(a)*v;p.vz=Math.cos(a)*v;p.vy=R(1.2,3.6);p.L=p.l=R(.5,1.3);p.s=R(.05,.11)}}
+// al prender las bolas: lluvia de chispas
+function fuegoChispas(F,n){const S2=FUEGO.sys;if(!S2||!S2.sp||!F||!F.balls)return;const w=new THREE.Vector3();for(const b of F.balls){b.getWorldPosition(w);fuegoChispa(S2.sp,w,Math.round(n*S2.mul/F.balls.length))}}
 if(typeof calleTick==='function'){const _ctF=calleTick;calleTick=function(dt){_ctF(dt);try{fuegoTick(dt*((CL&&CL.spd)||1))}catch(e){}}}
 // en el ritual: la antorcha arde desde que aparece y las bolas solo al encenderlas
 if(typeof embStart==='function'){const _esF=embStart;embStart=function(r){_esF(r);try{const e=CL.emb;if(e&&e.torch){const tip=new THREE.Object3D();tip.position.y=.45;e.torch.add(tip);fuegoTorch(tip);const fl=e.torch.userData.fl;if(fl)fl.scale.set(.6,.6,1)}}catch(x){}}}

@@ -248,8 +248,11 @@ const zona=PT.zona||'horta',g=new THREE.PlaneGeometry(840,840,84,84);g.rotateX(-
  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,fog:false}));m.position.y=PT.mar?-1:-.08;sc.add(m)}
 // plano de presentación al empezar el festejo: la plaza y lo que la distingue, desde lo alto
 if(typeof camCalle==='function'){const _ccPP=camCalle;camCalle=function(dt){
- if(CL&&CL.ppIntro!=null&&!CL.plaza&&CL.cam==='tv'&&PMX.PT){const now=performance.now();if(!CL.ppIntro)CL.ppIntro=now;const s=(now-CL.ppIntro)/1000;if(s>=5.5){CL.ppIntro=null;return _ccPP(dt)}const u=s/5.5,e=u*u*(3-2*u),f=PMX.PT.foco||[0,10,-20];
+ // en el embolat la cámara del ritual ya presenta la plaza: sin plano aéreo al soltar el toro
+ if(CL&&CL.emb&&CL.ppIntro!=null)CL.ppIntro=null;
+ if(CL&&CL.ppIntro!=null&&!CL.plaza&&CL.cam==='tv'&&PMX.PT){const now=performance.now();if(!CL.ppIntro)CL.ppIntro=now;const s=(now-CL.ppIntro)/1000;if(s>=5.5){CL.ppIntro=null;CL.ppCorte=true;if(ppRealizador(dt))return;return _ccPP(dt)}const u=s/5.5,e=u*u*(3-2*u),f=PMX.PT.foco||[0,10,-20];
   W3.cam.position.set(9-15*e,19-7*e,30-16*e);W3.cam.lookAt(f[0],f[1]-2*e,f[2]);return}
+ if(CL&&!CL.plaza&&CL.cam==='tv'&&PMX.PT&&CL.ppIntro==null&&ppRealizador(dt))return;
  return _ccPP(dt)}}
 
 /* ---------- el segundo edificio de la plaza, en su lado real ----------
@@ -342,3 +345,17 @@ const PP_FACHADA={gotica:['borriana','sagunt','segorbe','xabia','peniscola','ond
  barroca:['benicarlo','vinaros','alcala','denia','lliria','ontinyent','cabanes','almassora','pedreguer','laromana','borriol','lalcora','chiva','torreblanca','sueca'],
  neoclasica:['nules','moncofa','benicassim','massamagrell','alboraia','museros','meliana','pucol','foios','elpuig','betxi','vilareal']};
 for(const [f,L] of Object.entries(PP_FACHADA))for(const k of L)if(PMX_PLAZAS[k])PMX_PLAZAS[k].fachada=f;
+
+/* ---------- realizador: la cámara general a la altura de los balcones, con la plaza de cada pueblo detrás ----------
+   En la plaza encuadra desde el lado del cajón, con la iglesia o el monumento al fondo. En las calles va dentro de
+   la calle, a la altura de un primer piso, mirando hacia la plaza. En el embolat de noche se acerca y baja para que
+   el fuego llene el plano. */
+function ppRealizador(dt){const r=CL&&CL.res;if(!r||!r.b||CL.enc)return false;const c=W3.cam.position,emb=!!(CL.emb&&CL.emb.ph==='libre'),corte=!!CL.ppCorte,k=corte?1:Math.min(1,dt*2.4);CL.ppCorte=false;
+ let tx,ty,tz,lx,ly,lz;const x=r.x,z=r.z,zona=inRc(CLRECT.plz,x,z,2)?'p':(Math.abs(z)<5&&Math.abs(x)>14)?'c':'n';
+ if(CL.ppZona&&CL.ppZona!==zona&&!corte){CL.ppZona=zona;CL.ppCorte=true;return ppRealizador(dt)}CL.ppZona=zona;
+ if(zona==='p'){tx=clamp(x*.5,-9,9)+(x>0?-2.5:2.5);tz=clamp(z+(emb?7.5:10.5),3,10.2);ty=emb?3.9:5.4;lx=x*.85;lz=z-(emb?2:4);ly=emb?1.2:2.2}
+ else if(zona==='c'){const s=Math.sign(x);tx=clamp(x+s*(emb?6.5:8.5),-60,60);tz=z>0?-2.2:2.2;ty=emb?3.4:4.4;lx=x-s*4;lz=z*.5;ly=1.4}
+ else{const d=emb?6.5:8.5;tx=x>0?-2:2;ty=emb?3.4:4.4;ly=1.4;lx=x*.5;
+  // sin meterse en el cajón: cerca de él, la cámara se pone delante y mira hacia el cajón
+  if(z+d<=40.5){tz=z+d;lz=z-4}else{tz=Math.max(12,Math.min(z,40)-d);lz=z+2}}
+ c.x+=(tx-c.x)*k;c.y+=(ty-c.y)*k;c.z+=(tz-c.z)*k;if(corte)W3.look.set(lx,ly,lz);else W3.look.lerp(new THREE.Vector3(lx,ly,lz),Math.min(1,dt*4));W3.cam.lookAt(W3.look);return true}
