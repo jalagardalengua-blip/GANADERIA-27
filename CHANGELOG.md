@@ -1,5 +1,14 @@
 # Cambios
 
+## Ganadería de corro: también las calles del recorrido y las iglesias, distintas en cada pueblo
+- Las calles del cajón y de salida ya no tienen las mismas casas en todos los pueblos.
+  - Las bordean los edificios reales de cada uno, pegados a la calle y con sus alturas y tejados.
+  - Donde el plano real deja hueco, hay casas en fila con balcones y gente.
+- Cada iglesia tiene la fachada de su estilo:
+  - gótica con rosetón: Borriana, Sagunt, Segorbe, Xàbia, Peníscola…;
+  - barroca con remate curvo, hornacina y óculo: Benicarló, Vinaròs, Alcalà, Dénia…;
+  - neoclásica con óculo y frontón liso: Nules, Moncofa, Benicàssim…
+
 ## Ganadería de corro: las 14 plazas de Castellón según la guía de entornos 3D
 - Vila-real: cuatro alas porticadas alrededor de la plaza y torre-reloj del ayuntamiento.
 - Nules: fuente-monumento en el eje entre la iglesia de cúpula azul y el ayuntamiento.

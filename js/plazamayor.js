@@ -167,10 +167,11 @@ buildCalle=function(night){
  if(PT.fondo==='iglesia'){const cs=PT.camp&&PT.camp.exent?PT.camp.side:0;if(!PER)house(-21,cs<0?-13.2:-8,-11,'x',1,{plaza:1,fl:FL,arcade:PT.porxosTot?1:0});pmxIglesia(G,sc,-8,8,-11,PT,LAN);if(!PER)house(cs>0?13.2:8,21,-11,'x',1,{plaza:1,fl:FL,arcade:PT.porxosTot?1:0})}
  else if(PT.fondo==='ajuntament'){if(!PER)house(-21,-9,-11,'x',1,{plaza:1,fl:FL,arcade:PT.porxosTot?1:0});pmxAjuntament(G,sc,-9,9,-11,PT,LAN);if(!PER)house(9,21,-11,'x',1,{plaza:1,fl:FL,arcade:PT.porxosTot?1:0})}
  else if(!PER)house(-21,21,-11,'x',1,{arcade:1,plaza:1,fl:FL});
- house(PER?-10.6:-21,-3.5,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});if(PT.norte&&typeof ppNorte==='function')ppNorte(G,sc,PT,LAN);else house(3.5,PER?10.6:21,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});
+ // con plano real, las fachadas del perímetro y de las calles del recorrido son los edificios de verdad
+ if(!PER)house(-21,-3.5,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});if(PT.norte&&typeof ppNorte==='function')ppNorte(G,sc,PT,LAN);else if(!PER)house(3.5,21,11,'x',-1,{plaza:1,fl:FL,arcade:PT.porxos?1:0});
  if(PT.castell)pmxCastell(sc,PT.castell);if(typeof pmxHitos==='function')try{pmxHitos(sc,G,PT,LAN)}catch(e){console.warn('hitos',e)}
- house(-11,-4,14,'z',-1,{plaza:1,fl:FL});house(4,11,14,'z',-1,{plaza:1,fl:FL});house(-11,-4,-14,'z',1,{plaza:1,fl:FL});house(4,11,-14,'z',1,{plaza:1,fl:FL});
- house(21,64,4,'x',-1);house(21,64,-4,'x',1);house(-64,-21,4,'x',-1);house(-64,-21,-4,'x',1);house(18,46,3.5,'z',-1);house(18,46,-3.5,'z',1);if(!PT.mar||OSMR)house(-4,4,66,'z',-1);house(-4,4,-66,'z',1);
+ if(!PER){house(-11,-4,14,'z',-1,{plaza:1,fl:FL});house(4,11,14,'z',-1,{plaza:1,fl:FL});house(-11,-4,-14,'z',1,{plaza:1,fl:FL});house(4,11,-14,'z',1,{plaza:1,fl:FL})}
+ if(!OSMR){house(21,64,4,'x',-1);house(21,64,-4,'x',1);house(-64,-21,4,'x',-1);house(-64,-21,-4,'x',1);house(18,46,3.5,'z',-1);house(18,46,-3.5,'z',1)}if(!PT.mar||OSMR)house(-4,4,66,'z',-1);house(-4,4,-66,'z',1);
  if(OSMR)try{ppOsmEdificios(G,sc,PT,LAN,rnd,PAL)}catch(e){console.warn('plaza real',e)}
  // ---------- cadafales en los refugios de la plaza ----------
  const PNT=[[.12,.3,.75],[.1,.45,.22],[.72,.08,.06],[.95,.72,.08],[.92,.92,.9],[.9,.35,.05],[.25,.55,.85]];
@@ -408,11 +409,25 @@ function pmxIglesia(G,sc,a0,a1,line,PT,LAN){const fz=line-1,D=16,W=a1-a0,cx=(a0+
  for(const s of [-1,1]){pmxCyl(G.granite,cx+s*1.75,fz+.62,.4,4.8,.2,.17,[.95,.9,.82],14);G.granite.box(cx+s*1.75,.2,fz+.62,.6,.4,.6,1.5,[.9,.86,.78])}
  const arc=new THREE.Mesh(new THREE.RingGeometry(1.2,1.65,28,1,0,Math.PI),new THREE.MeshStandardMaterial({map:PMX.T.granite.map,color:'#e6dccb',roughness:.9}));arc.position.set(cx,4,fz+.52);sc.add(arc);
  const tim=new THREE.Mesh(new THREE.CircleGeometry(1.2,24,0,Math.PI),new THREE.MeshStandardMaterial({color:'#3a2a1c',roughness:.8}));tim.position.set(cx,4,fz+.51);sc.add(tim);
- // rosetón con vidriera (se ilumina de noche)
+ // fachada según el estilo del templo: gótica con rosetón, barroca con remate curvo y hornacina, neoclásica con óculo
+ const FA=PT.fachada||'gotica';
+ if(FA==='gotica'){
  const vid=pmxCanvas('vidriera',256,256,(c,w,h)=>{c.fillStyle='#1b1d3a';c.fillRect(0,0,w,h);const cols=['#c8102e','#1d3f8f','#f2c200','#2e7d32','#7b1fa2'];for(let i=0;i<24;i++){c.fillStyle=cols[i%5];c.beginPath();c.moveTo(128,128);c.arc(128,128,124,i/24*6.283,(i+1)/24*6.283);c.fill()}
   c.strokeStyle='#2a2a2a';c.lineWidth=6;for(let i=0;i<12;i++){c.beginPath();c.moveTo(128,128);c.lineTo(128+Math.cos(i/12*6.283)*128,128+Math.sin(i/12*6.283)*128);c.stroke()}c.beginPath();c.arc(128,128,60,0,7);c.stroke();c.fillStyle='#f2c200';c.beginPath();c.arc(128,128,22,0,7);c.fill()});
  const night=!!(CL&&CL.night),rm=new THREE.Mesh(new THREE.CircleGeometry(1.35,32),new THREE.MeshStandardMaterial({map:vid,emissive:'#ffffff',emissiveMap:vid,emissiveIntensity:night?.9:.08,roughness:.2}));rm.position.set(cx,9,fz+.03);sc.add(rm);
- const rr=new THREE.Mesh(new THREE.RingGeometry(1.35,1.75,32),new THREE.MeshStandardMaterial({map:PMX.T.granite.map,color:'#e6dccb',roughness:.9}));rr.position.set(cx,9,fz+.04);sc.add(rr);
+ const rr=new THREE.Mesh(new THREE.RingGeometry(1.35,1.75,32),new THREE.MeshStandardMaterial({map:PMX.T.granite.map,color:'#e6dccb',roughness:.9}));rr.position.set(cx,9,fz+.04);sc.add(rr);}
+ else{const night2=!!(CL&&CL.night),gm=new THREE.MeshStandardMaterial({map:PMX.T.granite.map,color:new THREE.Color(st[0]*.82,st[1]*.8,st[2]*.76),roughness:.9});
+  if(FA==='barroca'){// remate mixtilíneo, hornacina con imagen y óculo
+   const cr=new THREE.Mesh(new THREE.CircleGeometry(3.4,32,0,Math.PI),gm);cr.position.set(cx,Hn+.1,fz+.06);sc.add(cr);
+   const vo=new THREE.Mesh(new THREE.TorusGeometry(3.45,.16,6,32,Math.PI),gm);vo.position.set(cx,Hn+.1,fz+.12);sc.add(vo);
+   G.granite.box(cx,7.6,fz+.22,1.7,2.6,.3,1.5,[.92,.88,.8]);G.iron.box(cx,7.55,fz+.38,1.15,2,.04,1,[.2,.17,.14]);
+   const img=new THREE.Mesh(new THREE.CylinderGeometry(.22,.3,1.5,8),new THREE.MeshStandardMaterial({color:'#e9e2d2',roughness:.7}));img.position.set(cx,7.5,fz+.5);sc.add(img);
+   for(const s2 of [-1,1]){const ob=new THREE.Mesh(new THREE.SphereGeometry(.32,10,8),gm);ob.position.set(cx+s2*(W/2-.4),Hn+.55,fz+.1);sc.add(ob)}
+   const oc=new THREE.Mesh(new THREE.CircleGeometry(.55,24),new THREE.MeshStandardMaterial({color:'#2a2f45',emissive:'#ffd9a0',emissiveIntensity:night2?.7:.05,roughness:.2}));oc.position.set(cx,Hn+1.5,fz+.14);sc.add(oc)}
+  else{// neoclásica: óculo, entablamento y frontón liso
+   const oc=new THREE.Mesh(new THREE.CircleGeometry(.8,28),new THREE.MeshStandardMaterial({color:'#2a2f45',emissive:'#ffd9a0',emissiveIntensity:night2?.7:.05,roughness:.2}));oc.position.set(cx,9,fz+.04);sc.add(oc);
+   const or2=new THREE.Mesh(new THREE.RingGeometry(.8,1.08,28),gm);or2.position.set(cx,9,fz+.05);sc.add(or2);
+   G.granite.box(cx,Hn-.5,fz+.2,W+.2,.7,.4,1.5,[.94,.9,.84]);for(const x of [cx-5.4,cx+5.4])G.granite.box(x,Hn/2,fz+.2,.5,Hn,.3,1.5,[.97,.93,.86])}}
  // escalinata
  for(let i=0;i<3;i++)G.granite.box(cx,.1+i*.17,fz+.85-i*.28,7.5-i*.6,.2,.6,1.5,[.86,.83,.78]);
  // campanario (si el pueblo tiene campanario exento o singular lo dibuja pmxHitos)
