@@ -135,23 +135,23 @@ function embTick(r,dt){const e=CL.emb,E=CL.env,b=r.b,P=EMB_POST;e.t+=dt;let anim
    e.ang+=((e.mode==='resiste'?Math.sin(CL.t*1.7)*.45:0)-e.ang)*Math.min(1,dt*1.5);
    anim=e.mode==='tira'?(far?{speed:.7,head:.7,look:Math.sin(CL.t*1.6)*.3}:{speed:.35,head:.85,push:true,look:Math.sin(CL.t*2)*.4}):{speed:0,head:.95,toss:Math.sin(CL.t*9)>.3?.7:0,paw:true,look:Math.sin(CL.t*3)};
    if(e.L<=1.2){embPhase(e,'amarre');clCrowd(.5)}break}
-  case 'amarre':{e.L=1.15;anim={speed:0,head:1,toss:Math.sin(CL.t*6)>.6?.6:0,paw:Math.sin(CL.t*1.3)>0,look:Math.sin(CL.t*2.3)*.6};if(e.t>2.2)embPhase(e,'fang');break}
+  case 'amarre':{e.L=1.15;anim={speed:0,head:1,toss:Math.sin(CL.t*6)>.6?.6:0,paw:Math.sin(CL.t*1.3)>0,look:Math.sin(CL.t*2.3)*.6};if(e.t>4)embPhase(e,'fang');break}
   case 'fang':{e.L=1.15;anim={speed:0,head:1,look:Math.sin(CL.t*1.9)*.35,paw:Math.sin(CL.t*1.1)>.4};
-   if(!e.clay.length&&e.t>1.3){for(const s of [1,-1]){const c=mesh(geos().sph,M('#6b4a2e',.95),.01,.01,.01,s*.6,.6,.2,b.hp,true);e.clay.push(c)}}
-   for(const c of e.clay){const k=clamp((e.t-1.3)/1.4,0,1)*.12;c.scale.set(k*.9,k*1.3,k*.9)}
-   if(e.t>3.2)embPhase(e,'ferros');break}
-  case 'ferros':{e.L=1.15;anim={speed:0,head:1,toss:e.t>1&&e.t<1.4?.5:0,look:Math.sin(CL.t*2.1)*.3};
-   if(!e.ferros&&e.t>.9){const g=new THREE.Group(),ir=M('#2b2b2b',.45,.7);for(const s of [1,-1]){const rod=mesh(geos().box,ir,.03,.03,.66,s*.31,.52,.22,g,true);rod.rotation.y=s*1.45;mesh(geos().box,ir,.025,.32,.025,s*.6,.75,.2,g,true)}
+   if(!e.clay.length&&e.t>1.8){for(const s of [1,-1]){const c=mesh(geos().sph,M('#6b4a2e',.95),.01,.01,.01,s*.6,.6,.2,b.hp,true);e.clay.push(c)}}
+   for(const c of e.clay){const k=clamp((e.t-1.8)/2.6,0,1)*.12;c.scale.set(k*.9,k*1.3,k*.9)}
+   if(e.t>5.4)embPhase(e,'ferros');break}
+  case 'ferros':{e.L=1.15;anim={speed:0,head:1,toss:e.t>1.6&&e.t<2.1?.5:0,look:Math.sin(CL.t*2.1)*.3};
+   if(!e.ferros&&e.t>1.5){const g=new THREE.Group(),ir=M('#2b2b2b',.45,.7);for(const s of [1,-1]){const rod=mesh(geos().box,ir,.03,.03,.66,s*.31,.52,.22,g,true);rod.rotation.y=s*1.45;mesh(geos().box,ir,.025,.32,.025,s*.6,.75,.2,g,true)}
      mesh(geos().box,M('#3b2a1c',.8),.92,.07,.08,0,.42,.3,g,true);b.hp.add(g);e.ferros=g;e.fireObj=embolar(b);e.fireObj.fires.forEach(f=>f.visible=false);e.fireObj.L.intensity=0;e.fireObj.k=0}
-   if(e.t>3)embPhase(e,'foc');break}
+   if(e.t>4.8)embPhase(e,'foc');break}
   case 'foc':{e.L=1.15;anim={speed:0,head:1,look:Math.sin(CL.t*2.6)*.5,paw:true};const F=e.fireObj;
-   if(e.t>2.8&&F){if(!r.fire){r.fire=F;F.fires.forEach(f=>{f.visible=true});try{crowdLevel(.35)}catch(x){}clCrowd(.8)}F.k=Math.min(1,(F.k||0)+dt*.7)}
+   if(e.t>3.6&&F){if(!r.fire){r.fire=F;F.fires.forEach(f=>{f.visible=true});try{crowdLevel(.35)}catch(x){}clCrowd(.8);if(typeof fuegoChispas==='function')fuegoChispas(F,70)}F.k=Math.min(1,(F.k||0)+dt*.7)}
    // se apagan las luces de la calle
-   const d=clamp((e.t-2.8)/2,0,1);for(const [o,i0] of e.lights)o.intensity=i0*(1-.82*d);if(e.hemi)e.hemi[0].intensity=e.hemi[1]*(1-.4*d);
-   if(e.t>5.4)embPhase(e,'solta');break}
-  case 'solta':{anim={speed:0,head:1,toss:e.t>.6&&e.t<1.1?.9:0,look:Math.sin(CL.t*4)*.8,paw:true};
-   if(!e.cut&&e.t>.9){e.cut=true;try{bufido(.8)}catch(x){}ole('¡Solta!');clCrowd(1)}
-   if(e.t>1.6){e.ph='libre';CLPOST.on=true;CLPOST.x=EMB_POST.x;CLPOST.z=EMB_POST.z;
+   const d=clamp((e.t-3.6)/2.2,0,1);for(const [o,i0] of e.lights)o.intensity=i0*(1-.82*d);if(e.hemi)e.hemi[0].intensity=e.hemi[1]*(1-.4*d);
+   if(e.t>7.6)embPhase(e,'solta');break}
+  case 'solta':{anim={speed:0,head:1,toss:e.t>1&&e.t<1.6?.9:0,look:Math.sin(CL.t*4)*.8,paw:true};
+   if(!e.cut&&e.t>1.5){e.cut=true;try{bufido(.8)}catch(x){}ole('¡Solta!');clCrowd(1)}
+   if(e.t>2.4){e.ph='libre';CLPOST.on=true;CLPOST.x=EMB_POST.x;CLPOST.z=EMB_POST.z;
     // salida: arranca al galope calle abajo hacia la plaza
     r.salida=CL.t;r.mode='trota';r.t=0;r.tt=0;r.v=2.5;r.trotV=5.6;CL.lowT=CL.t;
     {let best=null;for(let k=0;k<24;k++){const a=Math.random()*6.283,d=7.5+Math.random()*3,x=EMB_POST.x+Math.sin(a)*d,z=EMB_POST.z+Math.cos(a)*d;if(clRectOf(x,z)==='plz'&&clFree(CL.env,x,z,.8,true)&&clLinea(CL.env,r.x,r.z,x,z)){best=[x,z];break}}r.wx=best?best[0]:0;r.wz=best?best[1]:8}$('#h3cap').textContent='El toro embolado corre libre por la plaza. Respeta la distancia y busca los cadafales.'}break}}
@@ -266,3 +266,8 @@ if(typeof resTick==='function'){const _rtD=resTick;resTick=function(r,dt){_rtD(r
  if(r.mode!=='embiste'||!r.tgt){r.prog=null;return}
  const d=Math.hypot(r.tgt.x-r.x,r.tgt.z-r.z);if(!r.prog||r.prog.tg!==r.tgt){r.prog={tg:r.tgt,t0:CL.t,d0:d};return}
  if(CL.t-r.prog.t0>1.2){if(r.prog.d0-d<.5){r.mode='remata';r.t=.06;r.v*=.3;r.prog=null}else r.prog={tg:r.tgt,t0:CL.t,d0:d}}}}
+/* ---------------- y si al trote no avanza (esquina, refugio, gente delante), remata y busca otra cosa ---------------- */
+if(typeof resTick==='function'){const _rtT=resTick;resTick=function(r,dt){_rtT(r,dt);if(!CL||CL.res!==r)return;
+ if(r.mode!=='trota'&&r.mode!=='embiste'){r.mv=null;return}if(CL.emb&&CL.emb.r===r&&CL.emb.ph!=='libre'){r.mv=null;return}
+ if(!r.mv){r.mv={t0:CL.t,x:r.x,z:r.z};return}if(CL.t-r.mv.t0<.9)return;
+ if(Math.hypot(r.x-r.mv.x,r.z-r.mv.z)<.45){r.mode='remata';r.t=.06;r.v*=.3;r.prog=null}r.mv={t0:CL.t,x:r.x,z:r.z}}}

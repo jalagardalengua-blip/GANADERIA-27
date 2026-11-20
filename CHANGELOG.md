@@ -1,5 +1,17 @@
 # Cambios
 
+## Ganadería de corro: cámara de realizador y embolats mejorados
+- La cámara general ya no mira las calles desde lo alto, donde solo se veían tejados iguales en todos los pueblos.
+  - En la plaza encuadra desde el lado del cajón, con la iglesia, el campanario o el monumento de cada pueblo al fondo.
+  - En las calles va a la altura de los balcones, entre las fachadas reales, mirando hacia la plaza.
+  - Cambia de plano con cortes limpios y nunca se mete en el cajón.
+- Bou embolat:
+  - el ritual en el pilón se ve con calma: amarre, barro, hierros, encendido y suelta duran ahora entre 2,4 y 7,6 s cada uno;
+  - al prender las bolas salta una lluvia de chispas, y al galopar o sacudir la cabeza el toro va soltando pavesas que caen y rebotan en el suelo;
+  - suelto de noche, la cámara lo sigue de cerca y bajo para que el fuego llene el plano;
+  - ya no hay plano aéreo al soltarlo.
+- La res ya no se queda parada al trote: si en un segundo no avanza medio metro, remata y busca otra cosa.
+
 ## Ganadería de corro: también las calles del recorrido y las iglesias, distintas en cada pueblo
 - Las calles del cajón y de salida ya no tienen las mismas casas en todos los pueblos.
   - Las bordean los edificios reales de cada uno, pegados a la calle y con sus alturas y tejados.
