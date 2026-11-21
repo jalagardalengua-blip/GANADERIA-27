@@ -944,7 +944,7 @@ function bloque(k){let ing=0,n=0;for(const a of campo()){if(k==='viejas'&&a.role
  S.animals=S.animals.filter(a=>a.st==='campo');S.money+=Math.round(ing);save();render();toast(`${n} vendidos por ${eur(ing)}`)}
 
 /* ============ PALMARÉS ============ */
-function getQual(){try{return localStorage.getItem('hd-qual')||(matchMedia('(pointer:coarse)').matches?'media':'alta')}catch(e){return 'media'}}
+function getQual(){return 'alta'}
 function setQual(k){try{localStorage.setItem('hd-qual',k)}catch(e){}toast(`Calidad ${k}: se aplica al volver a entrar en 3D`);if(W3.R){const pr={alta:1.6,media:1.2,baja:.9}[k];W3.R.setPixelRatio(Math.min(pr,window.devicePixelRatio||1));W3.R.shadowMap.enabled=k!=='baja';W3.resize&&W3.resize()}render()}
 let DEFER=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DEFER=e});
 function instalar(){if(DEFER){DEFER.prompt();DEFER=null;return}modal('Instalar en el móvil',`<div class="stack"><p style="margin:0">Abre el juego desde su dirección de GitHub Pages en el navegador del móvil.</p><div class="list"><div class="task"><span class="t"><b>iPhone (Safari)</b><br><small class="muted">Botón Compartir → «Añadir a pantalla de inicio».</small></span></div><div class="task"><span class="t"><b>Android (Chrome)</b><br><small class="muted">Menú ⋮ → «Instalar aplicación» o «Añadir a pantalla de inicio».</small></span></div></div><p class="muted" style="margin:0">Se abrirá a pantalla completa, como una app, y guardará tu partida en el móvil.</p></div>`)}
