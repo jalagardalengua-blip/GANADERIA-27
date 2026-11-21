@@ -599,11 +599,16 @@ const MEDAL={
  llama:'<svg class="medal" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#1a0a08" stroke="currentColor" stroke-width="1.5"/><path fill="#ff7a3c" d="M12.3 4.8c.4 2.4 3.9 3.7 3.9 7.6a4.2 4.2 0 0 1-8.4 0c0-2 1.2-3 1.8-4 .3 1.4.9 2 1.6 2.2-.4-2 .2-3.9 1.1-5.8z"/><path fill="#ffd36b" d="M12 11.5c.2 1.1 1.8 1.6 1.8 3.2a1.8 1.8 0 0 1-3.6 0c0-.9.6-1.4 1.8-3.2z"/></svg>',
  toro:'<svg class="medal" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#101318" stroke="currentColor" stroke-width="1.5"/><path fill="currentColor" d="M5.5 7c.4 2.4 2 3.6 3.8 3.6h5.4c1.8 0 3.4-1.2 3.8-3.6-1.1 1.4-2.3 1.6-3.8 1.6H9.3C7.8 8.6 6.6 8.4 5.5 7zM9.2 11.2h5.6l-1 5L12 18.4l-1.8-2.2z"/></svg>'
 };
-function emblem(g,sz){const L=esc(((g&&g.hierro&&g.hierro.l)||'?').slice(0,2).toUpperCase());
- return `<svg class="emb" width="${sz}" height="${sz}" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="eg${sz}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbe3a0"/><stop offset=".45" stop-color="#e6bb55"/><stop offset="1" stop-color="#9a6a1c"/></linearGradient></defs>
- <path fill="url(#eg${sz})" d="M2 8c2 12 8.5 17.5 17 17.5h1.5L19 30C9 30 3.5 21 2 8zM62 8c-2 12-8.5 17.5-17 17.5h-1.5L45 30C55 30 60.5 21 62 8z"/>
- <path fill="url(#eg${sz})" d="M16 22h32l-2.4 4.6-5.8 19.6L32 58l-7.8-11.8-5.8-19.6z"/><path fill="#0c0e13" d="M21.5 26h21l-4.6 17.6L32 52.5l-5.9-8.9z" opacity=".92"/>
- <text x="32" y="${L.length>1?42:44}" text-anchor="middle" font-family="Cinzel, Georgia, serif" font-weight="700" font-size="${L.length>1?13:17}" fill="url(#eg${sz})">${L}</text></svg>`}
+// Emblema de la ganadería: par de banderillas cruzadas forradas con el papel de su divisa
+function emblem(g,sz){const d=(g&&g.div&&g.div.length?g.div:['#e6bb55','#8d1420']),c1=esc(d[0]),c2=esc(d[1]||d[0]);const id='bd'+(++emblem.n);
+ const band=(y,c)=>`<path d="M-4.6 ${y}h9.2l-.9 3.4.9 3.4h-9.2l.9-3.4z" fill="${c}" stroke="#0b0710" stroke-width=".55"/>`;
+ let papel='';for(let i=0;i<6;i++)papel+=band(6+i*6.2,i%2?c2:c1);
+ const una=`<g><rect x="-1.1" y="4" width="2.2" height="44" rx="1" fill="#e9dcc0"/>${papel}
+  <path d="M-2.4 3.2c.8-2.2 4-2.2 4.8 0z" fill="${c2}" stroke="#0b0710" stroke-width=".5"/>
+  <path d="M0 47.5l-1.5 0 0 6.5-3 2.6 3.4-.6L0 61l1.1-5 3.4.6-3-2.6v-6.5z" fill="url(#${id})" stroke="#0b0710" stroke-width=".45"/></g>`;
+ return `<svg class="emb band" width="${sz}" height="${sz}" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8f969e"/><stop offset=".5" stop-color="#f1f3f5"/><stop offset="1" stop-color="#7c838b"/></linearGradient></defs>
+ <g transform="translate(32 0) rotate(-24 0 32) scale(1.18 1)">${una}</g><g transform="translate(32 0) rotate(24 0 32) scale(1.18 1)">${una}</g></svg>`}
+emblem.n=0;
 function hierroSVG(h,sz,col){
  h=h||{l:'?',a:'none'};const L=esc((h.l||'?').slice(0,2).toUpperCase());
  let ad='';
@@ -634,7 +639,7 @@ function startScreen(){
  <div class="hero2"><div class="img" style="background-image:url(img/hero.jpg)"></div><div class="txt"><div class="k">Modo carrera · ganadero de bravo</div><h1>Hierro y Divisa</h1><div class="tag">Tradición<i>·</i>Pasión<i>·</i>Toros</div></div></div>
  ${sv&&sv.g?`<button class="btn oro adv" onclick="continuar()">${sv.over?'Ver el final':'Continuar'} · ${esc(sv.g.name)} · ${MESES[sv.month]} ${sv.year}</button>`:''}
  <section class="sect"><header><h2>Ganaderías históricas</h2></header>
-  <div class="list">${GANADERIAS.map((g,i)=>`<button class="gan" onclick="startReal(${i})">${emblem({hierro:{l:g.name[0]}},44)}
+  <div class="list">${GANADERIAS.map((g,i)=>`<button class="gan" onclick="startReal(${i})">${emblem({hierro:{l:g.name[0]},div:g.div},44)}
    <span style="min-width:0"><b>${esc(g.name)}</b><br><small class="muted">Encaste ${g.enc} · prestigio ${g.pres}</small><div class="pres"><i style="width:${g.pres}%"></i></div></span>${divisa(g.div)}</button>`).join('')}</div>
  </section>
  <section class="sect card goldline"><header><h2>Funda tu ganadería</h2></header>
@@ -655,7 +660,7 @@ function startScreen(){
   <button class="btn pri adv" onclick="startNew()">Fundar ganadería ${ICO.chev}</button>
  </section></div></main>`;
 }
-function prevHTML(){return `${emblem({hierro:{l:NEWG.l||'?'}},56)}${hierroSVG({l:NEWG.l||'?',a:NEWG.a},48,'var(--oro)')}<div><div style="font-family:var(--serif);font-weight:700;font-size:1.1rem">${esc(NEWG.name||'Tu ganadería')}</div><div class="row" style="gap:.4rem">${divisa([NEWG.c1,NEWG.c2])}<small class="muted">Encaste ${NEWG.enc} · ${NEWG.prov}</small></div></div>`}
+function prevHTML(){return `${emblem({hierro:{l:NEWG.l||'?'},div:[NEWG.c1,NEWG.c2]},56)}${hierroSVG({l:NEWG.l||'?',a:NEWG.a},48,'var(--oro)')}<div><div style="font-family:var(--serif);font-weight:700;font-size:1.1rem">${esc(NEWG.name||'Tu ganadería')}</div><div class="row" style="gap:.4rem">${divisa([NEWG.c1,NEWG.c2])}<small class="muted">Encaste ${NEWG.enc} · ${NEWG.prov}</small></div></div>`}
 function updPrev(){const p=$('#prev');if(p)p.innerHTML=prevHTML()}
 function rerStart(){const y=window.scrollY;render();window.scrollTo(0,y)}
 function startReal(i){const g=GANADERIAS[i];newGame({real:true,name:g.name,enc:g.enc,pres:g.pres,div:g.div,hierro:{l:g.name[0],a:'none'},prov:''})}
