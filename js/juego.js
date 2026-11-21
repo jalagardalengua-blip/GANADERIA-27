@@ -121,7 +121,7 @@ function newGame(cfg){
  S={v:1,g:cfg,year:2027,month:0,money:cfg.real?260000:180000,pres:cfg.real?cfg.pres:12,feed:'nor',animals:[],nid:1,nums:{},offers:[],oid:1,
   hist:[],presHist:[],semAct:null,mej:cfg.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{},season:null,objs:[],porVer:[],mkt:null,log:[],stats:{corridas:0,toros:0,indultos:0,vueltas:0,orejas:0,premios:0,ingresos:0}};
  const real=cfg.real, enc=cfg.enc, b=real?2:-5;
- const nV=real?40:20, nM=real?12:5, nH=real?10:5, nS=real?2:1, maxM=real?5:4;
+ const nV=real?40:30, nM=real?12:7, nH=real?10:7, nS=real?2:1, maxM=real?5:4;
  const vacas=[];
  for(let i=0;i<nV;i++){const v=mk({sex:'H',born:S.year-RI(4,12),enc,bonus:b+2,role:'vaca'});tentar(v);vacas.push(v);S.animals.push(v)}
  for(let i=0;i<nS;i++){const s=mk({sex:'M',born:S.year-RI(5,7),enc,bonus:b+6,role:'semental'});tentar(s);if(s.nota<70){s.g.bra=Math.max(s.g.bra,78);tentar(s)}S.animals.push(s)}
@@ -149,7 +149,7 @@ function newSeason(){
 const OBJCHK={lid:(s,o)=>s.lid>=o.n,ov:s=>s.ov>=2,cash:(s,o)=>S.money>=o.n,c1:s=>s.c1>=1,vu:s=>s.vu+s.ind>=1};
 
 /* ============ ofertas y mercado ============ */
-function priceFor(cat,tipo){const p=S.pres,bonus=1+(mejLv('corrales')>=2?.05:0)+(mej('oficina')?.05:0);let v=cat===1?6000+p*95:cat===2?3400+p*45:1800+p*22;if(tipo==='novillada')v*=.45;return r100(v*bonus*R(.9,1.1))}
+function priceFor(cat,tipo){const p=S.pres,bonus=1+(mejLv('corrales')>=2?.05:0)+(mej('oficina')?.05:0);let v=cat===1?6000+p*95:cat===2?3400+p*45:2600+p*30;if(tipo==='novillada')v*=.45;return r100(v*bonus*R(.9,1.1))}
 function genOffers(ahead,init){
  const tgt=absNow()+ahead, tm=tgt%12;
  for(const f of FERIAS){
@@ -209,7 +209,7 @@ function advance(){
  const ev=Math.random()<.42?pick(['pelea','lluvia','sequia','veedor','visita','cojera']):null;
  if(ev==='lluvia'&&[1,2,3,9,10].includes(S.month))feedMod=.72;
  if(ev==='sequia'&&[5,6,7,8].includes(S.month)&&!mej('pozo'))feedMod=1.35;
- const fc=Math.round(n*FEED[S.feed].c*feedMod*feedMul()), pc=2500+10*n+mantenimiento();
+ const fc=Math.round(n*FEED[S.feed].c*feedMod*feedMul()), pc=1500+8*n+mantenimiento();
  S.money-=fc+pc;rep.cost+=fc+pc;
  rep.lines.push(`Alimentación ${FEED[S.feed].n.toLowerCase()}: ${eur(fc)} · Personal y mantenimiento: ${eur(pc)}`);
  // avanzar calendario
