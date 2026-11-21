@@ -280,7 +280,7 @@ function advance(){
  S.month++;if(S.month>11){S.month=0;S.year++;newSeason();rep.lines.push(`Empieza la temporada ${S.year}. Nuevos objetivos de la propiedad.`)}
  S.wx={abs:absNow(),ev,lluvia,sequia};
  if(S.money<0)S.conf=clamp(S.conf-BAL.confianza.rojos,0,100);
- if(S.month===1){const c=BAL.gastos.saneamientoCabeza*n;S.money-=c;rep.cost+=c;rep.lines.push(`Campaña de saneamiento ganadero: ${eur(c)}.`)}
+ if(S.month===1&&typeof obligMes!=='function'){const c=BAL.gastos.saneamientoCabeza*n;S.money-=c;rep.cost+=c;rep.lines.push(`Campaña de saneamiento ganadero: ${eur(c)}.`)}
  // envejecimiento y ayudas anuales
  if(S.month===0){
   let viejos=0,vv=0,ing=0;
@@ -343,6 +343,7 @@ function advance(){
  if(S.conf<=0&&!S.ultimatum){S.ultimatum=true;S.conf=BAL.confianza.ultimatum;rep.lines.push(`La propiedad pierde la paciencia: te da una última oportunidad con la confianza al ${BAL.confianza.ultimatum} %. Si vuelve a cero, se acabó.`);log('Ultimátum de la propiedad.')}
  else if(S.money<BAL.deuda.aviso&&S.money>=BAL.deuda.limite)rep.lines.push(`Aviso del banco: tu descubierto se acerca al límite de ${eur(BAL.deuda.limite)}.`);
  if(S.money<BAL.deuda.limite&&!S.prestamo&&!S.prestamoUsado)S.prestamoOferta=true;
+ if(typeof historiaMes==='function')historiaMes(rep);
  save();render();
  newsToast(rep);fx(rep.inc-rep.cost>=0?'cobro':'tap');
  if(S.prestamoOferta)return ofrecerPrestamo();

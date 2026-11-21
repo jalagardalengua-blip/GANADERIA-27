@@ -85,6 +85,8 @@ function renderInicio(el){
 
 /* ============ TAREAS ============ */
 function listaTareas(){const c=campo(),T=[];
+ if(typeof obligTareas==='function')T.push(...obligTareas());
+ if(typeof planRescate==='function'&&S.money<FIN.cajaBaja)T.push({t:`Caja baja (${eur(S.money)}): revisa el plan del mayoral`,p:'planRescate()',pl:'Ver plan',oro:1});
  const sin=c.filter(a=>!a.herrado).length,pendT=c.filter(a=>a.sex==='H'&&!a.tentado&&!a.role&&ageY(a)>=2).length,dec=c.filter(a=>a.sex==='H'&&a.tentado&&!a.role).length,nuevas=S.offers.filter(o=>o.st==='nueva'),sems=c.filter(a=>a.role==='semental');
  const mk=c.filter(a=>a.mark),enc=mk.filter(a=>a.encd).length,inj=c.filter(a=>a.salud<55);
  if(S.porVer.length)T.push({t:'Corrida de tu hierro en la plaza',p:`enterPlaza(${S.porVer[0]})`,pl:'Ir a la plaza',d:`verCorrida(${S.porVer[0]})`,dl:'Resumen',oro:1});
@@ -106,6 +108,8 @@ function tareaRow(x){return `<div class="task"><span class="dot ${x.oro?'ok':''}
 function siguientePaso(){if(!S)return null;const c=campo(),cap=capacidad();
  const nuevas=S.offers.filter(o=>o.st==='nueva').sort((a,b)=>a.abs-b.abs),aptas=o=>c.filter(a=>eligible(a,o)).length;
  if(S.prestamoOferta)return {txt:'El banco espera tu respuesta sobre el préstamo',spot:'casa',accion:'ofrecerPrestamo()',boton:'Responder'};
+ if(typeof obligPend==='function'){const ob=obligPend().find(x=>x.d.hasta<=S.month);if(ob)return {txt:`Vence este mes: ${ob.d.txt.toLowerCase()}`,spot:null,accion:`pagarOblig('${ob.id}')`,boton:'Hacerlo'}}
+ if(typeof planRescate==='function'&&S.money<FIN.cajaBaja)return {txt:`Caja baja (${eur(S.money)}): Anselmo tiene un plan`,spot:'casa',accion:'planRescate()',boton:'Ver plan'};
  if(S.porVer.length)return {txt:'Tus toros saltan hoy al ruedo: ve a la plaza',spot:'corrales',accion:`enterPlaza(${S.porVer[0]})`,boton:'Ir a la plaza'};
  const ok=nuevas.find(o=>aptas(o)>=o.n);if(ok)return {txt:`Reseña ${ok.n} toros para ${ok.plaza} (${ok.feria})`,spot:'corrales',accion:`resena(${ok.id})`,boton:'Reseñar'};
  if(S.escapado&&byId(S.escapado.id))return {txt:`${byId(S.escapado.id).name} se ha escapado: devuélvelo a caballo`,spot:'caballo',accion:`irA3D('caballo')`,boton:'Ir a caballo'};
