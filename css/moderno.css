@@ -1,0 +1,191 @@
+/* ===================== ACABADO MODERNO =====================
+   Capa final de estilo: paneles de cristal oscuro con filo fino en lugar de marcos dobles de oro con remates,
+   cabeceras de sección limpias, barra superior compacta y tipografía con más jerarquía.
+   Solo cambia el aspecto; la estructura y las funciones son las mismas. */
+:root{--m-bg:#07080b;--m-pan:rgba(20,22,28,.78);--m-pan2:rgba(28,30,38,.86);--m-line:rgba(255,255,255,.07);--m-line2:rgba(230,187,85,.32);
+ --m-oro:#e6bb55;--m-oro2:#f3d68b;--m-txt:#f2efe8;--m-mut:#9aa0ab;--m-acc:#e6bb55;--m-r:16px;--m-sh:0 18px 40px -22px rgba(0,0,0,.9)}
+body.casaC{--m-acc:#e0454c;--m-line2:rgba(224,69,76,.35)}
+
+/* ---------- paneles ---------- */
+html body .card,html body .obra,html body .reto,html body .wid,html body .kv,html body .list,html body .ofc,html body .duo>*{
+ border:1px solid var(--m-line) !important;border-radius:var(--m-r) !important;
+ background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0) 40%) padding-box,var(--m-pan) padding-box !important;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.05),var(--m-sh) !important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+html body .card.goldline,html body .wid{border-color:var(--m-line2) !important;
+ background:radial-gradient(120% 80% at 0 0,rgba(230,187,85,.07),transparent 55%) padding-box,linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0) 40%) padding-box,var(--m-pan) padding-box !important}
+body.casaC .card,body.casaC .obra,body.casaC .reto,body.casaC .wid,body.casaC .kv,body.casaC .list,body.casaC .duo>*{
+ background:radial-gradient(120% 80% at 0 0,rgba(200,30,40,.12),transparent 55%) padding-box,var(--m-pan) padding-box !important}
+html body .hero2,html body .ofc{border:1px solid var(--m-line2) !important;border-radius:20px !important;box-shadow:0 24px 50px -24px #000 !important}
+html body .hero2{background:#0b0c10 !important}
+
+/* ---------- cabeceras de sección ---------- */
+html body .sect>header{display:flex;align-items:center;justify-content:flex-start;gap:.6rem;padding:0 2px .5rem !important;margin:0 !important;text-align:left}
+html body .sect>header::after{display:none !important}
+html body .sect>header h2{display:flex !important;align-items:center;gap:.6rem !important;font-family:var(--display) !important;font-style:normal;font-weight:800 !important;
+ font-size:1.02rem !important;letter-spacing:.14em !important;text-transform:uppercase;color:var(--m-txt) !important;background:none !important;-webkit-text-fill-color:currentColor !important;text-shadow:none !important}
+html body .sect>header h2::before{content:"" !important;display:block !important;width:4px !important;height:1.05em !important;border-radius:2px;background:var(--m-acc) !important;transform:none !important;margin:0 !important;box-shadow:0 0 12px rgba(230,187,85,.35) !important;filter:none !important}
+html body .sect>header h2::after{display:none !important;content:none !important}
+html body .sect>header>small,html body .sect>header>.muted{width:auto !important;margin-left:auto;text-align:right !important;font-family:var(--body) !important;font-size:.72rem !important;letter-spacing:.04em !important;text-transform:none !important;color:var(--m-mut) !important}
+
+/* ---------- barra superior compacta ---------- */
+html body header.hdr{margin:0 !important;border-radius:0 0 20px 20px !important;border:0 !important;border-bottom:1px solid var(--m-line2) !important;
+ background:linear-gradient(180deg,#14161c,#0b0c10) !important;box-shadow:0 14px 30px -18px #000 !important}
+body.casaC header.hdr{box-shadow:0 14px 30px -18px #000,inset 0 3px 0 #c0262d !important}
+html body header.hdr .wrap{padding-block:.55rem .5rem !important}
+html body .hdr .gname{font-family:var(--display) !important;font-weight:800 !important;letter-spacing:.06em !important;font-size:clamp(1.15rem,5vw,1.55rem) !important}
+html body .hdr .gsub{font-family:var(--body) !important;letter-spacing:.08em !important;font-size:.7rem !important;color:var(--m-mut) !important}
+html body .casaSw{margin:8px 12px 0 !important;border-radius:999px !important;border:1px solid var(--m-line) !important;background:rgba(18,19,24,.9) !important;box-shadow:none !important}
+html body .casaSw .wrap{padding:4px !important;gap:4px !important}
+html body .casaSw .cs{min-height:40px !important;padding:6px 12px !important;border-radius:999px;justify-content:center;text-align:center}
+html body .casaSw .cs svg{display:none}
+html body .casaSw .cs b{font-family:var(--display) !important;font-weight:700 !important;font-size:.86rem !important;letter-spacing:.08em !important}
+html body .casaSw .cs small{display:none !important}
+html body .casaSw .knob{top:4px !important;bottom:4px !important;left:4px !important;width:calc(50% - 6px) !important;border-radius:999px !important;
+ background:linear-gradient(180deg,rgba(230,187,85,.24),rgba(230,187,85,.1)) !important;box-shadow:inset 0 0 0 1px rgba(230,187,85,.45) !important}
+html body .casaSw.c .knob{transform:translateX(calc(100% + 4px)) !important;background:linear-gradient(180deg,rgba(224,69,76,.3),rgba(224,69,76,.1)) !important;box-shadow:inset 0 0 0 1px rgba(224,69,76,.55) !important}
+html body .sbar{margin:8px 12px 0 !important;border-radius:14px !important;border:1px solid var(--m-line) !important;background:rgba(18,19,24,.9) !important;box-shadow:none !important}
+html body .sbar .wrap{padding:6px 6px 6px 10px !important}
+html body .sbar button.go{border-radius:10px !important;clip-path:none !important;box-shadow:0 6px 18px -6px rgba(200,32,42,.7) !important}
+
+/* ---------- pestañas de contenido, chips y botones ---------- */
+html body .btn{border-radius:12px !important;border:1px solid var(--m-line) !important;background:linear-gradient(180deg,#1d2028,#14161c) !important;
+ font-family:var(--display) !important;font-weight:700 !important;letter-spacing:.08em !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 6px 16px -10px #000 !important}
+html body .btn.oro,html body .btn.adv.oro{border:0 !important;color:#1a1206 !important;background:linear-gradient(180deg,#f7dc93,#e0b14e 55%,#c99634) !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 10px 24px -10px rgba(230,187,85,.7) !important}
+html body .chip{border-radius:999px !important;border:1px solid var(--m-line) !important;background:rgba(255,255,255,.04) !important}
+html body .chip[aria-pressed="true"],html body .chip.on{background:rgba(230,187,85,.16) !important;border-color:rgba(230,187,85,.5) !important;color:var(--m-oro2) !important}
+html body .seg button{border-radius:12px !important}
+
+/* ---------- campos ---------- */
+html body input[type=search],html body input[type=text],html body select{border-radius:12px !important;border:1px solid var(--m-line) !important;background:rgba(14,15,20,.9) !important;color:var(--m-txt) !important}
+html body input:focus-visible,html body select:focus-visible,html body button:focus-visible{outline:2px solid var(--m-oro);outline-offset:2px}
+
+/* ---------- menú principal ---------- */
+html body .mItem{border-radius:18px !important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+html body .mItem b{font-family:var(--display) !important;font-weight:800 !important;letter-spacing:.08em !important}
+html body .mFoot{font-family:var(--body) !important;letter-spacing:.06em !important;text-transform:none !important;color:rgba(230,225,210,.45) !important}
+
+/* ---------- ventanas ---------- */
+html body #ov .sheet{border-radius:22px 22px 0 0 !important;border:1px solid var(--m-line2) !important;background:linear-gradient(180deg,#16181e,#0b0c10) !important}
+@media (min-width:700px){html body #ov .sheet{border-radius:22px !important}}
+
+/* ---------- textos ---------- */
+html body .muted{color:var(--m-mut)}
+html body .lbl{letter-spacing:.14em !important}
+
+/* ---------- pestañas segmentadas (chips) ---------- */
+html body .chips{padding:4px !important;border-radius:999px !important;border:1px solid var(--m-line) !important;background:rgba(16,17,22,.9) !important;box-shadow:none !important;gap:4px !important}
+html body .chips .chip{clip-path:none !important;transform:none !important;border:0 !important;border-radius:999px !important;background:transparent !important;box-shadow:none !important;
+ font-family:var(--display) !important;font-style:normal !important;font-weight:700 !important;letter-spacing:.06em !important;text-transform:uppercase;font-size:.86rem !important;color:var(--m-mut) !important;padding:.5rem 1rem !important}
+html body .chips .chip>*{transform:none !important}
+html body .chips .chip[aria-pressed="true"],html body .chips .chip.on{background:linear-gradient(180deg,rgba(230,187,85,.26),rgba(230,187,85,.1)) !important;color:var(--m-oro2) !important;box-shadow:inset 0 0 0 1px rgba(230,187,85,.5) !important}
+body.casaC .chips .chip[aria-pressed="true"],body.casaC .chips .chip.on{background:linear-gradient(180deg,rgba(224,69,76,.3),rgba(224,69,76,.1)) !important;color:#ffd0d2 !important;box-shadow:inset 0 0 0 1px rgba(224,69,76,.55) !important}
+html body .chips .chip::before,html body .chips .chip::after{display:none !important}
+
+/* ---------- casillas de datos ---------- */
+html body .tile{border:1px solid var(--m-line) !important;border-radius:14px !important;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01)) ,var(--m-pan) !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.05) !important}
+html body .tile::before,html body .tile::after{display:none !important}
+html body .tile .lbl{color:var(--m-mut) !important;font-size:.7rem !important}
+html body .tile .v{color:var(--m-txt)}
+
+/* ---------- paneles dentro de paneles: sin marco doble ---------- */
+html body .card .card,html body .sheet .card .card,html body .bd .card.stack .card{border:1px solid var(--m-line) !important;background:rgba(255,255,255,.025) !important;box-shadow:none !important;backdrop-filter:none}
+html body .prof .pn{font-family:var(--display) !important;font-weight:800 !important;letter-spacing:.06em !important}
+
+/* ---------- títulos de ventana ---------- */
+html body .sheet h2,html body .sheet h3{font-family:var(--display) !important;font-weight:800 !important;letter-spacing:.06em !important;background:none !important;-webkit-text-fill-color:currentColor !important;color:var(--m-oro2) !important}
+/* sin filete interior de oro en los paneles */
+html body .card::after,html body .ofc::after,html body .obra::after,html body .card.goldline::before,html body .wid::after{display:none !important}
+html body .sheet .sh h2{font-size:1.2rem !important}
+
+/* ---------- corrida en directo (plaza realista) ---------- */
+#ruedoOv{position:fixed;inset:0;z-index:9000;background:#000}
+/* el marco de la corrida no se mete bajo la barra de gestos ni la muesca: dentro de un iframe el navegador no informa de esas zonas */
+#ruedoOv iframe{position:absolute;top:env(safe-area-inset-top,0px);bottom:env(safe-area-inset-bottom,0px);left:env(safe-area-inset-left,0px);right:env(safe-area-inset-right,0px);width:calc(100% - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px));height:calc(100% - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));border:0;display:block}
+#ruedoX{position:absolute;z-index:2;top:calc(env(safe-area-inset-top,0px) + 8px);right:calc(env(safe-area-inset-right,0px) + 8px);min-width:44px;height:44px;padding:0 16px;border-radius:999px;background:rgba(10,9,12,.62);color:#f3ead8;border:1px solid rgba(230,187,85,.55);font:700 13px/1 var(--ui,'Barlow Condensed',sans-serif);letter-spacing:.1em;text-transform:uppercase;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);touch-action:manipulation}
+#ruedoX:active{background:rgba(191,58,63,.75)}
+
+/* ---------- móvil ---------- */
+html.sinFS #h3fs{display:none!important}
+.h3tasks:empty{display:none!important}
+@media (max-height:520px){html body .h3tasks{max-width:220px;font-size:.7rem;padding:.35rem .55rem}}
+@media (pointer:coarse){html body input,html body select,html body textarea{font-size:16px!important}}
+
+/* ---------- logo de la ganadería: hierro sobre la divisa ---------- */
+html body .mPh.mLogo{display:grid;place-items:center;background:radial-gradient(70% 60% at 50% 45%,color-mix(in srgb,var(--d1) 32%,transparent),transparent 70%),radial-gradient(90% 80% at 50% 100%,color-mix(in srgb,var(--d2) 22%,transparent),transparent 70%),linear-gradient(180deg,#14161c,#0b0c10)!important}
+html body .mPh.mLogo .ganLogo{width:min(58%,230px);height:auto;aspect-ratio:1;border-radius:10px;box-shadow:0 0 0 1px rgba(230,187,85,.55),0 0 0 6px rgba(0,0,0,.35),0 24px 46px -18px #000;animation:ganIn .6s ease both}
+@keyframes ganIn{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+.ganLogoW{display:inline-grid;place-items:center;flex:none;border-radius:16%;overflow:hidden;box-shadow:0 0 0 1px rgba(230,187,85,.5),0 8px 18px -10px #000}
+.ganLogoW .ganLogo{width:100%;height:100%;display:block}
+
+/* ---------- mando táctil ---------- */
+#joy.flota{opacity:1;transition:none}
+#joy{transition:left .2s ease,top .2s ease,opacity .2s}
+html body #h3do{min-height:58px;font-size:1.08rem;padding:.85rem 1.25rem;border-radius:16px!important}
+html body #h3do.late{animation:h3late 1.1s ease-out 2}
+@keyframes h3late{0%{box-shadow:0 0 0 0 rgba(230,187,85,.75),0 10px 24px -10px rgba(230,187,85,.7)}100%{box-shadow:0 0 0 18px rgba(230,187,85,0),0 10px 24px -10px rgba(230,187,85,.7)}}
+.mkAct{position:absolute;left:0;top:0;z-index:5;pointer-events:none;white-space:nowrap;padding:.28rem .6rem .3rem;border-radius:999px;font:700 .72rem/1 var(--display,'Barlow Condensed',sans-serif);letter-spacing:.08em;text-transform:uppercase;
+ color:#f3d68b;background:rgba(12,13,17,.72);border:1px solid rgba(230,187,85,.45);box-shadow:0 6px 14px -8px #000;display:none}
+.mkAct.on{display:block}
+.mkAct::after{content:"";position:absolute;left:50%;bottom:-5px;width:8px;height:8px;margin-left:-4px;background:inherit;border-right:1px solid rgba(230,187,85,.45);border-bottom:1px solid rgba(230,187,85,.45);transform:rotate(45deg)}
+
+/* ---------- resultado de la corrida ---------- */
+.rsSheet .bd .wrap{padding-top:.4rem}
+.rsW{display:flex;flex-direction:column;gap:.9rem}
+.rsH{display:flex;gap:.9rem;align-items:center;padding:.9rem;border-radius:18px;border:1px solid rgba(230,187,85,.35);
+ background:radial-gradient(120% 140% at 0 0,rgba(230,187,85,.16),transparent 60%),linear-gradient(180deg,#191b22,#101116)}
+.rs-indulto .rsH{border-color:rgba(255,179,92,.6);background:radial-gradient(120% 140% at 0 0,rgba(255,179,92,.28),transparent 60%),linear-gradient(180deg,#1d1a16,#101116)}
+.rs-pitos .rsH{border-color:rgba(224,69,76,.4);background:radial-gradient(120% 140% at 0 0,rgba(224,69,76,.16),transparent 60%),linear-gradient(180deg,#1b1719,#101116)}
+.rsLogo{flex:none;width:72px;height:72px;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(230,187,85,.5),0 10px 20px -10px #000}
+.rsLogo svg{width:100%;height:100%;display:block}
+.rsHT{min-width:0}
+.rsK{font:700 .68rem/1.2 var(--display);letter-spacing:.16em;text-transform:uppercase;color:var(--m-mut)}
+.rsG{font:800 1.05rem/1.2 var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--m-txt);margin-top:.15rem}
+.rsR{font:700 1.15rem/1.25 'Cinzel',serif;color:var(--m-oro2);margin-top:.3rem}
+.rsS{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+.rsS>div{padding:.6rem .4rem;border-radius:14px;text-align:center;border:1px solid var(--m-line);background:rgba(255,255,255,.03)}
+.rsS b{display:block;font:800 1.08rem/1.1 var(--display);color:var(--m-txt);letter-spacing:.02em;white-space:nowrap}
+.rsS b small{font-size:.66rem;color:var(--m-oro2)}
+.rsS span{display:block;margin-top:.2rem;font:600 .62rem/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--m-mut)}
+.rsP{padding:.6rem .8rem;border-radius:12px;background:rgba(230,187,85,.12);border:1px solid rgba(230,187,85,.4);color:var(--m-oro2);font-size:.86rem}
+.rsL{display:flex;flex-direction:column;gap:.55rem}
+.rsT{position:relative;display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center;padding:.75rem .8rem;border-radius:16px;
+ border:1px solid var(--m-line);background:linear-gradient(90deg,color-mix(in srgb,var(--rc) 14%,transparent),transparent 45%),rgba(20,22,28,.85);box-shadow:inset 3px 0 0 var(--rc)}
+.rsT.top{border-color:rgba(243,214,139,.6);box-shadow:inset 3px 0 0 var(--rc),0 0 0 1px rgba(243,214,139,.25),0 12px 26px -14px rgba(230,187,85,.6)}
+.rsN{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:800 .9rem var(--display);color:#1a1206;background:linear-gradient(180deg,#f7dc93,#c99634)}
+.rsI{min-width:0}
+.rsNom{font:800 1rem/1.15 var(--display);letter-spacing:.04em;color:var(--m-txt)}
+.rsNom small{font-weight:600;color:var(--m-mut);font-size:.72rem}
+.rsSub{font-size:.74rem;color:var(--m-mut);margin-top:.1rem}
+.rsMat{font-size:.8rem;color:var(--m-txt);margin-top:.25rem;opacity:.9}
+.rsRes{display:flex;align-items:center;gap:.35rem;margin-top:.35rem;flex-wrap:wrap}
+.rsChip{padding:.18rem .55rem;border-radius:999px;font:700 .68rem/1.2 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--rc);border:1px solid color-mix(in srgb,var(--rc) 55%,transparent);background:color-mix(in srgb,var(--rc) 12%,transparent)}
+.rsO{width:13px;height:18px;color:#e6bb55;filter:drop-shadow(0 1px 2px #000)}
+.rsInd{font:800 .72rem var(--display);letter-spacing:.1em;text-transform:uppercase;color:#ffb35c}
+.rsJ{font-size:.74rem;color:var(--m-mut);margin-top:.35rem;line-height:1.35}
+.rsNota{position:relative;width:46px;height:46px}
+.rsNota svg{width:100%;height:100%;transform:rotate(-90deg)}
+.rsNota circle{fill:none;stroke-width:3.2}.rsNota .f{stroke:rgba(255,255,255,.08)}.rsNota .v{stroke:var(--c);stroke-linecap:round}
+.rsNota b{position:absolute;inset:0;display:grid;place-items:center;font:800 .9rem var(--display);color:var(--m-txt)}
+.rsNota.sin{display:grid;place-items:center;color:var(--m-mut)}
+.rsTop{position:absolute;top:-8px;right:12px;padding:.12rem .5rem;border-radius:999px;font:800 .6rem/1.3 var(--display);letter-spacing:.12em;text-transform:uppercase;color:#1a1206;background:linear-gradient(180deg,#f7dc93,#d9a947)}
+.rsNote{margin:0;font-size:.74rem;color:var(--m-mut)}
+.rsA{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;position:sticky;bottom:0;z-index:2;padding:.7rem 0 .4rem;background:#0b0c10;box-shadow:0 -18px 18px -4px #0b0c10}
+.rsA .btn.oro{grid-column:1/-1;min-height:50px}
+.rsSheet .shareB{display:none}
+/* ---------- repetición en dibujo ---------- */
+.vcSheet .ring-wrap{border-radius:18px;overflow:hidden;border:1px solid rgba(230,187,85,.35);box-shadow:0 18px 36px -20px #000}
+.vcSheet .capt{min-height:3.2em;padding:.7rem .9rem;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--m-line);font-size:1rem;line-height:1.4}
+.vcBar{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center}
+.vcBar .sp{display:none}
+.vcBar .btn{flex:1 1 auto;min-height:44px}
+.vcBar .btn.oro{flex-basis:100%;order:9}
+.vcDots{display:flex;gap:6px;justify-content:center}
+.vcDots i{width:22px;height:4px;border-radius:2px;background:rgba(255,255,255,.12)}
+.vcDots i.ya{background:rgba(230,187,85,.5)}.vcDots i.on{background:#f3d68b;box-shadow:0 0 8px rgba(243,214,139,.7)}
+.vcSheet .shareB{margin-top:.2rem}
+
+/* ---------- finca en vertical ---------- */
+@media (orientation:portrait){
+ html body #h3info{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.2;font-size:.74rem;max-width:44vw}
+ html body .h3tasks{max-width:calc(100% - 24px);font-size:.74rem;padding:.4rem .6rem}
+}

@@ -48,7 +48,7 @@ function irA3D(spot){enter3D();const P=SPOTS[spot];if(P&&W3.F){W3.F.p.set(P[0],0
 function delegar(k){const c=campo();
  if(k==='cerca'){S.money-=600;S.roto=null;toast('El mayoral repara la cerca · −600 €')}
  if(k==='escapado'){S.money-=900;S.escapado=null;toast('Los vaqueros recogen la res · −900 €')}
- if(k==='curas'){const inj=c.filter(a=>a.salud<55);S.money-=inj.length*250;inj.forEach(a=>{a.salud=Math.min(100,a.salud+30);a.lesion=0});toast(`Veterinario · −${eur(inj.length*250)}`)}
+ if(k==='curas'){const inj=c.filter(a=>a.salud<55);const vc=mej('clinica')?120:250;S.money-=inj.length*vc;inj.forEach(a=>{a.salud=Math.min(100,a.salud+30);a.lesion=0});toast(`Veterinario · −${eur(inj.length*vc)}`)}
  save();render()}
 
 /* ============ INICIO ============ */
@@ -87,7 +87,7 @@ function listaTareas(){const c=campo(),T=[];
  if(dec)T.push({t:`Decidir ${dec} hembras tentadas`,p:`UI.filter='hjov';go('camada')`,pl:'Decidir'});
  if(S.roto)T.push({t:`Reparar la cerca de ${RKN[S.roto.rk]}`,p:`irA3D('aperos')`,pl:'Hacerlo yo',d:`delegar('cerca')`,dl:'Mayoral · 600 €'});
  if(S.escapado){const a=byId(S.escapado.id);if(a)T.push({t:`Devolver a ${a.name} a su cercado`,p:`irA3D('caballo')`,pl:'A caballo',d:`delegar('escapado')`,dl:'Vaqueros · 900 €'})}
- if(inj.length)T.push({t:`Curar ${inj.length>1?inj.length+' animales':'a '+inj[0].name}`,p:`irA3D('aperos')`,pl:'Hacerlo yo',d:`delegar('curas')`,dl:`Veterinario · ${eur(inj.length*250)}`});
+ if(inj.length)T.push({t:`Curar ${inj.length>1?inj.length+' animales':'a '+inj[0].name}`,p:`irA3D('aperos')`,pl:'Hacerlo yo',d:`delegar('curas')`,dl:`Veterinario · ${eur(inj.length*(mej('clinica')?120:250))}`});
  if((S.fedM||0)<4)T.push({t:`Echar pienso a mano (${S.fedM||0}/4)`,p:`irA3D('pienso')`,pl:'Hacerlo yo',opt:1});
  if(!sems.length)T.push({t:'Sin semental para la paridera',p:`go('mercado')`,pl:'Mercado'});
  return T}
@@ -112,6 +112,7 @@ function renderPalmares(el){
   <div class="tile"><div class="lbl">Festejos</div><div class="v">${st.corridas}</div></div><div class="tile"><div class="lbl">Toros lidiados</div><div class="v">${st.toros}</div></div>
   <div class="tile"><div class="lbl">Orejas</div><div class="v">${st.orejas}</div></div><div class="tile"><div class="lbl">Vueltas</div><div class="v">${st.vueltas}</div></div>
   <div class="tile"><div class="lbl">Indultos</div><div class="v">${st.indultos}</div></div><div class="tile"><div class="lbl">Ingresos plaza</div><div class="v" style="font-size:1.15rem">${eur(st.ingresos)}</div></div></div>
+  <div class="imp"><div><span class="lbl">${esc(rangoImperio())}</span><b>${eur(patrimonio())}</b><small>patrimonio total</small></div><div><span class="lbl">Ganado</span><b>${eur(valorGanado())}</b><small>valor estimado</small></div><div><span class="lbl">Obras</span><b>${eur(invertido())}</b><small>invertido</small></div></div>
   ${S.presHist.length>1?`<section class="sect"><header><h2>Prestigio</h2></header><div class="card">${spark()}</div></section>`:''}
   <section class="sect"><header><h2>Diario</h2></header><div class="list">${S.log.slice(0,10).map(l=>`<div class="task"><span class="mono muted" style="min-width:64px">${l.d}</span><span class="t" style="font-size:.88rem">${esc(l.t)}</span></div>`).join('')}</div></section>`;
  if(tab==='rank')body=`<div class="list tw"><table class="t rank"><tr><th>#</th><th>Ganadería</th><th>Pts</th><th>Orejas</th><th>Ind.</th></tr>${rk.map((r,i)=>`<tr class="${r.me?'me':''}"><td class="num">${i+1}</td><td>${divisa(r.div||['#333','#666'])} ${esc(r.name)}</td><td class="num"><b>${r.pts}</b></td><td class="num">${r.ore}</td><td class="num">${r.ind}</td></tr>`).join('')}</table></div><small class="muted">Puntos por toro: indulto 30, vuelta 12, ovación 6, silencio 1, pitos −3, devuelto −5, y 4 por oreja. Premios al cerrar el año.</small>`;

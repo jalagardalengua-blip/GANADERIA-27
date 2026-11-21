@@ -1,0 +1,16 @@
+/* Barra inferior violeta (js/tema-violeta.js) sobre la barra de gala de main */
+nav.tabs.gala.vio{background:linear-gradient(180deg,transparent,rgba(12,5,19,.9) 30%,#0c0513)}
+nav.tabs.gala.vio .wrap{position:relative;background:linear-gradient(180deg,#5b2a6e 0%,#3a1748 45%,#24102e 100%);
+  clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,14px 100%,0 50%);box-shadow:inset 0 1px 0 rgba(255,170,220,.35);border:0}
+nav.tabs.gala.vio .wrap::after{left:12%;right:12%;bottom:3px;height:2px;opacity:1;background:linear-gradient(90deg,transparent,#ff4fa0 25%,#ffb35a 50%,#ff4fa0 75%,transparent);box-shadow:0 0 10px #ff6a8a}
+nav.tabs.gala.vio .gDrL,nav.tabs.gala.vio .gDrR{display:none}
+nav.tabs.gala.vio button{min-height:70px;padding:7px 1px 10px;color:#e8d3ee}
+nav.tabs.gala.vio button:not(:first-child){box-shadow:none}
+nav.tabs.gala.vio button span:not(.bdg){font-family:var(--display);font-style:normal;font-weight:700;font-size:.64rem;text-transform:none;color:#e8d3ee;text-shadow:0 1px 2px #000}
+nav.tabs.gala.vio .gIco.gTile{height:auto;width:100%;max-width:42px;aspect-ratio:1;border-radius:9px;object-fit:cover;border:1px solid rgba(255,190,230,.25);box-shadow:0 2px 6px rgba(0,0,0,.55);filter:saturate(.85) brightness(.82)}
+nav.tabs.gala.vio button[aria-current="true"]{background:none}
+nav.tabs.gala.vio button[aria-current="true"] .gIco.gTile{filter:none;transform:translateY(-2px) scale(1.07);border-color:#ffc46b;box-shadow:0 0 0 1px #ff6aa8,0 0 14px rgba(255,120,150,.75),0 4px 10px rgba(0,0,0,.6)}
+nav.tabs.gala.vio button[aria-current="true"] span:not(.bdg){color:#fff;text-shadow:0 0 8px rgba(255,120,170,.7),0 1px 0 #000}
+nav.tabs.gala.vio button[aria-current="true"]::after{display:none}
+nav.tabs.gala.vio .gEmb img{filter:drop-shadow(0 0 12px rgba(255,79,160,.55)) drop-shadow(0 4px 10px rgba(0,0,0,.85))}
+nav.tabs.gala.vio .bdg{background:linear-gradient(180deg,#ff4f6e,#c3102a);box-shadow:0 0 0 2px #3a1748}
