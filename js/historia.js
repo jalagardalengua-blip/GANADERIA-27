@@ -68,6 +68,8 @@ const CAPS=[
   obj:[{txt:'Vuelta al ruedo o indulto en una plaza de primera',ok:()=>nuevaHist().some(h=>h.cat===1&&h.toros.some(t=>t.res==='vuelta'||t.res==='indulto'))}],
   rw:{money:25000,pres:4,conf:10},outro:'Lo has conseguido. El hierro de la casa ya es leyenda. La temporada sigue: ahora toca mantenerse arriba.'}
 ];
+// Capítulos que tienen vídeo en video/historia/cap-N.mp4 (añadir aquí el número al subir cada vídeo)
+const HVID=[];
 const CAP_IMG=['img/carga.jpg','img/carga-m.jpg'];
 function capActual(){stInit();return S.story.cap<CAPS.length?CAPS[S.story.cap]:null}
 function capObjs(c){return c.obj.map(o=>({txt:o.txt,ok:!!o.ok(),prog:o.prog?o.prog():''}))}
@@ -83,7 +85,7 @@ function capModal(tipo,c){c=c||capActual();if(!c)return;const n=CAPS.indexOf(c)+
  const body=tipo==='intro'
   ?`<p style="margin:0">${esc(c.intro())}</p><div class="list">${capObjs(c).map(o=>`<div class="task"><span class="dot ${o.ok?'ok':''}"></span><span class="t">${esc(o.txt)}${o.prog?` <small class="muted">(${o.prog})</small>`:''}</span></div>`).join('')}</div><p class="muted" style="margin:0">Recompensa: ${rw}</p>`
   :`<p style="margin:0">${esc(c.outro)}</p><p style="margin:0"><b>Recompensa:</b> ${rw}</p>${capActual()?`<p class="muted" style="margin:0">Siguiente capítulo: «${esc(capActual().t)}».</p>`:''}`;
- modal(tipo==='intro'?`Capítulo ${n} · ${c.t}`:`Capítulo ${n} completado`,`<div class="stack"><div class="capimg" style="background-image:url(${img})"><span>${tipo==='intro'?'Capítulo '+n:'Completado'}</span><b>${esc(c.t)}</b></div>${body}<button class="btn pri adv" onclick="closeModal()">${tipo==='intro'?'En marcha':'Seguir'}</button></div>`,
+ modal(tipo==='intro'?`Capítulo ${n} · ${c.t}`:`Capítulo ${n} completado`,`<div class="stack"><div class="capimg" style="background-image:url(${img})">${HVID.includes(n)?`<video class="capv" src="video/historia/cap-${n}.mp4" poster="${img}" autoplay muted loop playsinline preload="metadata" onerror="this.remove()"></video>`:''}<span>${tipo==='intro'?'Capítulo '+n:'Completado'}</span><b>${esc(c.t)}</b></div>${body}<button class="btn pri adv" onclick="closeModal()">${tipo==='intro'?'En marcha':'Seguir'}</button></div>`,
   ()=>{if(tipo==='fin')setTimeout(()=>historiaCheck(),250)})}
 function historiaCard(){const c=capActual();if(!c){return `<div class="card hcap"><div class="lbl">Historia</div><b>Leyenda del campo bravo</b><p class="muted" style="margin:.3rem 0 0">Has completado la historia. Sigue criando toros y manteniéndote en lo alto del escalafón.</p></div>`}
  const n=S.story.cap+1,o=capObjs(c),hechos=o.filter(x=>x.ok).length;

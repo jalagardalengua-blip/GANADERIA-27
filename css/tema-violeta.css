@@ -52,3 +52,23 @@ nav.tabs.gala.vio button span:not(.bdg){font-family:'Barlow Condensed',sans-seri
 .mItem small{color:#e2cfe9!important}
 .mItem.prim{background:linear-gradient(100deg,#ff4fa0 0%,#ff7a6b 50%,#ffb35a 100%)!important;border-color:rgba(255,220,180,.7)!important;box-shadow:0 14px 30px -12px rgba(255,79,160,.7)!important}
 .mItem.prim b,.mItem.prim small{color:#2a0b1e!important;text-shadow:none!important}
+
+/* ===== Logotipo taurino (portada, menú y pantalla de carga): menos GTA, más autoridad de toreo ===== */
+.lgTaurino{background:none!important;display:flex;flex-direction:column;align-items:center;gap:0}
+.lgTaurino .lgMarca{filter:drop-shadow(0 0 12px rgba(255,110,30,.55)) drop-shadow(0 4px 8px rgba(0,0,0,.8));margin-bottom:-.2rem}
+.lgTaurino h1,#carga .cg-t{display:flex!important;flex-direction:column;align-items:center;margin:.15rem 0 0!important;line-height:.9!important;
+  font-family:'Cinzel Decorative','Cinzel',Georgia,serif!important;font-weight:900!important;font-style:normal!important;text-transform:uppercase;letter-spacing:.06em!important;
+  background:none!important;-webkit-text-fill-color:initial!important;color:#fff!important;text-shadow:none!important;font-size:clamp(2.6rem,13vw,4.6rem)!important}
+.lgH{background:linear-gradient(180deg,#faf6ef 0%,#cfc8bd 34%,#7d746a 58%,#3d3530 82%,#7a3a1c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 2px 0 rgba(0,0,0,.85)) drop-shadow(0 0 9px rgba(255,98,26,.45))}
+.lgD{background:linear-gradient(180deg,#fff4c8 0%,#f0c75a 36%,#a8761f 62%,#f6d983 84%,#c08a2e 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 2px 0 rgba(0,0,0,.85)) drop-shadow(0 0 10px rgba(240,180,70,.35))}
+.lgY{font-family:'Playfair Display',Georgia,serif!important;font-style:italic!important;font-weight:700!important;text-transform:none!important;letter-spacing:0!important;
+  font-size:.42em!important;color:#e8b84a!important;-webkit-text-fill-color:#e8b84a!important;margin:.02em 0 .04em!important;text-shadow:0 2px 6px rgba(0,0,0,.8)!important}
+.lgTaurino .lgCintas{width:min(66%,260px);height:auto;margin-top:.35rem;filter:drop-shadow(0 3px 4px rgba(0,0,0,.7))}
+.lgTaurino .mTag{margin-top:.45rem;font-family:'Cinzel',Georgia,serif!important;letter-spacing:.24em!important;color:#e8c27a!important}
+.lgTaurino.sm h1{flex-direction:row!important;gap:.3em;align-items:baseline;font-size:clamp(1.7rem,8.6vw,2.8rem)!important}
+.lgTaurino.sm .lgY{font-size:.6em!important}
+.lgTaurino.sm .lgCintas{width:min(46%,180px)}
+.menu.mPress .lgTaurino h1{font-size:clamp(2.8rem,14vw,4.8rem)!important}
+#carga .cg-t{font-size:clamp(2.4rem,12vw,4rem)!important;align-items:flex-start}

@@ -1114,3 +1114,5 @@ td svg.div{width:16px;height:25px}
 .capimg span,.capimg b{position:relative}
 .capimg span{font-family:var(--display);font-weight:700;letter-spacing:.24em;text-transform:uppercase;font-size:.72rem;color:var(--oro)}
 .capimg b{font-family:var(--display);font-weight:800;font-style:italic;text-transform:uppercase;font-size:1.7rem;line-height:1;color:#fff}
+.capimg .capv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 25%}
+.capimg::before{z-index:1}.capimg span,.capimg b{z-index:2}
