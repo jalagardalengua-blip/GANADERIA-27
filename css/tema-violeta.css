@@ -14,3 +14,41 @@ nav.tabs.gala.vio button[aria-current="true"] span:not(.bdg){color:#fff;text-sha
 nav.tabs.gala.vio button[aria-current="true"]::after{display:none}
 nav.tabs.gala.vio .gEmb img{filter:drop-shadow(0 0 12px rgba(255,79,160,.55)) drop-shadow(0 4px 10px rgba(0,0,0,.85))}
 nav.tabs.gala.vio .bdg{background:linear-gradient(180deg,#ff4f6e,#c3102a);box-shadow:0 0 0 2px #3a1748}
+
+/* ---------- Barra sin el toro central: 7 pestañas a todo el ancho ---------- */
+nav.tabs.gala.vio .gEmb{display:none!important}
+nav.tabs.gala.vio .wrap{grid-template-columns:repeat(7,1fr)!important}
+nav.tabs.gala.vio .gIco.gTile{max-width:48px}
+
+/* ---------- Tipografía de cartel: Anton para titulares, Cinzel para etiquetas, Barlow para el texto ---------- */
+:root{--cartel:'Anton','Barlow Condensed',Impact,sans-serif;--clasica:'Cinzel',Georgia,serif}
+h1,h2,h3,.hero2 h1,.hcap b,.capimg b,.cg-t,.hdr .gname,.fx-banner b,.sheet h2,.gan b,.prof .pn,.tile .v,.big{font-family:var(--cartel)!important;font-weight:400!important;font-style:normal!important;letter-spacing:.015em!important}
+h2{font-size:1.6rem}
+.hero2 h1{font-size:clamp(3rem,16vw,5.2rem)!important;line-height:.88!important;text-shadow:3px 4px 0 rgba(224,54,138,.8),0 10px 26px rgba(0,0,0,.65)!important}
+.hdr .gname{font-size:clamp(1.35rem,6.4vw,2.1rem)!important;letter-spacing:.03em!important}
+.lbl,.hero2 .k,.hero2 .tag,.hdr .gsub,.mTag,.cg-d,.capimg span{font-family:var(--clasica)!important;font-weight:700!important;letter-spacing:.2em!important;color:var(--ambar,#ffb35a)}
+.btn.pri,.btn.oro,.adv,.sbar .go{font-family:var(--cartel)!important;font-weight:400!important;font-style:normal!important;letter-spacing:.07em!important}
+nav.tabs.gala.vio button span:not(.bdg){font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.03em;font-size:.68rem}
+
+/* ---------- Portada y pantalla de carga ---------- */
+.mBg i{background-position:50% 20%!important;filter:saturate(1.12) contrast(1.05)}
+.mVig{background:linear-gradient(0deg,rgba(12,5,19,.96) 0%,rgba(12,5,19,.55) 38%,rgba(12,5,19,.15) 62%,rgba(12,5,19,.55) 100%)!important}
+.vioLogo{background:none!important;gap:.2rem}
+.vioLogo h1{font-family:var(--cartel)!important;color:#fff!important;background:none!important;-webkit-text-fill-color:#fff!important;text-transform:uppercase;font-size:clamp(3.4rem,18vw,6rem)!important;line-height:.86!important;
+  text-shadow:4px 5px 0 rgba(224,54,138,.85),0 12px 30px rgba(0,0,0,.7)!important;display:flex;flex-direction:column;align-items:center;margin:.2rem 0}
+.vioLogo h1 em{font-family:var(--clasica)!important;font-style:italic;font-size:.32em!important;letter-spacing:.25em!important;color:var(--ambar,#ffb35a)!important;-webkit-text-fill-color:var(--ambar,#ffb35a)!important;text-shadow:none!important;margin:.1em 0!important}
+.vioLogo.sm h1{flex-direction:row!important;gap:.25em;font-size:clamp(2.2rem,11vw,3.6rem)!important;align-items:center}
+.vioLogo .band{filter:drop-shadow(0 0 14px rgba(255,79,160,.6)) drop-shadow(0 4px 8px rgba(0,0,0,.7))}
+.mPressT{font-family:var(--clasica)!important;color:#fff!important;letter-spacing:.3em!important}
+#carga .cg-t{font-family:var(--cartel)!important;font-weight:400!important;text-transform:uppercase;color:#fff!important;background:none!important;-webkit-text-fill-color:#fff!important;text-shadow:3px 4px 0 rgba(224,54,138,.85),0 10px 26px rgba(0,0,0,.7)!important;font-size:clamp(2.6rem,13vw,4.4rem)!important;line-height:.9!important}
+#carga .cg-bar i{background:linear-gradient(90deg,#ff4fa0,#ffb35a)!important;box-shadow:0 0 10px #ff6a8a}
+/* Portada: el título va abajo, sobre el traje, y deja la cara del torero a la vista */
+.menu.mPress .mCenter{position:fixed;left:0;right:0;bottom:calc(8vh + env(safe-area-inset-bottom,0px));top:auto!important;transform:none!important;justify-content:flex-end!important}
+.menu.mPress .vioLogo h1{font-size:clamp(3rem,15vw,5.2rem)!important}
+/* Menú principal en violeta */
+.menu.mPress .mFoot{display:none}
+.mItem{background:linear-gradient(180deg,rgba(52,26,74,.9),rgba(26,12,39,.92))!important;border:1px solid rgba(255,79,160,.45)!important;box-shadow:0 12px 26px -16px #000,inset 0 1px 0 rgba(255,140,200,.15)!important;color:#fff!important}
+.mItem b{font-family:var(--cartel)!important;font-weight:400!important;letter-spacing:.05em!important;color:#fff!important}
+.mItem small{color:#e2cfe9!important}
+.mItem.prim{background:linear-gradient(100deg,#ff4fa0 0%,#ff7a6b 50%,#ffb35a 100%)!important;border-color:rgba(255,220,180,.7)!important;box-shadow:0 14px 30px -12px rgba(255,79,160,.7)!important}
+.mItem.prim b,.mItem.prim small{color:#2a0b1e!important;text-shadow:none!important}
