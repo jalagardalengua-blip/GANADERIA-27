@@ -863,7 +863,7 @@ function bloque(k){let ing=0,n=0;for(const a of campo()){if(k==='viejas'&&a.role
  S.animals=S.animals.filter(a=>a.st==='campo');S.money+=Math.round(ing);save();render();toast(`${n} vendidos por ${eur(ing)}`)}
 
 /* ============ PALMARÉS ============ */
-function getQual(){try{return localStorage.getItem('hd-qual')||(matchMedia('(pointer:coarse)').matches?'media':'alta')}catch(e){return 'media'}}
+function getQual(){return 'alta'}
 function setQual(k){try{localStorage.setItem('hd-qual',k)}catch(e){}toast(`Calidad ${k}: se aplica al volver a entrar en 3D`);if(W3.R){const pr={alta:1.6,media:1.2,baja:.9}[k];W3.R.setPixelRatio(Math.min(pr,window.devicePixelRatio||1));W3.R.shadowMap.enabled=k!=='baja';W3.resize&&W3.resize()}render()}
 let DEFER=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DEFER=e});
 const APK_URL='https://github.com/jalagardalengua-blip/GANADERIA-27/releases/latest/download/HierroYDivisa.apk';
