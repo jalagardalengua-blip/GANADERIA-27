@@ -1,0 +1,63 @@
+/* =====================================================================
+   INTERFAZ UNIFICADA · la misma piel violeta en todos los modos
+   Última hoja de estilo: iguala botones, pestañas activas, tarjetas, ventanas,
+   HUD 3D (finca, tienta, calle), barra de la ganadería de corro y la corrida.
+   ===================================================================== */
+:root{--neon:linear-gradient(100deg,#ff4fa0 0%,#ff7a6b 50%,#ffb35a 100%);--vidrio-b:linear-gradient(180deg,rgba(52,26,74,.9),rgba(26,12,39,.93));--filo:rgba(255,79,160,.42)}
+
+/* Botones: principal en neón, secundarios en cristal violeta */
+html body .btn.pri,html body .btn.oro,html body .adv,html body .btn.pri.adv,html body .btn.oro.adv{
+  background:var(--neon)!important;color:#2a0b1e!important;border:1px solid rgba(255,220,180,.7)!important;text-shadow:none!important;
+  box-shadow:0 10px 24px -12px rgba(255,79,160,.75),inset 0 1px 0 rgba(255,255,255,.35)!important}
+html body .btn.pri svg,html body .btn.oro svg,html body .adv svg{color:#2a0b1e!important;fill:currentColor}
+html body .btn:not(.pri):not(.oro):not(.adv){background:var(--vidrio-b)!important;border:1px solid var(--filo)!important;color:#fff!important}
+html body .btn[disabled]{filter:grayscale(.5)!important;opacity:.5!important}
+
+/* Pestañas, filtros y opciones activas: violeta con borde rosa (antes dorado) */
+html body .chip,html body .chips .chip,html body .seg button{background:rgba(26,12,39,.75)!important;border:1px solid rgba(255,255,255,.08)!important;color:#e9dcef!important}
+html body .chip[aria-pressed="true"],html body .chip.on,html body .chips .chip[aria-pressed="true"],html body .chips .chip.on,html body .seg button[aria-pressed="true"]{
+  background:linear-gradient(180deg,rgba(255,79,160,.28),rgba(90,30,120,.55))!important;border:1px solid #ff6aa8!important;color:#fff!important;box-shadow:0 0 14px -4px rgba(255,79,160,.7)!important}
+html body .chip[aria-pressed="true"] svg,html body .chip.on svg{color:#ffb35a!important}
+
+/* Tarjetas con filo dorado → filo violeta-rosa */
+html body .goldline,html body .wid{border-color:var(--filo)!important}
+html body .goldline::before,html body .wid::after{background:linear-gradient(90deg,transparent,#ff4fa0,#ffb35a,transparent)!important;opacity:.6}
+
+/* Ventanas (fichas, obras, calendario, informes) */
+html body .sheet{background:linear-gradient(180deg,#26123a,#140a1f)!important;border-color:var(--filo)!important}
+html body .sheet .x{background:rgba(26,12,39,.8)!important;border:1px solid var(--filo)!important;color:#fff!important}
+
+/* HUD 3D (finca, tienta, calle): misma piel que la interfaz */
+html body .h3top .btn,html body .h3act .btn,html body #h3tt .btn,html body #h3plaza .btn{background:var(--vidrio-b)!important;border:1px solid var(--filo)!important;color:#fff!important;border-radius:12px!important}
+html body .h3act .btn.oro,html body #h3tt .btn.oro,html body #h3tt .btn.pri,html body #h3plaza .btn.oro{background:var(--neon)!important;color:#2a0b1e!important}
+html body .h3info{color:#fff!important}
+html body .h3tasks{background:rgba(18,8,28,.82)!important;border:1px solid var(--filo)!important;border-left:3px solid #ff4fa0!important}
+html body #joy{border-color:rgba(255,79,160,.55)!important;background:radial-gradient(circle,rgba(90,30,120,.35),rgba(18,8,28,.25) 70%)!important}
+html body #knob{background:var(--neon)!important;box-shadow:0 0 16px rgba(255,79,160,.6)!important}
+
+/* Corrida en directo: el «Salir» de arriba con la misma piel */
+html body #ruedoX{background:var(--vidrio-b)!important;border:1px solid var(--filo)!important;color:#fff!important}
+
+/* Calendario: día de hoy y marcas en la paleta */
+html body .cal .hoy,html body .calD.hoy,html body .calDay.hoy{border-color:#ff6aa8!important;box-shadow:0 0 12px -3px rgba(255,79,160,.7)!important}
+
+/* Barra de la ganadería de corro: la misma barra violeta (sin tira rojigualda ni cortinas) */
+nav.tabs.gala.galaC.vio .wrap::before{display:none!important}
+nav.tabs.gala.galaC.vio .wrap{grid-template-columns:repeat(5,1fr)!important;margin-top:0!important}
+nav.tabs.gala.galaC.vio button:not([aria-current="true"]){background:none!important}
+nav.tabs.gala.galaC.vio button:not([aria-current="true"])::after{display:none!important}
+nav.tabs.gala.galaC.vio button[aria-current="true"]{background:none!important;box-shadow:none!important}
+nav.tabs.gala.galaC.vio .gIco{height:30px}
+nav.tabs.gala.galaC.vio button[aria-current="true"] .gIco{filter:drop-shadow(0 0 8px rgba(255,79,160,.8))}
+
+/* Tarjetas de meses de la temporada (Inicio) */
+html body .season .sm{background:linear-gradient(180deg,rgba(40,20,58,.85),rgba(20,10,30,.9))!important;border-color:rgba(255,255,255,.08)!important}
+html body .season .sm.now{border-color:#ff6aa8!important;box-shadow:0 0 12px -4px rgba(255,79,160,.7)!important}
+html body .season .sm.now b{color:#fff!important}
+html body .season .sm.mine{background:linear-gradient(180deg,rgba(255,79,160,.22),rgba(70,24,90,.6))!important;border-color:rgba(255,179,90,.6)!important}
+html body .season .sm.mine small{color:#ffcf8a!important}
+
+/* Cortinilla de cambio de mes y de modo: capote en la paleta violeta-rosa con filo ámbar */
+html body .capWipe i,html body .capWipe.cC i{background:linear-gradient(90deg,#24102e,#5b2a6e 38%,#c0307a 56%,#3a1748 74%,#ffb35a 76%,#ffb35a 78%,transparent 78.5%)!important}
+html body .capWipe b{font-family:'Anton','Barlow Condensed',sans-serif!important;font-style:normal!important;font-weight:400!important;letter-spacing:.03em;text-shadow:3px 4px 0 rgba(224,54,138,.75),0 8px 22px rgba(0,0,0,.6)!important}
+html body .capWipe b small{font-family:'Cinzel',Georgia,serif!important;color:#ffcf8a!important}
