@@ -87,4 +87,4 @@ h2::before{content:"";width:5px;height:1.05em;border-radius:2px;background:var(-
 ::selection{background:var(--rosa);color:#fff}
 
 /* Franjas de la divisa visibles aunque sean negras */
-.div i{box-shadow:0 0 0 1px rgba(255,255,255,.28)}
+svg.div{width:30px;height:46px;display:inline-block;vertical-align:middle;flex:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6)) drop-shadow(0 0 1px rgba(255,255,255,.35))}

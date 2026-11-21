@@ -619,7 +619,15 @@ function hierroSVG(h,sz,col){
  if(h.a==='media')ad=`<path d="M10 40 A20 20 0 0 0 50 40" fill="none" stroke="${col}" stroke-width="3.5" stroke-linecap="round"/>`;
  return `<svg class="hierro" width="${sz}" height="${sz}" viewBox="0 0 60 60" aria-hidden="true">${ad}<text x="30" y="${h.a==='media'?34:40}" text-anchor="middle" font-family="Cinzel, Georgia, serif" font-weight="700" font-size="${L.length>1?22:28}" fill="${col}">${L}</text></svg>`;
 }
-const divisa=d=>`<span class="div" aria-hidden="true"><i style="background:${d[0]}"></i><i style="background:${d[1]}"></i></span>`;
+// Divisa: arponcillo con la lazada y las dos cintas de los colores de la ganadería (puntas en cola de golondrina)
+const divisa=d=>{const a=esc(d&&d[0]||'#888'),b=esc(d&&(d[1]||d[0])||'#888'),k='#0b0710';
+ return `<svg class="div" width="26" height="40" viewBox="0 0 26 40" aria-hidden="true">
+ <path d="M13 .6l-2.2 3.4h1.4v4.6h1.6V4h1.4z" fill="#cfd4d8" stroke="${k}" stroke-width=".5"/>
+ <path d="M12.2 9.2C6.4 6.6 2.6 8.4 3.4 11.6c.8 3 5.6 2.6 8.8.4z" fill="${a}" stroke="${k}" stroke-width=".7"/>
+ <path d="M13.8 9.2c5.8-2.6 9.6-.8 8.8 2.4-.8 3-5.6 2.6-8.8.4z" fill="${b}" stroke="${k}" stroke-width=".7"/>
+ <path d="M11.6 11.2L6.2 37.6l2.6-2.4 1.4 3.6 4-26.8z" fill="${a}" stroke="${k}" stroke-width=".7"/>
+ <path d="M14.4 11.2l5.4 26.4-2.6-2.4-1.4 3.6-4-26.8z" fill="${b}" stroke="${k}" stroke-width=".7"/>
+ <circle cx="13" cy="10.4" r="2.1" fill="${b}" stroke="${k}" stroke-width=".7"/><circle cx="13" cy="10.4" r=".9" fill="${a}"/></svg>`};
 function subtitulo(){return S.g.real?`Ganadería · encaste ${S.g.enc}`:`Ganadería fundada en ${S.g.fund||2027}`}
 function nivel(){const st=S.stats||{};const xp=Math.round((S.xp||0)+S.pres*6+(st.corridas||0)*25+(st.indultos||0)*150+(st.vueltas||0)*40);return {n:1+Math.floor(xp/100),p:xp%100}}
 const FAMP={negro:'negro',burraco:'negro',entrepelado:'negro','cárdeno':'cardeno',salinero:'cardeno',colorado:'colorado','castaño':'castano',jabonero:'jabonero'};
