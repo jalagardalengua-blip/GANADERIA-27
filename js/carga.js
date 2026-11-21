@@ -17,7 +17,7 @@ const CG={on:false,t0:0,id:0,sale:null,
   'Con la velocidad x4 puedes ver la lidia más deprisa sin perder ningún momento.'],
  dest:'',rx:/\b(enter3D|enterPlaza|irA3D|faenaYo|irCalle|irPlaza|corroTienta|tcGo|hacerFestival)\(|\b(calCorrida|calCorro)\([^)]*,\s*(true|1)\)/};
 function cgEl(){let e=document.getElementById('carga');if(e)return e;e=document.createElement('div');e.id='carga';e.setAttribute('role','status');e.setAttribute('aria-live','polite');
- e.innerHTML='<div class="cg-bg"></div><img class="cg-img" src="img/carga.jpg" alt="" decoding="async"><div class="cg-vig"></div><div class="cg-info"><h1 class="cg-t">Hierro y Divisa</h1><p class="cg-d"></p><div class="cg-bar"><i></i></div><p class="cg-tip"></p></div>';
+ e.innerHTML='<div class="cg-bg"></div><img class="cg-img" src="img/carga.jpg" alt="" decoding="async"><div class="cg-vig"></div><div class="cg-info"><h1 class="cg-t"><span class="lgH">Hierro</span> <em class="lgY">y</em> <span class="lgD">Divisa</span></h1><p class="cg-d"></p><div class="cg-bar"><i></i></div><p class="cg-tip"></p></div>';
  document.body.appendChild(e);return e}
 function cargaProg(p){const i=cgEl().querySelector('.cg-bar i');if(i)i.style.width=Math.round(Math.max(0,Math.min(1,p))*100)+'%'}
 function cargaMostrar(dest){const e=cgEl();clearTimeout(CG.sale);e.classList.remove('sale');CG.on=true;CG.t0=performance.now();CG.id++;
