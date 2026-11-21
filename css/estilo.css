@@ -1090,3 +1090,10 @@ html.calma .pgH>i,html.calma .hubT::after{animation:none}
 .plzPrev .plzT b{font-size:1rem;line-height:1.2}.plzPrev .plzT span{font-size:.82rem;opacity:.8}
 .calEvH .calPlz{display:block;color:var(--oro,#e6bb55);margin-top:.15rem}.calEvH .calPlzI{display:block;margin-top:.55rem;width:100%;aspect-ratio:16/9;border-radius:10px;background-size:cover;background-position:center}
 @media (max-width:440px){.plzPrev .plzI{width:96px}.ofc .plzN{max-width:92%}}
+
+/* Divisa dibujada (juego.js: divisa) y banderillas (js/banderillas.js) */
+svg.div{display:inline-block;vertical-align:middle;flex:none;width:30px;height:46px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6)) drop-shadow(0 0 1px rgba(255,255,255,.35))}
+.mDivT svg.div,.cpDv svg.div{width:18px;height:28px}
+svg.emb.band{filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
+td svg.div{width:16px;height:25px}
+.row svg.div{width:22px;height:34px}
