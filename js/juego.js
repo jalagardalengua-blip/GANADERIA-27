@@ -121,7 +121,7 @@ function newGame(cfg){
  S={v:1,g:cfg,year:2027,month:0,money:cfg.real?260000:180000,pres:cfg.real?cfg.pres:12,feed:'nor',animals:[],nid:1,nums:{},offers:[],oid:1,
   hist:[],presHist:[],semAct:null,mej:cfg.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{},season:null,objs:[],porVer:[],mkt:null,log:[],stats:{corridas:0,toros:0,indultos:0,vueltas:0,orejas:0,premios:0,ingresos:0}};
  const real=cfg.real, enc=cfg.enc, b=real?2:-5;
- const nV=real?40:20, nM=real?12:5, nH=real?10:5, nS=real?2:1, maxM=real?5:4;
+ const nV=real?40:30, nM=real?12:7, nH=real?10:7, nS=real?2:1, maxM=real?5:4;
  const vacas=[];
  for(let i=0;i<nV;i++){const v=mk({sex:'H',born:S.year-RI(4,12),enc,bonus:b+2,role:'vaca'});tentar(v);vacas.push(v);S.animals.push(v)}
  for(let i=0;i<nS;i++){const s=mk({sex:'M',born:S.year-RI(5,7),enc,bonus:b+6,role:'semental'});tentar(s);if(s.nota<70){s.g.bra=Math.max(s.g.bra,78);tentar(s)}S.animals.push(s)}
@@ -149,7 +149,7 @@ function newSeason(){
 const OBJCHK={lid:(s,o)=>s.lid>=o.n,ov:s=>s.ov>=2,cash:(s,o)=>S.money>=o.n,c1:s=>s.c1>=1,vu:s=>s.vu+s.ind>=1};
 
 /* ============ ofertas y mercado ============ */
-function priceFor(cat,tipo){const p=S.pres,bonus=1+(mejLv('corrales')>=2?.05:0)+(mej('oficina')?.05:0);let v=cat===1?6000+p*95:cat===2?3400+p*45:1800+p*22;if(tipo==='novillada')v*=.45;return r100(v*bonus*R(.9,1.1))}
+function priceFor(cat,tipo){const p=S.pres,bonus=1+(mejLv('corrales')>=2?.05:0)+(mej('oficina')?.05:0);let v=cat===1?6000+p*95:cat===2?3400+p*45:2600+p*30;if(tipo==='novillada')v*=.45;return r100(v*bonus*R(.9,1.1))}
 function genOffers(ahead,init){
  const tgt=absNow()+ahead, tm=tgt%12;
  for(const f of FERIAS){
@@ -209,7 +209,7 @@ function advance(){
  const ev=Math.random()<.42?pick(['pelea','lluvia','sequia','veedor','visita','cojera']):null;
  if(ev==='lluvia'&&[1,2,3,9,10].includes(S.month))feedMod=.72;
  if(ev==='sequia'&&[5,6,7,8].includes(S.month)&&!mej('pozo'))feedMod=1.35;
- const fc=Math.round(n*FEED[S.feed].c*feedMod*feedMul()), pc=2500+10*n+mantenimiento();
+ const fc=Math.round(n*FEED[S.feed].c*feedMod*feedMul()), pc=1500+8*n+mantenimiento();
  S.money-=fc+pc;rep.cost+=fc+pc;
  rep.lines.push(`Alimentación ${FEED[S.feed].n.toLowerCase()}: ${eur(fc)} · Personal y mantenimiento: ${eur(pc)}`);
  // avanzar calendario
@@ -543,7 +543,16 @@ function hierroSVG(h,sz,col){
  if(h.a==='media')ad=`<path d="M10 40 A20 20 0 0 0 50 40" fill="none" stroke="${col}" stroke-width="3.5" stroke-linecap="round"/>`;
  return `<svg class="hierro" width="${sz}" height="${sz}" viewBox="0 0 60 60" aria-hidden="true">${ad}<text x="30" y="${h.a==='media'?34:40}" text-anchor="middle" font-family="Cinzel, Georgia, serif" font-weight="700" font-size="${L.length>1?22:28}" fill="${col}">${L}</text></svg>`;
 }
-const divisa=d=>`<span class="div" aria-hidden="true">${(d&&d.length?d:['#333','#999']).map(c=>`<i style="background:${c}"></i>`).join('')}</span>`;
+// Divisa dibujada como la real: arponcillo, lazada y una cinta por color (1 a 3), puntas en cola de golondrina
+const divisa=d=>{const c=(d&&d.length?d:['#333','#999']).slice(0,3).map(x=>esc(x)),k='#0b0710',n=c.length;
+ const L=c[0],Rr=c[n-1],M=c[n>2?1:0];
+ const colas=n===3?`<path d="M11.6 11.2L6.2 37.6l2.6-2.4 1.4 3.6 4-26.8z" fill="${L}" stroke="${k}" stroke-width=".7"/><path d="M12 11.6l-1.1 27 2.1-2.6 2.1 2.6-1.1-27z" fill="${M}" stroke="${k}" stroke-width=".7"/><path d="M14.8 11.2l6.6 26.4-2.6-2.4-1.4 3.6-4.2-26.8z" fill="${Rr}" stroke="${k}" stroke-width=".7"/>`
+  :`<path d="M11.6 11.2L6.2 37.6l2.6-2.4 1.4 3.6 4-26.8z" fill="${L}" stroke="${k}" stroke-width=".7"/><path d="M14.4 11.2l5.4 26.4-2.6-2.4-1.4 3.6-4-26.8z" fill="${n>1?Rr:L}" stroke="${k}" stroke-width=".7"/>`;
+ return `<svg class="div" width="30" height="46" viewBox="0 0 26 40" aria-hidden="true">
+ <path d="M13 .6l-2.2 3.4h1.4v4.6h1.6V4h1.4z" fill="#cfd4d8" stroke="${k}" stroke-width=".5"/>
+ <path d="M12.2 9.2C6.4 6.6 2.6 8.4 3.4 11.6c.8 3 5.6 2.6 8.8.4z" fill="${L}" stroke="${k}" stroke-width=".7"/>
+ <path d="M13.8 9.2c5.8-2.6 9.6-.8 8.8 2.4-.8 3-5.6 2.6-8.8.4z" fill="${n>1?Rr:L}" stroke="${k}" stroke-width=".7"/>
+ ${colas}<circle cx="13" cy="10.4" r="2.1" fill="${M===L&&n>1?Rr:M}" stroke="${k}" stroke-width=".7"/><circle cx="13" cy="10.4" r=".9" fill="${L}"/></svg>`};
 function subtitulo(){return S.g.real?`Encaste ${S.g.enc}`:`Ganadería fundada en ${S.g.fund||2027}`}
 function nivel(){const st=S.stats||{};const xp=Math.round((S.xp||0)+S.pres*6+(st.corridas||0)*25+(st.indultos||0)*150+(st.vueltas||0)*40);return {n:1+Math.floor(xp/100),p:xp%100}}
 const FAMP={negro:'negro',burraco:'negro',entrepelado:'negro','cárdeno':'cardeno',salinero:'cardeno',colorado:'colorado','castaño':'castano',jabonero:'jabonero'};
@@ -854,7 +863,7 @@ function bloque(k){let ing=0,n=0;for(const a of campo()){if(k==='viejas'&&a.role
  S.animals=S.animals.filter(a=>a.st==='campo');S.money+=Math.round(ing);save();render();toast(`${n} vendidos por ${eur(ing)}`)}
 
 /* ============ PALMARÉS ============ */
-function getQual(){try{return localStorage.getItem('hd-qual')||(matchMedia('(pointer:coarse)').matches?'media':'alta')}catch(e){return 'media'}}
+function getQual(){return 'alta'}
 function setQual(k){try{localStorage.setItem('hd-qual',k)}catch(e){}toast(`Calidad ${k}: se aplica al volver a entrar en 3D`);if(W3.R){const pr={alta:1.6,media:1.2,baja:.9}[k];W3.R.setPixelRatio(Math.min(pr,window.devicePixelRatio||1));W3.R.shadowMap.enabled=k!=='baja';W3.resize&&W3.resize()}render()}
 let DEFER=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DEFER=e});
 const APK_URL='https://github.com/jalagardalengua-blip/GANADERIA-27/releases/latest/download/HierroYDivisa.apk';

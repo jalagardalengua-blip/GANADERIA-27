@@ -1090,3 +1090,27 @@ html.calma .pgH>i,html.calma .hubT::after{animation:none}
 .plzPrev .plzT b{font-size:1rem;line-height:1.2}.plzPrev .plzT span{font-size:.82rem;opacity:.8}
 .calEvH .calPlz{display:block;color:var(--oro,#e6bb55);margin-top:.15rem}.calEvH .calPlzI{display:block;margin-top:.55rem;width:100%;aspect-ratio:16/9;border-radius:10px;background-size:cover;background-position:center}
 @media (max-width:440px){.plzPrev .plzI{width:96px}.ofc .plzN{max-width:92%}}
+
+/* Divisa dibujada (juego.js: divisa) y banderillas (js/banderillas.js) */
+svg.div{display:inline-block;vertical-align:middle;flex:none;width:30px;height:46px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6)) drop-shadow(0 0 1px rgba(255,255,255,.35))}
+.mDivT svg.div,.cpDv svg.div{width:18px;height:28px}
+svg.emb.band{filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
+td svg.div{width:16px;height:25px}
+.row svg.div{width:22px;height:34px}
+
+/* ---------- Historia por capítulos (js/historia.js) ---------- */
+.hcap{position:relative;overflow:hidden;cursor:pointer;min-height:150px;display:flex;align-items:flex-end;padding:0!important}
+.hcap .hcap-bg{position:absolute;inset:0;background-size:cover;background-position:60% 18%}
+.hcap::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(7,8,11,.97) 0%,rgba(7,8,11,.86) 50%,rgba(7,8,11,.2) 100%)}
+.hcap .hcap-tx{position:relative;z-index:2;padding:14px 16px;max-width:80%}
+.hcap b{display:block;font-family:var(--display);font-weight:800;font-style:italic;text-transform:uppercase;font-size:1.4rem;line-height:1;margin:.25rem 0 .5rem;color:#fff}
+.hcap-o{display:flex;gap:.45rem;align-items:flex-start;font-size:.86rem;line-height:1.3;margin:.18rem 0;color:#efe8da}
+.hcap-o i{flex:none;width:12px;height:12px;margin-top:2px;border-radius:3px;border:2px solid var(--oro)}
+.hcap-o.ok{color:var(--muted)}.hcap-o.ok i{background:var(--oro)}
+.hcap .meter{margin-top:.55rem;height:4px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden}
+.hcap .meter i{display:block;height:100%;background:var(--gold-grad)}
+.capimg{position:relative;height:170px;border-radius:12px;background-size:cover;background-position:50% 20%;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:12px 14px}
+.capimg::before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(7,8,11,.95),rgba(7,8,11,.1) 70%)}
+.capimg span,.capimg b{position:relative}
+.capimg span{font-family:var(--display);font-weight:700;letter-spacing:.24em;text-transform:uppercase;font-size:.72rem;color:var(--oro)}
+.capimg b{font-family:var(--display);font-weight:800;font-style:italic;text-transform:uppercase;font-size:1.7rem;line-height:1;color:#fff}

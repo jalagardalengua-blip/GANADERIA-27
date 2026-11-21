@@ -137,7 +137,7 @@ body.cine .bar{height:0}
   <div id="ole">¡Olé!</div>
   <div id="res"><div class="resC"><span class="eyebrow" id="rEy"></span><h2 id="rT"></h2><div class="panu" id="rPa"></div><div class="trof" id="rTr"></div><p id="rD"></p><p class="muted" id="rM"></p><div class="acts"><button class="btnR oro" id="rSig">Siguiente toro</button></div></div></div>
   <div id="rot"><small></small><b></b></div><div id="com"><i>En directo</i><span></span></div>
-  <div class="bar2" id="panel"><button class="b2" id="bVel" aria-label="Velocidad">×1</button><button class="b2" id="bVista">Vista: TV</button><button class="b2" id="bHD" aria-label="Modo hiperrealista">HD: sí</button><button class="b2" id="bSup">⏭ A matar</button><button class="b2" id="bSig">Siguiente toro</button><button class="b2" id="bClas">Vista clásica</button><button class="b2" id="bSal">Salir</button></div></div>
+  <div class="bar2" id="panel"><button class="b2" id="bVel" aria-label="Velocidad">×1</button><button class="b2" id="bVista" hidden>Vista: tendido</button><button class="b2" id="bHD" aria-label="Modo hiperrealista" hidden>HD: sí</button><button class="b2" id="bSup">⏭ A matar</button><button class="b2" id="bSig">Siguiente toro</button><button class="b2" id="bClas">Vista clásica</button><button class="b2" id="bSal">Salir</button></div></div>
   <div id="loading"><img class="ldImg" src="img/carga.jpg" alt=""><div class="ldVig"></div><div class="ldInfo"><p>Hierro y Divisa</p><small>Preparando la plaza…</small><div class="ldBar"><i></i></div></div></div>
 </div>
 
@@ -367,7 +367,7 @@ function init(){
  scene.add(sword,stick);
  const sd=seedFromHash();const lr=rng(sd||((Math.random()*4294967295)>>>0));const lt=lr();ui.luz=lt<.6?'tarde':lt<.9?'ocaso':'noche';
  setLight(ui.luz);
- HI.ok=hiSoporta();{let v=null;try{v=localStorage.getItem('hd-hiper')}catch(e){}hiPon(HI.ok&&v!=='0');}
+ HI.ok=hiSoporta();hiPon(HI.ok);
  setupControls();
  onResize();addEventListener('resize',onResize);
  const start=()=>{const inGame=parent!==window;if(!inGame)newCorrida(sd);else{JUEGO.on=true;}document.body.classList.toggle('cine',ui.cam==='cine');initPanel();requestAnimationFrame(frame);};
@@ -1172,8 +1172,8 @@ const CAMN={cine:'realizador',libre:'libre',tendido:'tendido',callejon:'callejó
 function initPanel(){const $=id=>document.getElementById(id);const msg=m=>parent.postMessage({ruedo:m,id:JUEGO.t&&JUEGO.t.id},'*');
  {const VIS=[['cine','Vista: TV'],['tendido','Vista: tendido'],['cerca','Vista: a pie de ruedo']];const bv=$('bVista');
   const pon=id=>{setCam(id);if(id==='cine')cut(camS.shot&&camS.shot!=='cerca'?camS.shot:'tendido');else camS.snap=true;bv.textContent=(VIS.find(v=>v[0]===id)||VIS[0])[1];try{localStorage.setItem('hd-vista',id)}catch(e){}};
-  {const bh=$('bHD');if(bh){bh.hidden=!HI.ok;bh.textContent=HI.on?'HD: sí':'HD: no';bh.classList.toggle('on',HI.on);bh.onclick=()=>hiPon(!HI.on);}}
-  let ini='cine';try{const g=localStorage.getItem('hd-vista');if(VIS.some(v=>v[0]===g))ini=g}catch(e){}if(bv){pon(ini);bv.onclick=()=>{const i=VIS.findIndex(v=>v[0]===ui.cam);pon(VIS[(i+1)%VIS.length][0]);}}}
+  {const bh=$('bHD');if(bh){bh.hidden=true;bh.textContent=HI.on?'HD: sí':'HD: no';bh.classList.toggle('on',HI.on);bh.onclick=()=>hiPon(!HI.on);}}
+  let ini='tendido';if(bv){pon(ini);bv.onclick=()=>{const i=VIS.findIndex(v=>v[0]===ui.cam);pon(VIS[(i+1)%VIS.length][0]);}}}
  const cams=['cine','tendido','callejon','raso','torero','toro','cenital'],vels=[1,2,4,8,.5];
  const pinta=()=>{$('bVel').textContent='×'+String(ui.speed).replace('.',',');};
  
