@@ -1,5 +1,17 @@
 # Cambios
 
+## Ganadería de corro: cada plaza con su tamaño y proporciones reales
+- Hasta ahora todas las plazas medían 28 × 22 m. Ahora cada pueblo tiene las suyas:
+  - Peníscola: 22 × 17 m, en lo alto del peñón;
+  - Vila-real: 38 × 26 m, porticada;
+  - Onda y Segorbe: 36 × 19 m, alargadas;
+  - Xàbia y Cabanes: compactas;
+  - Benicarló: 33 × 24 m; Vinaròs y Ontinyent: 34 × 24 m; Sagunt: 26 × 20 m…
+- Las medidas salen de la guía de plazas o del contorno real de la plaza en OpenStreetMap; si no hay dato fiable, de lo típico de cada tipo de plaza.
+- Con cada tamaño se adaptan la arena, los cadafales, los refugios, las escaleras, el pilón del embolat, las bocacalles, el recorrido del encierro, las casas, la iglesia o el ayuntamiento y los edificios reales.
+- Las bocas de las tres calles y el cajón no se mueven, así que la res entra y sale igual.
+- El test de físicas cubre 18 festejos, entre ellos la plaza más pequeña (Peníscola) y Xàbia: 0 fallos.
+
 ## Ganadería de corro: cámara de realizador y embolats mejorados
 - La cámara general ya no mira las calles desde lo alto, donde solo se veían tejados iguales en todos los pueblos.
   - En la plaza encuadra desde el lado del cajón, con la iglesia, el campanario o el monumento de cada pueblo al fondo.

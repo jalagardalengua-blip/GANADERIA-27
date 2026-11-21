@@ -71,7 +71,7 @@ const CAPS=[
 // Capítulos que tienen vídeo en video/historia/cap-N.mp4 (añadir aquí el número al subir cada vídeo)
 const HVID=[];
 const CAP_IMG=['img/carga.jpg','img/carga-m.jpg'];
-function capActual(){stInit();return S.story.cap<CAPS.length?CAPS[S.story.cap]:null}
+function capActual(){if(!S)return null;stInit();return S.story&&S.story.cap<CAPS.length?CAPS[S.story.cap]:null}
 function capObjs(c){return c.obj.map(o=>({txt:o.txt,ok:!!o.ok(),prog:o.prog?o.prog():''}))}
 function historiaCheck(silencio){const c=capActual();if(!c)return;
  if(S.story.visto!==S.story.cap&&!silencio){S.story.visto=S.story.cap;if(c.start)c.start();save();return capModal('intro')}
