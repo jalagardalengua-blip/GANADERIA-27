@@ -10,7 +10,7 @@ await p.route(/fonts\.(googleapis|gstatic)/,r=>r.abort());
 await p.goto((process.env.BASE||'http://localhost:8765/')+'index.html');await p.waitForTimeout(800);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(1500);
 await p.evaluate(()=>{startReal(0);S.money=3e6;NEWC.name='Prueba';NEWC.l='PR';NEWC.lote=1;crearCorro()});
 const CASOS=[['embolado','Vila-real'],['embolado','Nules'],['embolado','Burriana'],['embolado','Onda'],['embolado','Morella'],['embolado','Sueca'],
- ['vaquillas','Algemesí'],['capea','Segorbe'],['cerril','Morella'],['mar','Burriana'],['encierro','Onda'],['corda','Nules'],['concurso','Vila-real'],['embolado','Benicarló'],['vaquillas','Dénia'],['capea','Sagunt']];
+ ['vaquillas','Algemesí'],['capea','Segorbe'],['cerril','Morella'],['mar','Burriana'],['encierro','Onda'],['corda','Nules'],['concurso','Vila-real'],['embolado','Benicarló'],['vaquillas','Dénia'],['capea','Sagunt'],['embolado','Peñíscola'],['vaquillas','Xàbia']];
 let fallos=0;
 for(const [tipo,pueblo] of CASOS){
  const r=await p.evaluate(([tipo,pueblo])=>{if(W3.mode==='calle')salirCalle();const C=S.corro;

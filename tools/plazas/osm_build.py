@@ -73,6 +73,25 @@ def kind_of(tags):
     return 0
 
 
+MEDIDAS = {'vilareal': (19, 13), 'benicarlo': (16.5, 12), 'peniscola': (11, 8.5), 'segorbe': (18, 9.5), 'onda': (18, 9.5), 'almassora': (15, 11),
+           'betxi': (16, 12), 'lavall': (15, 12), 'nules': (14, 12), 'borriana': (16, 12.5), 'vinaros': (17, 12), 'sagunt': (13, 10), 'cabanes': (12, 9.5),
+           'torreblanca': (15, 11.5), 'moncofa': (14.5, 11), 'denia': (15, 11), 'xabia': (12.5, 9.5), 'alcala': (14, 10.5), 'ontinyent': (17, 12), 'sueca': (16, 12)}
+
+
+def medidas(k, poly, hit, fondo):
+    if k in MEDIDAS:
+        return MEDIDAS[k][0], MEDIDAS[k][1], 'guía'
+    real = hit.get('category') == 'place' or (hit.get('category') == 'highway' and hit.get('type') == 'pedestrian')
+    if poly is not None and real and 250 < poly.area < 3200:
+        minx, minz, maxx, maxz = poly.bounds
+        W = max(11, min(19, (maxx - minx) / 2 * .92)); D = max(8.5, min(14, (maxz - minz) / 2 * .92))
+        if W < D:  # la arena es más ancha que honda: el lado largo a lo ancho
+            W, D = max(W, D), min(W, D)
+        return round(W, 1), round(D, 1), 'osm'
+    # sin medida fiable: lo típico de cada plaza (las de iglesia, más recogidas; las mayores y de ayuntamiento, más amplias)
+    return {'iglesia': (13.5, 10.5), 'ajuntament': (16, 12), 'arcade': (16, 11)}.get(fondo, (14, 11)) + ('tipo',)
+
+
 def main():
     out = {}
     for f in sorted(os.listdir(OSM)):
@@ -186,28 +205,39 @@ def main():
             minx, minz, maxx, maxz = tg.bounds
             dz = max(-25, min(25, -11.6 - maxz)); dx = max(-10, min(10, -tg.centroid.x))
             polys = [(affinity.translate(pg, dx, dz), t) for pg, t in polys]
+        # forma real de la plaza en el marco del juego
+        sq = None
+        try:
+            g = shape(hit.get('geojson')) if hit.get('geojson') else None
+            if g is not None and g.geom_type in ('Polygon', 'MultiPolygon') and g.area > 0:
+                g = max(getattr(g, 'geoms', [g]), key=lambda x: x.area)
+                sq = Polygon([P(la, lo) for lo, la in g.exterior.coords])
+                sq = affinity.translate(affinity.rotate(affinity.translate(sq, -origin.x, -origin.y), phi, origin=(0, 0), use_radians=True), dx, dz)
+        except Exception:  # noqa: BLE001
+            sq = None
+        W, D, fuente = medidas(k, sq, hit, fondo)
         # zonas reservadas del juego
-        keep = [box(-14.6, -11.6, 14.6, 11.6), box(14, -4.4, 82, 4.4), box(-82, -4.4, -14, 4.4), box(-3.9, 11, 3.9, 58)]
+        keep = [box(-W - .6, -D - .6, W + .6, D + .6), box(W, -4.4, 82, 4.4), box(-82, -4.4, -W, 4.4), box(-3.9, D, 3.9, 58)]
         CALLES = [box(14, -4.4, 82, 4.4), box(-82, -4.4, -14, 4.4), box(-3.9, 11, 3.9, 58)]
         if fondo == 'iglesia':
-            keep.append(box(-8.6, -28.6, 8.6, -11))
+            keep.append(box(-8.6, -D - 17.6, 8.6, -D))
         elif fondo == 'ajuntament':
-            keep.append(box(-9.2, -21.2, 9.2, -11))
+            keep.append(box(-9.2, -D - 10.2, 9.2, -D))
         if k in EXENT:
-            s = EXENT[k]; keep.append(box(min(s * 8, s * 13.4), -17.2, max(s * 8, s * 13.4), -11))
+            s = EXENT[k]; keep.append(box(min(s * 8, s * 13.4), -D - 6.2, max(s * 8, s * 13.4), -D))
         if k in NORTE:
-            keep.append(box(3, 11, 21.6, 11 + NORTE[k]))
+            keep.append(box(3, D, W + 7.6, D + NORTE[k]))
         if k in PALAU:
-            keep += [box(-15.4, -16.2, -8.6, -10.8), box(8.6, -16.2, 15.4, -10.8)]
+            keep += [box(-15.4, -D - 5.2, -8.6, -D + .2), box(8.6, -D - 5.2, 15.4, -D + .2)]
         if k == 'elpuig':
-            keep.append(box(-15.6, -29, 15.6, -10.8))
-        for (tx, tz) in TORRES.get(k, []):
-            keep.append(Point(tx, tz).buffer(3.6))
+            keep.append(box(-15.6, -D - 18, 15.6, -D + .2))
+        for (tx, tz) in TORRES.get(k, []):  # las torres del juego se mueven con la plaza
+            keep.append(Point(tx * W / 14 if abs(tx) < 22 else tx, tz * D / 11 if abs(tz) < 22 else tz).buffer(3.6))
         KO = unary_union(keep)
         ocup = unary_union([pg for pg, _ in polys]).buffer(.3) if polys else Polygon()
         filas = []
-        for (ax, az, bx, bz, nx, nz) in [(14.6, 4.4, 82, 4.4, 0, 1), (14.6, -4.4, 82, -4.4, 0, -1), (-82, 4.4, -14.6, 4.4, 0, 1), (-82, -4.4, -14.6, -4.4, 0, -1),
-                                         (3.9, 11.6, 3.9, 58, 1, 0), (-3.9, 11.6, -3.9, 58, -1, 0)]:
+        for (ax, az, bx, bz, nx, nz) in [(W + .6, 4.4, 82, 4.4, 0, 1), (W + .6, -4.4, 82, -4.4, 0, -1), (-82, 4.4, -W - .6, 4.4, 0, 1), (-82, -4.4, -W - .6, -4.4, 0, -1),
+                                         (3.9, D + .6, 3.9, 58, 1, 0), (-3.9, D + .6, -3.9, 58, -1, 0)]:
             L = math.hypot(bx - ax, bz - az); ux, uz = (bx - ax) / L, (bz - az) / L; t = 0.0
             while t < L - 2:
                 w = min(L - t, rnd.uniform(5, 9)); dep = rnd.uniform(8, 11)
@@ -235,8 +265,8 @@ def main():
                 if Polygon(ring).exterior.is_ccw:  # sentido horario visto desde arriba (x este, z sur): normales hacia fuera
                     ring.reverse()
                 res.append([kd, round(h * 10)] + [v for p in ring for v in (round(p[0] * 10), round(p[1] * 10))])
-        out[k] = {'rot': round(phi, 4), 'dx': round(dx, 2), 'dz': round(dz, 2), 'plaza': hit.get('name'), 'b': res}
-        print(k, '|', hit.get('name'), '|', 'fondo real' if target is not None else 'SIN fondo real', '|', len(res), 'edificios', '| de OSM', len(polys) - len(gen), '| en fila', len(gen))
+        out[k] = {'W': W, 'D': D, 'medida': fuente, 'rot': round(phi, 4), 'dx': round(dx, 2), 'dz': round(dz, 2), 'plaza': hit.get('name'), 'b': res}
+        print(k, '|', 'W', W, 'D', D, fuente, '|', len(res), 'edificios')
     D = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'datos', 'plazas'); os.makedirs(D, exist_ok=True)
     tot = 0
     for k, v in out.items():
