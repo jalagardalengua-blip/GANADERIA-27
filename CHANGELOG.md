@@ -1,5 +1,13 @@
 # Cambios
 
+## La Vall d'Uixó: plaza de bous hecha a partir de fotos reales
+- Explanada de arena de 44 × 30 m (la plaza genérica es de 28 × 22) rodeada de cadafales de andamio de dos alturas pintados de azul, rosa, verde, negro, rojo, naranja y blanco, con los carteles de las peñas, la jaula de barrotes abajo y el tablado con barandilla arriba.
+- Refugio amarillo en medio: muretes en laberinto, escalones y una torreta con tejadillo, con la gente dentro y cubos de agua.
+- Escalera de madera de peldaños con armazón morado (también es refugio).
+- Farolas negras de dos faroles en lo alto de los cadafales.
+- Detrás, bloques de pisos de ladrillo de siete y ocho alturas con balcones blancos y un edificio moderno de fachada gris con lamas.
+- Arena de playa, más clara. Los refugios funcionan igual para la res (test nuevo: plaza-vall.js).
+
 ## Divisas en los nombres y vida en la finca
 - El nombre de cada ganadería se escribe en letra clásica con los **colores reales de su divisa** (Miura verde y negro, Victorino azul y encarnado…), en la cabecera, la elección de ganadería y el resto de pantallas. Fuera el estilo de cartel.
 - Finca 3D con vida:
