@@ -1,5 +1,11 @@
 # Cambios
 
+## Revisión de fallos
+- Bancarrota definitiva: antes la ventana se podía cerrar y se seguía jugando con deudas sin fin (en una prueba de 4 años se llegó a −216.000 €). Ahora queda guardada, la ventana vuelve a salir y «Avanzar» no deja seguir.
+- Ofertas: el plazo decía «Responde antes de Febrero» estando ya en febrero (en realidad se puede responder todo el mes). Ahora dice «Responde este mes» o «Tienes hasta final de …».
+- Plaza a pantalla completa en el móvil: se pedía después de la pantalla de carga, cuando el navegador ya no lo permite (y daba un error). Ahora se pide en el mismo toque.
+- Imágenes de la barra inferior y los iconos de la aplicación comprimidas sin pérdida visible: de 611 KB a 139 KB.
+
 ## Ganadería de corro: cada plaza con su tamaño y proporciones reales
 - Hasta ahora todas las plazas medían 28 × 22 m. Ahora cada pueblo tiene las suyas:
   - Peníscola: 22 × 17 m, en lo alto del peñón;
