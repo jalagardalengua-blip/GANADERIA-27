@@ -4,6 +4,8 @@ const ctx=await b.newContext({viewport:{width:844,height:390},isMobile:true,hasT
 await p.goto('http://localhost:8765/index.html');await p.waitForTimeout(2000);await p.evaluate(()=>{localStorage.clear();startReal(1);enter3D()});await p.waitForTimeout(7000);
 // si un modelo o la vegetación llegan tarde, la finca se rehace tapada por la pantalla de carga: se espera a que se quite
 await p.waitForFunction(()=>!CG.on,null,{timeout:60000}).catch(()=>{});await p.waitForTimeout(500);
+// el capítulo del modo historia sale al empezar: se cierra para tocar la finca
+await p.evaluate(()=>{try{closeModal(true)}catch(e){}});await p.waitForTimeout(300);
 const cdp=await ctx.newCDPSession(p);const T=(type,pts)=>cdp.send('Input.dispatchTouchEvent',{type,touchPoints:pts.map((q,i)=>({x:q[0],y:q[1],id:q[2]??i}))});
 const R={};const p0=await p.evaluate(()=>[W3.F.p.x,W3.F.p.z]);
 await T('touchStart',[[250,200]]);await p.waitForTimeout(150);R.joyMovido=await p.evaluate(()=>document.getElementById('joy').classList.contains('flota'));
