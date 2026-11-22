@@ -1,5 +1,15 @@
 # Cambios
 
+## Torero realista, cámara de la plaza de corro e imagen HDR
+- **Torero nuevo en la corrida en directo** a partir del modelo 3D enviado por el jugador: se ha separado del toro, se le han quitado la muleta y el estoque que venían pegados a las manos y se le ha puesto el esqueleto del juego, así que anda, cita, da los pases y entra a matar con las animaciones de siempre (las telas y el estoque del juego van aparte). Malla reducida a unos 15.000 triángulos y textura de 1024 px para el móvil.
+- **Plaza de corro (festejos populares):**
+  - Cámara con el dedo: arrastra para girar alrededor de la acción, pellizca para acercar y doble toque para volver al plano del realizador.
+  - Selector de planos claro: TV, cadafal, la res y libre (en el libre recorres la plaza a tu aire).
+  - Flecha en el borde que señala dónde está la res cuando se sale del encuadre.
+  - Revelado HDR como en la corrida: resplandor, curva ACES, color de tarde de fiestas, viñeta y grano (se apaga solo si el móvil no llega).
+  - Luz ambiental real de una calle (HDRI «Pedestrian Overpass» de Poly Haven, CC0).
+  - Modelos glTF gratuitos CC0: farolas de poste con farol («Lantern», Khronos) en las calles y radiocasetes («BoomBox», Microsoft) en los cadafales. Licencias en modelos/props/LICENCIAS.md.
+
 ## La Vall d'Uixó: plaza de bous hecha a partir de fotos reales
 - Explanada de arena de 44 × 30 m (la plaza genérica es de 28 × 22) rodeada de cadafales de andamio de dos alturas pintados de azul, rosa, verde, negro, rojo, naranja y blanco, con los carteles de las peñas, la jaula de barrotes abajo y el tablado con barandilla arriba.
 - Refugio amarillo en medio: muretes en laberinto, escalones y una torreta con tejadillo, con la gente dentro y cubos de agua.

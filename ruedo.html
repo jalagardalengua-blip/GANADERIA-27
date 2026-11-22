@@ -781,6 +781,41 @@ function updateBull(dt){const b=bull,sp=bullSpeed;b.root.position.copy(B);b.root
   b.root.updateMatrixWorld(true);headPt(b,0,.84,1.7,b.muzzleW);headPt(b,0,1.16,1.3,b.foreW);headPt(b,.36,1.26,1.55,b.tipLW);headPt(b,-.36,1.26,1.55,b.tipRW);}
  else{b.root.updateMatrixWorld(true);b.muzzle.getWorldPosition(b.muzzleW);b.fore.getWorldPosition(b.foreW);b.tipL.getWorldPosition(b.tipLW);b.tipR.getWorldPosition(b.tipRW);}}
 
+/* ---------- torero realista (modelo glTF enviado por el jugador) ----------
+   La figura venía fija y pegada al toro, con la muleta y el estoque fundidos a las manos. Se ha separado,
+   se le han quitado muleta y estoque, y aquí se le pone el esqueleto del torero del juego: cada punto de la
+   malla sigue a los dos huesos más cercanos (cadera, columna, cuello, cabeza, brazos, manos, muslos, piernas y
+   pies), así anda, cita, carga la suerte y entra a matar con las animaciones de siempre. Mientras se descarga,
+   se ve el torero dibujado de antes. */
+const TGLB={geo:null,mat:null,pend:false};
+function toreroGLBCarga(){if(TGLB.pend||!THREE.GLTFLoader)return;TGLB.pend=true;new THREE.GLTFLoader().load('modelos/torero.glb',g=>{g.scene.traverse(o=>{if(o.isMesh&&!TGLB.geo){TGLB.geo=o.geometry;TGLB.mat=o.material}});
+  if(TGLB.mat){TGLB.mat.roughness=.62;TGLB.mat.metalness=.05;TGLB.mat.envMapIntensity=.9;if(TGLB.mat.map){TGLB.mat.map.anisotropy=8;TGLB.mat.map.encoding=THREE.sRGBEncoding}TGLB.mat.side=THREE.FrontSide;TGLB.mat.skinning=true;TGLB.mat.needsUpdate=true}
+  if(torero&&!torero.piel)try{toreroPiel(torero)}catch(e){console.warn('torero glb',e)}},undefined,()=>{});}
+function toreroPiel(t){if(!TGLB.geo||t.piel)return;const root=t.root;root.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(root.matrixWorld).invert();
+ // huesos: los grupos del torero dibujado (a los que mueven las animaciones)
+ const G=[['hips',t.hips],['spine',t.spine],['neck',t.neck],['head',t.head]];for(const [s,a] of [['L',t.aL],['R',t.aR]]){G.push(['up'+s,a.up],['fo'+s,a.fo],['hand'+s,a.hand])}
+ for(const [s,l] of [['L',t.lL],['R',t.lR]]){G.push(['th'+s,l.th],['sh'+s,l.sh],['an'+s,l.an])}
+ const loc=o=>{const v=new THREE.Vector3();o.getWorldPosition(v);return v.applyMatrix4(inv)};const P={};for(const [n,o] of G)P[n]=loc(o);
+ // tramos (de cada hueso a su hijo) para repartir los pesos por cercanía
+ const seg={hips:[P.hips,P.spine],spine:[P.spine,P.neck],neck:[P.neck,P.head],head:[P.head,P.head.clone().add(new THREE.Vector3(0,.24,0))]};
+ for(const s of ['L','R']){seg['up'+s]=[P['up'+s],P['fo'+s]];seg['fo'+s]=[P['fo'+s],P['hand'+s]];seg['hand'+s]=[P['hand'+s],P['hand'+s].clone().add(new THREE.Vector3(0,-.16,0))];
+  seg['th'+s]=[P['th'+s],P['sh'+s]];seg['sh'+s]=[P['sh'+s],P['an'+s]];seg['an'+s]=[P['an'+s],P['an'+s].clone().add(new THREE.Vector3(0,-.05,.16))]}
+ const names=G.map(g=>g[0]);
+ // la malla, a la altura del torero dibujado (de los pies a lo alto de la cabeza)
+ const top=P.head.y+.22,geo=TGLB.geo.clone();geo.scale(top,top,top);const pos=geo.attributes.position,n=pos.count;
+ const si=new Uint16Array(n*4),sw=new Float32Array(n*4),v=new THREE.Vector3(),ab=new THREE.Vector3(),av=new THREE.Vector3();
+ const dseg=(a,b)=>{ab.subVectors(b,a);av.subVectors(v,a);const k=Math.max(0,Math.min(1,av.dot(ab)/Math.max(1e-6,ab.lengthSq())));return av.sub(ab.multiplyScalar(k)).length()};
+ for(let i=0;i<n;i++){v.fromBufferAttribute(pos,i);const d=[];for(let b=0;b<names.length;b++){const nm=names[b],sd=nm.endsWith('L')?1:nm.endsWith('R')?-1:0;let x=dseg(seg[nm][0],seg[nm][1]);
+   // un brazo o una pierna no recoge puntos del otro lado del cuerpo; los brazos no recogen el tronco
+   if(sd&&v.x*sd<-.03)x+=1;if(/^(up|fo|hand)/.test(nm)&&Math.abs(v.x)<.15&&v.y>P.spine.y)x+=.06;d.push([x,b])}
+  d.sort((a,b)=>a[0]-b[0]);const w0=1/Math.pow(d[0][0]+.012,4),w1=1/Math.pow(d[1][0]+.012,4),ws=w0+w1;si[i*4]=d[0][1];si[i*4+1]=d[1][1];sw[i*4]=w0/ws;sw[i*4+1]=w1/ws}
+ geo.setAttribute('skinIndex',new THREE.Uint16BufferAttribute(si,4));geo.setAttribute('skinWeight',new THREE.Float32BufferAttribute(sw,4));
+ const bones=G.map(([nm,o])=>{const b=new THREE.Bone();b.name=nm;b.matrixAutoUpdate=false;b.matrix.copy(inv).multiply(o.matrixWorld);root.add(b);return b});root.updateMatrixWorld(true);
+ const sk=new THREE.Skeleton(bones);const m=new THREE.SkinnedMesh(geo,TGLB.mat);m.castShadow=true;m.receiveShadow=true;m.frustumCulled=false;
+ // fuera el torero dibujado (las telas y el estoque van aparte y se quedan)
+ root.traverse(o=>{if(o.isMesh)o.visible=false});root.add(m);root.updateMatrixWorld(true);m.bind(sk);t.piel={m,bones,src:G.map(g=>g[1]),inv:new THREE.Matrix4()}}
+/* cada fotograma, los huesos copian la postura del torero dibujado */
+function toreroPielTick(t){const P=t&&t.piel;if(!P)return;t.root.updateMatrixWorld(true);P.inv.copy(t.root.matrixWorld).invert();for(let i=0;i<P.bones.length;i++){P.bones[i].matrix.copy(P.inv).multiply(P.src[i].matrixWorld)}}
 /* ---------- animación del torero y telas ---------- */
 function updateTorero(dt){const t=torero,sp=t.spec,sc=sp.h;const yawE=Tyaw+D.spinA;t.root.position.copy(T);t.root.rotation.y=yawE;
  const f=new V3(Math.sin(yawE),0,Math.cos(yawE)),l=new V3(Math.cos(yawE),0,-Math.sin(yawE));const su=SU[D.cur];let mode='cite',p=0;const lure=new V3();
@@ -934,7 +969,7 @@ function newCorrida(seed){const load=document.getElementById('loading');
   CUR.t=randomTorero(r);CUR.b=randomBull(r);CUR.prog=randomProgram(r);if(JUEGO.on&&JUEGO.t)aplicaJuego(r);
   if(torero){scene.remove(torero.root);disposeTree(torero.root);}
   if(bull){scene.remove(bull.root);if(bull.rig){bull.anchors.forEach(a=>a.parent&&a.parent.remove(a));disposeTree(bull.div);bull.wrap.remove(RIG.sc);RIG.mixer.stopAllAction();}else if(bull.glb){bull.body.remove(bullGLB);bull.mesh.remove(bull.hp);bull.legs.forEach(l=>bull.mesh.remove(l.foot));bull.mesh.remove(bull.div);disposeTree(bull.div);}else disposeTree(bull.root);}
-  torero=buildTorero(CUR.t);scene.add(torero.root);sombraSoloGrande(torero.root);
+  torero=buildTorero(CUR.t);scene.add(torero.root);sombraSoloGrande(torero.root);try{toreroPiel(torero)}catch(e){console.warn('torero glb',e)}toreroGLBCarga();
   bull=(RIG&&bullGLB)?buildBullRig(CUR.b):bullGLB?buildBullGLB(CUR.b):buildBull({capa:{negro2:'negro',negro3:'negro',castano:'colorado'}[CUR.b.capa]||CUR.b.capa});scene.add(bull.root);
   resetLidia();updateBull(0);updateTorero(0);if(ui.cam==='cine')cut(pick(['tendido','grua','callejon']));else camS.snap=true;audio.clarin();
   setTimeout(()=>load.classList.add('off'),firstCorrida?60:250);firstCorrida=false;};
@@ -1277,7 +1312,7 @@ function frame(now){requestAnimationFrame(frame);try{if(last)autoCalidad(Math.mi
  sun.position.copy(focus).addScaledVector(sun.userData.dir,110);sun.target.position.copy(focus);
  updateCamera(dtR);
  dust.mat.uniforms.uScale.value=renderer.domElement.height/(2*Math.tan(camera.fov*Math.PI/360));
- hiRender(dtR);
+ try{toreroPielTick(torero)}catch(e){}hiRender(dtR);
 
  if(false){const d=gimg.data;for(let i=0;i<d.length;i+=4){const v=Math.random()*255;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}gctx.putImageData(gimg,0,0);}}
 /* ===================== MÁS LIDIA: tercios, banderillas, cuadrilla, comentarista y velocidad =====================
@@ -1389,7 +1424,7 @@ try{const v=+localStorage.getItem('ruedoVel');if([.5,1,2,4,8].includes(v))ui.spe
 (function(){const bS=document.getElementById('bSup');if(!bS)return;bS.onclick=()=>{if(D.phase==='suprema'||D.phase==='fin')return;XL.salta=true;ui.paused=false;bS.disabled=true;setTimeout(()=>bS.disabled=false,1500);};})();
 /* ayuda de pruebas: avanza la lidia sin depender de los fotogramas */
 const xlAvanza=seg=>{for(let t=0;t<seg&&bull&&torero;t+=.05){simTime+=.05;updateDirector(.05);updateBull(.05);updateTorero(.05);supremaPost(.05);}return D.phase;};
-window.__ruedo={avanza:xlAvanza,get xl(){return XL;},D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},banda:()=>xlBandStart(),get xl(){return XL;},vista:(v)=>{const b=document.getElementById('bVista');while(ui.cam!==v)b.click();},get plano(){return camS.shot;},get tor(){return torero;},render:(c)=>{if(HI.on&&c===camera)hiRender(0);else{const t=renderer.toneMapping;renderer.render(scene,c)}},hi:(v)=>hiPon(v),get HI(){return HI},get canvas(){return renderer.domElement;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
+window.__ruedo={avanza:xlAvanza,get xl(){return XL;},D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},banda:()=>xlBandStart(),get xl(){return XL;},vista:(v)=>{const b=document.getElementById('bVista');while(ui.cam!==v)b.click();},get plano(){return camS.shot;},get tor(){return torero;},render:(c)=>{try{toreroPielTick(torero)}catch(e){}if(HI.on&&c===camera)hiRender(0);else{const t=renderer.toneMapping;renderer.render(scene,c)}},hi:(v)=>hiPon(v),get HI(){return HI},get tor(){return torero},TGLB,get canvas(){return renderer.domElement;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
 })();
 </script>
 
