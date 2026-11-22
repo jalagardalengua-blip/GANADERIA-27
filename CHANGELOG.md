@@ -1,5 +1,12 @@
 # Cambios
 
+## Agenda y menús más claros
+- Inicio: en lugar del cartel enorme con el nombre (que ya está en la cabecera) sale una **agenda** con lo que pide atención: cuándo te quedas sin dinero a este ritmo, finca saturada o casi llena, ofertas que caducan este mes y tareas pendientes. Cada aviso lleva a donde se arregla.
+- Aviso al avanzar si la bancarrota está a menos de seis meses.
+- Cabeceras de Ofertas, Mercado, Tareas y demás pestañas mucho más bajas: el contenido se ve sin bajar.
+- El anillo de la cabecera dice «VAL» (valoración), para no confundirlo con el prestigio (★).
+- El «Modo torero · próximamente» deja de salir en el menú hasta que esté terminado.
+
 ## Revisión de fallos
 - Bancarrota definitiva: antes la ventana se podía cerrar y se seguía jugando con deudas sin fin (en una prueba de 4 años se llegó a −216.000 €). Ahora queda guardada, la ventana vuelve a salir y «Avanzar» no deja seguir.
 - Ofertas: el plazo decía «Responde antes de Febrero» estando ya en febrero (en realidad se puede responder todo el mes). Ahora dice «Responde este mes» o «Tienes hasta final de …».

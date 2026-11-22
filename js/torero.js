@@ -307,8 +307,9 @@ const TR_CAND='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true
 function trBloq(){try{uiSnd&&uiSnd('cap')}catch(e){}toast('Modo torero bloqueado: lo estamos terminando. Muy pronto podrás vestirte de luces.')}
 const _startScreenT=startScreen;
 startScreen=function(){if(MENU.v==='torero'&&!TR_LOCK)return toreroScreen();if(MENU.v==='torero')MENU.v='main';let h=_startScreenT();
- if(MENU.v==='main')h=h.replace(`<button class="mItem" onclick="menuGo('modos')">`,`<button class="mItem trItem trLock" aria-disabled="true" onclick="trBloq()"><b>Modo torero</b><small>Próximamente · en desarrollo</small><span class="mArr trCand">${TR_CAND}</span></button>\n   <button class="mItem" onclick="menuGo('modos')">`);
- if(MENU.v==='modos')h=h.replace(`<div class="mMode"><i style="background-image:url(img/palco.jpg)">`,`<div class="mMode"><i style="background-image:url(img/plaza-2.jpg)"></i><div><b>Modo torero · próximamente</b><p>Sé tú el matador: recibe con el capote, liga series de muleta con temple, entra a matar y sal a hombros. Carrera de novillero a figura.</p></div></div><div class="mMode"><i style="background-image:url(img/palco.jpg)">`);
+ /* el modo torero no sale en los menús hasta que esté terminado (TR_LOCK) */
+ if(MENU.v==='main'&&!TR_LOCK)h=h.replace(`<button class="mItem" onclick="menuGo('modos')">`,`<button class="mItem trItem trLock" aria-disabled="true" onclick="trBloq()"><b>Modo torero</b><small>Próximamente · en desarrollo</small><span class="mArr trCand">${TR_CAND}</span></button>\n   <button class="mItem" onclick="menuGo('modos')">`);
+ if(MENU.v==='modos'&&!TR_LOCK)h=h.replace(`<div class="mMode"><i style="background-image:url(img/palco.jpg)">`,`<div class="mMode"><i style="background-image:url(img/plaza-2.jpg)"></i><div><b>Modo torero · próximamente</b><p>Sé tú el matador: recibe con el capote, liga series de muleta con temple, entra a matar y sal a hombros. Carrera de novillero a figura.</p></div></div><div class="mMode"><i style="background-image:url(img/palco.jpg)">`);
  return h};
 /* capote y muleta con caída real: el paño se curva hacia delante y recoge la luz */
 const _clothTickT=clothTick;

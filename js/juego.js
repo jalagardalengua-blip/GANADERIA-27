@@ -485,7 +485,7 @@ function render(){
  <header class="hdr"><div class="bgimg" style="background-image:url(img/cabeza.jpg)"></div><div class="wrap">
   ${emblem(S.g,54)}
   <div class="id"><div class="gname">${esc(S.g.name)}</div><div class="gsub">${estrellas(S.pres)}<span>${esc(subtitulo())}</span></div></div>
-  <div class="lvl" title="Valoración y nivel"><span class="ring"><b>${valoracion()}</b></span><span><span class="lt">Nivel ${L.n}</span><span class="lb"><i style="width:${L.p}%"></i></span></span></div>
+  <div class="lvl" title="Valoración y nivel"><span class="ring" title="Valoración de la ganadería"><b>${valoracion()}</b><small>VAL</small></span><span><span class="lt">Nivel ${L.n}</span><span class="lb"><i style="width:${L.p}%"></i></span></span></div>
  </div></header>
  <div class="sbar"><div class="wrap">
   <div class="st"><span class="it hm">${ICO.cal}<span class="l">${MESES[S.month]} ${S.year}</span><span class="s">${MESES[S.month].slice(0,3)} ${String(S.year).slice(2)}</span></span><span class="it">${ICO.monG}<b class="num">${eur(S.money)}</b></span><span class="it">${ICO.star}<span><span class="l">Prestigio </span><b class="num">${Math.round(S.pres)}</b></span></span></div>
