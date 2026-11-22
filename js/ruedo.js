@@ -20,7 +20,7 @@ function ruedoAbrir(id){const r=S.hist.find(h=>h.id===id);if(!r||!r.toros||!r.to
  el.innerHTML='<iframe src="ruedo.html" title="Corrida en directo" allow="fullscreen; autoplay"></iframe><button id="ruedoX" type="button" aria-label="Salir de la corrida">✕ Salir</button>';document.body.appendChild(el);
  /* salida de respaldo fuera del marco: funciona aunque la corrida no responda */el.querySelector('#ruedoX').addEventListener('click',()=>ruedoCerrar(true));
  /* el botón «atrás» del móvil cierra la corrida */try{history.pushState({ruedo:1},'')}catch(e){}document.body.style.overflow='hidden';
- RD.el=el;RD.fr=el.querySelector('iframe');try{el.requestFullscreen&&matchMedia('(pointer:coarse)').matches&&el.requestFullscreen().catch(()=>{})}catch(e){}
+ RD.el=el;RD.fr=el.querySelector('iframe');try{const ua=navigator.userActivation;if(el.requestFullscreen&&!document.fullscreenElement&&matchMedia('(pointer:coarse)').matches&&(!ua||ua.isActive))el.requestFullscreen().catch(()=>{})}catch(e){}
  try{navigator.wakeLock&&navigator.wakeLock.request('screen').catch(()=>{})}catch(e){}return true}
 addEventListener('message',e=>{const d=e.data;if(!RD.on||!d||typeof d.ruedo!=='string'||!RD.fr||e.source!==RD.fr.contentWindow)return;
  if(d.ruedo==='listo')ruedoEnviar();

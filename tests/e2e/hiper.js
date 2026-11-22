@@ -1,4 +1,4 @@
-// QA: modo hiperrealista de la corrida en directo: se enciende por defecto, se puede apagar y encender, sin errores; capturas HD/normal
+// QA: modo hiperrealista de la corrida en directo: siempre encendido donde se puede (el botón HD se quitó a propósito); se apaga y enciende por código sin errores; capturas HD/normal
 const {chromium}=require('playwright');(async()=>{const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
 const errs=[];const ctx=await b.newContext({viewport:{width:844,height:390},deviceScaleFactor:1,isMobile:true,hasTouch:true});const p=await ctx.newPage();
 p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error'||/WebGL|THREE/.test(m.text()))errs.push(m.type()+' '+m.text().slice(0,200))});
@@ -10,9 +10,9 @@ await fr().evaluate(()=>{__ruedo.ui.speed=2});await p.waitForTimeout(14000);
 const R={};R.soporta=await fr().evaluate(()=>__ruedo.HI.ok);R.ini=await fr().evaluate(()=>__ruedo.HI.on);R.boton=await fr().evaluate(()=>{const b=document.getElementById('bHD');return b&&!b.hidden?b.textContent:null});
 await fr().evaluate(()=>{__ruedo.ui.paused=true});await p.waitForTimeout(1500);
 await p.screenshot({path:'/tmp/hiper-on.png',timeout:120000});
-await fr().evaluate(()=>document.getElementById('bHD').click());await p.waitForTimeout(2500);R.apagado=await fr().evaluate(()=>!__ruedo.HI.on);
+await fr().evaluate(()=>__ruedo.hi(!__ruedo.HI.on));await p.waitForTimeout(2500);R.apagado=await fr().evaluate(()=>!__ruedo.HI.on);
 await p.screenshot({path:'/tmp/hiper-off.png',timeout:120000});
-await fr().evaluate(()=>document.getElementById('bHD').click());await p.waitForTimeout(2500);R.encendido=await fr().evaluate(()=>__ruedo.HI.on);
+await fr().evaluate(()=>__ruedo.hi(!__ruedo.HI.on));await p.waitForTimeout(2500);R.encendido=await fr().evaluate(()=>__ruedo.HI.on);
 await fr().evaluate(()=>{__ruedo.ui.paused=false});await p.waitForTimeout(4000);
 
-console.log(JSON.stringify(R));const ok=R.soporta&&R.ini&&R.boton&&R.apagado&&R.encendido;console.log(errs.length?'ERRORES '+JSON.stringify(errs.slice(0,8)):ok?'HIPER OK':'HIPER MAL');await b.close()})();
+console.log(JSON.stringify(R));const ok=R.soporta&&R.ini&&R.boton===null&&R.apagado&&R.encendido;console.log(errs.length?'ERRORES '+JSON.stringify(errs.slice(0,8)):ok?'HIPER OK':'HIPER MAL');await b.close()})();

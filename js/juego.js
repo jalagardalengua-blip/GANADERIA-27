@@ -190,7 +190,7 @@ function est(a){
 
 /* ============ avance de mes ============ */
 function log(t){S.log.unshift({d:`${MESES[S.month].slice(0,3)} ${S.year}`,t});S.log=S.log.slice(0,60)}
-function advance(){
+function advance(){if(S&&S.over)return gameOver();
  const rep={lines:[],corridas:[],cost:0,inc:0};
  const n=campo().length;
  // fin de año
@@ -485,7 +485,7 @@ function render(){
  <header class="hdr"><div class="bgimg" style="background-image:url(img/cabeza.jpg)"></div><div class="wrap">
   ${emblem(S.g,54)}
   <div class="id"><div class="gname">${esc(S.g.name)}</div><div class="gsub">${estrellas(S.pres)}<span>${esc(subtitulo())}</span></div></div>
-  <div class="lvl" title="Valoración y nivel"><span class="ring"><b>${valoracion()}</b></span><span><span class="lt">Nivel ${L.n}</span><span class="lb"><i style="width:${L.p}%"></i></span></span></div>
+  <div class="lvl" title="Valoración y nivel"><span class="ring" title="Valoración de la ganadería"><b>${valoracion()}</b><small>VAL</small></span><span><span class="lt">Nivel ${L.n}</span><span class="lb"><i style="width:${L.p}%"></i></span></span></div>
  </div></header>
  <div class="sbar"><div class="wrap">
   <div class="st"><span class="it hm">${ICO.cal}<span class="l">${MESES[S.month]} ${S.year}</span><span class="s">${MESES[S.month].slice(0,3)} ${String(S.year).slice(2)}</span></span><span class="it">${ICO.monG}<b class="num">${eur(S.money)}</b></span><span class="it">${ICO.star}<span><span class="l">Prestigio </span><b class="num">${Math.round(S.pres)}</b></span></span></div>
@@ -600,7 +600,7 @@ function rerStart(){const y=window.scrollY;render();window.scrollTo(0,y)}
 function startReal(i){const g=GANADERIAS[i];newGame({real:true,name:g.name,enc:g.enc,pres:g.pres,div:g.div,hierro:{l:g.name[0],a:'none'},prov:''})}
 function startNew(){const n=NEWG.name.trim();if(!n){toast('Ponle nombre a tu ganadería');$('#ng-name').focus();return}
  newGame({real:false,name:n,enc:NEWG.enc,div:[NEWG.c1,NEWG.c2],hierro:{l:(NEWG.l.trim()||n[0]),a:NEWG.a},prov:NEWG.prov,fund:2027})}
-function continuar(){S=load();if(!S.animals){S=null;return}migrate(S);if(!S.mej)S.mej=S.g.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{};UI.tab='inicio';render()}
+function continuar(){S=load();if(!S.animals){S=null;return}migrate(S);if(!S.mej)S.mej=S.g.real?{placita:1,corrales:1,comederos:1,abrev:1,cercas:1,casa:1}:{};UI.tab='inicio';render();if(S.over)gameOver()}
 
 /* ============ INICIO ============ */
 function offerCard(o){
@@ -616,7 +616,7 @@ function offerCard(o){
    <div class="m">${ICO.feria.replace('<svg','<svg class="ico"')}<span>${esc(o.feria)}</span></div>
   </div>
   ${o.st==='nueva'?`<div class="acts"><button class="btn pri" ${elig<o.n?'disabled':''} onclick="resena(${o.id})">Reseñar toros (${elig} aptos)${ICO.chev}</button><button class="btn" onclick="rechazar(${o.id})">Rechazar${ICO.chev}</button></div>
-   ${elig<o.n?`<div class="note" style="color:var(--warn)">Te faltan animales aptos: necesitas ${o.n} ${o.tipo==='novillada'?'erales o utreros':'cuatreños o cinqueños'} de ${min} kg o más, sin tentar.</div>`:''}<div class="note">Responde antes de ${MESES[(o.abs-1+12)%12]}.</div>`
+   ${elig<o.n?`<div class="note" style="color:var(--warn)">Te faltan animales aptos: necesitas ${o.n} ${o.tipo==='novillada'?'erales o utreros':'cuatreños o cinqueños'} de ${min} kg o más, sin tentar.</div>`:''}<div class="note">${o.abs-absNow()<=1?'Responde este mes: el mes que viene ya es tarde.':`Tienes hasta final de ${MESES[(o.abs-1+12)%12].toLowerCase()} para responder.`}</div>`
   :`<div style="font-size:.9rem">${o.toros.map(id=>{const a=byId(id);return a?`${esc(a.name)} <span class="mono muted">${a.num}</span>`:''}).join(' · ')}</div><div class="note">Total: ${eur(o.precio*o.toros.length)} al lidiarse.</div>`}
  </article>`}
 /* ============ TAREAS ============ */
@@ -874,7 +874,8 @@ function spark(){const d=S.presHist;const W=600,H=120,p=24;const xs=i=>p+i*(W-2*
  <polygon points="${xs(0)},${H-p} ${pts} ${xs(d.length-1)},${H-p}" fill="rgba(230,187,85,.15)"/><polyline points="${pts}" fill="none" stroke="var(--oro)" stroke-width="2.5"/>
  ${d.map((x,i)=>`<circle cx="${xs(i)}" cy="${ys(x.p)}" r="${i===d.length-1?5:3}" fill="var(--oro)"/><text x="${xs(i)}" y="${H-6}" fill="var(--muted)" font-size="11" text-anchor="middle">${x.y}</text>`).join('')}</svg>`}
 function resetGame(){try{localStorage.removeItem(KEY)}catch(e){}S=null;render()}
-function gameOver(){modal('Bancarrota',`<div class="stack"><p style="margin:0">El banco ejecuta la deuda y la finca sale a subasta. ${esc(S.g.name)} cierra con ${S.stats.toros} toros lidiados y ${S.stats.indultos} indultos.</p><button class="btn pri adv" onclick="closeModal();resetGame()">Empezar otra carrera</button></div>`)}
+/* la bancarrota es definitiva: queda guardada y la ventana vuelve a salir si se cierra (antes se podía cerrar y seguir jugando con deudas sin fin) */
+function gameOver(){S.over=true;try{save()}catch(e){}modal('Bancarrota',`<div class="stack"><p style="margin:0">El banco ejecuta la deuda y la finca sale a subasta. ${esc(S.g.name)} cierra con ${S.stats.toros} toros lidiados y ${S.stats.indultos} indultos.</p><button class="btn pri adv" onclick="S.over=false;closeModal(true);resetGame()">Empezar otra carrera</button></div>`,()=>{if(S&&S.over)setTimeout(gameOver,0)})}
 
 /* ============ informe mensual ============ */
 function showReport(rep){if(!rep)return;if(!rep.corridas)rep={...rep,corridas:(rep.cor||[]).map(id=>S.hist.find(h=>h.id===id)).filter(Boolean)};

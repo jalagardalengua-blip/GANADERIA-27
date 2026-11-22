@@ -42,7 +42,10 @@ function cgEnvolver(n){const f=window[n];if(typeof f!=='function'||f.__cg)return
 /* botones que entran en 3D: primero se pinta la pantalla de carga y luego se monta la escena */
 document.addEventListener('click',e=>{if(!e.isTrusted||CG.on||e.__cg)return;const el=e.target&&e.target.closest&&e.target.closest('[onclick]');if(!el)return;
  const s=el.getAttribute('onclick')||'';if(!CG.rx.test(s)||typeof el.onclick!=='function')return;
- e.stopPropagation();e.preventDefault();const m=/enterPlaza\((\d+)\)/.exec(s);cargaMostrar(m?cgDestino('enterPlaza',[+m[1]]):/calCorrida|irPlaza/.test(s)?'Plaza de toros':/irCalle|calCorro/.test(s)?'Festejo popular':cgDestino('enterFinca',[]));CG.dest=1;
+ e.stopPropagation();e.preventDefault();
+ /* la plaza a pantalla completa en el móvil: hay que pedirlo ahora, mientras dura el toque (luego el navegador lo rechaza) */
+ try{const de=document.documentElement;if(/enterPlaza|irPlaza|calCorrida/.test(s)&&!document.fullscreenElement&&de.requestFullscreen&&matchMedia('(pointer:coarse)').matches)de.requestFullscreen().catch(()=>{})}catch(err){}
+ const m=/enterPlaza\((\d+)\)/.exec(s);cargaMostrar(m?cgDestino('enterPlaza',[+m[1]]):/calCorrida|irPlaza/.test(s)?'Plaza de toros':/irCalle|calCorro/.test(s)?'Festejo popular':cgDestino('enterFinca',[]));CG.dest=1;
  requestAnimationFrame(()=>requestAnimationFrame(()=>{CG.dest=0;try{el.onclick.call(el,e)}catch(err){console.error(err)}
   if(!(typeof W3!=='undefined'&&W3.on)&&!(typeof RD!=='undefined'&&RD.on))cargaOcultar(0)}))},true);
 /* al abrir el juego */
