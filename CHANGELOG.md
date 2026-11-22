@@ -1,5 +1,13 @@
 # Cambios
 
+## Divisas en los nombres y vida en la finca
+- El nombre de cada ganadería se escribe en letra clásica con los **colores reales de su divisa** (Miura verde y negro, Victorino azul y encarnado…), en la cabecera, la elección de ganadería y el resto de pantallas. Fuera el estilo de cartel.
+- Finca 3D con vida:
+  - Vaquero a caballo rondando el ganado (uno de la casa y, además, cada vaquero contratado).
+  - El personal contratado trabaja: el veterinario va de la clínica al mueco y a los corrales, el guarda recorre las cercas, el conocedor vigila la camada y el representante va y viene del cortijo. A todos se les puede hablar y cuentan algo útil (salud de la ganadería, el mejor macho, ofertas pendientes…).
+  - Dos mastines: uno te sigue cuando andas y otro sestea en la puerta del cortijo. Se les puede acariciar.
+  - Garcillas bueyeras entre las reses (levantan el vuelo si te acercas), nido de cigüeñas sobre un poste, cigüeñas planeando y bandadas de estorninos.
+
 ## Agenda y menús más claros
 - Inicio: en lugar del cartel enorme con el nombre (que ya está en la cabecera) sale una **agenda** con lo que pide atención: cuándo te quedas sin dinero a este ritmo, finca saturada o casi llena, ofertas que caducan este mes y tareas pendientes. Cada aviso lleva a donde se arregla.
 - Aviso al avanzar si la bancarrota está a menos de seis meses.

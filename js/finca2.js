@@ -72,10 +72,10 @@ rebuildFinca=function(){_rebuildF.apply(this,arguments);if(W3.mode!=='finca'||!W
   for(let i=0;i<3;i++)mesh(G.box,M('#1d1a16'),.6,.9,.1,0,3+i*2.3,1.62,g,true);col.push({t:'box',x0:x-1.7,x1:x+1.7,z0:z-1.7,z1:z+1.7});
   acts.push({x,z:z+2.6,r:2.4,l:'Subir al mirador',cond:()=>!W3.ride,fn:()=>{cine(x,z,9,40,10,true);toast('Desde lo alto de la torre se ve toda tu dehesa')}})}
  // personal trabajando por la finca
- const ws=[];const add=(st,x,z)=>{const p=makePerson(Object.assign({gl:1},st));p.root.position.set(x,0,z);sc.add(p.root);ws.push({p,x,z,hx:x,hz:z,t:R(0,3),tx:x,tz:z})};
- for(let i=0;i<stf('vaquero');i++)add({jacket:'#6b4a2a',pants:'#3a3027',hat:'campero',hatc:'#2a1d14'},R(10,24),R(-4,8));
- if(stf('veter'))add({jacket:'#e9e6df',pants:'#2b3a4a',hat:null},-8,25);if(stf('mayoral'))add({jacket:'#3a3027',pants:'#2a2420',hat:'campero',hatc:'#111'},-12,14);
- if(stf('guarda'))add({jacket:'#3e5a3a',pants:'#2a2a2a',hat:'campero',hatc:'#2e3b2a'},30,-6);if(stf('conocedor'))add({jacket:'#5a4a3a',pants:'#2a2420',hat:'campero',hatc:'#3b2c22'},-26,30);if(stf('representante'))add({jacket:'#1d2433',pants:'#1d2433',shirt:'#f4f0e6'},2,10);
+ const ws=[];const add=(st,x,z,role)=>{const p=makePerson(Object.assign({gl:1},st));p.root.position.set(x,0,z);sc.add(p.root);ws.push({p,x,z,hx:x,hz:z,t:R(0,3),tx:x,tz:z,role})};
+ for(let i=0;i<stf('vaquero');i++)add({jacket:'#6b4a2a',pants:'#3a3027',hat:'campero',hatc:'#2a1d14'},R(10,24),R(-4,8),'vaquero');
+ if(stf('veter'))add({jacket:'#e9e6df',pants:'#2b3a4a',hat:null},-8,25,'veter');if(stf('mayoral'))add({jacket:'#3a3027',pants:'#2a2420',hat:'campero',hatc:'#111'},-12,14,'mayoral');
+ if(stf('guarda'))add({jacket:'#3e5a3a',pants:'#2a2a2a',hat:'campero',hatc:'#2e3b2a'},30,-6,'guarda');if(stf('conocedor'))add({jacket:'#5a4a3a',pants:'#2a2420',hat:'campero',hatc:'#3b2c22'},-26,30,'conocedor');if(stf('representante'))add({jacket:'#1d2433',pants:'#1d2433',shirt:'#f4f0e6'},2,10,'representante');
  W3.workers=ws};
 function pesarCamada(){const c=campo().filter(a=>a.sex==='M'&&!a.role).sort((a,b)=>b.peso-a.peso);const top=c.slice(0,8);const m=c.length?Math.round(c.reduce((s,a)=>s+a.peso,0)/c.length):0;S.pesado=absNow();save();
  modal('Báscula ganadera',`<div class="stack"><div class="kv"><span>Machos pesados <b>${c.length}</b></span><span>Peso medio <b>${m} kg</b></span></div><div class="list">${top.map(a=>`<div class="task"><span class="t"><b>${esc(a.name)}</b> <span class="mono muted">${a.num??''}</span><br><small class="muted">${ageY(a)} años · ${a.pelo}</small></span><b>${a.peso} kg</b></div>`).join('')}</div><small class="muted">Con peso certificado las empresas pagan un 3 % más.</small></div>`)}
@@ -90,5 +90,5 @@ function cine(x,z,dur,h,r,orbit){W3.cine={x,z,t:0,dur,h,r,orbit}}
 const _fincaTickF=fincaTick;
 fincaTick=function(dt){_fincaTickF(dt);if(W3.mode!=='finca')return;
  if(W3.extra)for(const e of W3.extra){if(e.horse){e.a+=dt*.55;const hx=e.cx+Math.cos(e.a)*e.R,hz=e.cz+Math.sin(e.a)*e.R;e.horse.root.position.set(hx-e.cx,0,hz-e.cz);e.horse.root.rotation.y=-e.a;animHorse(e.horse,dt,1.15)}if(e.fl)e.fl.scale.y=.9+Math.random()*.25}
- if(W3.workers)for(const w of W3.workers){w.t-=dt;if(w.t<0){w.t=R(3,8);w.tx=w.hx+R(-6,6);w.tz=w.hz+R(-6,6)}const ex=w.tx-w.x,ez=w.tz-w.z,el=Math.hypot(ex,ez);const sp=el>.4?1.3:0;if(sp){w.x+=ex/el*sp*dt;w.z+=ez/el*sp*dt;w.p.root.rotation.y=Math.atan2(ex,ez)}w.p.root.position.set(w.x,gH(w.x,w.z),w.z);animPerson(w.p,dt,sp/3)}
+ if(W3.workers)for(const w of W3.workers){if(w.ia)continue;w.t-=dt;if(w.t<0){w.t=R(3,8);w.tx=w.hx+R(-6,6);w.tz=w.hz+R(-6,6)}const ex=w.tx-w.x,ez=w.tz-w.z,el=Math.hypot(ex,ez);const sp=el>.4?1.3:0;if(sp){w.x+=ex/el*sp*dt;w.z+=ez/el*sp*dt;w.p.root.rotation.y=Math.atan2(ex,ez)}w.p.root.position.set(w.x,gH(w.x,w.z),w.z);animPerson(w.p,dt,sp/3)}
  const C=W3.cine;if(C){C.t+=dt;const a=C.t*.35+.6,cp=W3.cam.position;cp.set(C.x+Math.cos(a)*C.r,gH(C.x,C.z)+C.h,C.z+Math.sin(a)*C.r);W3.cam.lookAt(C.orbit?C.x+Math.cos(a+2.4)*60:C.x,C.orbit?2:2.4,C.orbit?C.z+Math.sin(a+2.4)*60:C.z);if(C.t>C.dur)W3.cine=null}};
