@@ -1,0 +1,11 @@
+/* ===== plaza de corro: cámara del espectador ===== */
+.coSeg{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:rgba(10,9,12,.62);border:1px solid rgba(230,187,85,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);pointer-events:auto}
+.coSeg button{border:0;background:transparent;color:#e9e3d6;font-weight:700;font-size:.78rem;letter-spacing:.02em;padding:8px 12px;border-radius:999px;min-height:36px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.coSeg button.on{background:linear-gradient(180deg,#f3d68b,#c99a3a);color:#1a1207}
+.coAy{position:absolute;left:50%;top:calc(58px + env(safe-area-inset-top,0px));transform:translateX(-50%);padding:8px 14px;border-radius:999px;background:rgba(10,9,12,.7);color:#f3ead6;font-size:.78rem;white-space:nowrap;pointer-events:none;transition:opacity .6s}
+.coAy.fuera{opacity:0}
+@media (max-width:520px){.coAy{white-space:normal;text-align:center;width:86%}}
+.crlArr{position:fixed;left:0;top:0;width:58px;height:58px;display:none;place-items:center;pointer-events:none;z-index:4}
+.crlArr.on{display:grid}
+.crlArr svg{position:absolute;inset:8px;fill:#f3d68b;filter:drop-shadow(0 2px 4px rgba(0,0,0,.8))}
+.crlArr b{position:relative;top:27px;font-size:.66rem;color:#fff;text-shadow:0 1px 3px #000;white-space:nowrap}
