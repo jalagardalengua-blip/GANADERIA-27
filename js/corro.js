@@ -239,7 +239,7 @@ function cFicha(id){const a=cById(id);if(!a)return;const t=cTipo(a),g=a.g;const 
  ${t!=='cabestro'?`<button class="btn" onclick="cVender(${a.id},false)">Vender a otra ganadería · ${eur(r100(cPrecio(a)))}</button>`:''}<button class="btn" onclick="cVender(${a.id},true)">Matadero · ${eur(Math.round(a.peso*1.1))}</button></div></div>`)}
 // la plaza del pueblo (js/plazas-pueblos.js): nombre, rasgo y foto
 const cPlaza=pu=>typeof ppPlaza==='function'?ppPlaza(pu):null;
-function ofCorroCard(o){const F=FEST[o.tipo],ok=cPuede(o),hoy=o.abs===absNow(),nit=!!(F.night||o.night);const img=o.tipo==='concurso'?'plaza-1':nit?'calle-nit':'calle';
+function ofCorroCard(o){const F=FEST[o.tipo],ok=cPuede(o),hoy=o.abs===absNow(),nit=!!(F.night||o.night);const img=o.tipo==='concurso'?'plaza-1':nit?'plaza-1':'plaza-2';
  const pz=o.tipo==='concurso'?null:cPlaza(o.pueblo),foto=pz&&pz.img;
  return `<article class="ofc"><div class="pic ${foto?'plz'+(nit?' nit':''):'c2'}" style="background-image:url(${foto?pz.img:`img/${img}.jpg`})"></div>
  <div class="row" style="gap:.45rem"><span class="badge ${o.tipo==='concurso'?'oro':''}">${F.n}${o.night&&o.tipo==='vaquillas'?' · nit':''}</span>${o.cdg?'<span class="badge oro">Concurso de ganaderías</span>':''}${o.st==='aceptada'?'<span class="badge ok">Contratado</span>':''}</div>
@@ -254,7 +254,7 @@ function ofCorroCard(o){const F=FEST[o.tipo],ok=cPuede(o),hoy=o.abs===absNow(),n
 function cDelegar(id){const o=S.corro.of.find(x=>x.id===id);const r=cResolver(o,null);save();render();if(r)toast(`${o.pueblo}: ${LUCTXT(r.media)} (${r.media}) · +${eur(r.ing)}`)}
 function renderCorro(el){const C=S.corro;
  if(!C){el.innerHTML=`<div class="stack" style="gap:1rem">
-  <div class="fhero"><div class="img" style="background-image:url(img/calle.jpg)"></div><span class="season">Bous al carrer · Comunitat Valenciana</span></div>
+  <div class="fhero"><div class="img" style="background-image:url(img/plaza-2.jpg)"></div><span class="season">Bous al carrer · Comunitat Valenciana</span></div>
   <div class="card goldline"><b style="font-family:var(--display);font-size:1.25rem">Ganadería de corro</b><p class="muted" style="margin:.3rem 0 0">Vacas y toros para las fiestas de los pueblos: tardes de vaquillas, bous embolats, capeas, encierros y concursos de recortadores. Las vacas de corro salen muchas veces: cada salida es una prueba, ganan fama… y sentido. Comparte caja, calendario y placita de tientas con tu ganadería de bravo.</p></div>
   <section class="sect"><header><h2>Ganaderías de corro en venta</h2><span class="sp"></span><small class="muted">${CORRO_REAL.length} casas</small></header><div class="list">${CORRO_REAL.slice(0,CU.todas?99:8).map((r,i)=>`<button class="gan" onclick="comprarCorro(${i})">${emblem({hierro:{l:r.l}},44)}
    <span style="min-width:0"><b>${esc(r.name)}</b><br><small class="muted">${esc(r.pueblo)} · ${r.n[0]} vacas, ${r.n[1]} toros · ${eur(corroCostoReal(r))}</small><div class="pres"><i style="width:${r.pres}%"></i></div></span>${divisa(r.div)}</button>`).join('')}</div>${CU.todas?'':`<button class="btn" style="width:100%;margin-top:.5rem" onclick="CU.todas=1;render()">Ver las ${CORRO_REAL.length} ganaderías de corro</button>`}</section>
@@ -301,7 +301,7 @@ function corroBadge(n){const b=[...document.querySelectorAll('nav.tabs button')]
 const _renderInicio=renderInicio;
 renderInicio=function(el){_renderInicio(el);if(!S)return;const C=S.corro,d=document.createElement('section');d.className='sect';
  const hoy=C?C.of.filter(o=>o.st==='aceptada'&&o.abs===absNow()):[];
- d.innerHTML=`<button class="corroP" onclick="go('corro')"><span class="cpI" style="background-image:url(img/calle.jpg)"></span><span class="cpT"><small>Ganadería de corro</small><b>${C?esc(C.name):'Bous al carrer'}</b><span>${C?(hoy.length?`Este mes: ${hoy.map(o=>esc(o.pueblo)).join(', ')} · ¡míralo en directo!`:`${C.of.filter(o=>o.st==='nueva').length} contratos nuevos · prestigio ${Math.round(C.pres)}`):'Compra una casa de corro o funda la tuya'}</span></span>${ICO.chev}</button>`;
+ d.innerHTML=`<button class="corroP" onclick="go('corro')"><span class="cpI" style="background-image:url(img/plaza-2.jpg)"></span><span class="cpT"><small>Ganadería de corro</small><b>${C?esc(C.name):'Bous al carrer'}</b><span>${C?(hoy.length?`Este mes: ${hoy.map(o=>esc(o.pueblo)).join(', ')} · ¡míralo en directo!`:`${C.of.filter(o=>o.st==='nueva').length} contratos nuevos · prestigio ${Math.round(C.pres)}`):'Compra una casa de corro o funda la tuya'}</span></span>${ICO.chev}</button>`;
  el.firstElementChild?el.firstElementChild.insertBefore(d,el.firstElementChild.children[1]||null):el.appendChild(d)};
 const _finTareas=finTareas;
 finTareas=function(rep){_finTareas(rep);try{corroMes(rep)}catch(e){console.error(e)}};
