@@ -1,5 +1,9 @@
 # Cambios
 
+## Vuelve la ganadería de corro
+- A petición del propietario se deshace la ocultación (#71): vuelven el interruptor «Ganadería principal / Ganadería de corro» de la cabecera, la tarjeta de corro de Inicio, «Bous al carrer» en Modos de juego y la leyenda «Festejo de corro» del calendario.
+- Se elimina `js/sin-corro.js`.
+
 ## Ganadería de corro: cada plaza con su tamaño y proporciones reales
 - Hasta ahora todas las plazas medían 28 × 22 m. Ahora cada pueblo tiene las suyas:
   - Peníscola: 22 × 17 m, en lo alto del peñón;

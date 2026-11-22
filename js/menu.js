@@ -13,7 +13,7 @@ startScreen=function(){const sv=load();const v=MENU.v;
    ${sv&&sv.g?`<button class="mItem prim" onclick="menuContinuar()"><b>Continuar carrera</b><small>${esc(sv.g.name)} · ${MESES[sv.month]} ${sv.year} · ${eur(sv.money)}${sv.corro?' · corro '+esc(sv.corro.name):''}</small><span class="mArr">${ICO.chev}</span></button>`:''}
    <button class="mItem ${sv&&sv.g?'':'prim'}" onclick="menuGo('hist')"><b>Nueva carrera</b><small>Ponte al frente de una de las ${GANADERIAS.length} ganaderías históricas</small><span class="mArr">${ICO.chev}</span></button>
    <button class="mItem" onclick="menuGo('fundar')"><b>Funda tu ganadería</b><small>Tu hierro, tu divisa y tu encaste desde cero</small><span class="mArr">${ICO.chev}</span></button>
-   <button class="mItem" onclick="menuGo('modos')"><b>Modos de juego</b><small>Finca 3D · tientas · corridas</small><span class="mArr">${ICO.chev}</span></button>
+   <button class="mItem" onclick="menuGo('modos')"><b>Modos de juego</b><small>Finca 3D · tientas · corridas · bous al carrer</small><span class="mArr">${ICO.chev}</span></button>
    <button class="mItem" onclick="menuGo('ajustes')"><b>Ajustes</b><small>Gráficos y sonido</small><span class="mArr">${ICO.chev}</span></button>
   </nav></div><div class="mFoot">v2 · ${GANADERIAS.length} ganaderías · ${MATADORES.length} toreros · ${CORRO_REAL.length} casas de corro</div></div>`;
  if(v==='hist'){const i=MENU.i;
@@ -31,6 +31,7 @@ startScreen=function(){const sv=load();const v=MENU.v;
   ${[['dehesa','Finca en 3D','Recorre tu dehesa a pie, a caballo o en camioneta. Echa de comer, hierra, cura, repara cercas, acosa y derriba, y haz las faenas del calendario.'],
      ['cuerno','Tienta en la placita','Mide la bravura de tus vacas y machos con el picador y la muleta. Tú eliges quién se queda de vientre o de semental.'],
      ['plaza-1','Corridas en directo','Tu hierro en las grandes ferias: cada toro y cada torero son distintos, con cámaras de televisión, cogidas, avisos e indultos.'],
+     ['calle','Bous al carrer','Tu ganadería de corro en las fiestas de los pueblos valencianos: vaquillas, bou embolat, capeas y concursos de recortadores.'],
      ['palco','Carrera e imperio','Escalafón de ganaderías, retos del mes, obras de la finca y un patrimonio que crece temporada a temporada.']].map(([im,t,d])=>`<div class="mMode"><i style="background-image:url(img/${im}.jpg)"></i><div><b>${t}</b><p>${d}</p></div></div>`).join('')}</div></div>`;
  if(v==='ajustes'){const q=getQual();return `<div class="menu mForm">${menuBg()}<div class="mTop"><button class="mBack" onclick="menuGo('main')">${ICO.chev}<span>Volver</span></button><b>Ajustes</b><span></span></div><div class="mPanel">
   
