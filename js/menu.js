@@ -1,7 +1,7 @@
 /* ===================== MENÚ PRINCIPAL · pantalla de título de alto nivel ===================== */
 const MENU={v:'press',i:0,slide:0};
 const _startScreenOrig=startScreen;
-const MENU_BG=['hero','calle','plaza-1','palco','calle-nit','dehesa'];
+const MENU_BG=['hero','plaza-2','plaza-1','palco','plaza-1','dehesa'];
 function encImg(g,i){const p=(g.pelos&&g.pelos[0])||(ENC[g.enc]&&ENC[g.enc].pelos[0])||'negro';return `img/toro-${FAMP[p]||'negro'}-${(i*3+1)%8}.jpg`}
 function menuBg(){return `<div class="mBg">${MENU_BG.map((s,i)=>`<i style="background-image:url(img/${s}.jpg);animation-delay:${i*6}s"></i>`).join('')}</div><canvas id="mFx" class="mFx"></canvas><div class="mVig"></div><div class="mSweep"></div>`}
 function menuLogo(sm){return `<div class="mLogo ${sm?'sm':''}"><svg class="mHorns" viewBox="0 0 120 60"><defs><linearGradient id="mg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff2c4"/><stop offset=".45" stop-color="#e6bb55"/><stop offset="1" stop-color="#8a6420"/></linearGradient></defs><path fill="url(#mg)" d="M6 6c4 16 16 26 34 27l6 10h28l6-10c18-1 30-11 34-27-7 9-17 14-30 14H66l-6 5-6-5H36C23 20 13 15 6 6z"/><path fill="url(#mg)" d="M48 44h24l-12 14z"/></svg>
@@ -13,7 +13,7 @@ startScreen=function(){const sv=load();const v=MENU.v;
    ${sv&&sv.g?`<button class="mItem prim" onclick="menuContinuar()"><b>Continuar carrera</b><small>${esc(sv.g.name)} · ${MESES[sv.month]} ${sv.year} · ${eur(sv.money)}${sv.corro?' · corro '+esc(sv.corro.name):''}</small><span class="mArr">${ICO.chev}</span></button>`:''}
    <button class="mItem ${sv&&sv.g?'':'prim'}" onclick="menuGo('hist')"><b>Nueva carrera</b><small>Ponte al frente de una de las ${GANADERIAS.length} ganaderías históricas</small><span class="mArr">${ICO.chev}</span></button>
    <button class="mItem" onclick="menuGo('fundar')"><b>Funda tu ganadería</b><small>Tu hierro, tu divisa y tu encaste desde cero</small><span class="mArr">${ICO.chev}</span></button>
-   <button class="mItem" onclick="menuGo('modos')"><b>Modos de juego</b><small>Finca 3D · tientas · corridas</small><span class="mArr">${ICO.chev}</span></button>
+   <button class="mItem" onclick="menuGo('modos')"><b>Modos de juego</b><small>Finca 3D · tientas · corridas · bous al carrer</small><span class="mArr">${ICO.chev}</span></button>
    <button class="mItem" onclick="menuGo('ajustes')"><b>Ajustes</b><small>Gráficos y sonido</small><span class="mArr">${ICO.chev}</span></button>
   </nav></div><div class="mFoot">v2 · ${GANADERIAS.length} ganaderías · ${MATADORES.length} toreros · ${CORRO_REAL.length} casas de corro</div></div>`;
  if(v==='hist'){const i=MENU.i;
@@ -31,6 +31,7 @@ startScreen=function(){const sv=load();const v=MENU.v;
   ${[['dehesa','Finca en 3D','Recorre tu dehesa a pie, a caballo o en camioneta. Echa de comer, hierra, cura, repara cercas, acosa y derriba, y haz las faenas del calendario.'],
      ['cuerno','Tienta en la placita','Mide la bravura de tus vacas y machos con el picador y la muleta. Tú eliges quién se queda de vientre o de semental.'],
      ['plaza-1','Corridas en directo','Tu hierro en las grandes ferias: cada toro y cada torero son distintos, con cámaras de televisión, cogidas, avisos e indultos.'],
+     ['plaza-2','Bous al carrer','Tu ganadería de corro en las fiestas de los pueblos valencianos: vaquillas, bou embolat, capeas y concursos de recortadores.'],
      ['palco','Carrera e imperio','Escalafón de ganaderías, retos del mes, obras de la finca y un patrimonio que crece temporada a temporada.']].map(([im,t,d])=>`<div class="mMode"><i style="background-image:url(img/${im}.jpg)"></i><div><b>${t}</b><p>${d}</p></div></div>`).join('')}</div></div>`;
  if(v==='ajustes'){const q=getQual();return `<div class="menu mForm">${menuBg()}<div class="mTop"><button class="mBack" onclick="menuGo('main')">${ICO.chev}<span>Volver</span></button><b>Ajustes</b><span></span></div><div class="mPanel">
   
