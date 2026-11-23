@@ -788,34 +788,93 @@ function updateBull(dt){const b=bull,sp=bullSpeed;b.root.position.copy(B);b.root
    pies), así anda, cita, carga la suerte y entra a matar con las animaciones de siempre. Mientras se descarga,
    se ve el torero dibujado de antes. */
 const TGLB={geo:null,mat:null,pend:false};
+/* articulaciones medidas en la malla del modelo (altura 1): codos, muñecas, rodillas y tobillos */
+const TOR_JUNTAS={codoL:[.161,.624,.003],manoL:[.184,.5,.016],codoR:[-.158,.622,-.034],manoR:[-.184,.488,-.038],rodillaL:[.052,.273,.002],tobilloL:[0,.059,-.062],rodillaR:[-.105,.269,.078],tobilloR:[-.099,.057,.118]};
 function toreroGLBCarga(){if(TGLB.pend||!THREE.GLTFLoader)return;TGLB.pend=true;new THREE.GLTFLoader().load('modelos/torero.glb',g=>{g.scene.traverse(o=>{if(o.isMesh&&!TGLB.geo){TGLB.geo=o.geometry;TGLB.mat=o.material}});
   if(TGLB.mat){TGLB.mat.roughness=.62;TGLB.mat.metalness=.05;TGLB.mat.envMapIntensity=.9;if(TGLB.mat.map){TGLB.mat.map.anisotropy=8;TGLB.mat.map.encoding=THREE.sRGBEncoding}TGLB.mat.side=THREE.FrontSide;TGLB.mat.skinning=true;TGLB.mat.needsUpdate=true}
   if(torero&&!torero.piel)try{toreroPiel(torero)}catch(e){console.warn('torero glb',e)}},undefined,()=>{});}
-function toreroPiel(t){if(!TGLB.geo||t.piel)return;const root=t.root;root.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(root.matrixWorld).invert();
+function toreroPiel(t,geoPre){if(!TGLB.geo||t.piel)return;const root=t.root;root.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(root.matrixWorld).invert();
  // huesos: los grupos del torero dibujado (a los que mueven las animaciones)
  const G=[['hips',t.hips],['spine',t.spine],['neck',t.neck],['head',t.head]];for(const [s,a] of [['L',t.aL],['R',t.aR]]){G.push(['up'+s,a.up],['fo'+s,a.fo],['hand'+s,a.hand])}
  for(const [s,l] of [['L',t.lL],['R',t.lR]]){G.push(['th'+s,l.th],['sh'+s,l.sh],['an'+s,l.an])}
- const loc=o=>{const v=new THREE.Vector3();o.getWorldPosition(v);return v.applyMatrix4(inv)};const P={};for(const [n,o] of G)P[n]=loc(o);
+ const loc=o=>{const v=new THREE.Vector3();o.getWorldPosition(v);return v.applyMatrix4(inv)};
+ /* postura de enlace = la del modelo: brazos algo abiertos y la pierna derecha adelantada. Se apuntan los huesos a
+    las articulaciones medidas en la malla (codo, muñeca, rodilla, tobillo); luego se deja todo como estaba */
+ const top0=t.head?loc(t.head).y+.22:1.86,J=TOR_JUNTAS,guard=[];const rq=new THREE.Quaternion(),pq=new THREE.Quaternion(),dv=new THREE.Vector3();
+ const aim=(g,tgt)=>{guard.push([g,g.quaternion.clone()]);root.updateMatrixWorld(true);const st=loc(g);dv.set(tgt[0]*top0,tgt[1]*top0,tgt[2]*top0).sub(st).normalize();
+  root.getWorldQuaternion(rq);g.parent.getWorldQuaternion(pq);pq.premultiply(rq.clone().invert()).invert();dv.applyQuaternion(pq);g.quaternion.setFromUnitVectors(new THREE.Vector3(0,-1,0),dv);root.updateMatrixWorld(true)};
+ /* el hombro del torero dibujado estaba 7 cm más alto que el del modelo: el brazo giraba desde un punto que no es la articulación y la chaquetilla se estiraba */
+ if(!t.hombroOk){t.hombroOk=1;t.shL.position.set(.2,.355,0);t.shR.position.set(-.2,.355,0);root.updateMatrixWorld(true)}
+ for(const s of ['L','R']){const a=t['a'+s],l=t['l'+s];aim(a.up,J['codo'+s]);aim(a.fo,J['mano'+s]);aim(l.th,J['rodilla'+s]);aim(l.sh,J['tobillo'+s])}
+ const P={};for(const [n,o] of G)P[n]=loc(o);
  // tramos (de cada hueso a su hijo) para repartir los pesos por cercanía
  const seg={hips:[P.hips,P.spine],spine:[P.spine,P.neck],neck:[P.neck,P.head],head:[P.head,P.head.clone().add(new THREE.Vector3(0,.24,0))]};
- for(const s of ['L','R']){seg['up'+s]=[P['up'+s],P['fo'+s]];seg['fo'+s]=[P['fo'+s],P['hand'+s]];seg['hand'+s]=[P['hand'+s],P['hand'+s].clone().add(new THREE.Vector3(0,-.16,0))];
+ for(const s of ['L','R']){seg['up'+s]=[P['up'+s],P['fo'+s]];seg['fo'+s]=[P['fo'+s],P['hand'+s]];seg['hand'+s]=[P['hand'+s],P['hand'+s].clone().add(P['hand'+s].clone().sub(P['fo'+s]).normalize().multiplyScalar(.16))];
   seg['th'+s]=[P['th'+s],P['sh'+s]];seg['sh'+s]=[P['sh'+s],P['an'+s]];seg['an'+s]=[P['an'+s],P['an'+s].clone().add(new THREE.Vector3(0,-.05,.16))]}
  const names=G.map(g=>g[0]);
  // la malla, a la altura del torero dibujado (de los pies a lo alto de la cabeza)
- const top=P.head.y+.22,geo=TGLB.geo.clone();geo.scale(top,top,top);const pos=geo.attributes.position,n=pos.count;
- const si=new Uint16Array(n*4),sw=new Float32Array(n*4),v=new THREE.Vector3(),ab=new THREE.Vector3(),av=new THREE.Vector3();
+ const top=P.head.y+.22,geo=geoPre||TGLB.geo.clone();
+ /* el archivo trae los datos intercalados (posición, normal y textura juntas): se separan para poder añadir vértices */
+ if(!geoPre){for(const k of Object.keys(geo.attributes)){const at=geo.attributes[k];if(at.isInterleavedBufferAttribute){const a=new Float32Array(at.count*at.itemSize);for(let i=0;i<at.count;i++)for(let c=0;c<at.itemSize;c++)a[i*at.itemSize+c]=at.getComponent?at.getComponent(i,c):[at.getX,at.getY,at.getZ,at.getW][c].call(at,i);geo.setAttribute(k,new THREE.BufferAttribute(a,at.itemSize))}}geo.scale(top,top,top)}const pos=geo.attributes.position,n=pos.count;
+ /* pesos por distancia A TRAVÉS DE LA MALLA (geodésica), no en línea recta: el costado de la chaquetilla está
+    pegado al brazo, pero por la superficie queda lejos (hay que subir hasta el hombro), así que ya no se estira
+    con el brazo al citar o al dar el pase. Cada hueso parte de los puntos que le quedan muy cerca. */
+ let HK=new Float32Array(1<<16),HI_=new Int32Array(1<<16);const NB=names.length,v=new THREE.Vector3(),ab=new THREE.Vector3(),av=new THREE.Vector3();
  const dseg=(a,b)=>{ab.subVectors(b,a);av.subVectors(v,a);const k=Math.max(0,Math.min(1,av.dot(ab)/Math.max(1e-6,ab.lengthSq())));return av.sub(ab.multiplyScalar(k)).length()};
- for(let i=0;i<n;i++){v.fromBufferAttribute(pos,i);const d=[];for(let b=0;b<names.length;b++){const nm=names[b],sd=nm.endsWith('L')?1:nm.endsWith('R')?-1:0;let x=dseg(seg[nm][0],seg[nm][1]);
-   // un brazo o una pierna no recoge puntos del otro lado del cuerpo; los brazos no recogen el tronco
-   if(sd&&v.x*sd<-.03)x+=1;if(/^(up|fo|hand)/.test(nm)&&Math.abs(v.x)<.15&&v.y>P.spine.y)x+=.06;d.push([x,b])}
-  d.sort((a,b)=>a[0]-b[0]);const w0=1/Math.pow(d[0][0]+.012,4),w1=1/Math.pow(d[1][0]+.012,4),ws=w0+w1;si[i*4]=d[0][1];si[i*4+1]=d[1][1];sw[i*4]=w0/ws;sw[i*4+1]=w1/ws}
+ // vértices soldados por posición (la malla está partida en las costuras de la textura)
+ const key=new Map(),rep=new Int32Array(n);let nu=0;const up=[];for(let i=0;i<n;i++){const k=Math.round(pos.getX(i)*4000)+','+Math.round(pos.getY(i)*4000)+','+Math.round(pos.getZ(i)*4000);let r=key.get(k);if(r==null){r=nu++;key.set(k,r);up.push(i)}rep[i]=r}
+ const adj=[...Array(nu)].map(()=>[]);const ix=geo.index.array;const P3=i=>new THREE.Vector3().fromBufferAttribute(pos,up[i]);const UP=up.map((_,i)=>P3(i));
+ for(let t=0;t<ix.length;t+=3)for(const [a,b] of [[0,1],[1,2],[2,0]]){const A=rep[ix[t+a]],B=rep[ix[t+b]];if(A===B)continue;const w=UP[A].distanceTo(UP[B]);adj[A].push(B,w);adj[B].push(A,w)}
+ /* tapar los agujeros que dejó la muleta al quitarla (en el muslo izquierdo): cada borde cerrado pequeño se cierra
+    con un abanico desde su centro, con el color de la tela de alrededor */
+ {const ec=new Map();const ek=(a,b)=>a<b?a+'_'+b:b+'_'+a;for(let t2=0;t2<ix.length;t2+=3)for(const [a,b] of [[0,1],[1,2],[2,0]]){const A=rep[ix[t2+a]],B=rep[ix[t2+b]];if(A===B)continue;const k=ek(A,B);const e=ec.get(k);if(e)e.n++;else ec.set(k,{n:1,a:ix[t2+a],b:ix[t2+b],A,B})}
+  const nxt=new Map();for(const e of ec.values())if(e.n===1){nxt.set(e.A,e)}const usado=new Set();const nuevos=[];const P2=pos.array,Uv=geo.attributes.uv,Nr=geo.attributes.normal;let extra=[],eu=[],en=[];
+  TPN.bordes=nxt.size;TPN.lazos=[];
+  for(let [A0,e0] of nxt){if(usado.has(A0))continue;let lazo=[];const wl=[];let A=A0,e=e0,g=0;while(e&&!usado.has(A)&&g<400){usado.add(A);lazo.push(e.a);wl.push(A);A=e.B;e=nxt.get(A);g++}
+   {const k=wl.indexOf(A);if(k>=0){lazo=lazo.slice(k);A=A0=wl[k]}}
+   TPN.lazos.push([lazo.length,A===A0]);if(A!==A0||lazo.length<3||lazo.length>120)continue;const c=new THREE.Vector3();for(const i of lazo)c.add(new THREE.Vector3().fromBufferAttribute(pos,i));c.divideScalar(lazo.length);
+   const ci=n+extra.length/3;extra.push(c.x,c.y,c.z);eu.push(Uv.getX(lazo[0]),Uv.getY(lazo[0]));en.push(Nr.getX(lazo[0]),Nr.getY(lazo[0]),Nr.getZ(lazo[0]));for(let q=0;q<lazo.length;q++)nuevos.push(lazo[(q+1)%lazo.length],lazo[q],ci)}
+  if(nuevos.length){const nn=n+extra.length/3;const np=new Float32Array(nn*3);np.set(pos.array);np.set(extra,n*3);const nuv=new Float32Array(nn*2);nuv.set(Uv.array);nuv.set(eu,n*2);const nno=new Float32Array(nn*3);nno.set(Nr.array);nno.set(en,n*3);
+   geo.setAttribute('position',new THREE.BufferAttribute(np,3));geo.setAttribute('uv',new THREE.BufferAttribute(nuv,2));geo.setAttribute('normal',new THREE.BufferAttribute(nno,3));const ni=new Uint32Array(ix.length+nuevos.length);ni.set(ix);ni.set(nuevos,ix.length);geo.setIndex(new THREE.BufferAttribute(ni,1));
+   TPN.tapas=nuevos.length/3;for(const [g,q] of guard)g.quaternion.copy(q);root.updateMatrixWorld(true);return toreroPiel(t,geo)}}
+ const RAD={hips:.22,spine:.27,neck:.08,head:.14,up:.075,fo:.065,hand:.065,th:.11,sh:.075,an:.08};
+ /* el tronco solo arranca del centro y los brazos solo de fuera del tronco: así la espalda y el pecho no se van con el brazo */
+ const ZONA={spine:x=>Math.abs(x)<.155,hips:x=>Math.abs(x)<.17,up:x=>Math.abs(x)>.205};
+ const G2=new Float32Array(nu*NB).fill(1e9);
+ for(let b=0;b<NB;b++){const nm=names[b],sd=nm.endsWith('L')?1:nm.endsWith('R')?-1:0,rr=RAD[nm.replace(/[LR]$/,'')]||.08;const dist=new Float32Array(nu).fill(1e9);
+  // montón binario en arrays tipados (sin crear objetos: cabe en la memoria de cualquier móvil)
+  let hn=0;const push=(d,i)=>{if(hn>=HK.length){const a=new Float32Array(HK.length*2);a.set(HK);HK=a;const c=new Int32Array(HI_.length*2);c.set(HI_);HI_=c}let c=hn++;while(c>0){const p=(c-1)>>1;if(HK[p]<=d)break;HK[c]=HK[p];HI_[c]=HI_[p];c=p}HK[c]=d;HI_[c]=i};
+  const pop=()=>{const d=HK[0],i=HI_[0];hn--;if(hn>0){const ld=HK[hn],li=HI_[hn];let c=0;for(;;){const l=2*c+1,r=l+1;let m=-1,md=ld;if(l<hn&&HK[l]<md){m=l;md=HK[l]}if(r<hn&&HK[r]<md){m=r}if(m<0)break;HK[c]=HK[m];HI_[c]=HI_[m];c=m}HK[c]=ld;HI_[c]=li}PD=d;return i};let PD=0;
+  const zf=ZONA[nm.replace(/[LR]$/,'')];for(let i=0;i<nu;i++){v.copy(UP[i]);if(sd&&v.x*sd<-.02)continue;if(zf&&!zf(v.x))continue;const d=dseg(seg[nm][0],seg[nm][1]);if(d<rr){dist[i]=d;push(d,i)}}
+  if(!hn){let bi=0,bd=1e9;for(let i=0;i<nu;i++){v.copy(UP[i]);const d=dseg(seg[nm][0],seg[nm][1]);if(d<bd){bd=d;bi=i}}dist[bi]=bd;push(bd,bi)}
+  while(hn){const i=pop(),d=PD;if(d>dist[i])continue;const A=adj[i];for(let k=0;k<A.length;k+=2){const j=A[k],nd=d+A[k+1];if(nd<dist[j]){dist[j]=nd;push(nd,j)}}}
+  for(let i=0;i<nu;i++)G2[i*NB+b]=dist[i]}
+ // tres huesos más cercanos por la superficie, con caída suave; luego un par de pasadas de alisado
+ let W=new Float32Array(nu*NB);for(let i=0;i<nu;i++){const o=[];for(let b=0;b<NB;b++)o.push([G2[i*NB+b],b]);o.sort((x,y)=>x[0]-y[0]);let sum=0;const k0=o[0][0];
+  for(let q=0;q<3;q++){const w=1/Math.pow(Math.max(0,o[q][0]-k0)+.035,3);if(o[q][0]>k0+.25)continue;W[i*NB+o[q][1]]=w;sum+=w}for(let b=0;b<NB;b++)W[i*NB+b]/=sum}
+ for(let it=0;it<4;it++){const W2=new Float32Array(W);for(let i=0;i<nu;i++){const A=adj[i];if(!A.length)continue;const nn=A.length/2;for(let b=0;b<NB;b++){let acc=0;for(let k=0;k<A.length;k+=2)acc+=W[A[k]*NB+b];W2[i*NB+b]=W[i*NB+b]*.5+acc/nn*.5}}W=W2}
+ const si=new Uint16Array(n*4),sw=new Float32Array(n*4);
+ for(let i=0;i<n;i++){const r=rep[i];const o=[];for(let b=0;b<NB;b++){const w=W[r*NB+b];if(w>1e-4)o.push([w,b])}o.sort((x,y)=>y[0]-x[0]);o.length=Math.min(4,o.length);let sum=0;for(const q of o)sum+=q[0];o.forEach((q,k)=>{si[i*4+k]=q[1];sw[i*4+k]=q[0]/sum})}
  geo.setAttribute('skinIndex',new THREE.Uint16BufferAttribute(si,4));geo.setAttribute('skinWeight',new THREE.Float32BufferAttribute(sw,4));
  const bones=G.map(([nm,o])=>{const b=new THREE.Bone();b.name=nm;b.matrixAutoUpdate=false;b.matrix.copy(inv).multiply(o.matrixWorld);root.add(b);return b});root.updateMatrixWorld(true);
  const sk=new THREE.Skeleton(bones);const m=new THREE.SkinnedMesh(geo,TGLB.mat);m.castShadow=true;m.receiveShadow=true;m.frustumCulled=false;
  // fuera el torero dibujado (las telas y el estoque van aparte y se quedan)
- root.traverse(o=>{if(o.isMesh)o.visible=false});root.add(m);root.updateMatrixWorld(true);m.bind(sk);t.piel={m,bones,src:G.map(g=>g[1]),inv:new THREE.Matrix4()}}
+ root.traverse(o=>{if(o.isMesh)o.visible=false});root.add(m);root.updateMatrixWorld(true);m.bind(sk);for(const [g,q] of guard)g.quaternion.copy(q);root.updateMatrixWorld(true);t.piel={m,bones,src:G.map(g=>g[1]),inv:new THREE.Matrix4()}}
 /* cada fotograma, los huesos copian la postura del torero dibujado */
-function toreroPielTick(t){const P=t&&t.piel;if(!P)return;t.root.updateMatrixWorld(true);P.inv.copy(t.root.matrixWorld).invert();for(let i=0;i<P.bones.length;i++){P.bones[i].matrix.copy(P.inv).multiply(P.src[i].matrixWorld)}}
+/* cada fotograma, los huesos copian la postura del torero dibujado, con unos retoques de naturalidad que no
+   mueven las manos (las telas van agarradas a ellas):
+   - la cabeza baja la barbilla (el modelo venía mirando al cielo) y tiene un leve vaivén, como quien sigue al toro con la vista;
+   - respiración: el pecho sube y baja muy poco;
+   - parado, carga el peso en una pierna y flexiona un poco las rodillas; al citar, las flexiona algo más. */
+const TPN={t:0};
+function toreroPielTick(t){const P=t&&t.piel;if(!P)return;const dt=Math.min(.05,Math.max(0,(performance.now()-(TPN.last||performance.now()))/1000));TPN.last=performance.now();TPN.t+=dt;const T_=TPN.t;
+ const quieto=1-Math.min(1,(t.walkV||0)/.4),cita=D&&(D.phase==='cite'||D.phase==='wait')?1:0,pase=D&&D.phase==='pass'?1:0;
+ const hx=.15+Math.sin(T_*.7)*.025+Math.sin(T_*1.9)*.01,hy=Math.sin(T_*.43)*.04*quieto;
+ const fl=(.05+.07*cita+.05*pase)*quieto,peso=Math.sin(T_*.35)*.5+.5;
+ const ad=[[t.neck,'x',hx*.4],[t.head,'x',hx*.6],[t.head,'y',hy],[t.lL.th,'x',-fl*(.7+.5*peso)],[t.lL.sh,'x',fl*1.6*(.7+.5*peso)],[t.lR.th,'x',-fl*(1.2-.5*peso)],[t.lR.sh,'x',fl*1.6*(1.2-.5*peso)]];
+ for(const [o,k,v] of ad)o.rotation[k]+=v;const sp=1+Math.sin(T_*1.6)*.006;t.spine.scale.set(1,1,sp);
+ t.root.updateMatrixWorld(true);P.inv.copy(t.root.matrixWorld).invert();for(let i=0;i<P.bones.length;i++){P.bones[i].matrix.copy(P.inv).multiply(P.src[i].matrixWorld)}
+ for(const [o,k,v] of ad)o.rotation[k]-=v;t.spine.scale.set(1,1,1)}
 /* ---------- animación del torero y telas ---------- */
 function updateTorero(dt){const t=torero,sp=t.spec,sc=sp.h;const yawE=Tyaw+D.spinA;t.root.position.copy(T);t.root.rotation.y=yawE;
  const f=new V3(Math.sin(yawE),0,Math.cos(yawE)),l=new V3(Math.cos(yawE),0,-Math.sin(yawE));const su=SU[D.cur];let mode='cite',p=0;const lure=new V3();
@@ -1312,7 +1371,7 @@ function frame(now){requestAnimationFrame(frame);try{if(last)autoCalidad(Math.mi
  sun.position.copy(focus).addScaledVector(sun.userData.dir,110);sun.target.position.copy(focus);
  updateCamera(dtR);
  dust.mat.uniforms.uScale.value=renderer.domElement.height/(2*Math.tan(camera.fov*Math.PI/360));
- try{toreroPielTick(torero)}catch(e){}hiRender(dtR);
+ try{toreroPielTick(torero)}catch(e){}if(window.__camO)try{window.__camO(camera)}catch(e){}hiRender(dtR);
 
  if(false){const d=gimg.data;for(let i=0;i<d.length;i+=4){const v=Math.random()*255;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}gctx.putImageData(gimg,0,0);}}
 /* ===================== MÁS LIDIA: tercios, banderillas, cuadrilla, comentarista y velocidad =====================
@@ -1424,7 +1483,7 @@ try{const v=+localStorage.getItem('ruedoVel');if([.5,1,2,4,8].includes(v))ui.spe
 (function(){const bS=document.getElementById('bSup');if(!bS)return;bS.onclick=()=>{if(D.phase==='suprema'||D.phase==='fin')return;XL.salta=true;ui.paused=false;bS.disabled=true;setTimeout(()=>bS.disabled=false,1500);};})();
 /* ayuda de pruebas: avanza la lidia sin depender de los fotogramas */
 const xlAvanza=seg=>{for(let t=0;t<seg&&bull&&torero;t+=.05){simTime+=.05;updateDirector(.05);updateBull(.05);updateTorero(.05);supremaPost(.05);}return D.phase;};
-window.__ruedo={avanza:xlAvanza,get xl(){return XL;},D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},banda:()=>xlBandStart(),get xl(){return XL;},vista:(v)=>{const b=document.getElementById('bVista');while(ui.cam!==v)b.click();},get plano(){return camS.shot;},get tor(){return torero;},render:(c)=>{try{toreroPielTick(torero)}catch(e){}if(HI.on&&c===camera)hiRender(0);else{const t=renderer.toneMapping;renderer.render(scene,c)}},hi:(v)=>hiPon(v),get HI(){return HI},get tor(){return torero},TGLB,get canvas(){return renderer.domElement;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
+window.__ruedo={avanza:xlAvanza,get xl(){return XL;},D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},banda:()=>xlBandStart(),get xl(){return XL;},vista:(v)=>{const b=document.getElementById('bVista');while(ui.cam!==v)b.click();},get plano(){return camS.shot;},get tor(){return torero;},render:(c)=>{try{toreroPielTick(torero)}catch(e){}if(HI.on&&c===camera)hiRender(0);else{const t=renderer.toneMapping;renderer.render(scene,c)}},hi:(v)=>hiPon(v),get HI(){return HI},get tor(){return torero},TGLB,get TPN(){return TPN},get canvas(){return renderer.domElement;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
 })();
 </script>
 

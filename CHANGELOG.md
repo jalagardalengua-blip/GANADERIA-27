@@ -1,5 +1,11 @@
 # Cambios
 
+## Movimientos del torero nuevo más naturales
+- Piel repartida por la superficie del cuerpo (distancia geodésica) y no en línea recta: el costado y la espalda de la chaquetilla ya no se van con el brazo al citar o dar el pase.
+- Postura de enlace igual que la del modelo (brazos algo abiertos, pierna derecha adelantada) y hombros en su sitio: los brazos giran desde la articulación de verdad.
+- Agujero del muslo izquierdo (donde iba pegada la muleta) tapado.
+- La cabeza ya no mira al cielo; vaivén suave de la cabeza siguiendo al toro, respiración, peso cargado en una pierna y rodillas algo flexionadas al citar.
+
 ## Torero realista, cámara de la plaza de corro e imagen HDR
 - **Torero nuevo en la corrida en directo** a partir del modelo 3D enviado por el jugador: se ha separado del toro, se le han quitado la muleta y el estoque que venían pegados a las manos y se le ha puesto el esqueleto del juego, así que anda, cita, da los pases y entra a matar con las animaciones de siempre (las telas y el estoque del juego van aparte). Malla reducida a unos 15.000 triángulos y textura de 1024 px para el móvil.
 - **Plaza de corro (festejos populares):**
