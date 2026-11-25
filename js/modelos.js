@@ -99,5 +99,5 @@ if(typeof calleTick==='function'){const _ctM=calleTick;
   return _ctM(dt)}}
 
 /* créditos */
-const MOD_CRED='Modelos 3D animados: Quaternius (CC0) · Universal Base Characters, Universal Animation Library, Farm Animals y Ultimate Animated Animals';
+const MOD_CRED='Modelos 3D animados: Quaternius (CC0) · Universal Base Characters, Universal Animation Library, Farm Animals y Ultimate Animated Animals · Plaza de la corrida en directo: «Plaza de Toros Monumental Vicente Segura», de Vin D\'Alembert (CC BY 4.0)';
 try{if(document.readyState!=='loading')modLoad();else document.addEventListener('DOMContentLoaded',modLoad)}catch(e){MOD.err=e}

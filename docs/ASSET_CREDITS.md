@@ -19,6 +19,7 @@
 - `modelos/toro-tripo.glb` y `modelos/toro-tripo-lo.glb`: modelo creado por el propietario del juego con Tripo3D, aligerado (16k y 5k triángulos) y con el esqueleto y animaciones del toro de Quaternius (CC0) transferidos por cercanía.
 
 ## Plaza en directo
+- `modelos/plaza-vicente-segura.glb`: **«Plaza de Toros Monumental Vicente Segura»**, de **Vin D'Alembert** (Sketchfab), licencia **CC BY 4.0** (https://creativecommons.org/licenses/by/4.0/). Modificado: convertido de USDZ a glTF; quitadas la vegetación, el aparcamiento, las banderas de México, el ruedo, la barrera y los anuncios; lonas de patrocinadores sustituidas por rótulos propios; malla simplificada (673.000 → 97.000 triángulos), texturas a 384 px y cuantizada (glTF-Transform). Se usan sus tendidos, palco, galería y exterior.
 - `ruedo.html`: plaza realista propia (Ruedo de Valdeoro) para ver en directo las corridas de tu hierro. Albero, tendidos, torero de luces, capote y muleta con tela simulada, cámara de realizador.
 - Toro: `modelos/toro-ruedo.glb` (malla) y `modelos/toro-tripo.glb` (con esqueleto y animaciones), ambos del toro creado por el propietario con Tripo3D; pelo de cada res sobre su textura.
 - Libs: OrbitControls y Sky de three.js r128 (MIT).

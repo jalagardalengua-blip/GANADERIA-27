@@ -1,5 +1,12 @@
 # Cambios
 
+## Plaza monumental nueva en la corrida en directo
+- Los tendidos, el palco de la presidencia con su reloj, la galería de arcos, las cubiertas y el exterior de la plaza son ahora un modelo 3D de verdad: «Plaza de Toros Monumental Vicente Segura», de Vin D'Alembert (CC BY 4.0).
+- Aligerado para el móvil (de 673.000 a 97.000 triángulos, 4,5 MB) y adaptado al juego: sin vegetación, aparcamiento ni anuncios; lonas con rótulos propios («Hierro y Divisa», «Plaza de Toros»…).
+- El ruedo, la barrera, los burladeros y el toril siguen siendo los del juego, así que el toro y el torero se mueven igual que antes.
+- El público se sienta fila a fila en las gradas del modelo (unas 7.000 personas, según la entrada de cada corrida).
+- Mientras se descarga el modelo se ve la plaza de siempre, y se cambia sola al terminar. Crédito al autor en pantalla y en Ajustes → Créditos.
+
 ## Movimientos del torero nuevo más naturales
 - Piel repartida por la superficie del cuerpo (distancia geodésica) y no en línea recta: el costado y la espalda de la chaquetilla ya no se van con el brazo al citar o dar el pase.
 - Postura de enlace igual que la del modelo (brazos algo abiertos, pierna derecha adelantada) y hombros en su sitio: los brazos giran desde la articulación de verdad.
