@@ -307,6 +307,7 @@ function randomProgram(r){const P=[];const nc=r()<.7?2:1;for(let i=0;i<nc;i++){c
  const nm=2+(r()<.5?1:0);let last=null;for(let i=0;i<nm;i++){let n=r()<.5?'derechazo':'natural';if(n===last&&r()<.6)n=n==='derechazo'?'natural':'derechazo';last=n;P.push([n,2+Math.floor(r()*4),r()<.75?'pecho':null]);}
  return P;}
 const CUR={t:null,b:null,prog:null};
+const MOV={kn:0,knT:0,fx:0,fxT:0,drop:0,desp:0,carga:0,toque:0};   /* postura del torero: de rodillas, flexionado, desplante (ver «LIDIA VIVA») */
 const SU={
  veronica:{name:'Verónica',tool:'capote',alt:true,remate:'media',lead:.5,track:[[.75,1.7],[1.0,.25],[.9,-1.2],[.25,-2.9],[-1.2,-4.2],[-3.0,-4.6],[-4.5,-3.7],[-5.2,-2.1]],
   handY:p=>1.12-.2*smooth(.15,.42,p)+.12*smooth(.62,.85,p)},
@@ -797,7 +798,7 @@ function ole(k){k*=JUEGO.on?JUEGO.oleK:1;try{if(k>.9&&navigator.vibrate&&matchMe
 function updateDirector(dt){D.t+=dt;const tYaw=Math.atan2(B.x-T.x,B.z-T.z);if(D.phase==='suprema'){supremaTick(dt);return;}
  if(D.phase==='cite'){Tyaw+=clamp(angDiff(Tyaw,tYaw),-2*dt,2*dt);bullSpeed=damp(bullSpeed,0,6,dt);if(D.t>=D.citeDur)beginPass();}
  else if(D.phase==='pass'){const tr=D.track,sp=CUR.t;const mzP=trackAt(tr,D.s,new V3());const dl=Math.hypot(mzP.x-T.x,mzP.z-T.z);D.minD=Math.min(D.minD,dl);
-  const p=clamp((D.s-D.s0)/(tr.len-D.s0),0,1);const vPass=3.3*sp.temple*CUR.b.tb,vApp=CUR.b.vApp;let target=vPass+(vApp-vPass)*smooth(1.4,4.6,dl);if(p>.55)target=lerp(vPass,5.2,smooth(.55,.78,p));
+  const p=clamp((D.s-D.s0)/(tr.len-D.s0),0,1);const vPass=3.3*sp.temple*CUR.b.tb*(D.pv||1),vApp=CUR.b.vApp;let target=vPass+(vApp-vPass)*smooth(1.4,4.6,dl);if(p>.55)target=lerp(vPass,5.2,smooth(.55,.78,p));
   target=Math.min(target,.5+(tr.len-D.s)*1.5);target*=Math.max(.72,1-.055*D.si)*(D.phase==='pass'&&JUEGO.t&&JUEGO.t.fell&&D.si>1?.8:1);bullSpeed+=clamp(target-bullSpeed,-6*dt,7*dt);D.s+=bullSpeed*dt;
   const a=trackAt(tr,D.s,new V3()),b=trackAt(tr,D.s-D.HO,new V3());B.copy(b);const ny=Math.atan2(a.x-b.x,a.z-b.z);bull.yawRate=dt>1e-5?angDiff(Byaw,ny)/dt:0;Byaw=ny;
   D.embroque=dl<2.5&&p<.7;if(!D.ole&&p>.52){D.ole=true;ole((SU[D.cur].single?1:.6+.4*Math.random())*(D.minD<1.25?1:.7));}
@@ -943,7 +944,7 @@ function updateTorero(dt){const t=torero,sp=t.spec,sc=sp.h;const yawE=Tyaw+D.spi
  // piernas
  const wv=t.walkV||0,tv=Math.abs(t.turnV||0);t.turnV=0;const amp=Math.max(clamp(wv/1.05,0,1),D.phase==='turn'?clamp(tv/2,0,.6):0);t.walk+=dt*(wv*1.65+amp*1.4);
  const s1=Math.sin(t.walk*TAU);for(const[L,sg,o] of [[t.lL,1,0],[t.lR,-1,.5]]){const s=Math.sin((t.walk+o)*TAU);L.th.rotation.x=-.42*s*amp-.03;L.hp.rotation.z=sg*.06*(1-amp*.5);L.sh.rotation.x=.08+amp*.7*Math.max(0,Math.sin((t.walk+o)*TAU+.7));L.an.rotation.x=-.05;}
- t.hips.position.y=1.0-.018*Math.abs(Math.cos(t.walk*TAU))*amp-(mode==='pass'?.02:0);
+ t.hips.position.y=1.0-.018*Math.abs(Math.cos(t.walk*TAU))*amp-(mode==='pass'?.02:0);try{movPiernas(t,mode,p,dt)}catch(e){}
  t.root.updateMatrixWorld(true);
  // cabeza
  const look=D.phase==='paseo'?T.clone().addScaledVector(new V3(Math.sin(Tyaw),0,Math.cos(Tyaw)),5).setY(1.4):bull.foreW.clone();
@@ -952,14 +953,14 @@ function updateTorero(dt){const t=torero,sp=t.spec,sc=sp.h;const yawE=Tyaw+D.spi
  const SL=t.shL.getWorldPosition(new V3()),SR=t.shR.getWorldPosition(new V3()),chest=SL.clone().add(SR).multiplyScalar(.5);
  let dir=new V3(Math.sin(yawE+rel),0,Math.cos(yawE+rel));let tL=new V3(),tR=new V3();
  if(D.tool==='capote'){let reach=.46,sep=.36,hy2=1.1-sp.low;
-  if(mode==='pass'){hy2=su.handY(p)-sp.low;if(su.gather){const g=smooth(.28,.55,p);sep=lerp(.36,.08,g);reach=lerp(.46,.3,g);}}
+  if(mode==='pass'){hy2=su.handY(p)-sp.low;if(su.gather){const g=smooth(.28,.55,p);sep=lerp(.36,.08,g);reach=lerp(.46,.3,g);}if(su.behind){reach=-.16;sep=.42;}}
   else if(mode==='paseo'){sep=.07;reach=.26;hy2=1.12;dir=f.clone();}
   else{hy2=1.1-sp.low+(D.phase==='cite'?.03*Math.sin(D.t*9):0);sep=.34;}
   if(D.spinning){sep=.1;reach=.22;hy2=1.05;dir=f.clone();}
-  const c=chest.clone().setY(0).addScaledVector(dir,reach);c.y=hy2*sc;const perp=new V3(-dir.z,0,dir.x);tR.copy(c).addScaledVector(perp,sep);tL.copy(c).addScaledVector(perp,-sep);}
+  const c=chest.clone().setY(0).addScaledVector(dir,reach);c.y=(hy2-MOV.drop)*sc;const perp=new V3(-dir.z,0,dir.x);tR.copy(c).addScaledVector(perp,sep);tL.copy(c).addScaledVector(perp,-sep);}
  else{const main=D.hand==='R'?SR:SL,other=D.hand==='R'?SL:SR,out=D.hand==='R'?-1:1;let hy2,reach=.5;
-  if(mode==='suprema'){hy2=SP.mulY;reach=.42;}else if(mode==='pass')hy2=su.handY(p)-sp.low*.5;else if(mode==='paseo'){hy2=.86;reach=.22;dir=f.clone().multiplyScalar(.6).addScaledVector(l,out*.5).normalize();}else hy2=.98;
-  const tm=main.clone().setY(0).addScaledVector(dir,reach);tm.y=hy2*sc;const tf=other.clone().add(new V3(0,-.5*sc,0)).addScaledVector(f,.12).addScaledVector(l,-out*.06);
+  if(mode==='suprema'){hy2=SP.mulY;reach=.42;}else if(mode==='pass')hy2=su.handY(p)-sp.low*.5;else if(mode==='paseo'){hy2=.86;reach=.22;dir=f.clone().multiplyScalar(.6).addScaledVector(l,out*.5).normalize();}else hy2=.98+MOV.toque;
+  const tm=main.clone().setY(0).addScaledVector(dir,reach);tm.y=(hy2-MOV.drop)*sc;const tf=MOV.desp>0?other.clone().add(new V3(0,.46*sc,0)).addScaledVector(l,-out*.14).addScaledVector(f,.08):other.clone().add(new V3(0,-.5*sc,0)).addScaledVector(f,.12).addScaledVector(l,-out*.06);
   if(D.hand==='R'){tR.copy(tm);tL.copy(tf);}else{tL.copy(tm);tR.copy(tf);}
   if(mode==='suprema'&&SP.arm){const m=morrilloW(new V3());const sh=SR.clone();const dd=m.clone().sub(sh);dd.y=0;dd.normalize();const tgt=sh.clone().addScaledVector(dd,SP.arm*.55*sc).addScaledVector(l,.04);tgt.y=(SP.armY)*sc;tR.copy(tgt);}
   let sd;if(mode==='pass'){const a=trackAt(D.track,D.s+su.lead,new V3()),b2=trackAt(D.track,D.s+su.lead+.3,new V3());const tang=b2.sub(a).setY(0).normalize();sd=dir.clone().multiplyScalar(.55).addScaledVector(tang,.75);sd.y=-.3;}
@@ -1436,7 +1437,7 @@ function frame(now){requestAnimationFrame(frame);try{if(last)autoCalidad(Math.mi
    botón para ir directamente a la suerte suprema. */
 const XL={peones:null,ban:[],banTex:null,bandDone:false,band:null,salta:false,hitK:{},muere:false,com:{q:[],t:0,until:0}};
 const xlD=()=>JUEGO.t||{},xlMat=()=>xlD().mat||'El matador',xlToro=()=>xlD().name||'el toro';
-const xlPlural=n=>({Natural:'naturales',Delantal:'delantales'}[n]||n.toLowerCase()+'s');
+const xlPlural=n=>({Natural:'naturales',Delantal:'delantales','Pase estatuario':'estatuarios','Doblón':'doblones',Circular:'circulares','Larga cambiada':'largas cambiadas'}[n]||n.toLowerCase()+'s');
 const xlPick=a=>a[Math.floor(Math.random()*a.length)];
 function rotulo(sup,tit){const el=document.getElementById('rot');if(!el)return;el.querySelector('small').textContent=sup;el.querySelector('b').textContent=tit;el.classList.add('on');clearTimeout(rotulo.t);rotulo.t=setTimeout(()=>el.classList.remove('on'),2800);}
 // comentarista: una frase cada vez; las importantes se adelantan a las demás
@@ -1491,7 +1492,7 @@ function xlBanSway(){if(!XL.ban.length)return;const a=.05+Math.min(.12,bullSpeed
 function xlBandStart(){XL.bandDone=true;xlPeonesInit();D.phase='band';D.t=0;D.embroque=false;XL.band={par:0,P:null,st:'espera',t:0};audio.clarin();
  rotulo('Cambio de tercio','Tercio de banderillas');com(`Suena el clarín. Los banderilleros de ${xlMat()} van a poner tres pares a ${xlToro()}.`,true);if(ui.cam==='cine')cut('tendido');}
 function xlBandFin(){const b=XL.band;if(b&&b.P&&b.P.st!=='burl'){b.P.st='vuelve';b.P.path=[b.P.edge.clone(),b.P.home.clone()];xlManos(b.P,false);}XL.band=null;D.phase='cite';audio.clarin();rotulo('Tercio de muleta',`${xlMat()} brinda la faena`);
- com(`Cambio de tercio. ${xlMat()} brinda al público y se va al centro con la muleta.`,true);_xlSS(false);}
+ com(`Cambio de tercio. ${xlMat()} brinda al público y se va al centro con la muleta.`,true);startSerie(false);}
 function xlBandTick(dt){const b=XL.band;if(!b)return;b.t+=dt;
  // el matador espera al quite, siempre de cara al toro
  const tYaw=Math.atan2(B.x-T.x,B.z-T.z);Tyaw+=clamp(angDiff(Tyaw,tYaw),-2*dt,2*dt);torero.walkV=0;
@@ -1521,7 +1522,7 @@ const _xlRL=resetLidia;resetLidia=function(){XL.ban=[];XL.bandDone=false;XL.band
 const _xlSS=startSerie;startSerie=function(first){const nm=D.prog[D.si%D.prog.length][0],s=SU[nm];
  if(!first&&!XL.bandDone&&!XL.salta&&s&&s.tool==='muleta'){xlBandStart();return;}_xlSS(first);
  if(!first&&s){const izq=D.hand==='L';com(s.tool==='capote'?`Otra vez de capa: ${xlPlural(s.name)}.`:nm==='natural'?`Se echa la muleta a la izquierda: tanda de naturales.`:nm==='derechazo'?`Por el pitón derecho, tanda de derechazos.`:`Cambia de mano: ${xlPlural(s.name)}${izq?' por el izquierdo':''}.`);}};
-const _xlOle=ole;ole=function(k){_xlOle(k);if(D.phase==='pass'&&k>.62&&SU[D.cur]){const n=SU[D.cur].name.toLowerCase(),t=xlToro(),fem=/^(ver|chic|media|taf|rev|man)/.test(n);
+const _xlOle=ole;ole=function(k){_xlOle(k);if(D.phase==='pass'&&k>.62&&SU[D.cur]){const n=SU[D.cur].name.toLowerCase(),t=xlToro(),fem=/^(ver|chic|media|taf|rev|man|gao|larg|bern)/.test(n);
   com(xlPick([`¡Qué temple en ${fem?'esa':'ese'} ${n}!`,`Se lo pasa por la faja, muy cerca.`,`Mando y largura, la plaza se viene arriba.`,`Embiste con clase ${t}, humillando.`,`Templadísimo, a cámara lenta.`,`Bajando la mano, ¡olé!`]));}};
 const _xlCog=cogidaInicia;cogidaInicia=function(){_xlCog();rotulo('¡Cogida!',`${xlToro()} prende a ${xlMat()}`);com(`¡Cogida! ${xlToro()} prende a ${xlMat()}; corre la cuadrilla al quite con los capotes.`,true);};
 const _xlSup=suprema;suprema=function(){_xlSup();XL.hitK={};rotulo('Suerte suprema','La hora de la verdad');com(`${xlMat()} cambia el estoque simulado por el de verdad y se va a por ${xlToro()}.`,true);};
@@ -1533,12 +1534,195 @@ const _xlUD=updateDirector;updateDirector=function(dt){
  if(D.phase==='suprema'&&SP.plan){const st=SP.plan[SP.k];if(SP.hit&&!XL.hitK[SP.k]){XL.hitK[SP.k]=1;
    com({pinchazo:'Pinchazo: el acero toca hueso y sale despedido.',entera:'¡Estocada entera, hasta la bola!',media:'Media estocada, en buen sitio.',descabello:'Descabella…',indulto:'Simula la suerte con la mano: ¡indultado!'}[st]||'Entra a matar.',true);}
   if(SP.st==='muere'&&!XL.muere){XL.muere=true;com(`Rueda ${xlToro()} sin puntilla. La plaza se llena de pañuelos.`,true);}}};
+/* ===================== LIDIA VIVA: faenas distintas cada toro, imprevistos, cogidas variadas y un torero más natural =====================
+   - Repertorio nuevo: larga cambiada de rodillas, gaoneras, estatuarios, doblones, circulares, bernadinas, afarolados,
+     cambios de mano y kikirikís. Recibo, quite, inicio de faena, series (algunas de rodillas) y cierre cambian con el
+     estilo del matador, la bravura, la nobleza y la casta del toro, así que no hay dos faenas iguales.
+   - El torero carga la suerte (adelanta la pierna de salida y baja el peso), se arrodilla o flexiona en los doblones,
+     da unos pasos y un toque de muleta en el cite y remata algunas series con un desplante.
+   - Imprevistos: enganchones, desarmes (va a recoger la muleta a la arena) y volteretas o achuchones sin consecuencias
+     aunque el parte sea limpio, más probables con toros de casta y matadores tremendistas.
+   - Cogidas de cinco tipos (achuchón, voltereta, campana, prendido por el muslo y revolcón en la arena) con la cuadrilla
+     corriendo al quite: un peón se lleva al toro con el capote hasta el burladero y otro se queda junto al matador. */
+Object.assign(SU,{
+ larga:{name:'Larga cambiada',tool:'capote',single:true,lead:.45,gather:true,track:SU.pecho.track,handY:p=>1.0+.7*smooth(.3,.7,p)},
+ gaonera:{name:'Gaonera',tool:'capote',alt:true,remate:'revolera',lead:.45,behind:true,track:SU.chicuelina.track,handY:p=>.98-.06*smooth(.15,.4,p)},
+ estatuario:{name:'Pase estatuario',tool:'muleta',hand:'R',side:-1,remate:'pecho',lead:.45,track:SU.derechazo.track,handY:p=>1.4+.12*smooth(.3,.6,p)},
+ doblon:{name:'Doblón',tool:'muleta',hand:'R',side:-1,remate:'trincherazo',lead:.42,track:SU.derechazo.track.slice(0,6),handY:p=>.62-.1*smooth(.2,.5,p)},
+ circular:{name:'Circular',tool:'muleta',hand:'L',side:1,remate:'pecho',lead:.45,track:SU.derechazo.track.concat([[-2.9,1.7],[-2.0,2.6],[-.8,2.95]]),handY:p=>.92-.12*smooth(.15,.4,p)},
+ bernadina:{name:'Bernadina',tool:'muleta',single:true,lead:.4,spin:true,track:SU.pecho.track,handY:p=>.84+.06*smooth(.3,.7,p)},
+ afarolado:{name:'Afarolado',tool:'muleta',single:true,lead:.4,track:SU.pecho.track,handY:p=>1.0+.72*smooth(.2,.6,p)},
+ cambio:{name:'Cambio de mano',tool:'muleta',single:true,lead:.4,track:SU.pecho.track,handY:p=>.78+.34*smooth(.25,.75,p)},
+ kikiriki:{name:'Kikirikí',tool:'muleta',single:true,lead:.4,track:SU.media.track,handY:p=>1.0-.22*smooth(.15,.45,p)+.3*smooth(.5,.8,p)}});
+const LVS={o:null,drop:null,desarmes:0,game:null,agacha:0,de:0,n:0};
+const LV={CAP:{artista:['veronica','delantal','veronica'],tecnico:['veronica','veronica','delantal'],poderoso:['veronica','chicuelina'],valiente:['veronica','tafallera','gaonera'],tremendista:['chicuelina','tafallera','gaonera']},
+ QUITE:{artista:['chicuelina','delantal','gaonera'],tecnico:['chicuelina','delantal'],poderoso:['chicuelina','tafallera'],valiente:['gaonera','tafallera','chicuelina'],tremendista:['gaonera','tafallera']},
+ REM:{artista:['pecho','trincherazo','firma','kikiriki','cambio'],tecnico:['pecho','pecho','trincherazo','cambio'],poderoso:['pecho','trincherazo','molinete','afarolado'],valiente:['pecho','molinete','afarolado','cambio'],tremendista:['molinete','afarolado','pecho','kikiriki']},
+ CIERRE:{artista:['kikiriki','firma','trincherazo'],tecnico:['trincherazo','firma'],poderoso:['molinete','trincherazo'],valiente:['manoletina','bernadina'],tremendista:['bernadina','manoletina','molinete']}};
+const lvPk=(r,a)=>a[Math.floor(r()*a.length)];
+function programaVivo(r,o){const est=LV.CAP[o.est]?o.est:'tecnico',pk=a=>lvPk(r,a),cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+ const B=o.B,N=o.N,C=o.C,valor=est==='valiente'||est==='tremendista',P=[];
+ // recibo: a veces de rodillas con una larga cambiada antes de las verónicas
+ if(!o.dev&&r()<(valor?.4:.14))P.push(['larga',1,null,{kn:1,recibo:1}]);
+ P.push([pk(LV.CAP[est]),cl(Math.round(2+(B-60)/10+r()*1.5),2,5),B>58||r()<.5?(r()<.65?'media':'revolera'):null]);
+ // quite con otra suerte de capa
+ if(!o.dev&&(B>66||r()<.25)&&r()<.75)P.push([pk(LV.QUITE[est]),2+Math.floor(r()*2),r()<.6?'media':'revolera',{quite:1}]);
+ let nm=o.dev?0:o.raja||o.fell?1:N>80?4:N>68?3:2;if(o.pases)nm=Math.min(nm,Math.max(1,Math.ceil(o.pases/2)));if(nm>=2&&r()<.3)nm++;
+ if(nm>0){const ini=r();
+  // inicio de faena: estatuarios, doblones para someter o de rodillas
+  if(ini<.22)P.push(['estatuario',2+Math.floor(r()*3),'pecho',{ini:1}]);
+  else if(ini<.42&&(C>58||o.F<55))P.push(['doblon',2+Math.floor(r()*3),'trincherazo',{fx:1,ini:1}]);
+  else if(ini<.42+(valor?.22:.08))P.push(['derechazo',2+Math.floor(r()*2),'pecho',{kn:1,ini:1}]);
+  let last=est==='artista'||r()<.35?'natural':'derechazo';
+  for(let i=0;i<nm;i++){let n=i===0?last:(r()<.78?(last==='derechazo'?'natural':'derechazo'):last);
+   if(N>72&&i>0&&!P.some(q=>q[0]==='circular')&&r()<.22)n='circular';
+   const op={};if(i>0&&n==='derechazo'&&r()<(valor?.16:.05))op.kn=1;
+   P.push([n,cl(Math.round(2+(N-55)/9+r()*2.2-.6),2,6),N>56||r()<.4?pk(LV.REM[est]):null,op]);if(n!=='circular')last=n;}
+  if(!o.raja&&!o.fell&&N>64&&r()<.6){const cn=pk(LV.CIERRE[est]);P.push([cn,SU[cn].single?1:3,null,{cierre:1}]);}}
+ return P;}
+function cogidaAzar(r,o,P){if(P.length<2)return null;const pel=(o.C-50)/50+(70-o.N)/60+({tremendista:.5,valiente:.3}[o.est]||0);if(r()>=clamp(.12+.1*pel,.05,.42))return null;
+ const tipo=pickW(r,[['achuchon',.36],['voltereta',.22],['revolcon',.2],['campana',.13],['prendido',.09]]);
+ return{tipo,si:1+Math.floor(r()*(P.length-1)),pn:1+Math.floor(r()*2),grave:false,done:false,azar:1};}
+const LV_EST=['artista','tecnico','poderoso','valiente','tremendista'];
+const _lvRP=randomProgram;randomProgram=function(r){try{const o={est:lvPk(r,LV_EST),B:52+r()*42,N:50+r()*45,C:45+r()*50,F:45+r()*45};LVS.o=o;const P=programaVivo(r,o);CUR.cog=null;CUR.cog2=cogidaAzar(r,o,P);return P;}catch(e){return _lvRP(r);}};
+const _lvApl=aplicaJuego;aplicaJuego=function(r){_lvApl(r);try{const d=JUEGO.t||{},r2=rng(hashS('lv|'+(d.seed||d.id||1)+'|'+(d.name||'')+'|'+(d.i||0)));
+ const o={est:d.estilo||'tecnico',B:d.B||65,N:d.N||65,C:d.C||65,F:d.F||60,dev:d.res==='devuelto',raja:!!d.rajado,fell:!!d.fell,pases:d.pases};
+ const P=programaVivo(r2,o);CUR.prog=P;LVS.o=o;
+ if(CUR.cog){CUR.cog.si=Math.max(1,Math.min(P.length-1,1+Math.floor(r2()*Math.max(1,P.length-1))));
+  CUR.cog.tipo=CUR.cog.grave?lvPk(r2,['prendido','campana','voltereta']):/reservado|menos grave/.test(CUR.cog.parte)?lvPk(r2,['prendido','campana','revolcon']):lvPk(r2,['voltereta','revolcon','campana']);}
+ CUR.cog2=o.dev?null:cogidaAzar(r2,o,P);}catch(e){console.warn('lidia viva',e)}};
+/* ---------- postura: carga de la suerte, de rodillas, flexionado y desplante ---------- */
+function movPiernas(t,mode,p,dt){MOV.kn=damp(MOV.kn,MOV.knT,MOV.knT>MOV.kn?2.4:2,dt);MOV.fx=damp(MOV.fx,MOV.fxT,5,dt);LVS.de=damp(LVS.de,MOV.desp>0?1:0,6,dt);
+ const kn=MOV.kn,fx=MOV.fx*(1-kn),de=LVS.de;MOV.drop=.43*kn+.16*fx;
+ const cg=mode==='pass'&&kn<.3?Math.exp(-Math.pow((p-.42)/.24,2)):0;MOV.carga=damp(MOV.carga,cg,6,dt);const c=MOV.carga*(1-kn);
+ const sd=D.side>0?1:-1,La=sd>0?t.lL:t.lR,Lb=sd>0?t.lR:t.lL;   // La: la pierna del lado del engaño, la que se adelanta
+ La.th.rotation.x-=.34*c+.62*fx;La.sh.rotation.x+=.3*c+.95*fx;La.an.rotation.x-=.3*fx;
+ Lb.th.rotation.x+=.1*c-.12*fx;Lb.sh.rotation.x+=.14*c+.55*fx;
+ t.hips.position.y-=.035*c+.16*fx;t.hips.rotation.z=sd*.05*c;t.hips.rotation.y+=sd*.12*c;
+ t.spine.rotation.x+=.2*fx-.16*de;
+ if(kn>.001){for(const L of [t.lL,t.lR]){L.th.rotation.x=lerp(L.th.rotation.x,-.06,kn);L.hp.rotation.z=lerp(L.hp.rotation.z,0,kn);L.sh.rotation.x=lerp(L.sh.rotation.x,1.53,kn);L.an.rotation.x=lerp(L.an.rotation.x,.8,kn);}
+  t.hips.position.y=lerp(t.hips.position.y,.54,kn);}}
+/* ---------- desarme ---------- */
+function lvDesarme(){const g=(D.hand==='R'?torero.aR:torero.aL).grip.getWorldPosition(new V3());
+ if(!LVS.dropG){const gg=new THREE.PlaneGeometry(.92,.62,8,5),a=gg.attributes.position;for(let i=0;i<a.count;i++)a.setZ(i,.035*Math.sin(a.getX(i)*9)+.025*Math.cos(a.getY(i)*11));gg.computeVertexNormals();LVS.dropG=gg;LVS.dropM=std({color:'#a50f1a',roughness:.85,side:THREE.DoubleSide});}
+ const m=new THREE.Mesh(LVS.dropG,LVS.dropM);const bh=new V3(Math.sin(Byaw),0,Math.cos(Byaw));const pos=g.clone().addScaledVector(bh,1.2+Math.random()*.8);pos.y=.03;const rr=Math.hypot(pos.x,pos.z);if(rr>R-1.5)pos.multiplyScalar((R-1.5)/rr);
+ m.position.copy(pos);m.rotation.set(-Math.PI/2,0,Math.random()*TAU);m.receiveShadow=true;scene.add(m);LVS.drop=m;LVS.desarmes++;
+ muleta.mesh.visible=false;stick.visible=false;D.desarme=true;rotulo('Desarme',`${xlToro()} le quita la muleta`);
+ com(`¡Desarme! ${xlToro()} se lleva la muleta prendida en el pitón y la suelta en la arena. ${xlMat()} va a por ella.`,true);}
+function lvRecoge(sil){if(!LVS.drop)return;scene.remove(LVS.drop);LVS.drop=null;D.desarme=false;if(sil)return;
+ if(D.tool==='muleta'){muleta.mesh.visible=true;stick.visible=true;}D.clothReset=true;torero.tInit=false;LVS.agacha=.7;
+ com(xlPick(['Recoge la muleta y vuelve a la cara del toro.','Se agacha a por la muleta, la sacude y a empezar otra vez.']));}
+/* ---------- la cuadrilla al quite ---------- */
+function lvCapEnMano(P){if(!P.capSv)P.capSv={p:P.cap.position.clone(),q:P.cap.quaternion.clone()};const f=new V3(Math.sin(P.yaw),0,Math.cos(P.yaw));
+ P.cap.position.set(P.pos.x,1.02,P.pos.z).addScaledVector(f,.42);P.cap.rotation.set(0,P.yaw,0);P.aL.rotation.x=P.aR.rotation.x=-1.15;P.aL.rotation.z=.25;P.aR.rotation.z=-.25;}
+function lvQuite(){CG.lead=CG.side2=null;if(!XL.peones)return;const L=XL.peones.filter(P=>P.st==='burl').sort((a,b)=>a.pos.distanceTo(T)-b.pos.distanceTo(T));
+ if(L[0]){CG.lead=L[0];L[0].st='quite';L[0].qt=0;}if(L[1]){CG.side2=L[1];L[1].st='junto';}}
+function lvPeonesCogida(dt,u){for(const P of [CG.lead,CG.side2]){if(!P)continue;
+  if(P===CG.lead){if(P.st==='quite'){const aw=P.pos.clone().sub(B).setY(0);if(aw.lengthSq()<1e-3)aw.set(1,0,0);aw.normalize();const tg=B.clone().addScaledVector(aw,2.6);
+    const ok=u>.12&&xlPeonMove(P,tg,7.6,dt);xlPeonPose(P,dt,u>.12,false);if(ok||u>2.1){P.st='cita';P.qt=0;}}
+   else if(P.st==='cita'){P.qt+=dt;P.yaw+=clamp(angDiff(P.yaw,Math.atan2(B.x-P.pos.x,B.z-P.pos.z)),-6*dt,6*dt);xlPeonPose(P,dt,false,false);
+    if(P.qt>.5&&(Math.hypot(B.x-P.pos.x,B.z-P.pos.z)<2.6||P.qt>1.6)){P.st='huye';P.path=[P.edge.clone(),P.home.clone()];}}
+   else if(P.st==='huye'){if(P.path.length&&xlPeonMove(P,P.path[0],5.6,dt))P.path.shift();xlPeonPose(P,dt,true,false);if(!P.path.length){P.st='burl';P.pos.copy(P.home);}}}
+  else if(P.st==='junto'){const aw=new V3(T.x-B.x,0,T.z-B.z);if(aw.lengthSq()<1e-3)aw.set(1,0,0);aw.normalize();const tg=T.clone().addScaledVector(aw,.9).addScaledVector(new V3(-aw.z,0,aw.x),.6);
+   const ok=u>.25&&xlPeonMove(P,tg,7,dt);if(ok)P.yaw+=clamp(angDiff(P.yaw,Math.atan2(B.x-P.pos.x,B.z-P.pos.z)),-6*dt,6*dt);xlPeonPose(P,dt,u>.5&&!ok,false);}
+  if(P.st!=='burl')lvCapEnMano(P);}}
+function lvCapas(){if(!XL.peones)return;for(const P of XL.peones){if(!P.capSv)continue;if(P.st==='burl'){P.cap.position.copy(P.capSv.p);P.cap.quaternion.copy(P.capSv.q);P.capSv=null;}else if(P.st==='vuelve')lvCapEnMano(P);}}
+function lvPeonesVuelven(){for(const P of [CG.lead,CG.side2]){if(P&&P.st!=='burl'&&P.st!=='vuelve'){P.st='vuelve';P.path=[P.edge.clone(),P.home.clone()];}}}
+/* ---------- cogidas de cinco tipos ---------- */
+const LV_COGTXT={achuchon:['¡Achuchón! Se le cuela por dentro, lo empuja y lo descompone, pero no llega a prenderlo.','Le pega un arreón; el matador trastabilla y se rehace.'],
+ voltereta:[`¡Voltereta! Lo prende y lo lanza por los aires.`,'¡Cogida! Lo levanta del suelo y le da una voltereta espeluznante.'],
+ campana:['¡Lo campanea! Vuelta de campana en el aire y cae de bruces.','Tremenda cogida: lo lanza girando por el aire.'],
+ prendido:['¡Lo prende por el muslo! Lo lleva colgado del pitón varios metros.','Cogida seria: lo engancha por la pierna y lo pasea en el pitón.'],
+ revolcon:['¡Revolcón! Lo arrolla, lo tira a la arena y lo busca en el suelo.','Lo derriba y hace por él en la arena: ¡corre la cuadrilla!']};
+const _lvCI=cogidaInicia;cogidaInicia=function(){const c=CUR.cog||{};CG.tipo=c.tipo||xlPick(['voltereta','campana']);
+ MOV.kn=MOV.knT=MOV.fx=MOV.fxT=0;MOV.desp=0;D.ev=null;D.recul=0;if(LVS.drop)lvRecoge(true);
+ _lvCI();CG.side=Math.random()<.5?1:-1;CG.c0=null;CG.tUp={achuchon:1.05,voltereta:3.2,campana:3.4,prendido:3.7,revolcon:3.9}[CG.tipo]||3.2;
+ if(CG.tipo==='achuchon'){rotulo('¡Achuchón!',`${xlToro()} se le cuela a ${xlMat()}`);const o=document.getElementById('ole');if(o)o.textContent='¡Achuchón!';}
+ com(xlPick(LV_COGTXT[CG.tipo]||LV_COGTXT.voltereta),true);if(CG.tipo!=='achuchon')lvQuite();};
+function lvToroCogida(dt,u){const tp=CG.tipo,P=CG.lead;let tgt=null,v=0,w=1.2;
+ if(P&&(P.st==='cita'||P.st==='huye')&&u>.9){tgt=P.pos;const d=Math.hypot(P.pos.x-B.x,P.pos.z-B.z);v=d>1.4?3.1:1.6;w=2.4;}
+ else if(tp==='revolcon'&&u>.3&&u<1.8){tgt=T;v=Math.hypot(T.x-B.x,T.z-B.z)>1.2?.9:.15;w=2;}
+ else if(tp==='prendido'&&u<1.7){bullSpeed=damp(bullSpeed,2.3,3,dt);Byaw+=.25*Math.sin(u*3)*dt;}
+ else if(u<(tp==='achuchon'?.9:2.4)){bullSpeed=damp(bullSpeed,u<1.4?3.2:1.2,2,dt);if(u>1.2)Byaw+=.5*dt;}
+ else{const away=Math.atan2(B.x-T.x,B.z-T.z);Byaw+=clamp(angDiff(Byaw,away),-2.5*dt,2.5*dt);bullSpeed=damp(bullSpeed,Math.hypot(B.x-T.x,B.z-T.z)<6?2.4:0,2,dt);}
+ if(tgt){const ny=Math.atan2(tgt.x-B.x,tgt.z-B.z),st=clamp(angDiff(Byaw,ny),-w*dt,w*dt);Byaw+=st;bull.yawRate=dt>1e-5?st/dt:0;bullSpeed=damp(bullSpeed,v,2.4,dt);}
+ B.x+=Math.sin(Byaw)*bullSpeed*dt;B.z+=Math.cos(Byaw)*bullSpeed*dt;}
+function lvFinCogida(){CG.on=false;CG.polvo=0;CG.rx=CG.rz=CG.h=0;lvPeonesVuelven();const az=CUR.cog&&CUR.cog.azar;if(az){CUR.cog=LVS.game;LVS.game=null;}
+ if(CG.tipo==='achuchon'){D.phase='turn';D.t=0;D.after='pass';setTool(D.tool,D.hand);com(xlPick(['Se rehace, se coloca y vuelve a citar.','Recompone la figura sin perder la cara al toro.']));return;}
+ D.phase='turn';D.t=0;D.after='serie';D.si++;D.passN=99;setTool(D.tool,D.hand);
+ com(xlPick(['Se levanta sin mirarse y vuelve a la cara del toro. ¡Qué raza!','Con la taleguilla rota, se sacude la arena y sigue la faena.','Dolorido pero entero: rechaza a las asistencias y pide la muleta.']),true);}
+cogidaTick=function(dt){CG.t+=dt;const u=CG.t,tp=CG.tipo,grave=CUR.cog&&CUR.cog.grave&&!CUR.cog.azar;
+ lvToroCogida(dt,u);try{lvPeonesCogida(dt,u);}catch(e){}
+ const F=CG.from,dir=CG.dir,lat=new V3(dir.z,0,-dir.x).multiplyScalar(CG.side),bh=new V3(Math.sin(Byaw),0,Math.cos(Byaw));let lying=-Math.PI/2;torero.walkV=0;
+ const polvo=(n,s)=>{if(!CG.polvo){CG.polvo=1;emitDust(T,n,s);}};
+ if(tp==='achuchon'){if(u<.3){const k=u/.3;T.lerpVectors(F,F.clone().addScaledVector(dir,.75).addScaledVector(lat,.45),smooth(0,1,k));CG.rx=-.5*Math.sin(Math.PI*k);CG.rz=.25*CG.side*Math.sin(Math.PI*k);CG.h=0;}
+  else{const k=clamp((u-.3)/.7,0,1);MOV.fxT=k<.6?1:0;CG.rx=.12*Math.sin(Math.PI*k);CG.rz=0;}
+  if(u>CG.tUp){MOV.fxT=0;lvFinCogida();}return;}
+ if(tp==='voltereta'){if(u<.32){const k=u/.32;T.lerpVectors(F,F.clone().addScaledVector(dir,.45),k);CG.h=.55*k;CG.rx=-.6*k;}
+  else if(u<1.25){const k=(u-.32)/.93;const a=F.clone().addScaledVector(dir,.45);T.lerpVectors(a,F.clone().addScaledVector(dir,1.7),k);CG.h=.55*(1-k)+2.1*Math.sin(Math.PI*k);CG.rx=-.6-(Math.PI*2-.6+Math.PI/2)*smooth(0,1,k);CG.rz=.5*Math.sin(Math.PI*k);if(k>.97)polvo(24,1.4);}
+  else{CG.h=.12;CG.rx=-Math.PI/2;CG.rz=0;}}
+ else if(tp==='campana'){lying=Math.PI/2;if(u<.3){const k=u/.3;T.lerpVectors(F,F.clone().addScaledVector(dir,.4),k);CG.h=.6*k;CG.rx=-.4*k;CG.rz=.3*k*CG.side;}
+  else if(u<1.35){const k=(u-.3)/1.05;const a=F.clone().addScaledVector(dir,.4),b=F.clone().addScaledVector(dir,1.2).addScaledVector(lat,1.5);T.lerpVectors(a,b,smooth(0,1,k));CG.h=.6*(1-k)+2.5*Math.sin(Math.PI*k);
+   CG.rz=CG.side*(.3*(1-k)+TAU*smooth(0,1,k));CG.rx=-.4*(1-k)+lying*smooth(.55,1,k);if(k>.97)polvo(26,1.5);}
+  else{CG.h=.12;CG.rx=lying;CG.rz=0;}}
+ else if(tp==='prendido'){if(u<.3){const k=u/.3;CG.h=.95*k;CG.rx=-1.3*k;CG.rz=.5*CG.side*k;const m=bull.muzzleW;T.lerpVectors(F,new V3(m.x,0,m.z).addScaledVector(bh,.2),k);}
+  else if(u<1.65){const m=bull.muzzleW;T.set(m.x,0,m.z).addScaledVector(bh,.2);CG.h=.95+.12*Math.sin(u*16);CG.rx=-1.3+.2*Math.sin(u*9);CG.rz=CG.side*(.5+.25*Math.sin(u*7));if(Math.random()<dt*6)emitDust(T,3,.6);}
+  else if(u<2.15){if(!CG.c0)CG.c0=T.clone();const k=(u-1.65)/.5;T.lerpVectors(CG.c0,CG.c0.clone().addScaledVector(lat,1.6).addScaledVector(bh,.5),smooth(0,1,k));CG.h=.95*(1-k)+.8*Math.sin(Math.PI*k);CG.rx=lerp(-1.3,-Math.PI/2,smooth(0,1,k));CG.rz=CG.side*Math.PI*.5*Math.sin(Math.PI*k);if(k>.95)polvo(22,1.3);}
+  else{CG.h=.12;CG.rx=-Math.PI/2;CG.rz=0;}}
+ else{/* revolcón */if(u<.35){const k=u/.35;T.lerpVectors(F,F.clone().addScaledVector(dir,.9),smooth(0,1,k));CG.rx=-Math.PI/2*smooth(0,1,k);CG.h=.25*Math.sin(Math.PI*k)+.12*k;if(k>.9)polvo(20,1.1);}
+  else if(u<2.1){CG.h=.12;CG.rx=-Math.PI/2;CG.rz=CG.side*.95*Math.sin((u-.35)*5)*(1-smooth(1.7,2.1,u));if(u<1.3){T.addScaledVector(bh,.35*dt);if(Math.random()<dt*5)emitDust(T,4,.7);}}
+  else{CG.h=.12;CG.rx=-Math.PI/2;CG.rz=0;}}
+ if(!grave&&u>CG.tUp){const k=smooth(CG.tUp,CG.tUp+1.4,u);CG.rx=lying*(1-k);CG.h=.12*(1-k);CG.rz=0;if(u>CG.tUp+1.4)lvFinCogida();}
+ if(grave&&u>3.6&&!CG.fin){CG.fin=1;const o=document.getElementById('ole');o.textContent='A la enfermería';o.style.color='#e0454c';o.classList.add('on');setTimeout(()=>{o.classList.remove('on');o.style.color='';},2000);
+  com(`${xlMat()} no se levanta: las asistencias se lo llevan a la enfermería.`,true);setTimeout(()=>{CG.on=false;CG.fin=0;CG.polvo=0;D.phase='fin';lvPeonesVuelven();finFaena();},2200);}};
+/* ---------- enganches con la lidia ---------- */
+const _lvSS=startSerie;startSerie=function(first){_lvSS(first);if(D.phase==='band'||!D.prog)return;const e=D.prog[D.si%D.prog.length]||[],o=e[3]||{},s=SU[e[0]]||{};
+ MOV.knT=o.kn?1:0;MOV.fxT=o.fx?1:0;if(o.kn||o.fx)D.citeDur=Math.max(D.citeDur,1.7);
+ const m=xlMat(),t=xlToro();let txt=null;
+ if(o.recibo)txt=`¡${m} se va a los medios y se hinca de rodillas para recibir a ${t} con una larga cambiada!`;
+ else if(o.quite)txt=`Quite por ${xlPlural(s.name||'')}: ${m} se luce con el capote.`;
+ else if(o.ini&&e[0]==='estatuario')txt=`Inicia la faena por estatuarios, sin mover las zapatillas.`;
+ else if(o.ini&&o.fx)txt=`Doblones por bajo, flexionando la pierna, para someter a ${t} y enseñarle el camino.`;
+ else if(o.kn)txt=xlPick([`¡De rodillas! Derechazos con las dos rodillas en la arena.`,`Se arrodilla en el tercio: la plaza contiene la respiración.`]);
+ else if(e[0]==='circular')txt=`Circulares: se lo enrosca a la cintura sin soltarlo.`;
+ else if(o.cierre)txt=`Para cerrar, ${xlPlural(s.name||'')} ajustadísimas.`;
+ if(txt&&(!first||o.recibo))com(txt,true);};
+const _lvBP=beginPass;beginPass=function(){_lvBP();D.pv=(.86+Math.random()*.3)*(MOV.kn>.5?.93:1);D.ev=null;D.evDone=false;LVS.n++;
+ const s=SU[D.cur]||{},o=LVS.o||{},cas=clamp(((o.C||60)-50)/50,0,1),x=Math.random();
+ if(MOV.kn<.2&&MOV.fxT===0&&!CG.on){if(s.tool==='muleta'&&!s.single&&LVS.desarmes<1&&x<.022+.02*cas)D.ev='desarme';else if(x<.07+.06*cas)D.ev='engancha';}};
+const _lvEP=endPass;endPass=function(){if(D.desarme&&LVS.drop){D.passN=99;D.dest=LVS.drop.position.clone().setY(0);D.phase='paseo';D.t=0;MOV.knT=MOV.fxT=0;director.onPaseo();return;}_lvEP();};
+const _lvSP=startPaseo;startPaseo=function(){_lvSP();MOV.fxT=0;const s=SU[D.cur]||{},o=LVS.o||{};
+ if(D.tool==='muleta'&&Math.random()<(s.single?.5:.28)*({tremendista:1.5,valiente:1.25,artista:1.1}[o.est]||1)){MOV.desp=1.5+Math.random()*.6;
+  com(xlPick(MOV.knT?['Desplante de rodillas, de espaldas al toro: ¡la plaza en pie!']:['Desplante: brazo en alto, mirando al tendido.','Se gira y se encara con el tendido: desplante torero.','Le da la espalda al toro y se va andando, despacio.']));ole(.75);}
+ else MOV.knT=0;};
+const _lvSup=suprema;suprema=function(){MOV.knT=MOV.fxT=0;MOV.desp=0;if(LVS.drop){lvRecoge(true);}if(D.tool==='muleta')muleta.mesh.visible=true;_lvSup();};
+const _lvRL=resetLidia;resetLidia=function(){MOV.kn=MOV.knT=MOV.fx=MOV.fxT=0;MOV.desp=0;MOV.toque=0;LVS.desarmes=0;LVS.n=0;if(LVS.drop)lvRecoge(true);D.pv=1;D.ev=null;D.recul=0;D.desarme=false;_lvRL();};
+const _lvUD=updateDirector;updateDirector=function(dt){const T0=T.clone(),y0=Tyaw,ph0=D.phase;
+ _lvUD(dt);
+ // en el paseo, primero termina el desplante y se levanta
+ if(ph0==='paseo'&&D.phase==='paseo'&&(MOV.kn>.15||MOV.desp>0)){T.copy(T0);Tyaw=y0;torero.walkV=0;D.t=Math.max(0,D.t-dt);}
+ if(MOV.desp>0){MOV.desp-=dt;if(MOV.desp<=0){MOV.desp=0;MOV.knT=0;}}
+ if(LVS.agacha>0){LVS.agacha-=dt;MOV.fxT=LVS.agacha>0?1:0;}
+ // cite: unos pasos hacia el toro y un toque de muleta
+ MOV.toque=0;
+ if(D.phase==='cite'&&MOV.knT===0&&MOV.kn<.1&&D.citeDur>1.2){if(D.t>.25&&D.t<.95&&Math.hypot(B.x-T.x,B.z-T.z)>3.4){const f=new V3(B.x-T.x,0,B.z-T.z).normalize();T.addScaledVector(f,.42*dt);torero.walkV=.42;D.lvPaso=1;}else if(D.lvPaso){torero.walkV=0;D.lvPaso=0;}
+  const tq=D.citeDur-.35;if(D.tool==='muleta')MOV.toque=.07*Math.sin(Math.PI*clamp((D.t-tq+.2)/.3,0,1));}
+ else if(D.lvPaso){torero.walkV=0;D.lvPaso=0;}
+ // imprevistos durante el pase
+ if(D.phase==='pass'&&D.ev&&!D.evDone&&D.track){const p=clamp((D.s-D.s0)/(D.track.len-D.s0),0,1);
+  if(D.ev==='engancha'&&p>.48){D.evDone=true;D.recul=.35;D.ole=true;com(xlPick([`Le engancha el engaño ${xlToro()}; el matador recompone la figura.`,`Enganchón: el toro tropieza la muleta y se descompone la tanda.`,`Se le cuela por dentro, un susto, pero aguanta.`]));}
+  if(D.ev==='desarme'&&p>.52){D.evDone=true;lvDesarme();}}
+ if(D.recul>0&&D.phase!=='cogida'){const k=Math.min(D.recul,dt);D.recul-=k;const aw=new V3(T.x-B.x,0,T.z-B.z);if(aw.lengthSq()>1e-4){aw.normalize();T.addScaledVector(aw,1.5*k);}}
+ // volteretas y achuchones que no estaban en el parte
+ const cg=CUR.cog2;if(D.phase==='pass'&&cg&&!cg.done&&!(CUR.cog&&!CUR.cog.done&&D.si>=CUR.cog.si)&&D.si>=cg.si&&D.passN>=cg.pn&&D.track){const p=clamp((D.s-D.s0)/(D.track.len-D.s0),0,1);if(p>.4&&p<.55){LVS.game=CUR.cog;CUR.cog=cg;cogidaInicia();}}
+ if(LVS.drop&&D.phase!=='pass'&&(D.phase!=='paseo'||Math.hypot(T.x-LVS.drop.position.x,T.z-LVS.drop.position.z)<.35))lvRecoge();
+ try{lvCapas();}catch(e){}};
 /* ---------- velocidad, saltar a la estocada ---------- */
 try{const v=+localStorage.getItem('ruedoVel');if([.5,1,2,4,8].includes(v))ui.speed=v;}catch(e){}
 (function(){const bS=document.getElementById('bSup');if(!bS)return;bS.onclick=()=>{if(D.phase==='suprema'||D.phase==='fin')return;XL.salta=true;ui.paused=false;bS.disabled=true;setTimeout(()=>bS.disabled=false,1500);};})();
 /* ayuda de pruebas: avanza la lidia sin depender de los fotogramas */
 const xlAvanza=seg=>{for(let t=0;t<seg&&bull&&torero;t+=.05){simTime+=.05;updateDirector(.05);updateBull(.05);updateTorero(.05);supremaPost(.05);}return D.phase;};
-window.__ruedo={get pvs(){return PVS},avanza:xlAvanza,get xl(){return XL;},D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},banda:()=>xlBandStart(),get xl(){return XL;},vista:(v)=>{const b=document.getElementById('bVista');while(ui.cam!==v)b.click();},get plano(){return camS.shot;},get tor(){return torero;},render:(c)=>{try{toreroPielTick(torero)}catch(e){}if(HI.on&&c===camera)hiRender(0);else{const t=renderer.toneMapping;renderer.render(scene,c)}},hi:(v)=>hiPon(v),get HI(){return HI},get tor(){return torero},TGLB,get TPN(){return TPN},get canvas(){return renderer.domElement;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
+window.__ruedo={get pvs(){return PVS},avanza:xlAvanza,get xl(){return XL;},D,ui,setCam,fin:()=>finFaena(),cog:(g,tipo)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false,tipo};},get mov(){return MOV},get lvs(){return LVS},get prog(){return CUR.prog},get cog2(){return CUR.cog2},lvProg:(P)=>{CUR.prog=D.prog=P;D.si=0;XL.bandDone=true;CUR.cog=CUR.cog2=null;startSerie(true);},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},banda:()=>xlBandStart(),get xl(){return XL;},vista:(v)=>{const b=document.getElementById('bVista');while(ui.cam!==v)b.click();},get plano(){return camS.shot;},get tor(){return torero;},render:(c)=>{try{toreroPielTick(torero)}catch(e){}if(HI.on&&c===camera)hiRender(0);else{const t=renderer.toneMapping;renderer.render(scene,c)}},hi:(v)=>hiPon(v),get HI(){return HI},get tor(){return torero},TGLB,get TPN(){return TPN},get canvas(){return renderer.domElement;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
 })();
 </script>
 

@@ -1,5 +1,13 @@
 # Cambios
 
+## Lidia viva: cada toro, una faena distinta
+- **Repertorio nuevo:** larga cambiada de rodillas, gaoneras, estatuarios, doblones, circulares, bernadinas, afarolados, cambios de mano y kikirikís, además de los pases de siempre.
+- **Faenas que no se repiten:** recibo, quite, inicio de faena (estatuarios, doblones o de rodillas), número y largo de las series, remates y cierre cambian según el estilo del matador y la bravura, nobleza y casta del toro.
+- **Torero más natural:** carga la suerte adelantando la pierna de salida, se arrodilla de verdad en las series de rodillas, flexiona en los doblones, da unos pasos y un toque de muleta al citar y remata algunas series con un desplante con el brazo en alto.
+- **Imprevistos:** enganchones, desarmes (el toro le quita la muleta y va a recogerla) y volteretas o achuchones sin consecuencias, más frecuentes con toros de casta y matadores tremendistas.
+- **Cinco tipos de cogida:** achuchón, voltereta, campana, prendido por el muslo (lo lleva en el pitón) y revolcón en la arena. La cuadrilla corre al quite: un peón se lleva al toro con el capote hasta el burladero y otro se queda junto al matador.
+- El comentarista narra cada novedad.
+
 ## Plaza monumental nueva en la corrida en directo
 - Los tendidos, el palco de la presidencia con su reloj, la galería de arcos, las cubiertas y el exterior de la plaza son ahora un modelo 3D de verdad: «Plaza de Toros Monumental Vicente Segura», de Vin D'Alembert (CC BY 4.0).
 - Aligerado para el móvil (de 673.000 a 97.000 triángulos, 4,5 MB) y adaptado al juego: sin vegetación, aparcamiento ni anuncios; lonas con rótulos propios («Hierro y Divisa», «Plaza de Toros»…).
