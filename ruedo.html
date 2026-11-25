@@ -368,6 +368,7 @@ function init(){
  scene.fog=new THREE.FogExp2(0xd8cbb6,.0022);
  buildPlaza();
  buildCrowd();
+ plazaVSCarga();
  dust=buildDust();
  const weave=tex(weaveMap().color,6,6);
  capote=new Cloth(22,15,1.5,1.02,twoSide('#d0306a','#e9b521',weave));
@@ -437,10 +438,12 @@ function buildPlaza(){
  pr.push([r,y]);pr.push([r,15.4]);
  const st=stoneMap();
  const tiers=M(new THREE.LatheGeometry(pr.map(p=>new V2(p[0],p[1])),240),new THREE.MeshStandardMaterial({map:tex(st.color,110,14),bumpMap:tex(st.height,110,14,false),bumpScale:.02,roughness:.92,side:THREE.DoubleSide}));scene.add(tiers);
+ plaza.tend=[wall,tiers];plaza.wallTex=wallC.c;
  // toril
  const ta=SUN_AZ+Math.PI;const dw=gen(512,256,(u,v,x,y,o)=>{const pl=Math.floor(u*8),n=vn(u*256,v*5+pl,256);const s=(u*8%1<.04)?.4:1;o.r=70*s*(.8+.3*n);o.g=18*s;o.b=14*s;}).color;
  const door=M(new THREE.BoxGeometry(2.8,1.58,.08),new THREE.MeshStandardMaterial({map:tex(dw),roughness:.65}));door.position.set(Math.cos(ta)*(R-.05),.79,Math.sin(ta)*(R-.05));door.lookAt(0,.79,0);scene.add(door);
  // galería con arcos
+ const nArq0=scene.children.length;
  const rg=R+2.35+16*.8,yg=2.3+16*.42,nCol=80;
  const plMat=new THREE.MeshStandardMaterial({map:tex(pm.color,1,3),roughness:.85});
  const cols=new THREE.InstancedMesh(new THREE.BoxGeometry(.42,5.4,.42),plMat,nCol);cols.castShadow=true;cols.receiveShadow=true;
@@ -468,9 +471,60 @@ function buildPlaza(){
  lamps=new THREE.Group();const lm=new THREE.MeshBasicMaterial({color:col('#fff6e4')});
  for(let i=0;i<16;i++){const a=i/16*TAU;const b=new THREE.Mesh(new THREE.BoxGeometry(1.4,.5,.2),lm);b.position.set(Math.cos(a)*(r+.6),yg+8.6,Math.sin(a)*(r+.6));b.lookAt(0,0,0);lamps.add(b);}
  lamps.visible=false;scene.add(lamps);
+ plaza.arq=scene.children.slice(nArq0);
  plaza.rTop=r;plaza.sand=sandMat;plaza.wood=woodMat;
 }
 const plaza={};
+
+/* ---------- plaza GLB: «Plaza de Toros Monumental Vicente Segura», de Vin D'Alembert (CC BY 4.0, Sketchfab) ----------
+   Se carga mientras ya se ve la plaza hecha por código y la sustituye al llegar. El ruedo, la barrera, los burladeros y el
+   toril siguen siendo los del juego (el toro y el torero chocan con ellos); del modelo se usan los tendidos, el palco, la
+   galería, las cubiertas y el exterior. Unidades del modelo en cm y sin escala real: se encaja el borde de sus tendidos
+   en R+3 m y se achata la altura (ky) para que la barrera no pase de 2 m. El público se vuelve a sentar en sus gradas. */
+const PVS={s:28/186,ky:.65,c:[0,-14,-559.5],rot:Math.PI/2-SUN_AZ,on:false};
+function plazaVSCarga(){if(!THREE.GLTFLoader||/[?&]plaza=proc/.test(location.search))return;
+ new THREE.GLTFLoader().load('modelos/plaza-vicente-segura.glb',g=>{try{plazaVSPon(g.scene);}catch(e){console.warn('plaza',e);}},undefined,()=>{});}
+function plazaVSPon(m){const s=PVS.s,sy=s*PVS.ky;
+ const OCULTA=/MaderaCafec|burladeros_|Proteccion7|pCube104|RuedoBlan1|ruedosuelo|Tarimas_|ruedoentrade|puertatoril|Publicidad|PosterFront/;
+ const G=new THREE.Group();G.name='plazaVS';G.rotation.y=PVS.rot;m.scale.set(s,sy,s);m.position.set(-PVS.c[0]*s,-PVS.c[1]*sy,-PVS.c[2]*s);G.add(m);
+ const quita=[],gradas=[];
+ m.traverse(o=>{if(!o.isMesh)return;let n=o.name,p=o.parent;while(p&&p!==m){n+=' '+p.name;p=p.parent;}
+  if(OCULTA.test(n)){quita.push(o);return;}
+  o.castShadow=true;o.receiveShadow=Math.min(innerWidth,innerHeight)>=700||/grada|Escalon/i.test(n);
+  for(const mt of [].concat(o.material)){if(mt.isMeshStandardMaterial){mt.envMapIntensity=.7;mt.roughness=Math.max(mt.roughness,.55);mt.metalness=Math.min(mt.metalness,.3);}
+   if(/Lona|Bandera|Espana|Banderin|Papel|Lamina1/i.test(n))mt.side=THREE.DoubleSide;
+   if(/Lona/.test(n)&&mt.map&&!mt.map.__vf){mt.map.__vf=1;mt.map.repeat.y=-1;mt.map.offset.y=1;}}
+  if(/grada|Escalon/i.test(n))gradas.push(o);});
+ for(const o of quita)o.parent.remove(o);
+ scene.add(G);G.updateMatrixWorld(true);
+ // la plaza hecha por código: fuera tendidos, galería, cubiertas, banderas y focos; se queda el ruedo con su barrera
+ for(const o of (plaza.arq||[]).concat(plaza.tend||[]))scene.remove(o);
+ flags.length=0;lamps=new THREE.Group();lamps.visible=ui.luz==='noche';scene.add(lamps);
+ // contrabarrera y paso del callejón hasta la primera fila del modelo
+ const h0=(16-PVS.c[1])*sy,r1=186*s+.05;
+ const cb=M(new THREE.LatheGeometry([[R+1.75,0],[R+1.75,h0],[r1,h0],[r1,h0-.6]].map(p=>new V2(p[0],p[1])),200),new THREE.MeshStandardMaterial({map:tex(plaza.wallTex,40,1),roughness:.9,side:THREE.DoubleSide}));
+ cb.geometry.computeVertexNormals();scene.add(cb);
+ const asientos=plazaVSAsientos(gradas);
+ PVS.on=true;PVS.n=asientos.length;
+ if(asientos.length>500){const f=crowd&&crowd.fill;buildCrowd(asientos);if(f)entrada(f);if(AQ.lvl===3)crowd.hm.visible=false;}
+ try{const c=document.getElementById('credPlaza');if(c){c.hidden=false;setTimeout(()=>c.classList.add('fuera'),7000);}}catch(e){}}
+/* mapa de alturas polar de las gradas (solo caras que miran arriba) y una persona delante de cada contrahuella */
+function plazaVSAsientos(gradas){const NA=1440,r0=R+2.6,dr=.2,NR=Math.ceil((70-r0)/dr),H=new Float32Array(NA*NR).fill(-1e9);
+ const A=new V3(),B=new V3(),C=new V3(),P=new V3(),e1=new V3(),e2=new V3(),nn=new V3();
+ const den=a=>{const t=a.array;return !a.normalized?1:t instanceof Int16Array?1/32767:t instanceof Uint16Array?1/65535:t instanceof Int8Array?1/127:t instanceof Uint8Array?1/255:1;};
+ for(const o of gradas){const g=o.geometry,pa=g.attributes.position,k=den(pa),ix=g.index,mw=o.matrixWorld;const nt=(ix?ix.count:pa.count)/3;
+  const v=(i,out)=>out.set(pa.getX(i)*k,pa.getY(i)*k,pa.getZ(i)*k).applyMatrix4(mw);
+  for(let t=0;t<nt;t++){const i0=ix?ix.getX(t*3):t*3,i1=ix?ix.getX(t*3+1):t*3+1,i2=ix?ix.getX(t*3+2):t*3+2;v(i0,A);v(i1,B);v(i2,C);
+   e1.subVectors(B,A);e2.subVectors(C,A);nn.crossVectors(e1,e2);const L=nn.length();if(L<1e-6||Math.abs(nn.y)/L<.8)continue;
+   const n=Math.min(60,Math.ceil(Math.max(e1.length(),e2.length(),B.distanceTo(C))/.15));
+   for(let i=0;i<=n;i++)for(let j=0;j<=n-i;j++){P.copy(A).addScaledVector(e1,i/n).addScaledVector(e2,j/n);
+    const rr=Math.hypot(P.x,P.z),rb=Math.floor((rr-r0)/dr);if(rb<0||rb>=NR)continue;let a=Math.atan2(P.z,P.x);if(a<0)a+=TAU;const ai=Math.floor(a/TAU*NA)%NA;const q=ai*NR+rb;if(P.y>H[q])H[q]=P.y;}}}
+ const seats=[],dA=TAU/NA,sp=.56;
+ for(let ai=0;ai<NA;ai++){let fila=0;for(let rb=0;rb<NR-2;rb++){const h=H[ai*NR+rb];if(h<-1e8)continue;const hn=H[ai*NR+rb+1],h1=hn>-1e8?hn:H[ai*NR+rb+2];
+   if(!(h1-h>.22&&h1-h<1.4))continue;fila++;const rr=r0+(rb+.5)*dr-.22;
+   if(Math.floor(ai*dA*rr/sp)===Math.floor((ai-1)*dA*rr/sp))continue;if(hash2(ai*7+rb,53)<(fila>14?.12:.07))continue;
+   seats.push([(ai+.5)*dA,rr,h,fila]);}}
+ return seats;}
 
 /* ---------- público ---------- */
 const crowdU={uTime:{value:0},uOle:{value:0}};
@@ -478,8 +532,9 @@ function crowdMat(){const m=new THREE.MeshLambertMaterial();m.onBeforeCompile=sh
  sh.vertexShader='uniform float uTime;uniform float uOle;\n'+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
  float ph=instanceMatrix[3].x*.71+instanceMatrix[3].z*1.37;
  transformed.y+=sin(uTime*1.3+ph*3.)*.012+uOle*max(0.,sin(uTime*7.+ph))*.22*step(.35,fract(ph*.173));vec4 wpC=modelMatrix*instanceMatrix*vec4(0.,.5,0.,1.);transformed*=smoothstep(4.5,7.,distance(wpC.xyz,cameraPosition));`);};return m;}
-function buildCrowd(){lMsg.textContent='Llenando los tendidos';const r=rng(9);
- const seats=[];for(let i=0;i<20;i++){const ys=2.3+(i+1)*.42,rr=R+2.35+i*.8+.42,n=Math.floor(TAU*rr/.56);const off=r()*TAU;
+function buildCrowd(S0){lMsg.textContent='Llenando los tendidos';const r=rng(9);
+ if(crowd&&crowd.all)for(const m of crowd.all){scene.remove(m);m.geometry.dispose();}
+ const seats=S0||[];if(!S0)for(let i=0;i<20;i++){const ys=2.3+(i+1)*.42,rr=R+2.35+i*.8+.42,n=Math.floor(TAU*rr/.56);const off=r()*TAU;
   for(let k=0;k<n;k++){const a=off+k/n*TAU;const sec=frac((a-SUN_AZ)/(TAU/10));if(sec<.02||sec>.98)continue;if(r()<(i>15?.12:.07))continue;seats.push([a,rr,ys,i]);}}
  const N=seats.length;
  const mergeG=gs=>{let n=0;gs=gs.map(g=>{g=g.index?g.toNonIndexed():g;n+=g.attributes.position.count;return g;});const P=new Float32Array(n*3),N=new Float32Array(n*3);let o=0;for(const g of gs){P.set(g.attributes.position.array,o*3);N.set(g.attributes.normal.array,o*3);o+=g.attributes.position.count;}const r=new THREE.BufferGeometry();r.setAttribute('position',new THREE.BufferAttribute(P,3));r.setAttribute('normal',new THREE.BufferAttribute(N,3));return r;};
@@ -497,8 +552,8 @@ function buildCrowd(){lMsg.textContent='Llenando los tendidos';const r=rng(9);
   const sol=Math.cos(a-SUN_AZ)<0;if(sol&&r()<.22)hats.push(o.matrix.clone());});
  bodies.receiveShadow=heads.receiveShadow=true;scene.add(bodies,heads);
  const hatG=new THREE.CylinderGeometry(.08,.19,.08,7);hatG.translate(0,.76,0);const hm=new THREE.InstancedMesh(hatG,crowdMat(),hats.length);hats.forEach((m,i)=>{hm.setMatrixAt(i,m);hm.setColorAt(i,c.copy(col(r()<.7?'#d9c48e':'#f2eee4')));});hm.receiveShadow=true;scene.add(hm);
- crowdPanuelos(bodies);
- crowd={bodies,heads,hm,m0:Float32Array.from(bodies.instanceMatrix.array),h0:Float32Array.from(heads.instanceMatrix.array),k0:Float32Array.from(hm.instanceMatrix.array)};}
+ const pm=crowdPanuelos(bodies);
+ crowd={all:[bodies,heads,hm,pm],bodies,heads,hm,m0:Float32Array.from(bodies.instanceMatrix.array),h0:Float32Array.from(heads.instanceMatrix.array),k0:Float32Array.from(hm.instanceMatrix.array)};}
 
 const PAN={t:0};crowdU.uPan={value:0};
 function crowdPanuelos(bodies){const n=bodies.count,sel=[];const m=new THREE.Matrix4();for(let i=0;i<n;i++)if(hash2(i,31)<.42)sel.push(i);
@@ -506,7 +561,7 @@ function crowdPanuelos(bodies){const n=bodies.count,sel=[];const m=new THREE.Mat
  mat.onBeforeCompile=sh=>{sh.uniforms.uTime=crowdU.uTime;sh.uniforms.uPan=crowdU.uPan;sh.vertexShader='uniform float uTime;uniform float uPan;\n'+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
   float ph=instanceMatrix[3].x*.53+instanceMatrix[3].z*1.91;float on=step(fract(ph*.37),uPan);float w=(position.x)/.46;
   transformed.z+=sin(uTime*10.+ph*5.+w*3.)*.12*w;transformed.y+=sin(uTime*7.+ph*3.)*.05;transformed.x+=sin(uTime*6.+ph)*.06;vec4 wpP=modelMatrix*instanceMatrix*vec4(0.,1.,0.,1.);transformed*=on*smoothstep(7.,10.,distance(wpP.xyz,cameraPosition));`);};
- const pm=new THREE.InstancedMesh(g,mat,sel.length);sel.forEach((i,k)=>{bodies.getMatrixAt(i,m);pm.setMatrixAt(k,m);});pm.frustumCulled=false;scene.add(pm);}
+ const pm=new THREE.InstancedMesh(g,mat,sel.length);sel.forEach((i,k)=>{bodies.getMatrixAt(i,m);pm.setMatrixAt(k,m);});pm.frustumCulled=false;scene.add(pm);return pm;}
 /* ---------- polvo ---------- */
 function buildDust(){/* polvo con cuadritos orientados a la cámara (no puntos de GPU): en los iPhone los puntos grandes salían como círculos negros */
  const N=900;const q=new THREE.PlaneGeometry(1,1);const g=new THREE.InstancedBufferGeometry();g.index=q.index;g.setAttribute('position',q.attributes.position);g.setAttribute('uv',q.attributes.uv);g.instanceCount=N;
@@ -1086,7 +1141,7 @@ function variaPlaza(d){const r=rng(hashS((d.plaza||'')+'|'+(d.cid||'')));
  const pr=rng(hashS(d.plaza||'x'));const sandT=['#ffffff','#ffe6c2','#f3d2a6','#ffd9a8','#e9c9a4'][Math.floor(pr()*5)],woodT=['#ffffff','#ffffff','#d9b8b0','#c7d6c2','#f0d9c0'][Math.floor(pr()*5)];
  if(plaza.sand)plaza.sand.color.copy(col(sandT));if(plaza.wood)plaza.wood.color.copy(col(woodT));
  const fill=clamp((d.cat===1?.88:.6)+r()*.14+(d.score>80?.04:0),.45,1);entrada(fill,r);}
-function entrada(fill,r){if(!crowd||!crowd.m0)return;const Z=new THREE.Matrix4().makeScale(0,0,0).elements;
+function entrada(fill,r){if(!crowd||!crowd.m0)return;crowd.fill=fill;const Z=new THREE.Matrix4().makeScale(0,0,0).elements;
  for(const [im,src] of [[crowd.bodies,crowd.m0],[crowd.heads,crowd.h0]]){const a=im.instanceMatrix.array;a.set(src);}
  const n=crowd.bodies.count;for(let i=0;i<n;i++){if(hash2(i,77)<fill)continue;crowd.bodies.instanceMatrix.array.set(Z,i*16);crowd.heads.instanceMatrix.array.set(Z,i*16);}
  crowd.bodies.instanceMatrix.needsUpdate=crowd.heads.instanceMatrix.needsUpdate=true;}
@@ -1483,8 +1538,10 @@ try{const v=+localStorage.getItem('ruedoVel');if([.5,1,2,4,8].includes(v))ui.spe
 (function(){const bS=document.getElementById('bSup');if(!bS)return;bS.onclick=()=>{if(D.phase==='suprema'||D.phase==='fin')return;XL.salta=true;ui.paused=false;bS.disabled=true;setTimeout(()=>bS.disabled=false,1500);};})();
 /* ayuda de pruebas: avanza la lidia sin depender de los fotogramas */
 const xlAvanza=seg=>{for(let t=0;t<seg&&bull&&torero;t+=.05){simTime+=.05;updateDirector(.05);updateBull(.05);updateTorero(.05);supremaPost(.05);}return D.phase;};
-window.__ruedo={avanza:xlAvanza,get xl(){return XL;},D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},banda:()=>xlBandStart(),get xl(){return XL;},vista:(v)=>{const b=document.getElementById('bVista');while(ui.cam!==v)b.click();},get plano(){return camS.shot;},get tor(){return torero;},render:(c)=>{try{toreroPielTick(torero)}catch(e){}if(HI.on&&c===camera)hiRender(0);else{const t=renderer.toneMapping;renderer.render(scene,c)}},hi:(v)=>hiPon(v),get HI(){return HI},get tor(){return torero},TGLB,get TPN(){return TPN},get canvas(){return renderer.domElement;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
+window.__ruedo={get pvs(){return PVS},avanza:xlAvanza,get xl(){return XL;},D,ui,setCam,fin:()=>finFaena(),cog:(g)=>{CUR.cog={si:D.si,pn:0,grave:!!g,done:false};},CG,get dist(){return Math.hypot(B.x-T.x,B.z-T.z);},sup:()=>suprema(),SP,get t(){return simTime;},get bull(){return bull;},get cam(){return camera;},banda:()=>xlBandStart(),get xl(){return XL;},vista:(v)=>{const b=document.getElementById('bVista');while(ui.cam!==v)b.click();},get plano(){return camS.shot;},get tor(){return torero;},render:(c)=>{try{toreroPielTick(torero)}catch(e){}if(HI.on&&c===camera)hiRender(0);else{const t=renderer.toneMapping;renderer.render(scene,c)}},hi:(v)=>hiPon(v),get HI(){return HI},get tor(){return torero},TGLB,get TPN(){return TPN},get canvas(){return renderer.domElement;},get dust(){return dust;},get bspeed(){return bullSpeed;},shot:(w)=>{const c=new THREE.PerspectiveCamera(30,renderer.domElement.width/renderer.domElement.height,.2,200);const bp=bull.root.position;const hp=bull.hp.getWorldPosition(new V3());c.position.set(hp.x+(w||4)*Math.sin(Byaw+1.4),1.7,hp.z+(w||4)*Math.cos(Byaw+1.4));c.lookAt(hp.x,hp.y-.3,hp.z);renderer.render(scene,c);return renderer.domElement.toDataURL('image/jpeg',.85);},get rig(){return typeof RIG!=='undefined'?RIG:null;},get byaw(){return Byaw;},pan:()=>{PAN.t=30;},get info(){const i=renderer.info.render;return {tri:i.triangles,calls:i.calls,crowd:crowd.bodies.count,pr:renderer.getPixelRatio(),sh:sun.shadow.mapSize.x};}};
 })();
 </script>
 
+<div id="credPlaza" hidden style="position:fixed;left:8px;bottom:calc(6px + env(safe-area-inset-bottom));z-index:5;font:11px/1.3 system-ui,sans-serif;color:rgba(255,255,255,.82);text-shadow:0 1px 2px #000;pointer-events:none;transition:opacity 1.2s">Plaza: «Plaza de Toros Monumental Vicente Segura» · Vin D'Alembert · CC BY 4.0</div>
+<style>#credPlaza.fuera{opacity:0}</style>
 </body></html>
