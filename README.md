@@ -9,6 +9,12 @@ Modo carrera de ganadero de bravo para el navegador y el móvil. Eliges una gana
 - **Camada**: cada animal tiene genética, reata, hechuras y encornadura propias, y una calidad (de Común a Leyenda) que colorea su tarjeta.
 - **Finca en 3D**: tu personaje a pie, a caballo con garrocha o en camioneta. Echas pienso, hierras becerros, curas lesionados, reparas cercas, devuelves reses escapadas, apartas y encierras toros, y tientas en la placita.
 - **Tareas**: cada una se puede hacer en persona en la finca 3D (incluido el acoso y derribo a caballo) o delegar pagando al mayoral, vaqueros o veterinario.
+- **Modelos 3D realistas** (calidad Alta y Media):
+  - Toros, vacas y becerros animados, en ocho pelos. Pastan, se quedan fijos mirando, escarban, se arrancan humillando, empujan en el peto, derrotan, doblan y caen.
+  - Cortijo, portería, comederos, abrevaderos, encinas y olivos.
+  - Placita de tientas con aficionados que se quiebran, huyen por la tapia y entran al quite.
+  - Las Ventas, la Maestranza, Valencia y Ronda, con el público sentado en sus tendidos.
+  - Créditos en [CREDITOS-3D.md](CREDITOS-3D.md).
 - **Plaza en 3D**: cartel previo, marcador en directo, resumen con nota de cada toro y toro de la tarde; paseíllo, tercios de varas, banderillas y muleta, estilos de torero distintos, cogidas, estocada con pinchazos, descabellos y avisos, petición de oreja, mulillas, vuelta al ruedo e indultos. Clarín, pasodoble y público con sonido.
 
 ## Cómo jugar
@@ -21,7 +27,7 @@ Para jugar desde el móvil como una app:
 2. Abre en el móvil la dirección que te da GitHub Pages.
 3. iPhone: Compartir → «Añadir a pantalla de inicio». Android: menú ⋮ → «Instalar aplicación».
 
-La primera carga necesita conexión (motor 3D y tipografías). Después funciona sin conexión.
+La primera carga necesita conexión (motor 3D y tipografías). Los modelos 3D (unos 60 MB) se descargan poco a poco al entrar en la finca o en cada plaza y quedan guardados para jugar sin conexión. En móviles antiguos, pon la calidad en Baja desde Perfil → Ajustes.
 
 ## Estructura
 
@@ -30,6 +36,9 @@ index.html            página principal
 css/estilo.css        interfaz
 js/juego.js           lógica de la ganadería y pantallas
 js/mundo3d.js         finca, tienta y plaza en 3D (three.js)
+js/modelos3d.js       carga de modelos GLB, animación de reses y aficionados
+js/vendor/            GLTFLoader y SkeletonUtils de three.js r128
+modelos/              reses, pelos, finca, placita, plazas y aficionados (GLB)
 img/                  fotografías y retratos
 manifest.webmanifest  instalación como app
 sw.js                 caché sin conexión
