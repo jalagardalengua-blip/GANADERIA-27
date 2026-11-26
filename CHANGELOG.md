@@ -1,5 +1,11 @@
 # Cambios
 
+## Modelos 3D del pueblo en los festejos populares
+- Cadafales de madera (con y sin toldo) alternando con los de tubo de las peñas, con sus carteles y su público.
+- Iglesia y ayuntamiento nuevos al fondo de la plaza en los pueblos que no tienen plaza propia hecha a mano.
+- Bou embolat: armazón de hierro con las bolas de estopa en los cuernos (se ven encendidas al prender el fuego) y pilón de madera o de piedra según el pueblo.
+- Todo se descarga en segundo plano; si aún no ha llegado se ve lo de antes.
+
 ## Torero sin deformaciones
 - Fuera el resto de la muleta que el modelo traía pegado a la mano y al muslo izquierdos (salía como una bandera de picos rojos al mover la mano); el hueco del muslo se rellena con un parche que sigue su forma.
 - Hombros: un hueso intermedio reparte el giro del brazo y ya no se retuerce la hombrera; la manga y el costado de la chaquetilla dejan de unirse bajo la axila (era la «vela» que salía al abrir el brazo).
