@@ -1,5 +1,10 @@
 # Cambios
 
+## Torero sin deformaciones
+- Fuera el resto de la muleta que el modelo traía pegado a la mano y al muslo izquierdos (salía como una bandera de picos rojos al mover la mano); el hueco del muslo se rellena con un parche que sigue su forma.
+- Hombros: un hueso intermedio reparte el giro del brazo y ya no se retuerce la hombrera; la manga y el costado de la chaquetilla dejan de unirse bajo la axila (era la «vela» que salía al abrir el brazo).
+- El brazo derecho vuelve a ir entero con el hombro.
+
 ## Camioneta nueva en la finca 3D
 - La camioneta para recorrer la finca es ahora un todoterreno en 3D de verdad (modelo «Toyota Fortuner 2021», de Asadawut.Kaewma, CC BY 4.0), aligerado para el móvil. Las ruedas giran al avanzar y las delanteras se orientan con la dirección.
 
