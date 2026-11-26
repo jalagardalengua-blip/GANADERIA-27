@@ -382,7 +382,7 @@ function rebuildFinca(){
  mesh(G.box,tc,2,.9,4.6,0,.95,0,tr);mesh(G.box,tc,1.9,.8,2,0,1.8,.6,tr);mesh(G.box,M('#9fb6c4',.1,.5),1.92,.55,.05,0,1.9,1.62,tr);
  mesh(G.box,M('#e9e2c8',.3,.2),.3,.15,.05,.65,1.05,2.31,tr,true);mesh(G.box,M('#e9e2c8',.3,.2),.3,.15,.05,-.65,1.05,2.31,tr,true);
  const wheels=[];for(const [x,z] of [[1,1.5],[-1,1.5],[1,-1.5],[-1,-1.5]]){const wg=new THREE.Group();wg.position.set(x,.42,z);tr.add(wg);const w=mesh(G.cyl,M('#151515',.6),.42,.3,.42,0,0,0,wg);w.rotation.z=Math.PI/2;wheels.push(wg)}
- W3.truckM={g:tr,wheels};
+ W3.truckM={g:tr,wheels};try{if(typeof camionetaGLB==='function')camionetaGLB(W3.truckM)}catch(e){}
  const gate=new THREE.Group();gate.position.set(0,gH(0,96),96);sc.add(gate);mesh(G.box,M('#e9e2d4'),1,3.4,1,-4,1.7,0,gate);mesh(G.box,M('#e9e2d4'),1,3.4,1,4,1.7,0,gate);mesh(G.box,M('#2a221c',.4,.5),9,.5,.3,0,3.6,0,gate);
  const gt=document.createElement('canvas');gt.width=512;gt.height=64;const gc=gt.getContext('2d');gc.fillStyle='#2a221c';gc.fillRect(0,0,512,64);gc.fillStyle='#e6bb55';gc.font='36px "Cinzel", Georgia, serif';gc.textAlign='center';gc.fillText(S.g.name.toUpperCase().slice(0,22),256,46);
  const gp=new THREE.Mesh(new THREE.PlaneGeometry(8,1),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(gt)}));gp.position.set(0,4.3,0);gate.add(gp);const gp2=gp.clone();gp2.rotation.y=Math.PI;gate.add(gp2);

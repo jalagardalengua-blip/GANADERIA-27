@@ -1,5 +1,8 @@
 # Cambios
 
+## Camioneta nueva en la finca 3D
+- La camioneta para recorrer la finca es ahora un todoterreno en 3D de verdad (modelo «Toyota Fortuner 2021», de Asadawut.Kaewma, CC BY 4.0), aligerado para el móvil. Las ruedas giran al avanzar y las delanteras se orientan con la dirección.
+
 ## Lidia viva: cada toro, una faena distinta
 - **Repertorio nuevo:** larga cambiada de rodillas, gaoneras, estatuarios, doblones, circulares, bernadinas, afarolados, cambios de mano y kikirikís, además de los pases de siempre.
 - **Faenas que no se repiten:** recibo, quite, inicio de faena (estatuarios, doblones o de rodillas), número y largo de las series, remates y cierre cambian según el estilo del matador y la bravura, nobleza y casta del toro.
