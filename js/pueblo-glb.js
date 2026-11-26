@@ -67,8 +67,9 @@ function pglbBolas(e,b,n){const g=e.bolasPre&&e.bolasPre[n];if(!g)return false;i
  g.matrix.copy(new THREE.Matrix4().makeScale(1.07,1,1).setPosition(0,.12,.18));g.matrixWorldNeedsUpdate=true;g.visible=true;e.bolasG=g;return true}
 if(typeof embTick==='function'){const _etG=embTick;embTick=function(r,dt){const out=_etG.apply(this,arguments);try{const e=CL&&CL.emb;if(!e||!r||!r.b)return out;
  if(e.ferros&&!e.bolasOk){e.bolasOk=1;if(pglbBolas(e,r.b,'bolas_embolar')){e.ferros.visible=false;
-   // las esferas del armazón dibujado (no las llamas ni la luz) se ocultan
-   const F=e.fireObj;if(F&&F.bolas)F.bolas.forEach(o=>o.visible=false)}}
+   /* las bolas dibujadas se quedan: coinciden con las del modelo y son las que arden (el fuego sale de ellas);
+      solo se quita la estopa de debajo, que ahora es la del modelo */
+   const F=e.fireObj;if(F&&F.bolas)F.bolas.forEach(o=>{if(!(F.balls||[]).includes(o))o.visible=false})}}
  if(r.fire&&e.bolasG&&!e.encendidas){e.encendidas=1;pglbBolas(e,r.b,'bolas_embolar_encendidas')}}catch(x){}return out}}
 // las esferas que dibuja embolar() (para poder ocultarlas cuando hay modelo)
 if(typeof embolar==='function'){const _ebG=embolar;embolar=function(b){const antes=new Set(b.hp.children);const F=_ebG.apply(this,arguments);try{F.bolas=b.hp.children.filter(o=>!antes.has(o)&&o.isMesh&&!F.fires.includes(o))}catch(e){}return F}}

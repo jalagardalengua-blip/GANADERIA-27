@@ -4,7 +4,8 @@
    las mismas animaciones (andar, galope, embestida, comer, muerte...) y todo el código de la lidia sigue igual.
    El pelo de cada res se pinta encima conservando el relieve de la textura (negro, cárdeno, colorado, jabonero,
    berrendos y señas). Dos versiones: detallada para plaza, tienta y ficha; ligera para la manada de la finca.
-   Las vacas y becerros siguen con el modelo de siempre. */
+   Vacas y becerros usan la misma malla realista con hechuras de hembra: sin morrillo, cuello y pecho más finos,
+   menos papada y cuerpo más estrecho (antes eran el modelo de bloques de Quaternius). */
 const TRI={hi:null,lo:null,det:null,mats:new Map(),geo:new Map(),err:null};
 /* el modelo se llevó a las proporciones del toro de Quaternius para heredar su esqueleto: aquí se le devuelve su anchura y largo reales */
 const TRI_FX=1.78,TRI_FZ=1.06;
@@ -24,13 +25,22 @@ function triClaro(det,u,v){if(!det)return false;const x=Math.min(det.w-1,Math.ma
  const i=(y*det.w+x)*4,o=TRI.hi_orig;if(!o)return false;const l=(.3*o[i]+.59*o[i+1]+.11*o[i+2])/255;return l>.42&&(o[i]-o[i+2])>12}
 function triOrig(){if(TRI.hi_orig)return;const src=triMalla(TRI.hi).material.map;if(!src||!src.image)return;const im=src.image,cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const c=cv.getContext('2d');c.drawImage(im,0,0);TRI.hi_orig=c.getImageData(0,0,im.width,im.height).data}
 /* pelo por vértice sobre la malla del toro (en el espacio del esqueleto, igual que el de siempre) */
-function triColores(lod,spec,m){const ck=lod+'|'+(spec.pelo||'negro')+'|'+(spec.kind||'toro')+'|'+(m.bragado?1:0)+(m.lucero?1:0)+(m.calcetero?1:0)+(m.rabicano?1:0);
+function triColores(lod,spec,m){const ck=lod+'|'+(spec.pelo||'negro')+'|'+(spec.kind==='vaca'||spec.kind==='becerro'?'h':'m')+'|'+(m.bragado?1:0)+(m.lucero?1:0)+(m.calcetero?1:0)+(m.rabicano?1:0);
  if(TRI.geo.has(ck))return TRI.geo.get(ck);triOrig();const det=triDetalle();
  const src=TRI[lod],mm=triMalla(src);src.scene.updateMatrixWorld(true);const I=torInfo('bull'),[base,hi,pat]=PELO[spec.pelo]||PELO.negro;
  const cB=new THREE.Color(base),cH=new THREE.Color(hi),cD=new THREE.Color(shade(base,-.35)),cW=new THREE.Color('#ece4d6'),cP=new THREE.Color('#15100c');
  const r=mulberry((spec.pelo||'negro').length*17),blobs=[];
  if(pat===2)for(let i=0;i<7;i++)blobs.push({x:(r()-.5)*.7,y:I.top*(.45+r()*.5),z:I.zMin+I.L*(.12+r()*.62),rx:.18+r()*.2,ry:.16+r()*.16,rz:.22+r()*.3});
  const g=mm.geometry.clone(),p=g.attributes.position,uv=g.attributes.uv,n=p.count,a=new Float32Array(n*3),v=new THREE.Vector3(),c=new THREE.Color(),K=2*.62;
+ /* hembra: se baja el morrillo, se adelgaza el cuello y la papada (en la pose de reposo, antes de pintar) */
+ const hembra=spec.kind==='vaca'||spec.kind==='becerro';if(hembra){const M4=mm.matrixWorld,inv=new THREE.Matrix4().copy(M4).invert(),q=new THREE.Vector3(),bump=(t,c0,w)=>{const d=(t-c0)/w;return d*d<1?(1-d*d)*(1-d*d):0};
+  for(let i=0;i<n;i++){q.fromBufferAttribute(p,i).applyMatrix4(M4);const zr=(q.z-I.zMin)/I.L,yn=q.y/I.top;if(zr>.9&&yn>.72)continue;
+   const mo=bump(zr,.66,.18)*Math.max(0,(yn-.58)/.42);q.y-=mo*.15*I.top;q.x*=1-mo*.16;
+   const pa=bump(zr,.8,.12)*Math.max(0,(.62-yn)/.4);q.y+=pa*.08*I.top;q.x*=1-pa*.25;
+   const cu=bump(zr,.74,.14);q.x*=1-.1*cu;
+   // sin la verga del toro: lo que cuelga bajo la barriga se sube a la línea del vientre
+   if(((zr>.3&&zr<.62&&Math.abs(q.x)<.13)||(zr>.1&&zr<=.3&&Math.abs(q.x)<.09))&&yn<.5&&yn>.12){const by=(zr>.3?.47:.5)*I.top;q.y=by-(by-q.y)*.25}
+   q.applyMatrix4(inv);p.setXYZ(i,q.x,q.y,q.z)}g.computeVertexNormals()}
  for(let i=0;i<n;i++){v.fromBufferAttribute(p,i).applyMatrix4(mm.matrixWorld);const x=v.x,y=v.y,z=v.z,zr=(z-I.zMin)/I.L,yn=y/I.top;
   if(zr>.8&&y>I.top*.72&&uv&&triClaro(det,uv.getX(i),uv.getY(i))){a[i*3]=a[i*3+1]=a[i*3+2]=1;continue}   // pitones con su color
   if(y<.11){a[i*3]=a[i*3+1]=a[i*3+2]=.3;continue}                                                       // pezuñas                                                                   // pezuñas
@@ -48,15 +58,15 @@ function triMat(lod){if(TRI.mats.has(lod))return TRI.mats.get(lod);const o=triMa
  const m=new THREE.MeshStandardMaterial({vertexColors:true,skinning:true,map:det?det.t:null,normalMap:lod==='hi'?o.normalMap:null,roughnessMap:lod==='hi'?o.roughnessMap:null,roughness:lod==='hi'?1:.62,metalness:0,name:'ToroTripo'});
  if(m.normalMap)m.normalScale=new THREE.Vector2(1,1);m.userData.lin=1;TRI.mats.set(lod,m);return m}
 function makeBullTri(spec){
- const G=geos(),kind=spec.kind||'toro',cab=kind==='cabestro',KD=TOR_KIND[kind]||TOR_KIND.toro;
+ const G=geos(),kind=spec.kind||'toro',cab=kind==='cabestro',hembra=kind==='vaca'||kind==='becerro',KD=TOR_KIND[kind]||TOR_KIND.toro;
  const m=spec.m||{len:1,alt:1,morr:.9,leg:1,girth:1,papada:1,horn:cab?'cab':'veleto',hl:cab?1.25:1,ht:.05,hc:'#e2d6bc'};
  const lod=(typeof W3!=='undefined'&&W3&&W3.mode==='finca'&&W3.on&&TRI.lo&&!spec.hi)?'lo':'hi';
  const I=torInfo('bull'),geo=triColores(lod,spec,m),mat=triMat(lod);
  const sc=THREE.SkeletonUtils.clone(TRI[lod].scene);const bones={};
  sc.traverse(o=>{if(o.isBone)bones[o.name]=o;if(!o.isSkinnedMesh)return;o.geometry=geo;o.material=mat;o.castShadow=true;o.receiveShadow=lod==='hi';o.frustumCulled=false});
  const root=new THREE.Group(),b=new THREE.Group();root.add(b);const mdl=new THREE.Group();b.add(mdl);mdl.add(sc);
- const k=KD.f/KD.s,sx=k*(m.girth||1)*TRI_FX*.92,sy=k*(m.alt||1)*(.75+.25*(m.leg||1)),sz=k*(m.len||1)*KD.z*TRI_FZ*.97;mdl.scale.set(sx,sy,sz);
- if(bones.Torso3&&bones.Neck1){const f=1+.06*(m.morr??.9)*(cab?.5:1);bones.Torso3.scale.setScalar(f);bones.Neck1.scale.setScalar(1/f)}
+ const k=KD.f/KD.s,sx=k*(m.girth||1)*TRI_FX*.92*(hembra?.86:1),sy=k*(m.alt||1)*(.75+.25*(m.leg||1)),sz=k*(m.len||1)*KD.z*TRI_FZ*.97;mdl.scale.set(sx,sy,sz);
+ if(bones.Torso3&&bones.Neck1){const f=hembra?.97:1+.06*(m.morr??.9)*(cab?.5:1);bones.Torso3.scale.setScalar(f);bones.Neck1.scale.setScalar(1/f)}
  root.updateMatrixWorld(true);
  /* cabeza: los pitones son los del propio modelo; el ancla se usa para el cencerro del cabestro y para el código que la mueve */
  const hp=torAnchor(bones.Head,b,new THREE.Vector3(0,I.horn.y*sy-.08,I.horn.z*sz-.15),1,.28);
@@ -74,5 +84,5 @@ function makeBullTri(spec){
   cruz:{y:I.back(I.cruz)*sy,z:I.cruz*sz},gl:{mixer,acts,cur:null,neck:bones.Neck2||bones.Neck1||null}};
  torPlay(B,'Idle',0);if(acts.Idle)acts.Idle.time=Math.random()*3;return B}
 const _makeBullGLT=makeBullGL;
-makeBullGL=function(spec){const kind=(spec&&spec.kind)||'toro';if((kind==='toro'||kind==='cabestro')&&TRI.hi&&TOR.bull){try{return makeBullTri(spec)}catch(e){console.warn('toro Tripo',e)}}return _makeBullGLT.apply(this,arguments)};
+makeBullGL=function(spec){const kind=(spec&&spec.kind)||'toro';if((kind==='toro'||kind==='cabestro'||kind==='vaca'||kind==='becerro')&&TRI.hi&&TOR.bull){try{return makeBullTri(spec)}catch(e){console.warn('toro Tripo',e)}}return _makeBullGLT.apply(this,arguments)};
 try{if(document.readyState!=='loading')triLoad();else document.addEventListener('DOMContentLoaded',triLoad)}catch(e){TRI.err=e}
