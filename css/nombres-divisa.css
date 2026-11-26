@@ -1,0 +1,6 @@
+/* nombres de ganadería en los colores de su divisa (ver js/nombres-divisa.js) */
+html body .divN,html body .hdr .gname.divN{font-family:'Cinzel','Times New Roman',serif !important;font-weight:700 !important;font-style:normal !important;letter-spacing:.015em !important;text-transform:uppercase;
+ color:var(--d1) !important;background:linear-gradient(180deg,var(--d1) 0 50%,var(--d2) 50% 100%) !important;-webkit-background-clip:text !important;background-clip:text !important;-webkit-text-fill-color:transparent !important;
+ -webkit-text-stroke:.35px rgba(255,244,214,.7);paint-order:stroke fill;text-shadow:none !important;
+ filter:drop-shadow(0 0 .6px rgba(255,240,205,.95)) drop-shadow(0 2px 3px rgba(0,0,0,.75)) !important}
+html body .hdr .gname.divN{font-size:clamp(.98rem,4.5vw,1.5rem) !important;-webkit-text-stroke:.4px rgba(255,244,214,.75)}

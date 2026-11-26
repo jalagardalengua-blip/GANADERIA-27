@@ -1,0 +1,108 @@
+# Estado de la hoja de ruta
+
+Leyenda: ✅ hecho y verificado · 🟡 parcial · ⏳ pendiente · ⛔ bloqueado
+
+## Fase 0 · Auditoría (rama `fase-0-auditoria`, sin cambios de producto)
+| ID | Tarea | Estado | Evidencia |
+|---|---|---|---|
+| AUD-001 | Copia y rama de trabajo | ✅ | rama `fase-0-auditoria` desde `main@46550cb`; producción intacta |
+| AUD-002 | Inventario | ✅ | `docs/PROJECT_INVENTORY.md` |
+| AUD-003 | Mapa de funcionalidades | ✅ | `docs/QA_BASELINE.md` |
+| AUD-004 | Estado y persistencia | ✅ | `docs/SAVE_SCHEMA.md` |
+| AUD-005 | Renderizado 3D | ✅ | `QA_BASELINE.md` § ciclo de vida, R-02 |
+| AUD-006 | Rendimiento base | 🟡 | medido en navegador sin cabeza; **falta móvil Android real** |
+| AUD-007 | Regresión inicial | ✅ | `tests/e2e/*.js`, `docs/qa/partida-referencia.json`, `docs/qa/capturas/` |
+| AUD-008 | Riesgos | ✅ | `docs/RISKS.md` |
+
+## Fase 1 · Estabilidad y guardado (rama `desarrollo`)
+| Tarea | Origen | Estado | Evidencia (`tests/e2e/fase1.js`) |
+|---|---|---|---|
+| three.js local y en la precaché | R-01 | ✅ | 3D carga con cdnjs bloqueado |
+| Liberar geometrías, materiales, texturas, sombras y esqueletos al cambiar de escena | R-02 | ✅ | finca ×10: texturas 48 → 48 (antes 58 → 339) |
+| Guardado verificado, copia de seguridad automática, recuperación de partida dañada | R-03 | ✅ | JSON roto → se recupera la copia y se conserva la dañada |
+| 3 ranuras manuales, exportar/importar con suma de control y validación | R-03 | ✅ | manipulado o ajeno → rechazado |
+| Pausar 3D, música y audio en segundo plano | R-04 | ✅ | `visibilitychange` |
+| Registro de errores visible en Ajustes | R-07 | 🟡 | errores no capturados registrados; los `catch` vacíos existentes siguen |
+| Precaché sin duplicados (−1,7 MB) | R-06 | ✅ | `sw.js` |
+| Prueba de regresión de la corrida arreglada | — | ✅ | `regresion.js`: 0 errores, corrida y juicio OK |
+
+## Fase 2 · Arquitectura y sistema visual
+| Tarea | Estado | Evidencia |
+|---|---|---|
+| Bus de eventos (`SAVE_COMPLETED`, `MONTH_CLOSED`, `EVENT_COMPLETED`) | ✅ | `tests/e2e/fase2.js`, ADR 001 |
+| Inicio: centro de avisos con acceso directo | ✅ | 10 tipos de aviso (corridas por ver, ofertas que caducan, reseñas incompletas, lesionados, capacidad, liquidez, semental, herradero, confianza, corro) |
+| Inicio: agenda de próximos festejos | ✅ | enlazada con el calendario |
+| Inicio: resumen económico de los últimos meses | ✅ | gráfico ingresos/gastos y saldo neto |
+| Accesibilidad: tamaño de texto y reducir movimiento | ✅ | Ajustes → Accesibilidad |
+| Tema visual de gala unificado | ✅ | hecho antes de la hoja de ruta |
+| Módulos ES / separación completa de capas | ⏳ | aplazado (ADR 001) |
+
+## Fase 3 · Animales y contenido 3D
+⛔ Bloqueada a la espera del modelo de toro (GLB de Tripo o glTF de Sketchfab con licencia comprobada). Hecho de la fase 1: liberación de esqueletos y mezcladores al salir de escena.
+
+## Fase 4 · Finca dinámica
+| Tarea | Estado | Evidencia |
+|---|---|---|
+| Clima visual por semanas y estación (sol, nubes, lluvia, niebla matinal) | ✅ | `js/clima.js`, indicador en el HUD |
+| Hierba con color de estación | ✅ | `js/texturas.js` |
+| Día y noche | ✅ | existente |
+| Recintos inspirados en ganaderías reales: paredes de piedra seca con remate, charcas con orilla y juncos, abrevaderos de obra, manga de manejo y mueco | ✅ | `js/finca3.js` |
+| Inspeccionar instalaciones (nivel, función, mantenimiento, mejora) y mueco para curar | ✅ | 7 acciones nuevas |
+
+## Fase 5 · Simulación ganadera
+| Tarea | Estado | Evidencia |
+|---|---|---|
+| Árbol genealógico navegable (3 generaciones + descendencia y resultados en plaza) | ✅ | `tests/e2e/fase5y6.js` |
+| Buscador y orden en Ganadería | ✅ | idem |
+| Comparador de hasta 3 animales | ✅ | idem |
+| Reproducción, genética, envejecimiento y salud | ✅ | existentes (paridera, reata, herencia, edad, lesiones) |
+
+## Fase 6 · Economía
+| Tarea | Estado | Evidencia |
+|---|---|---|
+| Libro de cuentas mensual con detalle, saldo y patrimonio | ✅ | `js/economia.js` |
+| Exportar a CSV | ✅ | `fase5y6.js` |
+| Mercado, contratos, obras y personal | ✅ | existentes |
+| Subastas y transporte detallado | ⏳ | futuro |
+
+## Fase 7 · Bous al carrer
+| Tarea | Estado | Evidencia |
+|---|---|---|
+| Cada pueblo con su callejero y la paleta de su comarca (costa, interior, ribera) | ✅ | `js/localidades.js` |
+| Vaquillas, concurso y bous a la mar terminan solos (R-12) | ✅ | eran límites de la prueba; `regresion.js` |
+
+## Fase 8 · Retransmisión y audio
+| Tarea | Estado |
+|---|---|
+| Rótulos de televisión | ⛔ descartado por el propietario (vista limpia) |
+| Cámaras múltiples, velocidad ×1/×2/×4, cámara lenta | ✅ existentes |
+| Sonido sin zumbidos, banda, público | ✅ |
+
+## Fase 9 · Carrera
+✅ existente: temporadas, objetivos, escalafón contra rivales, retos del mes, palmarés, noticias, calendario.
+
+## Fase 10 · Optimización y accesibilidad
+| Tarea | Estado | Evidencia |
+|---|---|---|
+| Perfil gráfico automático según el dispositivo | ✅ | `js/rendimiento.js` |
+| Resolución dinámica según FPS | ✅ | baja sola de 0,9× a 0,6× con 4 FPS |
+| Contador de FPS opcional | ✅ | Ajustes → Rendimiento |
+| Accesibilidad | ✅ | fase 2 |
+
+## Fase 11 · Pulido
+| Tarea | Estado |
+|---|---|
+| `LICENSES.md`, README de desarrollo, workflow vacío eliminado | ✅ |
+| Origen de fotos e iconos (R-09, R-10) | ✅ imágenes propias del propietario generadas con IA |
+
+## Fase 12 · Online opcional
+| Tarea | Estado |
+|---|---|
+| Compartir resultado de una corrida (texto, sin servidor) | ✅ |
+| Intercambio de partidas por archivo | ✅ fase 1 |
+| Multijugador, nube, chat | ⛔ aplazado: no hay infraestructura gratuita y sostenible (cap. 19) |
+
+
+## Peticiones del propietario en cola
+- Toro de Tripo3D (enlace del 5 nov): pendiente de que el propietario exporte el GLB y confirme la licencia de su plan.
+- Finca con recintos de ganadería real y texturas realistas gratuitas: fase 4.

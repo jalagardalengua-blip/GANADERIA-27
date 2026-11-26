@@ -1,0 +1,33 @@
+/* ===================== PANTALLA DE CARGA =====================
+   Imagen a sangre con zoom lento, fondo desenfocado para pantallas apaisadas, título, destino, barra y consejo. */
+#carga{position:fixed;inset:0;z-index:99999;background:#07080b;overflow:hidden;opacity:0;visibility:hidden;transition:opacity .28s ease,visibility 0s linear .28s;
+ font-family:var(--body,'Barlow',system-ui,sans-serif);color:#f2efe8;-webkit-user-select:none;user-select:none}
+#carga.on{opacity:1;visibility:visible;transition:opacity .28s ease}
+#carga.sale{opacity:0;visibility:visible;pointer-events:none;transition:opacity .55s ease}
+#carga .cg-bg{position:absolute;inset:-8%;background:#07080b url(../img/carga-m.jpg) center/cover no-repeat;filter:blur(26px) brightness(.42) saturate(1.15);transform:scale(1.08)}
+#carga .cg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;transform-origin:50% 30%;animation:cgZoom 14s ease-out forwards}
+@keyframes cgZoom{from{transform:scale(1.0)}to{transform:scale(1.07)}}
+#carga .cg-vig{position:absolute;inset:0;background:
+ linear-gradient(180deg,rgba(7,8,11,.55) 0%,rgba(7,8,11,0) 18%,rgba(7,8,11,0) 46%,rgba(7,8,11,.78) 72%,#07080b 100%),
+ radial-gradient(120% 90% at 50% 35%,transparent 55%,rgba(0,0,0,.5) 100%)}
+#carga .cg-info{position:absolute;left:0;right:0;bottom:0;padding:0 max(22px,env(safe-area-inset-right,0px)) max(26px,calc(env(safe-area-inset-bottom,0px) + 18px)) max(22px,env(safe-area-inset-left,0px));text-align:center}
+#carga .cg-t{margin:0;font-family:'Cinzel',serif;font-weight:700;font-size:clamp(1.55rem,7.4vw,2.6rem);letter-spacing:.12em;line-height:1.05;
+ background:linear-gradient(180deg,#fbe7b0,#e6bb55 55%,#b7862e);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 10px rgba(0,0,0,.7))}
+#carga .cg-d{margin:.45rem 0 0;font-family:var(--display,'Barlow Condensed',sans-serif);font-weight:600;font-size:.82rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(242,239,232,.78)}
+#carga .cg-bar{position:relative;height:3px;margin:1.05rem auto 0;max-width:340px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+#carga .cg-bar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:3px;background:linear-gradient(90deg,#b7862e,#f3d68b);box-shadow:0 0 12px rgba(230,187,85,.7);transition:width .45s ease}
+#carga .cg-bar i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:cgBrillo 1.3s linear infinite;transform:translateX(-100%)}
+@keyframes cgBrillo{to{transform:translateX(100%)}}
+#carga .cg-tip{margin:.95rem auto 0;max-width:430px;font-size:.84rem;line-height:1.4;color:rgba(242,239,232,.72);min-height:2.4em}
+#carga .cg-tip b{display:block;margin-bottom:.15rem;font-family:var(--display,'Barlow Condensed',sans-serif);font-size:.68rem;letter-spacing:.26em;color:#e6bb55;font-weight:700}
+/* apaisado: la imagen entera a la izquierda y la información a la derecha sobre el fondo desenfocado */
+@media (orientation:landscape) and (min-aspect-ratio:5/4){
+ #carga .cg-img{width:auto;max-width:62%;height:100%;left:0;right:auto;object-fit:cover;object-position:50% 20%;
+  -webkit-mask-image:linear-gradient(90deg,#000 72%,transparent);mask-image:linear-gradient(90deg,#000 72%,transparent)}
+ #carga .cg-vig{background:linear-gradient(90deg,rgba(7,8,11,0) 0%,rgba(7,8,11,0) 40%,rgba(7,8,11,.55) 62%,rgba(7,8,11,.8) 100%),linear-gradient(180deg,rgba(7,8,11,.35),transparent 20%,transparent 80%,rgba(7,8,11,.5))}
+ #carga .cg-info{left:auto;top:0;bottom:0;width:min(46%,460px);display:flex;flex-direction:column;justify-content:center;text-align:left;padding-left:12px;padding-bottom:max(18px,env(safe-area-inset-bottom,0px))}
+ #carga .cg-t{font-size:clamp(1.5rem,4.2vw,2.8rem)}
+ #carga .cg-bar{margin-left:0;margin-right:0;width:100%}
+ #carga .cg-tip{margin-left:0;margin-right:0}
+}
+@media (prefers-reduced-motion:reduce){#carga .cg-img{animation:none}#carga .cg-bar i::after{animation:none}}
