@@ -34,3 +34,6 @@
 - `datos/plazas/*.json`: planta y altura de los edificios alrededor de la plaza de fiestas de 34 pueblos, y manzanas derivadas de sus calles.
   - © colaboradores de OpenStreetMap, ODbL 1.0 (https://www.openstreetmap.org/copyright).
   - Generado con `tools/plazas/osm_get.py` y `tools/plazas/osm_build.py`.
+
+## Camioneta de la finca 3D
+- `modelos/camioneta.glb`: **«Toyota Fortuner 2021»**, de **Asadawut.Kaewma** (Sketchfab, https://sketchfab.com/3d-models/toyota-fortuner-2021-a70b997f11b7482e9affbf318a508f85), licencia **CC BY 4.0**. Modificado: sin el interior, malla simplificada (452.000 → 80.000 triángulos), texturas a 512 px en JPEG y cuantizada (glTF-Transform); ruedas separadas por código en `js/camioneta.js`.

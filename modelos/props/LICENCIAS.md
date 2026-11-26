@@ -12,3 +12,4 @@ Las texturas de los modelos se han reducido a 512 px en JPEG para que carguen r�
 Modelo enviado por el jugador para el juego. Se ha separado del toro, se le han quitado la muleta y el estoque, se ha reducido a unos 15.000 triángulos y la textura a 1024 px.
 
 - `modelos/plaza-vicente-segura.glb` — «Plaza de Toros Monumental Vicente Segura» de Vin D'Alembert (Sketchfab), CC BY 4.0. Modificado (aligerado, sin vegetación ni anuncios, lonas propias).
+- `modelos/camioneta.glb` — «Toyota Fortuner 2021» de Asadawut.Kaewma (Sketchfab), CC BY 4.0. Modificado (sin interior, aligerado).
