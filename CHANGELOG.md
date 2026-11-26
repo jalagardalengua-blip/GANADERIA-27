@@ -1,5 +1,11 @@
 # Cambios
 
+## Corro: vacas realistas y noche de verdad en el bou embolat
+- Vacas y becerros con el modelo realista de los toros (pelo con relieve y brillo), con hechuras de hembra: sin morrillo, cuello y papada finos, cuerpo más estrecho. Fuera el modelo de bloques.
+- De noche la plaza ya no se ilumina como de día: el reflejo del cielo diurno se reduce al mínimo y mandan la luna, los faroles y las bombillas, con resplandor HDR.
+- Bou embolat: al encender las bolas la calle se queda casi a oscuras y el toro ilumina con su fuego; llamas y humo más grandes. Arreglado que el fuego no saliera de las bolas nuevas.
+- Cielo con degradado de día y de noche, y sombra de contacto al pie de las fachadas.
+
 ## Modelos 3D del pueblo en los festejos populares
 - Cadafales de madera (con y sin toldo) alternando con los de tubo de las peñas, con sus carteles y su público.
 - Iglesia y ayuntamiento nuevos al fondo de la plaza en los pueblos que no tienen plaza propia hecha a mano.
