@@ -13,3 +13,4 @@ Modelo enviado por el jugador para el juego. Se ha separado del toro, se le han 
 
 - `modelos/plaza-vicente-segura.glb` — «Plaza de Toros Monumental Vicente Segura» de Vin D'Alembert (Sketchfab), CC BY 4.0. Modificado (aligerado, sin vegetación ni anuncios, lonas propias).
 - `modelos/camioneta.glb` — «Toyota Fortuner 2021» de Asadawut.Kaewma (Sketchfab), CC BY 4.0. Modificado (sin interior, aligerado).
+- `modelos/pueblo/*.glb` (cadafal, cadafal con toldo, iglesia, ayuntamiento, bolas de embolar apagadas y encendidas, pilar de madera y pilar de piedra) — modelos enviados por el jugador para el juego; aligerados (texturas a 512 px, mallas unidas).
